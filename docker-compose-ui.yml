@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  drivedesk-ui:
+    build: .
+    container_name: drivedesk-ui
+    ports:
+      - "3000:80"

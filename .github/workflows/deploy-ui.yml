@@ -1,0 +1,33 @@
+name: CI/CD for React UI to GCP
+
+on:
+  push:
+    branches: develop
+
+jobs:
+  deploy-ui:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🧾 Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🚀 SSH into GCP VM and deploy UI
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.GCP_VM_IP }}
+        username: ${{ secrets.GCP_VM_USER }}
+        key: ${{ secrets.GCP_SSH_KEY }}
+        script: |
+          cd ~/drivedesk-crm-ui
+
+          echo "📥 Pulling latest code from develop..."
+          git pull origin develop
+
+          echo "🧼 Cleaning old UI container..."
+          docker-compose -f docker-compose-ui.yml down
+
+          echo "🔧 Building new React UI container..."
+          docker-compose -f docker-compose-ui.yml up -d --build
+
+          echo "✅ UI deployed successfully on GCP!"

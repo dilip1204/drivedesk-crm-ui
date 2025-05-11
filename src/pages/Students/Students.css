@@ -1,0 +1,92 @@
+.text-right {
+    text-align: right;
+}
+.page-header h3 {
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0;
+  }
+  .student-card {
+    background: #fff;
+    border: 1px solid #e3e3e3;
+    border-radius: 6px;
+    padding: 20px 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+  }
+  .student-card img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+  .student-card h5 {
+    font-weight: 500;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #212529;
+  }
+  .student-card p {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #6c757d;
+  }
+  .card-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  .completed-classes {
+    font-size: 14px;
+    color: #28a745;
+    font-weight: 600;
+    margin-top: 15px;
+  }
+  .btn-schedule {
+    background-color: #f1f1f1;
+    border: 1px solid #dee2e6;
+    color: #212529;
+  }
+  .btn-schedule:hover {
+    background-color: #e2e6ea;
+    color: #212529;
+  }
+  .btn-filter {
+    background-color: #28a745;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    padding: 6px 14px;
+    font-size: 14px;
+  }
+  .btn-add-student {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    padding: 6px 14px;
+    font-size: 14px;
+  }
+  .btn-filter:hover {
+    background-color: #218838;
+  }
+  .btn-add-student:hover {
+    background-color: #0069d9;
+  }
+  .top-buttons {
+    gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 576px) {
+    .top-buttons {
+      flex-direction: column;
+      align-items: flex-end;
+    }
+  }

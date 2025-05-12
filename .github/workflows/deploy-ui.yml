@@ -21,13 +21,13 @@ jobs:
         script: |
           cd ~/drivedesk-crm-ui
 
-          echo "📥 Pulling latest code from develop.."
+          echo " Pulling latest code from develop.."
           git pull origin develop
 
-          echo "🧼 Cleaning old UI container..."
+          echo " Cleaning old UI container..."
           docker-compose -f docker-compose-ui.yml down
 
-          echo "🔧 Building new React UI container..."
+          echo " Building new React UI container..."
           docker-compose -f docker-compose-ui.yml up -d --build
 
-          echo "✅ UI deployed successfully on GCP!"
+          echo "UI deployed successfully on GCP!"

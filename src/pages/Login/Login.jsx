@@ -31,34 +31,22 @@ const Login = () => {
     };
     dispatch(
       userLogin(data, (res) => {
-        if (res?.tenant_info) { console.info('res..........xxx', res.token)
-          //Store token and user details in localStorage
-          localStorage.setItem("token", `Bearer ${res.access_token}`); // assuming 'token' key exists
-          localStorage.setItem(
-            "userInfo",
-            JSON.stringify({
-              tenant_id: res.tenant_info.tenant_id,
-              org_name: res.tenant_info.org_name,
-              address: res.tenant_info.address,
-              pincode: res.tenant_info.pincode,
-              mobile_number_primary: res.tenant_info.mobile_number_primary,
-              mobile_number_secondary: res.tenant_info.mobile_number_secondary,
-              email: res.tenant_info.email,
-            })
-          );
+        if (res && !res.isError && res.response?.access_token) {
+        // Save access token
+        localStorage.setItem("token", `Bearer ${res.response.access_token}`);
 
-          //Redirect to dashboard
-          navigate("/dashboard");
-        } else if (res?.response?.status === 422) {
-          const errMsg =
-            res?.response?.statusText || "Invalid login credentials.";
-          setLoginError(errMsg);
-        } else {
-          setLoginError(
-            res?.response?.data?.detail ||
-              "An unexpected error occurred. Please try again."
-          );
-        }
+        // Save user details
+        const tenantInfo = res.response.tenant_info;
+        localStorage.setItem("userInfo", JSON.stringify(tenantInfo));
+
+        // Navigate to dashboard
+        navigate("/dashboard");
+      } else if (res?.statusCode === 422 || res?.isError) {
+        const errMsg = res?.message || "Invalid login credentials.";
+        setLoginError(errMsg);
+      } else {
+        setLoginError("An unexpected error occurred. Please try again.");
+      }
 
         setSubmitting(false);
       })

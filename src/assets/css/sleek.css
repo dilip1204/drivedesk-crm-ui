@@ -15660,10 +15660,10 @@ div.copied {
 .sidebar {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  height: 100%;
+  /* overflow: hidden;
+  height: 100%; */
   z-index: 1050;
-  min-height: 100vh;
+  /* min-height: 100vh; */
   position: relative;
 }
 

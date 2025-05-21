@@ -4,5 +4,17 @@ export const ENDPOINTS = {
     getAllStudents: 'getAllStudents',
     addStudent: 'students/',
     deleteStudent: 'students/application-number/',
-    editStudent: 'students/application-number/'
-}
+    editStudent: 'students/application-number/',
+    addTariff: 'tariff_router/tariff',
+    editTariff: 'tariff_router/tariff/',
+    getAllTariffs: 'tariff_router/tariff',
+    deleteTariff: 'tariff_router/tariff/',
+    addInstructor: 'instructors',
+    editInstructor: 'instructors/',
+    getAllInstructors: 'instructors/fetchAllInstructors',
+    deleteInstructor: 'instructors/',
+    addEnquiries: 'enquiries/save-enquiry',
+    editEnquiries: 'enquiries/',
+    getAllEnquiries: 'enquiries/fetchAll',
+    deleteEnquiries: 'enguiries/'
+} 

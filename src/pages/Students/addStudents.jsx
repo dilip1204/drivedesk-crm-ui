@@ -11,10 +11,12 @@ import {
     errorNotification
 } from "../../shared/commonComponent/toaster/toaster"
 
-export default function AddStudents({ showModal, hideModal, id, isEdit, onStudentAdded }) {
+import { IoClose } from "react-icons/io5"; // You can use other icons too
+
+export default function AddStudents({ showModal, hideModal, id, isEdit, onStudentAdded, studentData }) {
   const dispatch = useDispatch();
   const setErrorField = useSelector((state) => state.studentUpdate.addStudenttError);
-  console.info('id........', id?.name)
+  
   const initialValues = {
     name: id?.name || '',
     dob: id?.dob || '',
@@ -40,7 +42,11 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
         schema[key] = Yup.number()
           .typeError(`${key.replace(/_/g, ' ')} must be a number`)
           .required(`${key.replace(/_/g, ' ')} is required`);
-      } else {
+      } else if (key === 'dob') {
+  schema[key] = Yup.date()
+    .required(`${key.replace(/_/g, ' ')} is required`)
+    .max(new Date(), 'Date of birth cannot be in the future');
+} else {
         schema[key] = Yup.string().required(`${key.replace(/_/g, ' ')} is required`);
       }
       return schema;
@@ -117,6 +123,7 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
         formik.resetForm();
         if (typeof onStudentAdded === 'function') {
           onStudentAdded(); // trigger refresh in parent
+          studentData(response, isEdit);
         }
         hideModal();
       }));
@@ -156,6 +163,19 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
     >
       <Modal.Header closeButton>
         <Modal.Title>{isEdit ? 'Update Student' : 'Add Student'}</Modal.Title>
+        <IoClose
+    onClick={() => {
+      formik.resetForm();
+      hideModal();
+    }}
+    style={{
+      cursor: 'pointer',
+      fontSize: '1.5rem',
+      marginLeft: 'auto',
+      color: '#6c757d'
+    }}
+    title="Close"
+  />
       </Modal.Header>
       <Modal.Body>
         <form onSubmit={formik.handleSubmit}>
@@ -229,7 +249,12 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
             </div>
           ))}
           <Modal.Footer>
-            <Button variant="secondary" onClick={hideModal}>Cancel</Button>
+            <Button variant="secondary"
+             onClick={() => {
+                formik.resetForm(); // Reset form to initial values
+                hideModal();        // Close the modal
+              }}
+             >Cancel</Button>
             <Button type="submit" variant="primary">{isEdit ? 'Update' : 'Add'}</Button>
           </Modal.Footer>
         </form>

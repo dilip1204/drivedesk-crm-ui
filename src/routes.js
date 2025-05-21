@@ -5,6 +5,8 @@ import Login from './pages/Login/Login';
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Instructors from "./pages/Instructors/Instructors";
 import Students from "./pages/Students/Students";
+import Tariff from "./pages/Tariff/Tariff";
+import Enquiries from "./pages/Enquiries/enquiries"
 
 
 
@@ -17,7 +19,8 @@ export default function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/instructors" element={<Instructors />} />
         <Route path="/students" element={<Students />} />
-
+        <Route path="/tariff" element={<Tariff />} />
+        <Route path="/enquiries" element={<Enquiries />} />
         
       </Routes>
     

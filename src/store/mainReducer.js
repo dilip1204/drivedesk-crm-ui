@@ -4,10 +4,17 @@ import UserLoginReducer from './login/reducer';
 import studentsListReducer from './students/reducer';
 import StudentReducer from './addStudent/reducer';
 import DeleteStudentReducer from "./deleteStudent/reducer";
+import TariffReducer from "./tariff/reducer";
+import InstructorReducer from "./instructors/reducer";
+import EnquiriesReducer from "./Enquiries/reducer";
+
 
 export const mainReducer = combineReducers({
     loginUserInfo: UserLoginReducer,
     studentsListInfo: studentsListReducer,
     studentUpdate: StudentReducer,
-    deleteStudentUpdate: DeleteStudentReducer
+    deleteStudentUpdate: DeleteStudentReducer,
+    tariffUpdate: TariffReducer,
+    instructorInfo: InstructorReducer,
+    enquiriesInfo: EnquiriesReducer,
 })

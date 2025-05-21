@@ -1,21 +1,24 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import logo from "./../assets/logo/logo.png";
 
 export default function Sidebar() {
+  const location = useLocation();
+
+  const isActive = (path) => location.pathname === path;
   return (
     <aside className="left-sidebar bg-sidebar">
       <div id="sidebar" className="sidebar sidebar-with-footer">
         <div className="app-brand app-logo">
-          <a href="/index.html" title="Dashboard">
+          <a href="#" title="Dashboard">
             <img src={logo} alt="logo" />
           </a>
         </div>
 
         <div data-simplebar style={{ height: "100%" }}>
           <ul className="nav sidebar-inner" id="sidebar-menu">
-            <li className="has-sub active expand">
+            {/* <li className="has-sub active expand">
               <a
                 className="sidenav-item-link"
                 href="javascript:void(0)"
@@ -42,8 +45,8 @@ export default function Sidebar() {
                 <span className="nav-text">Scheduling</span>{" "}
               </a>
             </li>
-
-            <li className="has-sub ">
+*/}
+            <li className={`has-sub ${isActive("/instructors") ? "active expand" : ""}`}>
               <a
                 className="sidenav-item-link"
                 href="javascript:void(0)"
@@ -55,9 +58,23 @@ export default function Sidebar() {
                 <i className="mdi mdi-account-multiple"></i>
                 <span className="nav-text">Instructors</span>
               </a>
+            </li> 
+
+            <li className={`has-sub ${isActive("/tariff") ? "active expand" : ""}`}>
+              <Link
+                className="sidenav-item-link"
+                to="/tariff"
+                data-toggle="collapse"
+                data-target="#tariff"
+                aria-expanded="false"
+                aria-controls="tariff"
+              >
+                <i className="mdi mdi-chart-multiline"></i>
+                <span className="nav-text">Tariff</span>{" "}
+              </Link>
             </li>
 
-            <li className="has-sub ">
+            <li className={`has-sub ${isActive("/students") ? "active expand" : ""}`}>
               <Link
                 className="sidenav-item-link"
                 to="/students"
@@ -70,8 +87,21 @@ export default function Sidebar() {
                 <span className="nav-text">Students</span>{" "}
               </Link>
             </li>
+            <li className={`has-sub ${isActive("/enquiries") ? "active expand" : ""}`}>
+              <Link
+                className="sidenav-item-link"
+                to="/enquiries"
+                data-toggle="collapse"
+                data-target="#enquiries"
+                aria-expanded="false"
+                aria-controls="enquiries"
+              >
+                <i className="mdi mdi-account-question"></i>
+                <span className="nav-text">Enquiries</span>{" "}
+              </Link>
+            </li>
 
-            <li className="has-sub ">
+            {/* <li className="has-sub ">
               <a
                 className="sidenav-item-link"
                 href="javascript:void(0)"
@@ -125,7 +155,7 @@ export default function Sidebar() {
                 <i className="mdi mdi-car-connected"></i>
                 <span className="nav-text">Fleet</span>
               </a>
-            </li>
+            </li> */}
           </ul>
         </div>
       </div>

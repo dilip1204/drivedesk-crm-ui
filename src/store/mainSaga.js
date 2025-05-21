@@ -3,6 +3,9 @@ import { watchLoginUser } from './login/saga';
 import { watchStudentListInformation } from './students/saga';
 import { watchAddStudent, watchEditStudent } from './addStudent/saga';
 import { watchDeleteStudent } from './deleteStudent/saga';
+import { watchAddTariff, watchEditTariff, watchTariffListInformation, watchDeleteTariff } from './tariff/saga';
+import { watchAddInstructor, watchDeleteInstructor, watchEditInstructor, watchInstructorListInformation } from './instructors/saga';
+import { watchAddEnquiries, watchDeleteEnquiries, watchEnquiriesListInformation, watchUpdateEnquiries } from './Enquiries/saga';
 
 
 export function* mainSaga() {
@@ -12,5 +15,17 @@ export function* mainSaga() {
         watchAddStudent(),
         watchDeleteStudent(),
         watchEditStudent(),
+        watchAddTariff(),
+        watchEditTariff(),
+        watchTariffListInformation(),
+        watchDeleteTariff(),
+        watchAddInstructor(),
+        watchEditInstructor(),
+        watchDeleteInstructor(),
+        watchInstructorListInformation(),
+        watchAddEnquiries(),
+        watchEnquiriesListInformation(),
+        watchUpdateEnquiries(),
+        watchDeleteEnquiries()
     ])
 }

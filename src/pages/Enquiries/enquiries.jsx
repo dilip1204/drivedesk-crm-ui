@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { useDispatch } from "react-redux";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -7,22 +9,26 @@ import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
 import "../../assets/plugins/daterangepicker/daterangepicker.css";
 // import "../../assets/plugins/toastr/toastr.min.css";
 
-import "./Students.css";
+import "../Students/Students.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
-import AddStudents from "./addStudents";
 import { getStudentsListInformation } from "../../store/students/actions";
 import { deleteStudent } from "../../store/deleteStudent/actions";
+
 import avatar from "../../assets/img/avatar.png";
-import { ToastContainer, toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import {
+  toaster,
+  successNotification,
+  errorNotification
+} from '../../shared/commonComponent/toaster/toaster'
+import AddEnquiries from "./addEnquiries";
 
 
 
-const Students = () => {
+const Enquiries = () => {
 
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false)
@@ -34,35 +40,26 @@ const Students = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  const { addStudentResponse, addStudentLoader  } = useSelector((state) => state.studentUpdate)
-
 
   const getStudentsList = () => {
-    dispatch(getStudentsListInformation({}, (res) => {
-
-      const studentList = res?.response || [];
-  if (Array.isArray(studentList) && studentList.length > 0) {
-    setStudentsData(studentList);
-  } else {
-    setStudentsData([]);
-    setError("No students found.");
+    const data = {};
+    dispatch(getStudentsListInformation(data, (res) => {
+      if (Array.isArray(res) && res.length > 0) {
+        setStudentsData(res);
+        setError(null);
+      } else if (Array.isArray(res) && res.length === 0) {
+        setStudentsData([]);
+        setError("No students found.");
+      } else if (res?.message || typeof res === "string") {
+        setError("Something went wrong. Please try again.");
+      }
+      setLoading(false);
+    }));
   }
-  setLoading(false);
-}));
-  }
 
-  useEffect(() => { 
+  useEffect(() => {
     getStudentsList();
   }, [dispatch]);
-
-  const onStudentData = (res, isEdit) => {
-    if(!res.isError) {
-      toast.success(isEdit ? 'Student updated successfully!':'Student added successfully!');
-    }else {
-      toast.error('Failed....!')
-    }
-  }
-  
   
   const handleDeleteCloseModel = () => {
     setShowDeleteModal(false);
@@ -81,7 +78,11 @@ const Students = () => {
       deleteStudent(payloadDeleteStudent, (res) => {
         handleDeleteCloseModel()
         getStudentsList();
-        toast.success('Student deleted successfully.....');
+        // toaster(
+        //   'Delete Student',
+        //   'Student deleted successfully.....',
+        //   successNotification,
+        // )
         
       })
    )
@@ -122,14 +123,14 @@ const Students = () => {
                 {/* Breadcrumb */}
                 <div className="row">
                   <div className="breadcrumb-wrapper col-xl-6">
-                    <h1>Students</h1>
+                    <h1>Enquiries</h1>
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
                           <a href="#"><span className="mdi mdi-home"></span></a>
                         </li>
-                        <li className="breadcrumb-item">Students</li>
-                        <li className="breadcrumb-item" aria-current="page">StudentList</li>
+                        <li className="breadcrumb-item">Enquiries</li>
+                        <li className="breadcrumb-item" aria-current="page">EnquiriesList</li>
                       </ol>
                     </nav>
                   </div>
@@ -140,7 +141,7 @@ const Students = () => {
                       className="mb-1 btn btn-primary"
                       onClick={AddStudentsModal}
                     >
-                      <i className="bi bi-plus-lg"></i> Add Students
+                      <i className="bi bi-plus-lg"></i> Add Enquiries
                     </button>
                   </div>
                 </div>
@@ -202,14 +203,13 @@ const Students = () => {
             </div>
 
             {/* Modal Form */}
-            <AddStudents 
+            <AddEnquiries
             showModal={showModal} 
             hideModal={handleCloseModal}
             onStudentAdded={getStudentsList}
-            studentData={onStudentData}
             id={selectedStudent} 
             isEdit={isEdit}
-            ></AddStudents>
+            ></AddEnquiries>
 
           <DeleteConfirmation
             showDeleteModal={showDeleteModal}
@@ -222,16 +222,8 @@ const Students = () => {
           </div>
         </div>
       </div>
-      <ToastContainer 
-      position="top-right"
-      autoClose={5000}
-      hideProgressBar={false}
-      closeButton={false}
-      closeOnClick
-      pauseOnHover
-      />
     </>
   );
 };
 
-export default Students;
+export default Enquiries;

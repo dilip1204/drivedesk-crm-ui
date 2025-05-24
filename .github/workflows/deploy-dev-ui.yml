@@ -1,4 +1,4 @@
-name: Deploy React UI to Dev (No Clone - Fixed)
+name: Deploy React UI to Dev (Safe YAML - No Clone)
 
 on:
   push:
@@ -38,14 +38,12 @@ jobs:
             mkdir -p ~/drivedesk-crm-ui
             cd ~/drivedesk-crm-ui
             echo "GITHUB_SHA=${{ github.sha }}" > .env.dev
-            cat <<EOF > docker-compose-dev.template.yml
-version: "3"
-services:
-  crm-ui:
-    image: asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:\${GITHUB_SHA}
-    container_name: crm-ui
-    restart: unless-stopped
-    ports:
-      - "3000:80"
-EOF
+            echo "version: \"3\"" > docker-compose-dev.template.yml
+            echo "services:" >> docker-compose-dev.template.yml
+            echo "  crm-ui:" >> docker-compose-dev.template.yml
+            echo "    image: asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:\${GITHUB_SHA}" >> docker-compose-dev.template.yml
+            echo "    container_name: crm-ui" >> docker-compose-dev.template.yml
+            echo "    restart: unless-stopped" >> docker-compose-dev.template.yml
+            echo "    ports:" >> docker-compose-dev.template.yml
+            echo "      - \"3000:80\"" >> docker-compose-dev.template.yml
             docker-compose -f docker-compose-dev.template.yml --env-file .env.dev up -d crm-ui

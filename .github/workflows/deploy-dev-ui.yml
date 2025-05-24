@@ -42,7 +42,7 @@ jobs:
             echo "services:" >> docker-compose-dev.template.yml
             echo "  crm-ui:" >> docker-compose-dev.template.yml
             echo "    image: asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:\${GITHUB_SHA}" >> docker-compose-dev.template.yml
-            echo "    container_name: crm-ui" >> docker-compose-dev.template.yml
+            echo "    container_name: drivedesk-dev-ui" >> docker-compose-dev.template.yml
             echo "    restart: unless-stopped" >> docker-compose-dev.template.yml
             echo "    ports:" >> docker-compose-dev.template.yml
             echo "      - \"3000:80\"" >> docker-compose-dev.template.yml

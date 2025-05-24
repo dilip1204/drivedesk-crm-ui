@@ -5,7 +5,7 @@ import { ENDPOINTS } from "../../../shared/constants/endPoints";
 export const editEnquiriesList = (param) => { 
     return request(
         METHOD_TYPES.PUT,
-        ENDPOINTS.editEnquiries+param.enquiriesData.mobile_number,
-        param.enquiriesData
+        ENDPOINTS.editEnquiries+param.id+'/status',
+        param
     )
 } 

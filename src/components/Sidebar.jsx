@@ -47,17 +47,14 @@ export default function Sidebar() {
             </li>
 */}
             <li className={`has-sub ${isActive("/instructors") ? "active expand" : ""}`}>
-              <a
+              <Link
                 className="sidenav-item-link"
-                href="javascript:void(0)"
-                data-toggle="collapse"
-                data-target="#instructors"
-                aria-expanded="false"
-                aria-controls="instructors"
+                to="/instructors"
+                
               >
                 <i className="mdi mdi-account-multiple"></i>
                 <span className="nav-text">Instructors</span>
-              </a>
+              </Link>
             </li> 
 
             <li className={`has-sub ${isActive("/tariff") ? "active expand" : ""}`}>

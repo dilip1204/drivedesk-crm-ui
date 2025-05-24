@@ -1,4 +1,4 @@
-name: Deploy React UI to Prod (Image Tag Injected)
+name: Deploy React UI to Prod (with _PROD secrets)
 
 on:
   workflow_dispatch:
@@ -19,18 +19,18 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          credentials_json: ${{ secrets.GCP_CREDENTIALS_PROD }}
 
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth configure-docker asia-south1-docker.pkg.dev
 
-      - name: SSH and Deploy UI to Prod VM
+      - name: SSH and Deploy to Prod VM
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.PROD_VM_IP }}
-          username: ${{ secrets.PROD_VM_USER }}
-          key: ${{ secrets.GCP_SSH_KEY }}
+          host: ${{ secrets.GCP_VM_IP_PROD }}
+          username: ${{ secrets.GCP_VM_USER_PROD }}
+          key: ${{ secrets.GCP_SSH_KEY_PROD }}
           script: |
             mkdir -p ~/drivedesk-crm-ui
             cd ~/drivedesk-crm-ui

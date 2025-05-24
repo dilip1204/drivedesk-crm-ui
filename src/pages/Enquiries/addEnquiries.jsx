@@ -6,20 +6,30 @@ import { useDispatch } from "react-redux";
 import { addEnquiries, updateEnquiries } from "../../store/Enquiries/actions"; // Update path as needed
 import { IoClose } from "react-icons/io5";
 
-export default function AddEnquiries({ showModal, hideModal, id, isEdit, onSaved }) {
+export default function AddEnquiries({ showModal, hideModal, id, isEdit, onEnquiriesAdded, enquiriesData }) {
   const dispatch = useDispatch();
 
+  // Utility to format date for datetime-local input
+const formatDateTimeLocal = (date) => {
+  const d = new Date(date);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+
   const initialValues = {
-    name: id?.name || '',
-    mobile_number: id?.mobile_number || '',
-    dob: id?.dob || '',
-    referred_by: id?.referred_by || '',
-    email: id?.email || '',
-    course_interest: id?.course_interest || '',
-    enquiry_date: id?.enquiry_date || new Date().toISOString(),
-    follow_up_status: id?.follow_up_status || 'pending',
-    remarks: id?.remarks || ''
-  };
+  name: id?.name || '',
+  mobile_number: id?.mobile_number || '',
+  dob: id?.dob || '',
+  referred_by: id?.referred_by || '',
+  email: id?.email || '',
+  course_interest: id?.course_interest || '',
+  enquiry_date: id?.enquiry_date ? formatDateTimeLocal(id.enquiry_date) : formatDateTimeLocal(new Date()),
+  follow_up_status: id?.follow_up_status || 'pending',
+  remarks: id?.remarks || ''
+};
+
+
 
   const validationSchema = Yup.object({
     name: Yup.string().required("Name is required"),
@@ -40,15 +50,25 @@ export default function AddEnquiries({ showModal, hideModal, id, isEdit, onSaved
     initialValues,
     validationSchema,
     onSubmit: (values) => {
-      const payload = { ...values };
+      let payload;
+      if (isEdit) {
+    // Only send status for update
+    payload = {
+      id: id?.id, // or use id._id or whatever key uniquely identifies the enquiry
+      status: values.follow_up_status
+    };
+  } else {
+       payload = { ...values };
+  }
       const action = isEdit ? updateEnquiries : addEnquiries;
 
       dispatch(action(payload, (response) => {
         if (response?.isError === false && response?.response?.message) {
           formik.resetForm();
-          if (typeof onSaved === 'function') {
-            onSaved();
-          }
+         // if (typeof onSaved === 'function') {
+            onEnquiriesAdded();
+         // }
+          enquiriesData(response, isEdit);
           hideModal();
         } else if (Array.isArray(response?.detail || response?.data?.detail)) {
           const errors = response.detail || response.data.detail;

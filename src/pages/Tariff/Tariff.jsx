@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -16,10 +17,14 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import { getTariffsListInformation } from "../../store/tariff/actions";
-import { deleteStudent } from "../../store/deleteStudent/actions";
+import { deleteTariff } from "../../store/tariff/actions";
 
 import avatar from "../../assets/img/avatar.png";
 import AddTariffs from "./addTariffs";
+import ProfileModal from "../../components/ProfileModal"; // new generic component
+
+
+
 
 
 
@@ -34,6 +39,24 @@ const Tariff = () => {
   const [selectedTariffAppId, setSelectedTariffAppId] = useState(null);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedTariff, setSelectedTariff] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+const [profileData, setProfileData] = useState([]);
+
+const openTariffProfile = (tariff) => {
+  const fields = [
+    { label: "Plan Name", value: tariff.plan_name },
+    { label: "Training Days", value: tariff.training_days },
+    { label: "Amount", value: tariff.amount },
+    { label: "Reference Fee", value: tariff.reference_fee },
+    { label: "Description", value: tariff.description },
+    { label: "Remarks", value: tariff.remarks },
+    { label: "Category", value: tariff.category },
+    // add more if needed
+  ];
+  setProfileData(fields);
+  setShowProfileModal(true);
+};
+
 
 
   const getTariffsList = () => {
@@ -62,27 +85,22 @@ const Tariff = () => {
     setShowDeleteModal(true);
   }
 
-  const deleteData = (appId) => {
+  const deleteData = (appId) => { 
     const payloadDeleteTarrif = {
       appId: appId
     }
    
     dispatch(
-      deleteStudent(payloadDeleteTarrif, (res) => {
+      deleteTariff(payloadDeleteTarrif, (res) => {
         handleDeleteCloseModel()
         getTariffsList();
-        // toaster(
-        //   'Delete Student',
-        //   'Student deleted successfully.....',
-        //   successNotification,
-        // )
-        
+         toast.success('Tariff deleted successfully.....');
       })
    )
     handleDeleteCloseModel();
   }
 
-  const deleteUser = (appId) => {
+  const deleteTariffPlan= (appId) => { 
     setShowDeleteModal(true);
     setSelectedTariffAppId(appId)
   }
@@ -103,6 +121,16 @@ const Tariff = () => {
     setIsEdit(false);
     setSelectedTariff(null); // clear after closing
   };
+
+  const onTariffData = (res, isEdit) => {
+      if(!res.isError) {
+        getTariffsList();
+        toast.success(isEdit ? 'Tariff updated successfully!':'Tariff added successfully!');
+      }else {
+        toast.error('Failed....!')
+      }
+    }
+
   return (
     <>
       <div className="header-fixed sidebar-fixed sidebar-dark header-light" id="body">
@@ -164,7 +192,7 @@ const Tariff = () => {
               <button className="btn btn-sm btn-warning" title="Edit Tariff" onClick={() => handleEditTariff(tariff)}>
                 <i className="bi bi-pencil"></i>
               </button>
-              <button className="btn btn-sm btn-danger" title="Delete Tariff" onClick={()=>deleteUser(tariff.mobile_number)}>
+              <button className="btn btn-sm btn-danger" title="Delete Tariff" onClick={()=>deleteTariffPlan(tariff.plan_name)}>
                 <i className="bi bi-trash"></i>
               </button>
             </div>
@@ -178,8 +206,8 @@ const Tariff = () => {
 
             <div>
               <div className="card-buttons">
-                <a href="#" className="btn btn-primary btn-sm">Profile</a>
-                <a href="#" className="btn btn-secondary btn-sm">Schedule</a>
+                <Link to="#" onClick={() => openTariffProfile(tariff)} className="btn btn-primary btn-sm">View</Link>
+                {/* <a href="#" className="btn btn-secondary btn-sm">Schedule</a> */}
               </div>
               <div className="completed-classes">
                 <i className="bi bi-check-circle"></i> {tariff.reference_fee || 0} Reference fee
@@ -200,6 +228,7 @@ const Tariff = () => {
             showModal={showModal} 
             hideModal={handleCloseModal}
             onTariffAdded={getTariffsList}
+            tariffData={onTariffData}
             id={selectedTariff} 
             isEdit={isEdit}
             ></AddTariffs>
@@ -211,10 +240,26 @@ const Tariff = () => {
             id={selectedTariffAppId}
             message={'Are you sure want to delete this tariff?'}
           />
+          <ProfileModal
+  show={showProfileModal}
+  onClose={() => setShowProfileModal(false)}
+  title="Tariff Profile"
+  avatar={avatar}
+  data={profileData}
+/>
+
             <Footer />
           </div>
         </div>
       </div>
+      <ToastContainer 
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            closeButton={false}
+            closeOnClick
+            pauseOnHover
+            />
     </>
   );
 };

@@ -34,7 +34,7 @@ function* addInstructorData(action){
         if (typeof action.fn === "function") {
             action.fn(response.data)
         }
-    } catch (error) { console.info('error...........', error)
+    } catch (error) { 
         yield put({ type: ADD_INSTRUCTOR_DATA_ERROR, error: error});
         if (typeof action.fn === "function") {
             action.fn(error.response)

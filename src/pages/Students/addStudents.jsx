@@ -2,21 +2,22 @@ import React, { useEffect } from "react";
 import { Modal, Button, Alert } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useDispatch, useSelector } from "react-redux";
-//import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
 import { addStudent, updateStudent } from "../../store/addStudent/actions";
-import {
-    toaster,
-    successNotification,
-    errorNotification
-} from "../../shared/commonComponent/toaster/toaster"
+import { IoClose } from "react-icons/io5";
 
-import { IoClose } from "react-icons/io5"; // You can use other icons too
-
-export default function AddStudents({ showModal, hideModal, id, isEdit, onStudentAdded, studentData }) {
+export default function AddStudents({
+  showModal,
+  hideModal,
+  id,
+  isEdit,
+  onStudentAdded,
+  studentData,
+  plans = [],
+  instructors = []
+}) {
   const dispatch = useDispatch();
-  const setErrorField = useSelector((state) => state.studentUpdate.addStudenttError);
-  
+
   const initialValues = {
     name: id?.name || '',
     dob: id?.dob || '',
@@ -30,28 +31,26 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
     total_amount: id?.total_amount || 0,
     balance: id?.balance || 0,
     full_payment_status: id?.full_payment_status || 'Pending',
+    instructor_name: id?.instructor_name || '',
+    instructor_mobile: id?.instructor_mobile || ''
   };
 
-  const validationSchema = Yup.object(
-    Object.keys(initialValues).reduce((schema, key) => {
-      if (key === 'email') {
-        schema[key] = Yup.string()
-          .required(`${key.replace(/_/g, ' ')} is required`)
-          .email('Invalid email format');
-      } else if (['paid_amount', 'total_amount', 'balance'].includes(key)) {
-        schema[key] = Yup.number()
-          .typeError(`${key.replace(/_/g, ' ')} must be a number`)
-          .required(`${key.replace(/_/g, ' ')} is required`);
-      } else if (key === 'dob') {
-  schema[key] = Yup.date()
-    .required(`${key.replace(/_/g, ' ')} is required`)
-    .max(new Date(), 'Date of birth cannot be in the future');
-} else {
-        schema[key] = Yup.string().required(`${key.replace(/_/g, ' ')} is required`);
-      }
-      return schema;
-    }, {})
-  ).test(
+  const validationSchema = Yup.object({
+    name: Yup.string().required("Name is required"),
+    dob: Yup.date().required("Date of birth is required").max(new Date(), 'DOB cannot be in future'),
+    mobile_number: Yup.string().matches(/^\d{10}$/, "Mobile number must be 10 digits").required("Mobile number is required"),
+    application_number: Yup.string().required("Application number is required"),
+    email: Yup.string().email("Invalid email format").required("Email is required"),
+    aadhar_number: Yup.string().required("Aadhar number is required"),
+    plan: Yup.string().required("Plan is required"),
+    initial_payment_method: Yup.string().required("Payment method is required"),
+    paid_amount: Yup.number().required("Paid amount is required").typeError("Must be a number"),
+    total_amount: Yup.number().required("Total amount is required").typeError("Must be a number"),
+    balance: Yup.number().required("Balance is required").typeError("Must be a number"),
+    full_payment_status: Yup.string().required("Full payment status is required"),
+    instructor_name: Yup.string().required("Instructor name is required"),
+    instructor_mobile: Yup.string().required("Instructor mobile is required")
+  }).test(
     'paid-vs-total',
     'Paid amount cannot be greater than total amount',
     function (values) {
@@ -62,72 +61,39 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
   );
 
   const formik = useFormik({
-    enableReinitialize: true, //important to bind new props to form
-    validateOnChange: true,
-    validateOnBlur: true,
+    enableReinitialize: true,
     initialValues,
     validationSchema,
     onSubmit: (values) => {
-      const firstErrorField = Object.keys(formik.errors)[0];
-      if (firstErrorField) {
-        const errorElement = document.getElementsByName(firstErrorField)[0];
-        if (errorElement) {
-          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          errorElement.focus();
-        }
-        return;
-      }
-
       const payload = {
         studentData: {
           ...values,
-          status: "Process Started",
-        },
+          status: "Process Started"
+        }
       };
       const action = isEdit ? updateStudent : addStudent;
       dispatch(action(payload, (response) => {
         const errorList = response?.data?.detail || response?.detail || response;
 
         if (Array.isArray(errorList)) {
-          let firstErrorHandled = false;
-
           errorList.forEach((err) => {
             const field = err?.loc?.[1];
             const msg = err?.msg || err?.message || 'Invalid input';
-
             if (field && formik.values.hasOwnProperty(field)) {
-              formik.setFieldTouched(field, true, false);
               formik.setFieldError(field, msg);
-
-              if (!firstErrorHandled) {
-                const el = document.getElementsByName(field)?.[0];
-                if (el) {
-                  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  el.focus();
-                }
-                firstErrorHandled = true;
-              }
-            } else {
-              //toast().error(msg);
             }
           });
-
           return;
         }
 
-        // toaster(
-        //     'Add Student',
-        //     'Student added successfully...!',
-        //     successNotification,
-        // )
         formik.resetForm();
         if (typeof onStudentAdded === 'function') {
-          onStudentAdded(); // trigger refresh in parent
+          onStudentAdded();
           studentData(response, isEdit);
         }
         hideModal();
       }));
-    },
+    }
   });
 
   useEffect(() => {
@@ -138,11 +104,19 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
     }
   }, [formik.values.paid_amount, formik.values.total_amount]);
 
-  const fields = Object.keys(initialValues);
-  const fieldPairs = [];
-  for (let i = 0; i < fields.length; i += 2) {
-    fieldPairs.push(fields.slice(i, i + 2));
-  }
+  useEffect(() => {
+    const selectedPlan = plans.find((p) => p.plan_name === formik.values.plan);
+    if (selectedPlan) {
+      formik.setFieldValue('total_amount', selectedPlan.amount || 0);
+    }
+  }, [formik.values.plan, plans]);
+
+  useEffect(() => {
+    const selectedInstructor = instructors.find((i) => i.name === formik.values.instructor_name);
+    if (selectedInstructor) {
+      formik.setFieldValue('instructor_mobile', selectedInstructor.mobile_number || '');
+    }
+  }, [formik.values.instructor_name, instructors]);
 
   const handleNumericInput = (e) => {
     const { name, value } = e.target;
@@ -152,30 +126,26 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
 
   const showBalanceWarning = parseFloat(formik.values.balance) < 0;
 
+  const fields = [
+    'name', 'dob',
+    'mobile_number', 'application_number',
+    'email', 'aadhar_number',
+    'plan', 'initial_payment_method',
+    'paid_amount', 'total_amount',
+    'balance', 'full_payment_status',
+    'instructor_name', 'instructor_mobile'
+  ];
+
+  const fieldPairs = [];
+  for (let i = 0; i < fields.length; i += 2) {
+    fieldPairs.push(fields.slice(i, i + 2));
+  }
+
   return (
-    <Modal
-      show={showModal}
-      onHide={hideModal}
-      backdrop="static"
-      keyboard={false}
-      size="lg"
-      centered
-    >
+    <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered>
       <Modal.Header closeButton>
         <Modal.Title>{isEdit ? 'Update Student' : 'Add Student'}</Modal.Title>
-        <IoClose
-    onClick={() => {
-      formik.resetForm();
-      hideModal();
-    }}
-    style={{
-      cursor: 'pointer',
-      fontSize: '1.5rem',
-      marginLeft: 'auto',
-      color: '#6c757d'
-    }}
-    title="Close"
-  />
+        <IoClose onClick={() => { formik.resetForm(); hideModal(); }} style={{ cursor: 'pointer', fontSize: '1.5rem', marginLeft: 'auto', color: '#6c757d' }} title="Close" />
       </Modal.Header>
       <Modal.Body>
         <form onSubmit={formik.handleSubmit}>
@@ -193,26 +163,30 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
                       {field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                       <span style={{ color: 'red' }}>*</span>
                     </label>
-                    {['full_payment_status', 'initial_payment_method', 'plan'].includes(field) ? (
+                    {['full_payment_status', 'initial_payment_method', 'plan', 'instructor_name'].includes(field) ? (
                       <select
                         name={field}
-                        className={`form-control${formik.touched[field] && formik.errors[field] ? ' is-invalid' : formik.touched[field] && !formik.errors[field] ? ' is-valid' : ''}`}
+                        className={`form-control${formik.touched[field] && formik.errors[field] ? ' is-invalid' : ''}`}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         value={formik.values[field]}
                       >
                         <option value="">Select {field.replace(/_/g, ' ')}</option>
                         {field === 'full_payment_status' &&
-                          ["Pending", "Completed", "Failed"].map((opt) => (
+                          ["Pending", "Completed", "Failed"].map(opt => (
                             <option key={opt} value={opt}>{opt}</option>
                           ))}
                         {field === 'initial_payment_method' &&
-                          ["cash", "upi"].map((opt) => (
+                          ["cash", "upi"].map(opt => (
                             <option key={opt} value={opt}>{opt}</option>
                           ))}
                         {field === 'plan' &&
-                          ["Basic", "Advanced", "Premium"].map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
+                          plans.map(plan => (
+                            <option key={plan.plan_name} value={plan.plan_name}>{plan.plan_name}</option>
+                          ))}
+                        {field === 'instructor_name' &&
+                          instructors.map(ins => (
+                            <option key={ins.name} value={ins.name}>{ins.name}</option>
                           ))}
                       </select>
                     ) : (
@@ -223,7 +197,7 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
                             : 'text'
                         }
                         name={field}
-                        className={`form-control${formik.touched[field] && formik.errors[field] ? ' is-invalid' : formik.touched[field] && !formik.errors[field] ? ' is-valid' : ''}${showBalanceWarning && field === 'balance' ? ' is-invalid' : ''}`}
+                        className={`form-control${formik.touched[field] && formik.errors[field] ? ' is-invalid' : ''}${showBalanceWarning && field === 'balance' ? ' is-invalid' : ''}`}
                         onChange={
                           ['mobile_number', 'aadhar_number'].includes(field)
                             ? handleNumericInput
@@ -231,7 +205,7 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
                         }
                         onBlur={formik.handleBlur}
                         value={formik.values[field]}
-                        readOnly={field === 'balance'}
+                        readOnly={['balance', 'instructor_mobile'].includes(field)}
                         maxLength={
                           field === 'mobile_number' ? 10
                             : field === 'aadhar_number' ? 12
@@ -249,12 +223,7 @@ export default function AddStudents({ showModal, hideModal, id, isEdit, onStuden
             </div>
           ))}
           <Modal.Footer>
-            <Button variant="secondary"
-             onClick={() => {
-                formik.resetForm(); // Reset form to initial values
-                hideModal();        // Close the modal
-              }}
-             >Cancel</Button>
+            <Button variant="secondary" onClick={() => { formik.resetForm(); hideModal(); }}>Cancel</Button>
             <Button type="submit" variant="primary">{isEdit ? 'Update' : 'Add'}</Button>
           </Modal.Footer>
         </form>

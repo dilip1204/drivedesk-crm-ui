@@ -44,8 +44,8 @@ const Login = () => {
       } else if (res?.statusCode === 422 || res?.isError) {
         const errMsg = res?.message || "Invalid login credentials.";
         setLoginError(errMsg);
-      } else {
-        setLoginError("An unexpected error occurred. Please try again.");
+      } else { 
+        setLoginError(res.response.data.response);
       }
 
         setSubmitting(false);

@@ -1,0 +1,38 @@
+name: Deploy React UI to Prod
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker asia-south1-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE=asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-images/crm-ui:latest
+          docker build -t $IMAGE .
+          docker push $IMAGE
+
+      - name: SSH and Deploy to Prod VM
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PROD_VM_IP }}
+          username: ${{ secrets.PROD_VM_USER }}
+          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+          script: |
+            export GITHUB_SHA=latest
+            cd ~/crm-deployment
+            docker compose -f docker-compose-prod.template.yml --env-file .env.prod up -d crm-ui

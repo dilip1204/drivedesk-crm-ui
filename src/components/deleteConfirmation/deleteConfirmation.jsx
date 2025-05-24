@@ -6,11 +6,10 @@ const DeleteConfirmation = ({
     hideDeleteModal,
     confirmModal,
     id,
-    type,
     message
 }) => {
     
-    const handleConfirmClick = () => {
+    const handleConfirmClick = () => { console.info('id......', id)
         confirmModal(id);
     }
 

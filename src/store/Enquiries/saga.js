@@ -25,7 +25,7 @@ import {
 function* addEnquiriesData(action) {
   try {
     yield put({ type: ADD_ENQUIRIES_DATA_PENDING });
-    const response = yield call(addEnquiriesList, action.param);
+    const response = yield call(addEnquiriesList.addEnquiriesList, action.param);
     yield put({
       type: ADD_ENQUIRIES_DATA_SUCCESS,
       data: response.data
@@ -44,7 +44,7 @@ function* addEnquiriesData(action) {
 function* updateEnquiriesData(action) {
   try {
     yield put({ type: UPDATE_ENQUIRIES_DATA_PENDING });
-    const response = yield call(editEnquiriesList, action.param);
+    const response = yield call(editEnquiriesList.editEnquiriesList, action.param);
     yield put({
       type: UPDATE_ENQUIRIES_DATA_SUCCESS,
       data: response.data
@@ -63,7 +63,7 @@ function* updateEnquiriesData(action) {
 function* getAllEnquiriesInformation(action) {
   try {
     yield put({ type: GET_ENQUIRIES_LIST_PENDING });
-    const response = yield call(getAllEnquiriesService, action.param);
+    const response = yield call(getAllEnquiriesService.getAllEnquiries, action.param);
     yield put({
       type: GET_ENQUIRIES_LIST_SUCCESS,
       data: response.data
@@ -82,7 +82,7 @@ function* getAllEnquiriesInformation(action) {
 function* deleteEnquiriesData(action) {
   try {
     yield put({ type: DELETE_ENQUIRIES_DATA_PENDING });
-    const response = yield call(deleteEnquiriesList, action.param);
+    const response = yield call(deleteEnquiriesList.deleteEnquiriesList, action.param);
     yield put({
       type: DELETE_ENQUIRIES_DATA_SUCCESS,
       data: response.data

@@ -37,13 +37,24 @@ jobs:
           script: |
             mkdir -p ~/drivedesk-crm-ui
             cd ~/drivedesk-crm-ui
+
             echo "GITHUB_SHA=${{ github.sha }}" > .env.dev
+
             echo "version: \"3\"" > docker-compose-dev.template.yml
             echo "services:" >> docker-compose-dev.template.yml
-            echo "  crm-ui:" >> docker-compose-dev.template.yml
+            echo "  drivedesk-dev-ui:" >> docker-compose-dev.template.yml
             echo "    image: asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:\${GITHUB_SHA}" >> docker-compose-dev.template.yml
             echo "    container_name: drivedesk-dev-ui" >> docker-compose-dev.template.yml
             echo "    restart: unless-stopped" >> docker-compose-dev.template.yml
             echo "    ports:" >> docker-compose-dev.template.yml
             echo "      - \"3000:80\"" >> docker-compose-dev.template.yml
-            docker-compose -f docker-compose-dev.template.yml --env-file .env.dev up -d crm-ui
+
+            # Ensure shared network exists
+            docker network create drivedesk-network || true
+
+            # Launch the UI container
+            docker-compose -f docker-compose-dev.template.yml --env-file .env.dev up -d drivedesk-dev-ui
+
+            # Attach both UI and API to the same network
+            docker network connect drivedesk-network drivedesk-dev-ui || true
+            docker network connect drivedesk-network drivedesk-dev-api || true

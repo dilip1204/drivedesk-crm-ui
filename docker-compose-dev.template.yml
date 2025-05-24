@@ -1,6 +1,6 @@
-  crm-ui:
-    image: asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-images/crm-ui:${GITHUB_SHA}
-    container_name: crm-ui
+  drivedesk-dev-ui:
+    image: asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:${GITHUB_SHA}
+    container_name: drivedesk-dev-ui
     restart: unless-stopped
     ports:
       - "3000:80"

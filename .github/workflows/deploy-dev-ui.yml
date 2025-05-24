@@ -37,4 +37,5 @@ jobs:
           script: |
             export GITHUB_SHA=${{ github.sha }}
             cd ~/drivedesk-crm-ui
+            echo "GITHUB_SHA=${GITHUB_SHA}" > .env.dev
             docker-compose -f docker-compose-dev.template.yml --env-file .env.dev up -d crm-ui

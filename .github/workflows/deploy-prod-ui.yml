@@ -1,10 +1,15 @@
-name: Deploy React UI to Prod
+name: Deploy React UI to Prod (Image Tag Injected)
 
 on:
   workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Tag of the image to deploy (e.g., github_sha)'
+        required: true
+        default: 'latest'
 
 jobs:
-  build-and-deploy:
+  deploy-prod-ui:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,19 +25,29 @@ jobs:
         run: |
           gcloud auth configure-docker asia-south1-docker.pkg.dev
 
-      - name: Build and Push Docker Image
-        run: |
-          IMAGE=asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-images/crm-ui:latest
-          docker build -t $IMAGE .
-          docker push $IMAGE
-
-      - name: SSH and Deploy to Prod VM
+      - name: SSH and Deploy UI to Prod VM
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.PROD_VM_IP }}
           username: ${{ secrets.PROD_VM_USER }}
-          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+          key: ${{ secrets.GCP_SSH_KEY }}
           script: |
-            export GITHUB_SHA=latest
-            cd ~/crm-deployment
-            docker compose -f docker-compose-prod.template.yml --env-file .env.prod up -d crm-ui
+            mkdir -p ~/drivedesk-crm-ui
+            cd ~/drivedesk-crm-ui
+
+            IMAGE_TAG=asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:${{ github.event.inputs.image_tag }}
+            echo "IMAGE_TAG=$IMAGE_TAG" > .env.prod
+
+            echo "version: \"3\"" > docker-compose-prod.template.yml
+            echo "services:" >> docker-compose-prod.template.yml
+            echo "  drivedesk-prod-ui:" >> docker-compose-prod.template.yml
+            echo "    image: $IMAGE_TAG" >> docker-compose-prod.template.yml
+            echo "    container_name: drivedesk-prod-ui" >> docker-compose-prod.template.yml
+            echo "    restart: always" >> docker-compose-prod.template.yml
+            echo "    ports:" >> docker-compose-prod.template.yml
+            echo "      - \"3001:80\"" >> docker-compose-prod.template.yml
+
+            docker network create drivedesk-network || true
+            docker-compose -f docker-compose-prod.template.yml --env-file .env.prod up -d drivedesk-prod-ui
+            docker network connect drivedesk-network drivedesk-prod-ui || true
+            docker network connect drivedesk-network drivedesk-prod-api || true

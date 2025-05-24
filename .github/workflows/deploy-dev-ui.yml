@@ -24,7 +24,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          IMAGE=asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/drivedesk-images/crm-ui:${{ github.sha }}
+          IMAGE=asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/drivedesk-crm-ui/crm-ui:${{ github.sha }}
           docker build -t $IMAGE .
           docker push $IMAGE
 

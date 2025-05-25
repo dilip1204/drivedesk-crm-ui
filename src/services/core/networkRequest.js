@@ -2,8 +2,9 @@ import axios from 'axios';
 import { METHOD_TYPES } from '../../shared/constants/methodTypes'; 
 
 const instance = axios.create({
-    baseURL: process.env.REACT_APP_BASE_API_URL,
+    baseURL: process.env.REACT_APP_BASE_API_URL || '/api/',
 })
+
 
 instance.interceptors.request.use(
     (config) => {

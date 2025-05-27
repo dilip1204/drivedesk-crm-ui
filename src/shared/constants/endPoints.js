@@ -8,7 +8,7 @@ export const ENDPOINTS = {
     editTariff: 'tariff_router/tariff/',
     getAllTariffs: 'tariff_router/tariff',
     deleteTariff: 'tariff_router/tariff/',
-    addInstructor: 'instructors',
+    addInstructor: 'instructors/',
     editInstructor: 'instructors/',
     getAllInstructors: 'instructors/fetchAllInstructors',
     deleteInstructor: 'instructors/',

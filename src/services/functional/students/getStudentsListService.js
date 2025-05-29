@@ -8,3 +8,10 @@ export const getAllStudents = (param) => {
         ENDPOINTS.getAllStudents
     )
 } 
+
+export const getAllStudentsFilter = (param) => {
+    return request(
+        METHOD_TYPES.GET,
+        ENDPOINTS.getAllStudentsFilter+'?month='+param.month+'&year='+param.year+'&status='+param.status+'&instructor_mobile='+param.instructor_mobile+'&test_scheduled='+param.test_scheduled
+    )
+} 

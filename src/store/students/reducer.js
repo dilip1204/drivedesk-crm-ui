@@ -3,12 +3,20 @@ import {
     GET_STUDENTS_LIST_ERROR,
     GET_STUDENTS_LIST_PENDING,
     GET_STUDENTS_LIST_SUCCESS,
+    GET_STUDENTS_FILTER_LIST,
+    GET_STUDENTS_FILTER_LIST_ERROR,
+    GET_STUDENTS_FILTER_LIST_PENDING,
+    GET_STUDENTS_FILTER_LIST_SUCCESS
 } from './types';
 
 const initialState = {
     studentsList: [],
     studentsListLoader: false,
     studentsListError: [],
+    studentsFilterList: [],
+    studentsFilterListLoader: false,
+    studentsFilterListError: [],
+
 }
 
 export default function studentsListReducer(state = initialState, action) {
@@ -29,6 +37,23 @@ export default function studentsListReducer(state = initialState, action) {
                 ...state,
                 studentsListError: action.error,
                 studentsListLoader: false
+            }
+        case GET_STUDENTS_FILTER_LIST_SUCCESS:
+            return {
+                ...state,
+                studentsFilterList: action.data,
+                studentsFilterListLoader: false
+            }
+        case GET_STUDENTS_FILTER_LIST_PENDING:
+            return {
+                ...state,
+                studentsFilterListLoader: true
+            }
+        case GET_STUDENTS_FILTER_LIST_ERROR:
+            return {
+                ...state,
+                studentsFilterListError: action.error,
+                studentsFilterListLoader: false
             }
         default:
             return state;

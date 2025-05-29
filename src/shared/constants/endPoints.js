@@ -15,5 +15,6 @@ export const ENDPOINTS = {
     addEnquiries: 'enquiries/save-enquiry',
     editEnquiries: 'enquiries/',
     getAllEnquiries: 'enquiries/fetchAll',
-    deleteEnquiries: 'enquiries/'
+    deleteEnquiries: 'enquiries/',
+    getAllStudentsFilter: 'admin/students/filter'
 } 

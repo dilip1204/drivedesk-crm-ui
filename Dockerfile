@@ -11,7 +11,7 @@ RUN npm install
 
 COPY . .
 
-# Build with env injected
+# Build with env  injected
 RUN npm run build
 
 # Stage 2 - NGINX to serve React and proxy API

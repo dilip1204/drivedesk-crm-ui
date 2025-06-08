@@ -23,3 +23,23 @@
 .my-50 {
   margin: 50px auto;
 }
+body #dd-login {
+  background-image: url('../../assets/img/bg_login.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh;
+}
+
+/* Optional: dark overlay */
+body #dd-login::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3); /* adjust darkness */
+  z-index: -1;
+}
+

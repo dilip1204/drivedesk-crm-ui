@@ -37,7 +37,10 @@ const Login = () => {
 
         // Save user details
         const tenantInfo = res.response.tenant_info;
+        const userRoleInfo = res.response.user_info;
+         userRoleInfo.role = res.response.user_info.role || userRoleInfo.role; // ensure role exists
         localStorage.setItem("userInfo", JSON.stringify(tenantInfo));
+        localStorage.setItem("userRoleInfo", JSON.stringify(userRoleInfo));
 
         // Navigate to dashboard
         navigate("/dashboard");
@@ -56,10 +59,11 @@ const Login = () => {
 
   return (
     <div
-      className={`container d-flex align-items-center justify-content-center`}
-      style={{ margin: "25px auto" }}
+      id="dd-login"
+      className={`d-flex align-items-center justify-content-center`}
+      style={{ padding: "25px 0" }}
     >
-      <div className="row justify-content-center">
+      <div className="row justify-content-end" style={{marginLeft: "250px"}}>
         <div className="col-lg-6 col-md-10">
           <div className="card">
             <div className="card-header bg-primary card-logo-center">

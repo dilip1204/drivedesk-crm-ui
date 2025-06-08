@@ -23,12 +23,14 @@ import avatar from "../../assets/img/avatar.png";
 import AddTariffs from "./addTariffs";
 import ProfileModal from "../../components/ProfileModal"; // new generic component
 
-
+import { useAuth } from "../../hooks/useAuth";
 
 
 
 
 const Tariff = () => {
+
+  const { role } = useAuth();
 
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false)
@@ -157,13 +159,18 @@ const openTariffProfile = (tariff) => {
                   </div>
 
                   <div className="col-xl-6 text-right">
-                    <button
+                    {role === "admin" ? (
+         <button
                       type="button"
                       className="mb-1 btn btn-primary"
                       onClick={AddTariffsModal}
                     >
                       <i className="bi bi-plus-lg"></i> Add Tariffs
                     </button>
+      ) : (
+        <p></p>
+      )}
+                   
                   </div>
                 </div>
 
@@ -189,12 +196,19 @@ const openTariffProfile = (tariff) => {
                 gap: "5px",
               }}
             >
-              <button className="btn btn-sm btn-warning" title="Edit Tariff" onClick={() => handleEditTariff(tariff)}>
+              {role === "admin" ? (
+        <>
+        <button className="btn btn-sm btn-warning" title="Edit Tariff" onClick={() => handleEditTariff(tariff)}>
                 <i className="bi bi-pencil"></i>
               </button>
               <button className="btn btn-sm btn-danger" title="Delete Tariff" onClick={()=>deleteTariffPlan(tariff.plan_name)}>
                 <i className="bi bi-trash"></i>
               </button>
+        </>
+      ) : (
+        <span></span>
+      )}
+              
             </div>
 
             <div>

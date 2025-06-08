@@ -31,7 +31,7 @@ const Dashboard = () => {
                     <div className="card card-mini mb-4">
                       <div className="card-body">
                         <h2 className="mb-1">71,503</h2>
-                        <p>Online Signups</p>
+                        <p>Total Number of Students</p>
                         <div className="chartjs-wrapper">
                           <canvas id="barChart"></canvas>
                         </div>
@@ -42,7 +42,7 @@ const Dashboard = () => {
                     <div className="card card-mini  mb-4">
                       <div className="card-body">
                         <h2 className="mb-1">9,503</h2>
-                        <p>New Visitors Today</p>
+                        <p>Total Number Of Enquiry</p>
                         <div className="chartjs-wrapper">
                           <canvas id="dual-line"></canvas>
                         </div>
@@ -53,7 +53,7 @@ const Dashboard = () => {
                     <div className="card card-mini mb-4">
                       <div className="card-body">
                         <h2 className="mb-1">71,503</h2>
-                        <p>Monthly Total Order</p>
+                        <p>Monthly Total Students</p>
                         <div className="chartjs-wrapper">
                           <canvas id="area-chart"></canvas>
                         </div>
@@ -82,20 +82,20 @@ const Dashboard = () => {
                       <div className="card-body">
                         <canvas id="linechart" className="chartjs"></canvas>
                       </div>
-                      <div className="card-footer d-flex flex-wrap bg-white p-0">
+                      {/* <div className="card-footer d-flex flex-wrap bg-white p-0">
                         <div className="col-6 px-0">
                           <div className="text-center p-4">
-                            <h4>$6,308</h4>
+                            <h4>6,308</h4>
                             <p className="mt-2">Total orders of this year</p>
                           </div>
                         </div>
                         <div className="col-6 px-0">
                           <div className="text-center p-4 border-left">
-                            <h4>$70,506</h4>
+                            <h4>70,506</h4>
                             <p className="mt-2">Total revenue of this year</p>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
@@ -114,7 +114,7 @@ const Dashboard = () => {
                         <i className="mdi mdi-download mr-2"></i> Download
                         overall report
                       </a>
-                      <div className="card-footer d-flex flex-wrap bg-white p-0">
+                      {/* <div className="card-footer d-flex flex-wrap bg-white p-0">
                         <div className="col-6">
                           <div className="py-4 px-4">
                             <ul className="d-flex flex-column justify-content-between">
@@ -155,7 +155,7 @@ const Dashboard = () => {
                             </ul>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

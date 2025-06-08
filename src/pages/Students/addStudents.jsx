@@ -32,12 +32,23 @@ export default function AddStudents({
     balance: id?.balance || 0,
     full_payment_status: id?.full_payment_status || 'Pending',
     instructor_name: id?.instructor_name || '',
-    instructor_mobile: id?.instructor_mobile || ''
+    instructor_mobile: id?.instructor_mobile || '',
+    test_date: id?.test_date || ''
   };
 
   const validationSchema = Yup.object({
     name: Yup.string().required("Name is required"),
-    dob: Yup.date().required("Date of birth is required").max(new Date(), 'DOB cannot be in future'),
+    dob: Yup.date()
+  .required("Date of birth is required")
+  .max(new Date(), "DOB cannot be in future")
+  .test("age", "Student must be at least 18 years old", function (value) {
+    if (!value) return false;
+    const today = new Date();
+    const birthDate = new Date(value);
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    return age > 18 || (age === 18 && m >= 0);
+  }),
     mobile_number: Yup.string().matches(/^\d{10}$/, "Mobile number must be 10 digits").required("Mobile number is required"),
     application_number: Yup.string().required("Application number is required"),
     email: Yup.string().email("Invalid email format").required("Email is required"),
@@ -49,7 +60,10 @@ export default function AddStudents({
     balance: Yup.number().required("Balance is required").typeError("Must be a number"),
     full_payment_status: Yup.string().required("Full payment status is required"),
     instructor_name: Yup.string().required("Instructor name is required"),
-    instructor_mobile: Yup.string().required("Instructor mobile is required")
+    instructor_mobile: Yup.string().required("Instructor mobile is required"),
+     ...(isEdit && {
+    test_date: Yup.date().required("Test date is required")
+  })
   }).test(
     'paid-vs-total',
     'Paid amount cannot be greater than total amount',
@@ -59,6 +73,8 @@ export default function AddStudents({
       return !isNaN(paid) && !isNaN(total) ? paid <= total : true;
     }
   );
+
+  
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -205,7 +221,7 @@ export default function AddStudents({
                         }
                         onBlur={formik.handleBlur}
                         value={formik.values[field]}
-                        readOnly={['balance', 'instructor_mobile'].includes(field)}
+                        readOnly={['balance', 'total_amount', 'instructor_mobile'].includes(field)}
                         maxLength={
                           field === 'mobile_number' ? 10
                             : field === 'aadhar_number' ? 12
@@ -222,6 +238,29 @@ export default function AddStudents({
               ))}
             </div>
           ))}
+          {isEdit && (
+  <div className="row">
+    <div className="col-md-6">
+      <div className="form-group">
+        <label>
+          Test Date <span style={{ color: 'red' }}>*</span>
+        </label>
+        <input
+          type="date"
+          name="test_date"
+          className={`form-control${formik.touched.test_date && formik.errors.test_date ? ' is-invalid' : ''}`}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          value={formik.values.test_date}
+        />
+        {formik.touched.test_date && formik.errors.test_date && (
+          <div className="text-danger">{formik.errors.test_date}</div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
           <Modal.Footer>
             <Button variant="secondary" onClick={() => { formik.resetForm(); hideModal(); }}>Cancel</Button>
             <Button type="submit" variant="primary">{isEdit ? 'Update' : 'Add'}</Button>

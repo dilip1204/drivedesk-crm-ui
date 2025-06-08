@@ -23,8 +23,10 @@ import AddInstructors from "./addInstructors";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProfileModal from "../../components/ProfileModal";
+import { useAuth } from "../../hooks/useAuth";
 
 const Instructors = () => {
+  const { role } = useAuth();
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -163,13 +165,18 @@ const openInstructorProfile = (data) => {
                   </div>
 
                   <div className="col-xl-6 text-right">
-                    <button
+                    {role === "admin" ? (
+         <button
                       type="button"
                       className="mb-1 btn btn-primary"
                       onClick={AddInstructorsModal}
                     >
                       <i className="bi bi-plus-lg"></i> Add Instructors
                     </button>
+      ) : (
+        <p></p>
+      )}
+                   
                   </div>
                 </div>
 
@@ -198,7 +205,9 @@ const openInstructorProfile = (data) => {
                                 gap: "5px",
                               }}
                             >
-                              <button
+                              {role === "admin" ? (
+        <>
+         <button
                                 className="btn btn-sm btn-warning"
                                 title="Edit Instructor"
                                 onClick={() => handleEditInstructor(ins)}
@@ -212,6 +221,11 @@ const openInstructorProfile = (data) => {
                               >
                                 <i className="bi bi-trash"></i>
                               </button>
+        </>
+      ) : (
+        <span></span>
+      )}
+                             
                             </div>
 
                             <div>
@@ -246,7 +260,7 @@ const openInstructorProfile = (data) => {
             <AddInstructors
               showModal={showModal}
               hideModal={handleCloseModal}
-              onInstructorAdded={getInstructorsList}
+              onSaved={getInstructorsList}
               instructorsData={onInstructorsData}
               id={selectedInstructor}
               isEdit={isEdit}

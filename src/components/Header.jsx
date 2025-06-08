@@ -8,7 +8,10 @@ export default function Header() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userInfo = localStorage.getItem("userInfo");
+
+
+    const user = JSON.parse(localStorage.getItem('userRoleInfo'));
+    const userInfo = user.role === "admin" ? localStorage.getItem("userInfo"):localStorage.getItem('userRoleInfo');
     if (userInfo) {
       setUser(JSON.parse(userInfo));
     }
@@ -25,7 +28,7 @@ export default function Header() {
         </button>
 
         <div className="search-form d-none d-lg-inline-block">
-          <div className="input-group">
+          {/* <div className="input-group">
             <button
               type="button"
               name="search"
@@ -43,7 +46,7 @@ export default function Header() {
               autoFocus
               autoComplete="off"
             />
-          </div>
+          </div> */}
           <div id="search-results-container">
             <ul id="search-results"></ul>
           </div>
@@ -51,11 +54,11 @@ export default function Header() {
 
         <div className="navbar-right ">
           <ul className="nav navbar-nav">
-            <li className="dropdown notifications-menu custom-dropdown">
+            {/* <li className="dropdown notifications-menu custom-dropdown">
               <button className="dropdown-toggle notify-toggler custom-dropdown-toggler">
                 <i className="mdi mdi-bell-outline"></i>
               </button>
-            </li>
+            </li> */}
 
             <li className="dropdown user-menu">
               <button

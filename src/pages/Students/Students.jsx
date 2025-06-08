@@ -14,7 +14,10 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import AddStudents from "./addStudents";
-import { getStudentsListInformation, getStudentsFilterListInformation } from "../../store/students/actions";
+import {
+  getStudentsListInformation,
+  getStudentsFilterListInformation,
+} from "../../store/students/actions";
 import { getTariffsListInformation } from "../../store/tariff/actions";
 import { getInstructorsListInformation } from "../../store/instructors/actions";
 import { deleteStudent } from "../../store/deleteStudent/actions";
@@ -41,35 +44,34 @@ const Students = () => {
   const [profileStudentData, setProfileStudentData] = useState(null);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filters, setFilters] = useState({
-    month: '',
-    year: '',
-    status: '',
-    instructor_mobile: '',
-    test_scheduled: ''
+    month: "",
+    year: "",
+    status: "",
+    instructor_mobile: "",
+    test_scheduled: "",
   });
 
   const FilterValidationSchema = Yup.object().shape({
-  month: Yup.number()
-    .typeError("Month must be a number")
-    .min(1, "Min value is 1")
-    .max(12, "Max value is 12")
-    .required("Month is required"),
-  year: Yup.number()
-    .typeError("Year must be a number")
-    .min(2000, "Min value is 2000")
-    .max(2100, "Max value is 2100")
-    .required("Year is required"),
-  status: Yup.string()
-    .oneOf(["pending", "completed"], "Invalid status")
-    .required("Status is required"),
-  instructor_mobile: Yup.string()
-    .matches(/^[6-9]\d{9}$/, "Invalid mobile number")
-    .required("Instructor mobile is required"),
-  test_scheduled: Yup.string()
-    .oneOf(["true", "false"], "Must be Yes or No")
-    .required("Test scheduled is required"),
-});
-
+    month: Yup.number()
+      .typeError("Month must be a number")
+      .min(1, "Min value is 1")
+      .max(12, "Max value is 12")
+      .required("Month is required"),
+    year: Yup.number()
+      .typeError("Year must be a number")
+      .min(2000, "Min value is 2000")
+      .max(2100, "Max value is 2100")
+      .required("Year is required"),
+    status: Yup.string()
+      .oneOf(["pending", "completed"], "Invalid status")
+      .required("Status is required"),
+    instructor_mobile: Yup.string()
+      .matches(/^[6-9]\d{9}$/, "Invalid mobile number")
+      .required("Instructor mobile is required"),
+    test_scheduled: Yup.string()
+      .oneOf(["true", "false"], "Must be Yes or No")
+      .required("Test scheduled is required"),
+  });
 
   const openProfileModal = (student) => {
     setProfileStudentData(student);
@@ -82,7 +84,6 @@ const Students = () => {
   };
 
   const getStudentsList = () => {
-    
     dispatch(
       getStudentsListInformation({}, (res) => {
         const studentList = res?.response || [];
@@ -97,7 +98,6 @@ const Students = () => {
     );
   };
 
-
   const getTariffsList = () => {
     dispatch(
       getTariffsListInformation({}, (res) => {
@@ -111,7 +111,9 @@ const Students = () => {
     dispatch(
       getInstructorsListInformation({}, (res) => {
         const instructorsList = res?.response || [];
-        setInstructorsData(Array.isArray(instructorsList) ? instructorsList : []);
+        setInstructorsData(
+          Array.isArray(instructorsList) ? instructorsList : []
+        );
       })
     );
   };
@@ -123,8 +125,12 @@ const Students = () => {
   }, [dispatch]);
 
   const onStudentData = (res, isEdit) => {
-    toast[res.isError ? 'error' : 'success'](
-      res.isError ? "Failed....!" : isEdit ? "Student updated successfully!" : "Student added successfully!"
+    toast[res.isError ? "error" : "success"](
+      res.isError
+        ? "Failed....!"
+        : isEdit
+        ? "Student updated successfully!"
+        : "Student added successfully!"
     );
   };
 
@@ -161,7 +167,10 @@ const Students = () => {
 
   return (
     <>
-      <div className="header-fixed sidebar-fixed sidebar-dark header-light" id="body">
+      <div
+        className="header-fixed sidebar-fixed sidebar-dark header-light"
+        id="body"
+      >
         <div className="wrapper">
           <Sidebar />
           <div className="page-wrapper">
@@ -173,9 +182,15 @@ const Students = () => {
                     <h1>Students</h1>
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
-                        <li className="breadcrumb-item"><a href="#"><span className="mdi mdi-home"></span></a></li>
+                        <li className="breadcrumb-item">
+                          <a href="#">
+                            <span className="mdi mdi-home"></span>
+                          </a>
+                        </li>
                         <li className="breadcrumb-item">Students</li>
-                        <li className="breadcrumb-item" aria-current="page">StudentList</li>
+                        <li className="breadcrumb-item" aria-current="page">
+                          StudentList
+                        </li>
                       </ol>
                     </nav>
                   </div>
@@ -198,88 +213,135 @@ const Students = () => {
                 </div>
 
                 {filtersVisible && (
-  <div className="card p-3 mb-4">
-    <Formik
-      initialValues={filters}
-      validationSchema={FilterValidationSchema}
-      onSubmit={(values) => {
-        dispatch(
-          getStudentsFilterListInformation(values, (res) => {
-            const { response, isError } = res;
+                  <div className="card p-3 mb-4">
+                    <Formik
+                      initialValues={filters}
+                      validationSchema={FilterValidationSchema}
+                      onSubmit={(values) => {
+                        dispatch(
+                          getStudentsFilterListInformation(values, (res) => {
+                            const { response, isError } = res;
 
-            if (isError && Array.isArray(response)) {
-              response.forEach((err) => {
-                const field = err?.loc?.[1] || "Field";
-                const message = err?.msg || "Invalid input";
-                toast.error(`${field}: ${message}`);
-              });
-              return;
-            }
+                            if (isError && Array.isArray(response)) {
+                              response.forEach((err) => {
+                                const field = err?.loc?.[1] || "Field";
+                                const message = err?.msg || "Invalid input";
+                                toast.error(`${field}: ${message}`);
+                              });
+                              return;
+                            }
 
-            const studentLists = response || [];
-            if (Array.isArray(studentLists) && studentLists.length > 0) {
-              setStudentsData(studentLists);
-              setError(null);
-            } else {
-              setStudentsData([]);
-              setError("No students found.");
-            }
-            setLoading(false);
-          })
-        );
-      }}
-    >
-      {({ handleSubmit }) => (
-        <Form onSubmit={handleSubmit}>
-          <div className="row">
-            <div className="col-md-2">
-              <label>Month</label>
-              <Field type="number" name="month" className="form-control" />
-              <ErrorMessage name="month" component="div" className="text-danger" />
-            </div>
+                            const studentLists = response || [];
+                            if (
+                              Array.isArray(studentLists) &&
+                              studentLists.length > 0
+                            ) {
+                              setStudentsData(studentLists);
+                              setError(null);
+                            } else {
+                              setStudentsData([]);
+                              setError("No students found.");
+                            }
+                            setLoading(false);
+                          })
+                        );
+                      }}
+                    >
+                      {({ handleSubmit }) => (
+                        <Form onSubmit={handleSubmit}>
+                          <div className="row">
+                            <div className="col-md-2">
+                              <label>Month</label>
+                              <Field
+                                type="number"
+                                name="month"
+                                className="form-control"
+                              />
+                              <ErrorMessage
+                                name="month"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
 
-            <div className="col-md-2">
-              <label>Year</label>
-              <Field type="number" name="year" className="form-control" />
-              <ErrorMessage name="year" component="div" className="text-danger" />
-            </div>
+                            <div className="col-md-2">
+                              <label>Year</label>
+                              <Field
+                                type="number"
+                                name="year"
+                                className="form-control"
+                              />
+                              <ErrorMessage
+                                name="year"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
 
-            <div className="col-md-2">
-              <label>Status</label>
-              <Field as="select" name="status" className="form-control">
-                <option value="">All</option>
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-              </Field>
-              <ErrorMessage name="status" component="div" className="text-danger" />
-            </div>
+                            <div className="col-md-2">
+                              <label>Status</label>
+                              <Field
+                                as="select"
+                                name="status"
+                                className="form-control"
+                              >
+                                <option value="">All</option>
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                              </Field>
+                              <ErrorMessage
+                                name="status"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
 
-            <div className="col-md-3">
-              <label>Instructor Mobile</label>
-              <Field type="text" name="instructor_mobile" className="form-control" />
-              <ErrorMessage name="instructor_mobile" component="div" className="text-danger" />
-            </div>
+                            <div className="col-md-3">
+                              <label>Instructor Mobile</label>
+                              <Field
+                                type="text"
+                                name="instructor_mobile"
+                                className="form-control"
+                              />
+                              <ErrorMessage
+                                name="instructor_mobile"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
 
-            <div className="col-md-2">
-              <label>Test Scheduled</label>
-              <Field as="select" name="test_scheduled" className="form-control">
-                <option value="">All</option>
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-              </Field>
-              <ErrorMessage name="test_scheduled" component="div" className="text-danger" />
-            </div>
+                            <div className="col-md-2">
+                              <label>Test Scheduled</label>
+                              <Field
+                                as="select"
+                                name="test_scheduled"
+                                className="form-control"
+                              >
+                                <option value="">All</option>
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                              </Field>
+                              <ErrorMessage
+                                name="test_scheduled"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
 
-            <div className="col-md-1 d-flex align-items-end">
-              <button type="submit" className="btn btn-primary w-100">Apply</button>
-            </div>
-          </div>
-        </Form>
-      )}
-    </Formik>
-  </div>
-)}
-
+                            <div className="col-md-1 d-flex align-items-end">
+                              <button
+                                type="submit"
+                                className="btn btn-primary w-100"
+                              >
+                                Apply
+                              </button>
+                            </div>
+                          </div>
+                        </Form>
+                      )}
+                    </Formik>
+                  </div>
+                )}
 
                 {/* Student List */}
                 <div className="container py-0 p-0">
@@ -290,29 +352,65 @@ const Students = () => {
                   ) : (
                     <div className="row g-4">
                       {studentsData.map((student, index) => (
-                        <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3" key={index}>
+                        <div
+                          className="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3"
+                          key={index}
+                        >
                           <div className="student-card position-relative">
-                            <div style={{ position: "absolute", top: "5px", right: "5px", display: "flex", flexDirection: "column", gap: "5px" }}>
-                              <button className="btn btn-sm btn-warning" title="Edit Student" onClick={() => handleEditStudent(student)}>
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "5px",
+                                right: "5px",
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "5px",
+                              }}
+                            >
+                              <button
+                                className="btn btn-sm btn-warning"
+                                title="Edit Student"
+                                onClick={() => handleEditStudent(student)}
+                              >
                                 <i className="bi bi-pencil"></i>
                               </button>
-                              <button className="btn btn-sm btn-danger" title="Delete Student" onClick={() => deleteUser(student.application_number)}>
+                              <button
+                                className="btn btn-sm btn-danger"
+                                title="Delete Student"
+                                onClick={() =>
+                                  deleteUser(student.application_number)
+                                }
+                              >
                                 <i className="bi bi-trash"></i>
                               </button>
                             </div>
                             <div>
                               <img src={avatar} alt="Avatar" />
                               <h5>{student.name || "Student Name"}</h5>
-                              <p>{student.courseCount || 0} course(s) Enrolled</p>
+                              <p>
+                                {student.courseCount || 0} course(s) Enrolled
+                              </p>
                               <p>{student.mobile_number || "N/A"}</p>
                             </div>
                             <div>
                               <div className="card-buttons">
-                                <Link to="#" onClick={() => openProfileModal(student)} className="btn btn-primary btn-sm">Profile</Link>
-                                <a href="#" className="btn btn-secondary btn-sm">Schedule</a>
+                                <Link
+                                  to="#"
+                                  onClick={() => openProfileModal(student)}
+                                  className="btn btn-primary btn-sm"
+                                >
+                                  View
+                                </Link>
+                                <a
+                                  href="#"
+                                  className="btn btn-secondary btn-sm"
+                                >
+                                  Schedule
+                                </a>
                               </div>
                               <div className="completed-classes">
-                                <i className="bi bi-check-circle"></i> {student.classesCompleted || 0} Class(es) Completed
+                                <i className="bi bi-check-circle"></i>{" "}
+                                {student.plan}
                               </div>
                             </div>
                           </div>
@@ -340,7 +438,11 @@ const Students = () => {
               id={selectedStudentAppId}
               message={"Are you sure want to delete this student?"}
             />
-            <StudentProfileModal show={showProfileModal} onClose={closeProfileModal} student={profileStudentData} />
+            <StudentProfileModal
+              show={showProfileModal}
+              onClose={closeProfileModal}
+              student={profileStudentData}
+            />
             <Footer />
           </div>
         </div>

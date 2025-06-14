@@ -16,5 +16,6 @@ export const ENDPOINTS = {
     editEnquiries: 'enquiries/',
     getAllEnquiries: 'enquiries/fetchAll',
     deleteEnquiries: 'enquiries/',
-    getAllStudentsFilter: 'admin/students/filter'
+    getAllStudentsFilter: 'admin/students/filter',
+    getDashboardSummary: 'dashboard/summary'
 } 

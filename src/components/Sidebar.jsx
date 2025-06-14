@@ -46,6 +46,16 @@ export default function Sidebar() {
               </a>
             </li>
 */}
+             <li className={`has-sub ${isActive("/dashboard") ? "active expand" : ""}`}>
+              <Link
+                className="sidenav-item-link"
+                to="/dashboard"
+                
+              >
+                <i className="mdi mdi-account-multiple"></i>
+                <span className="nav-text">Dasgboard</span>
+              </Link>
+            </li>
             <li className={`has-sub ${isActive("/instructors") ? "active expand" : ""}`}>
               <Link
                 className="sidenav-item-link"

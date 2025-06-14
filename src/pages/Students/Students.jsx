@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Link, useSearchParams } from "react-router-dom";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -43,13 +43,26 @@ const Students = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileStudentData, setProfileStudentData] = useState(null);
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [filters, setFilters] = useState({
-    month: "",
-    year: "",
-    status: "",
-    instructor_mobile: "",
-    test_scheduled: "",
-  });
+
+
+  const [searchParams] = useSearchParams();
+const initialMonth = searchParams.get("month") || "";
+const initialYear = searchParams.get("year") || "";
+
+const [filters, setFilters] = useState({
+  month: initialMonth,
+  year: initialYear,
+  status: "",
+  instructor_mobile: "",
+  test_scheduled: false,
+});
+  // const [filters, setFilters] = useState({
+  //   month: "",
+  //   year: "",
+  //   status: "",
+  //   instructor_mobile: "",
+  //   test_scheduled: "",
+  // });
 
   const FilterValidationSchema = Yup.object().shape({
     month: Yup.number()
@@ -119,9 +132,27 @@ const Students = () => {
   };
 
   useEffect(() => {
-    getStudentsList();
+   // getStudentsList();
     getTariffsList();
     getInstructorsList();
+    if (initialMonth && initialYear) {
+    dispatch(
+      getStudentsFilterListInformation(filters, (res) => {
+        const { response, isError } = res;
+        
+        if (!isError && Array.isArray(response) && response.length > 0) {
+          setStudentsData(response);
+          setError(null);
+        } else { 
+          setStudentsData([]);
+          setError("No students found.");
+        }
+        setLoading(false);
+      })
+    );
+  } else {
+    getStudentsList();
+  }
   }, [dispatch]);
 
   const onStudentData = (res, isEdit) => {

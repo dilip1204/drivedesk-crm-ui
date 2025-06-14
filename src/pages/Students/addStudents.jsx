@@ -33,7 +33,7 @@ export default function AddStudents({
     full_payment_status: id?.full_payment_status || 'Pending',
     instructor_name: id?.instructor_name || '',
     instructor_mobile: id?.instructor_mobile || '',
-    test_date: id?.test_date || ''
+    test_date: id?.test_date || '2025-12-29'
   };
 
   const validationSchema = Yup.object({

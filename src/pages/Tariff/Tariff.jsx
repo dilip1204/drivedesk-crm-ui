@@ -241,7 +241,7 @@ const openTariffProfile = (tariff) => {
             <AddTariffs
             showModal={showModal} 
             hideModal={handleCloseModal}
-            onTariffAdded={getTariffsList}
+            onTariffSaved={getTariffsList}
             tariffData={onTariffData}
             id={selectedTariff} 
             isEdit={isEdit}

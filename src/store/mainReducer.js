@@ -7,6 +7,7 @@ import DeleteStudentReducer from "./deleteStudent/reducer";
 import TariffReducer from "./tariff/reducer";
 import InstructorReducer from "./instructors/reducer";
 import EnquiriesReducer from "./Enquiries/reducer";
+import dashboardSummaryReducer from "./dashboardSummary/reducer";
 
 
 export const mainReducer = combineReducers({
@@ -17,4 +18,5 @@ export const mainReducer = combineReducers({
     tariffUpdate: TariffReducer,
     instructorInfo: InstructorReducer,
     enquiriesInfo: EnquiriesReducer,
+    dashboardSummary: dashboardSummaryReducer
 })

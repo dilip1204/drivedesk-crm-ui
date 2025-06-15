@@ -17,5 +17,7 @@ export const ENDPOINTS = {
     getAllEnquiries: 'enquiries/fetchAll',
     deleteEnquiries: 'enquiries/',
     getAllStudentsFilter: 'admin/students/filter',
-    getDashboardSummary: 'dashboard/summary'
+    getDashboardSummary: 'dashboard/summary',
+    getStudentReceipt: 'student/receipt-preview-by-receiptno/',
+    addStudentPayment: 'students/',
 } 

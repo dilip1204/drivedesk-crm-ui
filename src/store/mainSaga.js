@@ -1,12 +1,13 @@
 import { all } from 'redux-saga/effects';
 import { watchLoginUser } from './login/saga';
-import { watchStudentListInformation, watchStudentFilterListInformation } from './students/saga';
+import { watchStudentListInformation, watchStudentFilterListInformation, watchStudentReceiptInformation } from './students/saga';
 import { watchAddStudent, watchEditStudent } from './addStudent/saga';
 import { watchDeleteStudent } from './deleteStudent/saga';
 import { watchAddTariff, watchEditTariff, watchTariffListInformation, watchDeleteTariff } from './tariff/saga';
 import { watchAddInstructor, watchDeleteInstructor, watchEditInstructor, watchInstructorListInformation } from './instructors/saga';
 import { watchAddEnquiries, watchDeleteEnquiries, watchEnquiriesListInformation, watchUpdateEnquiries } from './Enquiries/saga';
 import { watchDashboardSummary } from './dashboardSummary/saga'
+import { watchAddStudentPayment } from './addStudentPayment/saga';
 
 
 export function* mainSaga() {
@@ -29,6 +30,8 @@ export function* mainSaga() {
         watchUpdateEnquiries(),
         watchDeleteEnquiries(),
         watchStudentFilterListInformation(),
-        watchDashboardSummary()
+        watchDashboardSummary(),
+        watchStudentReceiptInformation(),
+        watchAddStudentPayment()
     ])
 }

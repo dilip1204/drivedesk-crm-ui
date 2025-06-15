@@ -53,7 +53,7 @@ export default function Sidebar() {
                 
               >
                 <i className="mdi mdi-account-multiple"></i>
-                <span className="nav-text">Dasgboard</span>
+                <span className="nav-text">Dashboard</span>
               </Link>
             </li>
             <li className={`has-sub ${isActive("/instructors") ? "active expand" : ""}`}>

@@ -1,10 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Button, Alert } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import { addStudent, updateStudent } from "../../store/addStudent/actions";
 import { IoClose } from "react-icons/io5";
+import {
+  getStudentReceiptInfo,
+} from "../../store/students/actions";
 
 export default function AddStudents({
   showModal,
@@ -17,6 +20,11 @@ export default function AddStudents({
   instructors = []
 }) {
   const dispatch = useDispatch();
+  const [isPrintEnabled, setIsPrintEnabled] = useState(false);
+  const [receiptData, setReceiptData] = useState(null);
+  const [htmlContent, setHtmlContent] = useState("");
+
+
 
   const initialValues = {
     name: id?.name || '',
@@ -106,8 +114,12 @@ export default function AddStudents({
         if (typeof onStudentAdded === 'function') {
           onStudentAdded();
           studentData(response, isEdit);
+          // Save response data to receipt state
+setReceiptData(response?.data || response); // adjust based on response format
+
         }
-        hideModal();
+       // hideModal();
+        setIsPrintEnabled(true);
       }));
     }
   });
@@ -156,6 +168,37 @@ export default function AddStudents({
   for (let i = 0; i < fields.length; i += 2) {
     fieldPairs.push(fields.slice(i, i + 2));
   }
+
+  useEffect(() => {
+  if (showModal) {
+    setIsPrintEnabled(false);
+  }
+}, [showModal]);
+
+
+const handlePrint = () => {
+
+  
+  const studentId = {receipt_no:receiptData?.response?.payments[0].receipt_no}; // or wherever you get student ID from
+
+  if (!studentId) return;
+
+  dispatch(getStudentReceiptInfo(studentId, (response) => {
+    if (response) {
+      setHtmlContent(response); // HTML string from backend
+      setTimeout(() => {
+        const printWindow = window.open("", "_blank");
+        printWindow.document.write(response);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+      }, 100); // allow time for DOM update if needed
+    } else {
+      alert("Failed to fetch receipt info.");
+    }
+  }));
+};
+
 
   return (
     <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered>
@@ -264,9 +307,25 @@ export default function AddStudents({
           <Modal.Footer>
             <Button variant="secondary" onClick={() => { formik.resetForm(); hideModal(); }}>Cancel</Button>
             <Button type="submit" variant="primary">{isEdit ? 'Update' : 'Add'}</Button>
+            <Button
+  variant="outline-primary"
+  onClick={handlePrint}
+  disabled={!isPrintEnabled}
+>
+  Print
+</Button>
           </Modal.Footer>
         </form>
+
+        {htmlContent && (
+  <div style={{ display: 'none' }}>
+    <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+  </div>
+)}
+
       </Modal.Body>
     </Modal>
+
+    
   );
 }

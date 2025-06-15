@@ -27,6 +27,8 @@ import "react-toastify/dist/ReactToastify.css";
 import StudentProfileModal from "./StudentProfile";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import AddPayment from "./addPayment";
+import { addStudentPayment } from "../../store/addStudentPayment/actions";
 
 const Students = () => {
   const dispatch = useDispatch();
@@ -43,11 +45,20 @@ const Students = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileStudentData, setProfileStudentData] = useState(null);
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [getStuentData, setGetStuentData] = useState([]);
+  const [receiptData, setReceiptData] = useState(null);
 
 
   const [searchParams] = useSearchParams();
 const initialMonth = searchParams.get("month") || "";
 const initialYear = searchParams.get("year") || "";
+
+
+const getOneStudentPaymentData = (flag, student) => {
+  setShowPaymentModal(flag)
+  setGetStuentData(student)
+}
 
 const [filters, setFilters] = useState({
   month: initialMonth,
@@ -195,6 +206,49 @@ const [filters, setFilters] = useState({
     setIsEdit(false);
     setSelectedStudent(null);
   };
+
+   const handleAddPayment = (payload) => {
+  console.log("Payment Payload:", payload, getStuentData);
+
+  const initialValues = {
+    appId: getStuentData.application_number,
+    studentPaymentData: {
+      payment_id: getStuentData.payments?.[getStuentData.payments.lenth-1]?.payment_id || '',
+      receipt_no: getStuentData.payments?.[getStuentData.payments.lenth-1]?.receipt_no || '',
+      amount: payload.amount,
+      transaction_id: '',
+      date: payload.date,
+      payment_method: payload.payment_method,
+      payment_status: payload.payment_status,
+      remarks: payload.remarks,
+      payment_received_by: getStuentData.payments?.[getStuentData.payments.lenth-1]?.payment_received_by || ''
+    }
+  };
+
+  dispatch(addStudentPayment(initialValues, (response) => {
+    const errorList = response?.data?.detail || response?.detail || response;
+
+    if (Array.isArray(errorList)) {
+      errorList.forEach((err) => {
+        const field = err?.loc?.[1];
+        const msg = err?.msg || err?.message || 'Invalid input';
+        toast.error(`${field}: ${msg}`);
+      });
+      return;
+    }
+
+    if (response?.isError) {
+      toast.error("Payment failed. Please try again.");
+    } else {
+      console.info('setReceiptData.......', response)
+      setReceiptData(response)
+      toast.success("Payment added successfully!");
+      //setShowPaymentModal(false);
+      getStudentsList(); // refresh student data after payment
+    }
+  }));
+};
+
 
   return (
     <>
@@ -414,6 +468,14 @@ const [filters, setFilters] = useState({
                               >
                                 <i className="bi bi-trash"></i>
                               </button>
+                              <button
+  className="btn btn-sm btn-success"
+  title={Number(student.balance) <= 0 ? "No balance due" : "Add Payment"}
+  onClick={() => getOneStudentPaymentData(true, student)}
+  disabled={Number(student.balance) <= 0}
+>
+  <i className="bi bi-currency-rupee"></i>
+</button>
                             </div>
                             <div>
                               <img src={avatar} alt="Avatar" />
@@ -474,6 +536,15 @@ const [filters, setFilters] = useState({
               onClose={closeProfileModal}
               student={profileStudentData}
             />
+
+            <AddPayment
+  show={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSubmit={handleAddPayment}
+        payReceiptData={receiptData}
+        student={getStuentData}
+/>
+
             <Footer />
           </div>
         </div>

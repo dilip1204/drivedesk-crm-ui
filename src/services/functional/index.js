@@ -16,6 +16,7 @@ import * as editEnquiriesList from './enquiries/editEnquiriesService';
 import * as getAllEnquiriesService from './enquiries/getEnquiriesListService';
 import * as deleteEnquiriesList from './enquiries/deleteEnquiriesService';
 import * as getDashboardSummaryService from './dashboard/getDashboardSummaryService';
+import * as addStudentPaymentList from './students/addPaymentService';
 
 export {
     userLogin,
@@ -35,5 +36,6 @@ export {
     editEnquiriesList,
     getAllEnquiriesService,
     deleteEnquiriesList,
-    getDashboardSummaryService  
+    getDashboardSummaryService,
+    addStudentPaymentList  
 };

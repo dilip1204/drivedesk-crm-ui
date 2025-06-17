@@ -13,7 +13,7 @@ export default function AddPayment({ show, onClose, onSubmit, payReceiptData, st
 
     const dispatch = useDispatch();
       const studentList = useSelector((state) => state.studentsListInfo.studentsList);
-      console.info('studentsList........', studentList)
+      
       const [receiptData, setReceiptData] = useState(payReceiptData);
         const [htmlContent, setHtmlContent] = useState("");
         const [isPrintEnabled, setIsPrintEnabled] = useState(false);
@@ -64,7 +64,9 @@ export default function AddPayment({ show, onClose, onSubmit, payReceiptData, st
 };
 
 
-  const handlePrint = () => { console.info('receiptData......', payReceiptData)
+  const handlePrint = () => {
+    // Close the modal after print window is opened
+      onClose();
   const receiptNo = payReceiptData?.response?.receipt_no;
   if (!receiptNo) {
     alert("Receipt number not found.");
@@ -79,6 +81,8 @@ export default function AddPayment({ show, onClose, onSubmit, payReceiptData, st
       printWindow.document.close();
       printWindow.focus();
       printWindow.print();
+      
+
     } else {
       alert("Failed to fetch receipt info.");
     }

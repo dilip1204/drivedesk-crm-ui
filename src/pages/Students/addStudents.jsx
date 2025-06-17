@@ -178,7 +178,7 @@ setReceiptData(response?.data || response); // adjust based on response format
 
 const handlePrint = () => {
 
-  
+  hideModal();
   const studentId = {receipt_no:receiptData?.response?.payments[0].receipt_no}; // or wherever you get student ID from
 
   if (!studentId) return;

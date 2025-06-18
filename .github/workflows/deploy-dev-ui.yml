@@ -42,6 +42,6 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
             cd ~/drivedesk-crm-ui
-            docker-compose -f docker-compose-dev.yml pull
-            docker-compose -f docker-compose-dev.yml down
-            docker-compose -f docker-compose-dev.yml up -d
+             docker-compose -f docker-compose-dev.template.yml pull
+             docker-compose -f docker-compose-dev.template.yml down
+             docker-compose -f docker-compose-dev.template.yml up -d

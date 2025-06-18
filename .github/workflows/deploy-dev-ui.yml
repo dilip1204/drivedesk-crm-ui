@@ -1,47 +1,51 @@
-name: Deploy React UI to Dev
+name: deploy-ui-dev
 
 on:
   push:
     branches:
       - develop
+    paths:
+      - "drivedesk-crm-ui/**"
+      - ".github/workflows/deploy-dev-ui.yml"
 
 jobs:
-  deploy-ui-dev:
+  deploy-ui:
+    name: SSH and Deploy to Dev VM
     runs-on: ubuntu-latest
+
+    env:
+      UI_IMAGE_TAG: ${{ github.sha }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.4
         with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          ssh-private-key: ${{ secrets.GCP_SSH_KEY }}
 
-      - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker asia-south1-docker.pkg.dev
-
-      - name: Set UI Image Tag
-        run: echo "UI_IMAGE_TAG=asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/drivedesk-crm-ui/drivedesk-dev-ui:${{ github.sha }}" >> $GITHUB_ENV
-
-      - name: Build and Push UI Docker Image
+      - name: SSH into VM and Deploy
         run: |
-          docker build -t $UI_IMAGE_TAG .
-          docker push $UI_IMAGE_TAG
+          echo "🔧 Connecting to VM and starting UI deployment..."
 
-      - name: Generate docker-compose-dev.yml from template
-        run: |
-          cp docker-compose-dev.template.yml docker-compose-dev.yml
-          sed -i "s|{{UI_IMAGE_TAG}}|$UI_IMAGE_TAG|g" docker-compose-dev.yml
-
-      - name: SSH and Deploy to Dev VM
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.GCP_VM_IP }}
-          username: ${{ secrets.GCP_VM_USER }}
-          key: ${{ secrets.GCP_SSH_KEY }}
-          script: |
+          ssh -o StrictHostKeyChecking=no vinoothiniddi@${{ secrets.GCP_VM_IP }} << 'EOF'
+            set -e
+            echo "📁 Switching to project directory"
             cd ~/drivedesk-crm-ui
-             docker-compose -f docker-compose-dev.template.yml pull
-             docker-compose -f docker-compose-dev.template.yml down
-             docker-compose -f docker-compose-dev.template.yml up -d
+
+            echo "🔁 Substituting env vars into docker-compose-dev.yml"
+            export UI_IMAGE_TAG='${{ github.sha }}'
+            envsubst < docker-compose-dev.template.yml > docker-compose-dev.yml
+
+            echo "📦 Pulling latest UI image: crm-ui:$UI_IMAGE_TAG"
+            docker-compose -f docker-compose-dev.yml pull
+
+            echo "🧹 Stopping previous containers"
+            docker-compose -f docker-compose-dev.yml down
+
+            echo "🚀 Starting new containers"
+            docker-compose -f docker-compose-dev.yml up -d
+
+            echo "✅ UI deployed with tag $UI_IMAGE_TAG"
+          EOF

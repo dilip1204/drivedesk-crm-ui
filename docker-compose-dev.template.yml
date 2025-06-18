@@ -1,5 +1,5 @@
   drivedesk-dev-ui:
-    image: asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:${UI_IMAGE_TAG}
+    image: "asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:${UI_IMAGE_TAG}"
     container_name: drivedesk-dev-ui
     restart: unless-stopped
     ports:

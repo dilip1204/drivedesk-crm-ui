@@ -37,6 +37,7 @@ jobs:
             echo "🔁 Substituting env vars into docker-compose-dev.yml"
             export UI_IMAGE_TAG='${{ github.sha }}'
             envsubst < docker-compose-dev.template.yml > docker-compose-dev.yml
+            cat docker-compose-dev.yml | yq eval
 
             echo "📦 Pulling latest UI image: crm-ui:$UI_IMAGE_TAG"
             docker-compose -f docker-compose-dev.yml pull

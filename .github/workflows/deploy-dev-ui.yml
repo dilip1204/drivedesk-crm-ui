@@ -28,7 +28,7 @@ jobs:
       - name: SSH and Deploy to Dev VM
         run: |
           TAG=${{ github.sha }}
-          ssh -o StrictHostKeyChecking=no vinoothiniddi@${{ secrets.DEV_VM_IP }} \
+          ssh -o StrictHostKeyChecking=no vinoothiniddi@${{ secrets.GCP_VM_IP }} \
           "cd ~/drivedesk-crm-ui && \
           echo '💡 Rendering docker-compose-dev.yml with tag $TAG' && \
           UI_IMAGE_TAG=$TAG envsubst < docker-compose-dev.template.yml > docker-compose-dev.yml && \

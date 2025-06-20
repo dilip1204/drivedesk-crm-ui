@@ -30,7 +30,7 @@ jobs:
           TAG=${{ github.sha }}
           echo "🔑 Connecting to VM and deploying UI with tag: $TAG"
 
-          ssh -o StrictHostKeyChecking=no vinoothiniddi@${{ secrets.DEV_VM_IP }} << EOF
+          ssh -o StrictHostKeyChecking=no vinoothiniddi@${{ secrets.GCP_VM_IP }} << EOF
             set -e
 
             # Ensure project directory is ready

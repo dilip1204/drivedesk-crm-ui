@@ -4,8 +4,11 @@
     restart: unless-stopped
     ports:
       - "3000:80"
+    networks:
+      - drivedesk-shared-network
+
       
   networks:
-  default:
-    external:
-      name: drivedesk-shared-network
+    drivedesk-shared-network:
+      external: true
+   

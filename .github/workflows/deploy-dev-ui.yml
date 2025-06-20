@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - develop
-    paths:
-      - "drivedesk-crm-ui/**"
-      - ".github/workflows/deploy-dev-ui.yml"
-
 jobs:
   deploy-ui:
     name: SSH and Deploy to Dev VM

@@ -1,69 +1,62 @@
-name: deploy-ui-dev
+name: Deploy UI to Dev VM
 
 on:
   push:
     branches:
       - develop
+
 jobs:
-  deploy-ui:
-    name: SSH and Deploy to Dev VM
+  deploy:
     runs-on: ubuntu-latest
 
     env:
-      PROJECT_ID: sage-buttress-455713-h4
-      REGION: asia-south1
-      REPO_NAME: drivedesk-crm-ui
-      IMAGE_NAME: drivedesk-dev-ui
-      IMAGE_TAG: ${{ github.sha }}
+      UI_IMAGE_TAG: asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:${{ github.sha }}
 
     steps:
-    - name: Checkout code
+    - name: Checkout UI repo
       uses: actions/checkout@v3
 
-    - name: Authenticate to Google Cloud
+    - name: Authenticate with GCP
       uses: google-github-actions/auth@v1
       with:
         credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
     - name: Configure Docker for Artifact Registry
-      run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+      run: gcloud auth configure-docker asia-south1-docker.pkg.dev
 
-    - name: Build and Push UI Docker image
+    - name: Build and Push UI Docker Image
       run: |
-        docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:$IMAGE_TAG .
-        docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:$IMAGE_TAG
+        docker build -t $UI_IMAGE_TAG .
+        docker push $UI_IMAGE_TAG
 
-    - name: SSH and Deploy to Dev VM
-      run: |
-        TAG=${{ github.sha }}
-        echo "🔐 Connecting to Dev VM and deploying UI with tag: $TAG"
-
-        ssh -o StrictHostKeyChecking=no vinoothiniddi@${{ secrets.GCP_VM_IP }} << EOF
-          set -e
-
-          cd ~
-
-          if [ ! -d "drivedesk-crm-ui/.git" ]; then
-            echo "📁 drivedesk-crm-ui not a Git repo. Cloning..."
-            rm -rf drivedesk-crm-ui
+    - name: SSH into Dev VM and deploy using docker-compose
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.GCP_VM_IP }}
+        username: ${{ secrets.GCP_VM_USER }}
+        key: ${{ secrets.GCP_SSH_KEY }}
+        envs: UI_IMAGE_TAG
+        script: |
+          cd ~/drivedesk-crm-ui || {
+            echo "📁 Repo not found. Cloning..."
             git clone https://github.com/dilip1204/drivedesk-crm-ui.git
-          fi
+            cd drivedesk-crm-ui
+          }
 
-          cd drivedesk-crm-ui
-          git reset --hard
+          echo "🔄 Pulling latest code..."
           git pull origin develop
 
-          echo "🛠 Rendering docker-compose-dev.yml"
-          UI_IMAGE_TAG=$TAG envsubst < docker-compose-dev.template.yml > docker-compose-dev.yml
+          echo "⚙️ Rendering docker-compose-dev.yml"
+          envsubst < docker-compose-dev.template.yml > docker-compose-dev.yml
 
-          echo "📦 Pulling Docker image"
+          echo "📦 Pulling image"
           docker-compose -f docker-compose-dev.yml pull
 
           echo "🧹 Stopping old container"
           docker-compose -f docker-compose-dev.yml down
 
-          echo "🚀 Starting new container"
-          docker-compose -f docker-compose-dev.yml up -d
+          echo "🚀 Starting updated container"
+          docker-compose -f docker-compose-dev.yml up -d --remove-orphans
 
-          echo "✅ UI deployment completed"
-        EOF
+          echo "✅ UI Dev Deployment complete"
+

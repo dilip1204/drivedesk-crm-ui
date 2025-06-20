@@ -13,7 +13,7 @@ jobs:
       PROJECT_ID: sage-buttress-455713-h4
       REGION: asia-south1
       REPO_NAME: drivedesk-crm-ui
-      IMAGE_NAME: crm-ui
+      IMAGE_NAME: drivedesk-dev-ui
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
@@ -23,7 +23,7 @@ jobs:
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
-        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
     - name: Configure Docker for Artifact Registry
       run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
@@ -38,7 +38,7 @@ jobs:
         TAG=${{ github.sha }}
         echo "🔐 Connecting to Dev VM and deploying UI with tag: $TAG"
 
-        ssh -o StrictHostKeyChecking=no vinoothiniddi@${{ secrets.DEV_VM_IP }} << EOF
+        ssh -o StrictHostKeyChecking=no vinoothiniddi@${{ secrets.GCP_VM_IP }} << EOF
           set -e
 
           cd ~

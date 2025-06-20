@@ -27,21 +27,14 @@ jobs:
 
       - name: SSH and Deploy to Dev VM
         run: |
-         TAG=${{ github.sha }}
-         ssh -o StrictHostKeyChecking=no vinoothiniddi@${{ secrets.GCP_VM_IP }} << EOF
-          set -e
-          cd ~/drivedesk-crm-ui
-
-          echo "💡 Generating docker-compose-dev.yml with tag ${TAG}"
-          echo "image: \\\"asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:${TAG}\\\"" > /tmp/.image_line
-          sed "/image:/r /tmp/.image_line" docker-compose-dev.template.yml | sed "/image:/d" > docker-compose-dev.yml
-
-          echo "📦 Pulling image"
-          docker-compose -f docker-compose-dev.yml pull
-
-          echo "🧹 Stopping old container"
-          docker-compose -f docker-compose-dev.yml down
-
-          echo "🚀 Starting new container"
-          docker-compose -f docker-compose-dev.yml up -d
-         EOF
+          TAG=${{ github.sha }}
+          ssh -o StrictHostKeyChecking=no vinoothiniddi@${{ secrets.DEV_VM_IP }} \
+          "cd ~/drivedesk-crm-ui && \
+          echo '📄 Substituting docker-compose-dev.yml with TAG=$TAG' && \
+          UI_IMAGE_TAG=$TAG envsubst < docker-compose-dev.template.yml > docker-compose-dev.yml && \
+          echo '📦 Pulling image' && \
+          docker-compose -f docker-compose-dev.yml pull && \
+          echo '🧹 Stopping old container' && \
+          docker-compose -f docker-compose-dev.yml down && \
+          echo '🚀 Starting new container' && \
+          docker-compose -f docker-compose-dev.yml up -d"

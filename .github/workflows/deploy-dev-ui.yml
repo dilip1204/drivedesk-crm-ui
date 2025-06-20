@@ -36,7 +36,7 @@ jobs:
             # Ensure project directory is ready
             if [ ! -d "~/drivedesk-crm-ui" ]; then
               echo "📁 Cloning UI repo..."
-              git clone https://github.com/YOUR_GITHUB_USERNAME/drivedesk-crm-ui.git ~/drivedesk-crm-ui
+              git clone https://github.com/dilip1204/drivedesk-crm-ui.git ~/drivedesk-crm-ui
             fi
 
             cd ~/drivedesk-crm-ui

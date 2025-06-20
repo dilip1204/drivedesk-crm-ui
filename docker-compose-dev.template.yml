@@ -11,6 +11,5 @@ services:
 
       
   networks:
-    default:
-      external:
-        name: drivedesk-shared-network
+    drivedesk-shared-network:
+      external: true

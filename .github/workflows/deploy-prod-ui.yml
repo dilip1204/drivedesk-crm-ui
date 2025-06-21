@@ -25,10 +25,9 @@ jobs:
 
       - name: Log in to Google Artifact Registry
         run: |
-          echo "${{ secrets.GCP_CREDENTIALS_PROD }}" | base64 --decode > /tmp/key.json
+          echo '${{ secrets.GCP_CREDENTIALS_PROD }}' > /tmp/key.json
           docker login -u _json_key --password-stdin https://asia-south1-docker.pkg.dev < /tmp/key.json
           rm /tmp/key.json
-
 
       - name: Build and Push Docker Image
         env:

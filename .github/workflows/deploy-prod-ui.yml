@@ -21,8 +21,9 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS_PROD }}
 
-      - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker asia-south1-docker.pkg.dev
+      - name: Configure Docker to use gcloud as a credential helper
+        run: |
+          gcloud auth configure-docker asia-south1-docker.pkg.dev
 
       - name: Set UI Image Tag
         run: echo "UI_IMAGE_TAG=asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID_PROD }}/drivedesk-crm-ui/drivedesk-dev-ui:${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV

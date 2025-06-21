@@ -36,20 +36,28 @@ jobs:
 
           docker push asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:prod
 
-      - name: SSH into Prod VM and deploy UI
-        uses: appleboy/ssh-action@master
+      - name: SSH into Prod VM and deploy UI using docker-compose
+        uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.GCP_VM_IP_PROD }}
-          username: ${{ secrets.GCP_VM_USER_PROD }}
-          key: ${{ secrets.GCP_SSH_KEY_PROD }}
+          host: ${{ secrets.GCP_VM_IP }}
+          username: ${{ secrets.GCP_VM_USER }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          envs: UI_IMAGE_TAG
           script: |
-            cd ~/drivedesk-crm-ui
+            cd ~/drivedesk-crm-ui || {
+              echo "Repo not found. Cloning..."
+              git clone https://github.com/your-org/drivedesk-crm-ui.git
+              cd drivedesk-crm-ui
+            }
+            git pull origin release
 
-            # Generate prod docker-compose file from template
-            API_HOST=drivedesk-prod-api:8000 \
-            UI_IMAGE_TAG=asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:prod \
+            echo "Generating docker-compose-prod.yml..."
             envsubst < docker-compose-prod.template.yml > docker-compose-prod.yml
 
+            echo "Restarting UI container..."
             docker-compose -f docker-compose-prod.yml pull
             docker-compose -f docker-compose-prod.yml down
-            docker-compose -f docker-compose-prod.yml up -d
+            docker-compose -f docker-compose-prod.yml up -d --remove-orphans
+
+            echo "✅ UI deployed to production!"
+

@@ -2,11 +2,6 @@ name: Deploy React UI to Prod
 
 on:
   workflow_dispatch:
-    inputs:
-      image_tag:
-        description: 'Tag of the image to deploy (e.g., github_sha)'
-        required: true
-        default: 'latest'
 
 jobs:
   deploy-ui-prod:

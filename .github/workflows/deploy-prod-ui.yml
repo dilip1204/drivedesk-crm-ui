@@ -2,10 +2,10 @@ name: Deploy Prod UI
 
 on:
   workflow_dispatch:
+
   push:
     branches:
       - release
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -14,11 +14,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS_PROD }}
+
+      - name: Configure Docker to use gcloud as a credential helper
+        run: |
+          gcloud auth configure-docker asia-south1-docker.pkg.dev
 
       - name: Log in to Google Artifact Registry
         run: echo "${{ secrets.GCP_CREDENTIALS_PROD }}" | docker login -u _json_key --password-stdin https://asia-south1-docker.pkg.dev
+
 
       - name: Build & Push Prod UI Image
         run: |

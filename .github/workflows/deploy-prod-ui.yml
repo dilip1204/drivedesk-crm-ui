@@ -2,10 +2,10 @@ name: Deploy Prod UI
 
 on:
   workflow_dispatch:
-
   push:
     branches:
       - release
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -24,40 +24,37 @@ jobs:
           gcloud auth configure-docker asia-south1-docker.pkg.dev
 
       - name: Log in to Google Artifact Registry
-        run: echo "${{ secrets.GCP_CREDENTIALS_PROD }}" | docker login -u _json_key --password-stdin https://asia-south1-docker.pkg.dev
-
-
-      - name: Build & Push Prod UI Image
         run: |
-          docker build \
-            --build-arg REACT_APP_BASE_API_URL=/api \
-            -t asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:prod \
-            .
+          echo "${{ secrets.GCP_CREDENTIALS_PROD }}" > key.json
+          cat key.json | docker login -u _json_key --password-stdin https://asia-south1-docker.pkg.dev
+          rm key.json
 
-          docker push asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:prod
+      - name: Build and Push Docker Image
+        env:
+          UI_IMAGE_TAG: asia-south1-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPO_NAME/crm-ui:${{ github.sha }}
+        run: |
+          docker build -t $UI_IMAGE_TAG .
+          docker push $UI_IMAGE_TAG
 
-      - name: SSH into Prod VM and deploy UI using docker-compose
-        uses: appleboy/ssh-action@v1.0.0
+      - name: SSH into Prod VM and Deploy
+        uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.GCP_VM_IP }}
-          username: ${{ secrets.GCP_VM_USER }}
-          key: ${{ secrets.GCP_SSH_KEY }}
+          host: ${{ secrets.GCP_VM_IP_PROD }}
+          username: ${{ secrets.GCP_VM_USER_PROD }}
+          key: ${{ secrets.GCP_SSH_KEY_PROD }}
           envs: UI_IMAGE_TAG
           script: |
             cd ~/drivedesk-crm-ui || {
-              echo "Repo not found. Cloning..."
-              git clone https://github.com/your-org/drivedesk-crm-ui.git
+              echo "❌ UI repo not found. Cloning..."
+              git clone https://github.com/dilip1204/drivedesk-crm-ui.git
               cd drivedesk-crm-ui
             }
             git pull origin release
-
-            echo "Generating docker-compose-prod.yml..."
+            echo "⚙️ Generating docker-compose-prod.yml..."
+            export UI_IMAGE_TAG=$UI_IMAGE_TAG
             envsubst < docker-compose-prod.template.yml > docker-compose-prod.yml
-
-            echo "Restarting UI container..."
+            echo "♻️ Restarting containers..."
             docker-compose -f docker-compose-prod.yml pull
             docker-compose -f docker-compose-prod.yml down
             docker-compose -f docker-compose-prod.yml up -d --remove-orphans
-
-            echo "✅ UI deployed to production!"
-
+            echo "✅ Prod UI Deployment complete!"

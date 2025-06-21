@@ -22,9 +22,10 @@ jobs:
       - name: Configure Docker to use gcloud as a credential helper
         run: |
           gcloud auth configure-docker asia-south1-docker.pkg.dev
-          
+
       - name: Log in to Google Artifact Registry
         run: echo "${{ secrets.GCP_CREDENTIALS_PROD }}" | docker login -u _json_key --password-stdin https://asia-south1-docker.pkg.dev
+
 
       - name: Build & Push Prod UI Image
         run: |

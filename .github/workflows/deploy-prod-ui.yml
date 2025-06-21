@@ -1,45 +1,48 @@
-name: Deploy React UI to Prod
+name: Deploy Prod UI
 
 on:
   workflow_dispatch:
-    inputs:
-      image_tag:
-        description: 'Tag of the image to deploy (e.g., github_sha)'
-        required: true
-        default: 'latest'
+  push:
+    branches:
+      - release
 
 jobs:
-  deploy-ui-prod:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS_PROD }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker asia-south1-docker.pkg.dev
+      - name: Log in to Google Artifact Registry
+        run: echo "${{ secrets.GCP_CREDENTIALS_PROD }}" | docker login -u _json_key --password-stdin https://asia-south1-docker.pkg.dev
 
-      - name: Set UI Image Tag
-        run: echo "UI_IMAGE_TAG=asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID_PROD }}/drivedesk-crm-ui/drivedesk-dev-ui:${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
-
-      - name: Generate docker-compose-prod.yml from template
+      - name: Build & Push Prod UI Image
         run: |
-          cp docker-compose-prod.template.yml docker-compose-prod.yml
-          sed -i "s|{{UI_IMAGE_TAG}}|$UI_IMAGE_TAG|g" docker-compose-prod.yml
+          docker build \
+            --build-arg REACT_APP_BASE_API_URL=/api \
+            -t asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:prod \
+            .
 
-      - name: SSH and Deploy to Prod VM
-        uses: appleboy/ssh-action@v1.0.0
+          docker push asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:prod
+
+      - name: SSH into Prod VM and deploy UI
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.GCP_VM_IP_PROD }}
           username: ${{ secrets.GCP_VM_USER_PROD }}
           key: ${{ secrets.GCP_SSH_KEY_PROD }}
           script: |
             cd ~/drivedesk-crm-ui
-            docker-compose -f docker-compose-prod.template.yml pull
-            docker-compose -f docker-compose-prod.template.yml down
-            docker-compose -f docker-compose-prod.template.yml up -d
+
+            # Generate prod docker-compose file from template
+            API_HOST=drivedesk-prod-api:8000 \
+            UI_IMAGE_TAG=asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:prod \
+            envsubst < docker-compose-prod.template.yml > docker-compose-prod.yml
+
+            docker-compose -f docker-compose-prod.yml pull
+            docker-compose -f docker-compose-prod.yml down
+            docker-compose -f docker-compose-prod.yml up -d

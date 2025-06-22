@@ -1,4 +1,4 @@
-import { takeLatest, put, call, takeEvery } from 'redux-saga/effects';
+import { put, call, takeEvery } from 'redux-saga/effects';
 import {
     ADD_TARIFF_DATA,
     ADD_TARIFF_DATA_ERROR,

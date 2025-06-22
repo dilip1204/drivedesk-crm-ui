@@ -1,4 +1,4 @@
-import { takeLatest, put, call, takeEvery } from 'redux-saga/effects';
+import { put, call, takeEvery } from 'redux-saga/effects';
 import {
     DELETE_STUDENT_DATA,
     DELETE_STUDENT_DATA_ERROR,

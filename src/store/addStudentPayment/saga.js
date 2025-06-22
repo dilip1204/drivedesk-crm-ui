@@ -1,4 +1,4 @@
-import { takeLatest, put, call, takeEvery } from 'redux-saga/effects';
+import { put, call, takeEvery } from 'redux-saga/effects';
 import {
     ADD_STUDENT_PAYMENT_DATA,
     ADD_STUDENT_PAYMENT_DATA_ERROR,

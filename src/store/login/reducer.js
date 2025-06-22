@@ -1,6 +1,5 @@
-import { userLogin } from './actions';
 import {
-    LOGIN_USER_DATA,
+   // LOGIN_USER_DATA,
     LOGIN_USER_DATA_ERROR,
     LOGIN_USER_DATA_PENDING,
     LOGIN_USER_DATA_SUCCESS

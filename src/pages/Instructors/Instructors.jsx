@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -38,6 +38,7 @@ const Instructors = () => {
   const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
 const [profileData, setProfileData] = useState([]);
+const instructorList = useSelector((state) => state.instructorInfo.instructorsList);
 
 const openInstructorProfile = (data) => {
   const fields = [
@@ -71,6 +72,17 @@ const openInstructorProfile = (data) => {
       })
     );
   };
+
+  useEffect(() => {
+    if (instructorList?.response?.length > 0) {
+      setInstructorsData(instructorList.response);
+      setError(null);
+    } else {
+      setInstructorsData([]);
+      setError("No Instructors found.");
+    }
+    setLoading(false);
+  }, [instructorList]);
 
   useEffect(() => {
     getInstructorsList();
@@ -123,6 +135,7 @@ const openInstructorProfile = (data) => {
 
   const onInstructorsData = (res, isEdit) => {
     if (!res.isError) {
+      getInstructorsList();
       toast.success(
         isEdit
           ? "Instructor updated successfully!"

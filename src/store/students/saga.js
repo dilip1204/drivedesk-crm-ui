@@ -1,4 +1,4 @@
-import { takeLatest, put, call, takeEvery } from 'redux-saga/effects';
+import { put, call, takeEvery } from 'redux-saga/effects';
 import {
     GET_STUDENTS_LIST,
     GET_STUDENTS_LIST_ERROR,

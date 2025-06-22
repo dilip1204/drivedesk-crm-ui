@@ -305,15 +305,30 @@ const handlePrint = () => {
 )}
 
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => { formik.resetForm(); hideModal(); }}>Cancel</Button>
+
+
+
+ {!isPrintEnabled ? (
+    <>
+      <Button variant="secondary" onClick={() => { formik.resetForm(); hideModal(); }}>Cancel</Button>
             <Button type="submit" variant="primary">{isEdit ? 'Update' : 'Add'}</Button>
-            <Button
-  variant="outline-primary"
-  onClick={handlePrint}
-  disabled={!isPrintEnabled}
->
-  Print
-</Button>
+    </>
+  ) : (
+    <>
+      <Button
+    variant="outline-primary"
+    onClick={handlePrint}
+    disabled={!isPrintEnabled}
+  >
+    Print
+  </Button>
+      <Button variant="secondary" onClick={() => { formik.resetForm(); hideModal(); }}>Close</Button>
+    </>
+  )}
+
+
+
+
           </Modal.Footer>
         </form>
 

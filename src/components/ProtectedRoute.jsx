@@ -10,10 +10,13 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   }
 
   if (!allowedRoles.includes(user.role)) {
-    //return <Navigate to="/dashboard" replace />;
+    
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
 };
 
 export default ProtectedRoute;
+
+

@@ -1,4 +1,4 @@
-import { takeLatest, put, call, takeEvery } from 'redux-saga/effects';
+import { put, call, takeEvery } from 'redux-saga/effects';
 import {
     LOGIN_USER_DATA,
     LOGIN_USER_DATA_ERROR,

@@ -25,10 +25,9 @@ jobs:
 
       - name: Log in to Google Artifact Registry
         run: |
-          echo "${{ secrets.GCP_CREDENTIALS_PROD }}" | base64 --decode > /tmp/key.json
+          echo '${{ secrets.GCP_CREDENTIALS_PROD }}' > /tmp/key.json
           docker login -u _json_key --password-stdin https://asia-south1-docker.pkg.dev < /tmp/key.json
           rm /tmp/key.json
-
 
       - name: Build and Push Docker Image
         env:
@@ -43,7 +42,6 @@ jobs:
           host: ${{ secrets.GCP_VM_IP_PROD }}
           username: ${{ secrets.GCP_VM_USER_PROD }}
           key: ${{ secrets.GCP_SSH_KEY_PROD }}
-          envs: UI_IMAGE_TAG
           script: |
             cd ~/drivedesk-crm-ui || {
               echo "❌ UI repo not found. Cloning..."
@@ -51,11 +49,17 @@ jobs:
               cd drivedesk-crm-ui
             }
             git pull origin release
+
             echo "⚙️ Generating docker-compose-prod.yml..."
-            export UI_IMAGE_TAG=$UI_IMAGE_TAG
+
+            export UI_IMAGE_TAG="asia-south1-docker.pkg.dev/sage-buttress-455713-h4/drivedesk-crm-ui/crm-ui:${{ github.sha }}"
+            export API_HOST="drivedesk-crm-backend:8000"
+
             envsubst < docker-compose-prod.template.yml > docker-compose-prod.yml
+
             echo "♻️ Restarting containers..."
             docker-compose -f docker-compose-prod.yml pull
             docker-compose -f docker-compose-prod.yml down
             docker-compose -f docker-compose-prod.yml up -d --remove-orphans
+
             echo "✅ Prod UI Deployment complete!"

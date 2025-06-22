@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useSearchParams } from "react-router-dom";
 
 import "../../assets/plugins/simplebar/simplebar.css";
@@ -48,6 +48,7 @@ const Students = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [getStuentData, setGetStuentData] = useState([]);
   const [receiptData, setReceiptData] = useState(null);
+  const studentDataLists = useSelector((state) => state.studentsListInfo.studentsList);
 
 
   const [searchParams] = useSearchParams();
@@ -121,6 +122,19 @@ const [filters, setFilters] = useState({
       })
     );
   };
+
+
+   useEffect(() => {
+   
+      if (studentDataLists?.response?.length > 0) {
+        setStudentsData(studentDataLists.response);
+        setError(null);
+      } else {
+        setStudentsData([]);
+        setError("No students found.");
+      }
+      setLoading(false);
+    }, [studentDataLists]);
 
   const getTariffsList = () => {
     dispatch(

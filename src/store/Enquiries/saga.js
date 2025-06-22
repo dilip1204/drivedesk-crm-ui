@@ -1,4 +1,4 @@
-import { takeLatest, put, call, takeEvery } from 'redux-saga/effects';
+import { put, call, takeEvery } from 'redux-saga/effects';
 import {
   ADD_ENQUIRIES_DATA,
   ADD_ENQUIRIES_DATA_ERROR,

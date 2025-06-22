@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -44,6 +44,10 @@ const Tariff = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
 const [profileData, setProfileData] = useState([]);
 
+
+
+const tariffList = useSelector((state) => state.tariffUpdate.tariffsList);
+
 const openTariffProfile = (tariff) => {
   const fields = [
     { label: "Plan Name", value: tariff.plan_name },
@@ -65,7 +69,7 @@ const openTariffProfile = (tariff) => {
     const data = {};
     dispatch(getTariffsListInformation(data, (res) => {
       const tariffsList = res?.response || [];
-  if (Array.isArray(tariffsList) && tariffsList.length > 0) {
+  if (tariffsList.length > 0) { 
     setTariffsData(tariffsList);
   } else {
     setTariffsData([]);
@@ -74,10 +78,23 @@ const openTariffProfile = (tariff) => {
       setLoading(false);
     }));
   }
+  
+  
+  useEffect(() => {
+  if (tariffList?.response?.length > 0) {
+    setTariffsData(tariffList.response);
+    setError(null);
+  } else {
+    setTariffsData([]);
+    setError("No Tariffs found.");
+  }
+  setLoading(false);
+}, [tariffList]);
+
 
   useEffect(() => {
     getTariffsList();
-  }, [dispatch]);
+  }, []);
   
   const handleDeleteCloseModel = () => {
     setShowDeleteModal(false);
@@ -182,7 +199,7 @@ const openTariffProfile = (tariff) => {
     <p className="text-center text-danger my-5">{error}</p>
   ) : (
     <div className="row g-4">
-      {tariffsData.map((tariff, index) => (
+      {tariffsData?.map((tariff, index) => (
         <div className="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3" key={index}>
           <div className="student-card position-relative">
             {/* Top Right Actions */}

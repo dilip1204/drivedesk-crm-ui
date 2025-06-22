@@ -1,4 +1,4 @@
-import { takeLatest, put, call, takeEvery } from 'redux-saga/effects';
+import { put, call, takeEvery } from 'redux-saga/effects';
 import {
     ADD_INSTRUCTOR_DATA,
     ADD_INSTRUCTOR_DATA_ERROR,

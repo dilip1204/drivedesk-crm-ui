@@ -1,4 +1,4 @@
-import { takeLatest, put, call, takeEvery } from 'redux-saga/effects';
+import { put, call, takeEvery } from 'redux-saga/effects';
 import {
     ADD_STUDENT_DATA,
     ADD_STUDENT_DATA_ERROR,
@@ -26,7 +26,7 @@ function* addStudentData(action){
         if (typeof action.fn === "function") {
             action.fn(response.data)
         }
-    } catch (error) { console.info('error...........', error)
+    } catch (error) { //console.info('error...........', error)
         yield put({ type: ADD_STUDENT_DATA_ERROR, error: error});
         if (typeof action.fn === "function") {
             action.fn(error.response)

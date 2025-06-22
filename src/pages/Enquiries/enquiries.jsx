@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -35,6 +35,7 @@ const Enquiries = () => {
   const [selectedEnquiries, setSelectedEnquiries] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
 const [profileData, setProfileData] = useState([]);
+const enquiriesDataList = useSelector((state) => state.enquiriesInfo.enquiriesList);
 
 const openEnquriesProfile = (data) => {
   const fields = [
@@ -69,6 +70,17 @@ const openEnquriesProfile = (data) => {
       })
     );
   };
+
+  useEffect(() => {
+    if (enquiriesDataList?.response?.length > 0) {
+      setEnquiriesData(enquiriesDataList.response);
+      setError(null);
+    } else {
+      setEnquiriesData([]);
+      setError("No enquiries found.");
+    }
+    setLoading(false);
+  }, [enquiriesDataList]);
 
   useEffect(() => {
     getEnquiriesList();

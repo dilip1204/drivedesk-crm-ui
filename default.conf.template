@@ -21,9 +21,19 @@ server {
 
     location /docs/ {
         proxy_pass http://$API_HOST/docs/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
     }
 
     location /redoc/ {
         proxy_pass http://$API_HOST/redoc/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /openapi.json {
+        proxy_pass http://$API_HOST/openapi.json;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
     }
 }

@@ -11,4 +11,5 @@ FROM nginx:1.25-alpine
 ENV API_HOST=drivedesk-dev-api:8000
 COPY --from=build /app/build /usr/share/nginx/html
 COPY default.conf.template /etc/nginx/templates/default.conf.template
-CMD sh -c "envsubst '\$API_HOST' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
+CMD ["/bin/sh", "-c", "envsubst < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
+

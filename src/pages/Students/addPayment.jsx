@@ -17,7 +17,7 @@ export default function AddPayment({
   // const studentList = useSelector((state) => state.studentsListInfo.studentsList);
 
   //const [receiptData, setReceiptData] = useState(payReceiptData);
-  const [setHtmlContent] = useState("");
+  //const [htmlContent, setHtmlContent] = useState("");
   const [isPrintEnabled, setIsPrintEnabled] = useState(false);
   const initialValues = {
     amount: "",
@@ -70,18 +70,21 @@ export default function AddPayment({
   };
 
   const handlePrint = () => {
+    setIsPrintEnabled(false)
     // Close the modal after print window is opened
     onClose();
     const receiptNo = payReceiptData?.response?.receipt_no;
     if (!receiptNo) {
-      alert("Receipt number not found.");
-      return;
+       setTimeout(() => {
+          toast.error("Receipt number not found.");
+        }, 100); // delay to allow modal to remain mounted
+     
     }
 
     dispatch(
       getStudentReceiptInfo({ receipt_no: receiptNo }, (response) => {
         if (response) {
-          setHtmlContent(response);
+          //setHtmlContent(response);
           const printWindow = window.open("", "_blank");
           printWindow.document.write(response);
           printWindow.document.close();

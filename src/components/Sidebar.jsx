@@ -29,16 +29,7 @@ export default function Sidebar() {
               </Link>
             </li>
 
-            {role === "admin" && (
-              <>
-                <li className={`has-sub ${isActive("/enquiries") ? "active expand" : ""}`}>
-                  <Link className="sidenav-item-link" to="/enquiries">
-                    <i className="mdi mdi-account-question"></i>
-                    <span className="nav-text">Enquiries</span>
-                  </Link>
-                </li>
-              </>
-            )}
+           
 
             {/* Shared routes */}
             <li className={`has-sub ${isActive("/students") ? "active expand" : ""}`}>
@@ -54,6 +45,13 @@ export default function Sidebar() {
                 <span className="nav-text">Instructors</span>
               </Link>
             </li>
+
+             <li className={`has-sub ${isActive("/enquiries") ? "active expand" : ""}`}>
+                  <Link className="sidenav-item-link" to="/enquiries">
+                    <i className="mdi mdi-account-question"></i>
+                    <span className="nav-text">Enquiries</span>
+                  </Link>
+                </li>
 
             {role === "admin" && (
               <li className={`has-sub ${isActive("/tariff") ? "active expand" : ""}`}>

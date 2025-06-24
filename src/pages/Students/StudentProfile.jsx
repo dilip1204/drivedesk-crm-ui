@@ -11,10 +11,13 @@ export default function StudentProfileModal({ show, onClose, student }) {
   const paymentTableRef = useRef();
   const dispatch = useDispatch();
 
-  const handlePrintReceipt = (receiptNo) => {
-  if (!receiptNo) {
+  const handlePrintReceipt = (receiptNo) => { 
+  if (!receiptNo) { 
+     setTimeout(() => {
     toast.error("Receipt number not found.");
-    return;
+  }, 100); // delay to allow modal to remain mounted
+  return;
+    
   }
 
   dispatch(getStudentReceiptInfo({ receipt_no: receiptNo }, (response) => {

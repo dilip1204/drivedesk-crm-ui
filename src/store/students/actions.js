@@ -20,7 +20,7 @@ export function getStudentsFilterListInformation(param, fn) {
     }
 }
 
-export function getStudentReceiptInfo(param, fn) { 
+export function getStudentReceiptInfo(param, fn) { console.info('Hi..........', param)
     return {
         type: GET_STUDENTS_RECEIPT,
         param,

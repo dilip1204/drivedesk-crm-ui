@@ -20,7 +20,7 @@ export default function AddTariffs({
     plan_name: id?.plan_name || "",
     amount: id?.amount,
     training_days: id?.training_days,
-    reference_fee: id?.reference_fee,
+    reference_fee: id?.reference_fee ?? 0,
     description: id?.description || "",
     remarks: id?.remarks || "",
     category: id?.category || "",

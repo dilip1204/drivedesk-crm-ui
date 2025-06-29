@@ -42,7 +42,7 @@ export default function AddStudents({
     instructor_name: id?.instructor_name || '',
     instructor_mobile: id?.instructor_mobile || '',
     test_date: id?.test_date || null,
-    discount: id?.discount || '',
+    discount: id?.discount || 0,
   };
 
   const validationSchema = Yup.object({
@@ -131,7 +131,8 @@ export default function AddStudents({
           onStudentAdded();
           studentData(response, isEdit);
           // Save response data to receipt state
-setReceiptData(response?.data || response); // adjust based on response format
+setReceiptData(response?.response || response); // Use the actual structure from console
+ // adjust based on response format
 
         }
        // hideModal();
@@ -197,27 +198,36 @@ setReceiptData(response?.data || response); // adjust based on response format
 
 
 const handlePrint = () => {
-
   hideModal();
-  const studentId = {receipt_no:receiptData?.response?.payments[0].receipt_no}; // or wherever you get student ID from
 
-  if (!studentId) return;
+  const receipt_no = receiptData?.payments?.[0]?.receipt_no ||
+                     receiptData?.response?.payments?.[0]?.receipt_no;
 
-  dispatch(getStudentReceiptInfo(studentId, (response) => {
+                     console.info('receiptData.......', receiptData)
+
+  if (!receipt_no) {
+    alert("Receipt number not available to print.");
+    return;
+  }
+
+  dispatch(getStudentReceiptInfo({ receipt_no }, (response) => {
     if (response) {
-      setHtmlContent(response); // HTML string from backend
+      setHtmlContent(response);
       setTimeout(() => {
         const printWindow = window.open("", "_blank");
         printWindow.document.write(response);
         printWindow.document.close();
         printWindow.focus();
         printWindow.print();
-      }, 100); // allow time for DOM update if needed
+      }, 100);
     } else {
       alert("Failed to fetch receipt info.");
     }
   }));
 };
+
+
+
 
 
   return (

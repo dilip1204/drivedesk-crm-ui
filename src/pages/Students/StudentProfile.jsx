@@ -111,6 +111,7 @@ export default function StudentProfileModal({ show, onClose, student }) {
             <ProfileItem label="Aadhar Number" value={student.aadhar_number} />
             <ProfileItem label="Plan" value={student.plan} />
             <ProfileItem label="Initial Payment Method" value={student.initial_payment_method} />
+            <ProfileItem label="Test Date" value={student.test_date} />
            
           </div>
 
@@ -122,7 +123,7 @@ export default function StudentProfileModal({ show, onClose, student }) {
             <ProfileItem label="Full Payment Status" value={student.full_payment_status} />
             <ProfileItem label="Instructor Name" value={student.instructor_name} />
             <ProfileItem label="Instructor Mobile" value={student.instructor_mobile} />
-            <ProfileItem label="Courses Enrolled" value={student.courseCount} />
+            <ProfileItem label="Courses Enrolled" value={student.plan} />
             <ProfileItem label="Classes Completed" value={student.classesCompleted} />
           </div>
         </div>

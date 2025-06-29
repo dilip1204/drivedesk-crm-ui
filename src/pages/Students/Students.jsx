@@ -177,6 +177,7 @@ const Students = () => {
   }, [dispatch]);
 
   const onStudentData = (res, isEdit) => {
+    setSelectedStudent(res.response)
     toast[res.isError ? "error" : "success"](
       res.isError
         ? "Failed....!"
@@ -389,10 +390,18 @@ const Students = () => {
                                 className="form-control"
                               >
                                 <option value="All">All</option>
-                                <option value="Process Started">Process Started</option>
-                                <option value="Process failed">Process failed</option>
-                                <option value="Process stalled">Process stalled</option>
-                                <option value="Process completed">Process completed</option>
+                                <option value="Process Started">
+                                  Process Started
+                                </option>
+                                <option value="Process failed">
+                                  Process failed
+                                </option>
+                                <option value="Process stalled">
+                                  Process stalled
+                                </option>
+                                <option value="Process completed">
+                                  Process completed
+                                </option>
                               </Field>
                               <ErrorMessage
                                 name="status"
@@ -404,10 +413,18 @@ const Students = () => {
                             <div className="col-md-3">
                               <label>Instructor Name</label>
                               <Field
-                                type="text"
+                                as="select"
                                 name="instructor_name"
                                 className="form-control"
-                              />
+                              >
+                                <option value="">--Select--</option>
+                                {instructorsData.map((instructor, idx) => (
+                                  <option key={idx} value={instructor.name}>
+                                    {instructor.name}
+                                  </option>
+                                ))}
+                              </Field>
+
                               <ErrorMessage
                                 name="instructor_name"
                                 component="div"
@@ -416,19 +433,18 @@ const Students = () => {
                             </div>
 
                             <div className="col-md-2">
-  <label>Test Date</label>
-  <Field
-    type="date"
-    name="test_date"
-    className="form-control"
-  />
-  <ErrorMessage
-    name="test_date"
-    component="div"
-    className="text-danger"
-  />
-</div>
-
+                              <label>Test Date</label>
+                              <Field
+                                type="date"
+                                name="test_date"
+                                className="form-control"
+                              />
+                              <ErrorMessage
+                                name="test_date"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
 
                             <div className="col-md-1 d-flex align-items-end">
                               <button

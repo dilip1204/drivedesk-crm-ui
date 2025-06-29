@@ -105,40 +105,60 @@ export default function AddStudents({
     initialValues,
     validationSchema,
     onSubmit: (values) => {
-      const payload = {
-        studentData: {
-          ...values,
-          status: "Process Started"
-        }
-      };
-      const action = isEdit ? updateStudent : addStudent;
-      dispatch(action(payload, (response) => {
-        const errorList = response?.data?.detail || response?.detail || response;
+  let updatedValues = {};
 
-        if (Array.isArray(errorList)) {
-          errorList.forEach((err) => {
-            const field = err?.loc?.[1];
-            const msg = err?.msg || err?.message || 'Invalid input';
-            if (field && formik.values.hasOwnProperty(field)) {
-              formik.setFieldError(field, msg);
-            }
-          });
-          return;
-        }
+  if (isEdit) {
+    Object.keys(values).forEach((key) => {
+      if (values[key] !== id[key]) {
+        updatedValues[key] = values[key];
+      }
+    });
 
-        formik.resetForm();
-        if (typeof onStudentAdded === 'function') {
-          onStudentAdded();
-          studentData(response, isEdit);
-          // Save response data to receipt state
-setReceiptData(response?.response || response); // Use the actual structure from console
- // adjust based on response format
+    updatedValues.status = "Process Started";
 
+    const payload = {
+      application_number: id?.application_number,
+      studentData: updatedValues,
+    };
+
+    dispatch(updateStudent(payload, (response) => {
+      handleResponse(response);
+    }));
+  } else {
+    updatedValues = {
+      ...values,
+      status: "Process Started",
+    };
+
+    dispatch(addStudent({ studentData: updatedValues }, (response) => {
+      handleResponse(response);
+    }));
+  }
+
+  function handleResponse(response) {
+    const errorList = response?.data?.detail || response?.detail || response;
+
+    if (Array.isArray(errorList)) {
+      errorList.forEach((err) => {
+        const field = err?.loc?.[1];
+        const msg = err?.msg || err?.message || 'Invalid input';
+        if (field && formik.values.hasOwnProperty(field)) {
+          formik.setFieldError(field, msg);
         }
-       // hideModal();
-        setIsPrintEnabled(true);
-      }));
+      });
+      return;
     }
+
+    formik.resetForm();
+    if (typeof onStudentAdded === 'function') {
+      onStudentAdded();
+      studentData(response, isEdit);
+      setReceiptData(response?.response || response);
+    }
+    setIsPrintEnabled(true);
+  }
+}
+
   });
 
   useEffect(() => {
@@ -203,7 +223,7 @@ const handlePrint = () => {
   const receipt_no = receiptData?.payments?.[0]?.receipt_no ||
                      receiptData?.response?.payments?.[0]?.receipt_no;
 
-                     console.info('receiptData.......', receiptData)
+                     //console.info('receiptData.......', receiptData)
 
   if (!receipt_no) {
     alert("Receipt number not available to print.");

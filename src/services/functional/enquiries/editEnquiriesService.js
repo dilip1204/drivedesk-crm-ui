@@ -4,8 +4,8 @@ import { ENDPOINTS } from "../../../shared/constants/endPoints";
 
 export const editEnquiriesList = (param) => { 
     return request(
-        METHOD_TYPES.PUT,
-        ENDPOINTS.editEnquiries+param.id+'/status',
+        METHOD_TYPES.PATCH,
+        ENDPOINTS.editEnquiries+'/'+param.id,
         param
     )
 } 

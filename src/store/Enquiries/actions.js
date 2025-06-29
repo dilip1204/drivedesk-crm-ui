@@ -2,7 +2,8 @@ import {
     ADD_ENQUIRIES_DATA,
     UPDATE_ENQUIRIES_DATA,
     GET_ENQUIRIES_LIST,
-    DELETE_ENQUIRIES_DATA
+    DELETE_ENQUIRIES_DATA,
+    GET_ENQUIRIES_FILTER_LIST
 } from "./types";
 
 export function addEnquiries(param, fn) {
@@ -35,4 +36,12 @@ export function deleteEnquiries(param, fn) {
         param,
         fn,
     };
+}
+
+export function getEnquiriesFilterListInformation(param, fn) { 
+    return {
+        type: GET_ENQUIRIES_FILTER_LIST,
+        param,
+        fn,
+    }
 }

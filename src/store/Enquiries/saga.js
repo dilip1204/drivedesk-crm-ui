@@ -15,7 +15,11 @@ import {
   DELETE_ENQUIRIES_DATA,
   DELETE_ENQUIRIES_DATA_ERROR,
   DELETE_ENQUIRIES_DATA_PENDING,
-  DELETE_ENQUIRIES_DATA_SUCCESS
+  DELETE_ENQUIRIES_DATA_SUCCESS,
+  GET_ENQUIRIES_FILTER_LIST,
+  GET_ENQUIRIES_FILTER_LIST_ERROR,
+  GET_ENQUIRIES_FILTER_LIST_PENDING,
+  GET_ENQUIRIES_FILTER_LIST_SUCCESS,
 } from './types';
 
 import {
@@ -98,6 +102,28 @@ function* deleteEnquiriesData(action) {
   }
 }
 
+function* getAllEnquiriesFilterInformation(action){ 
+    try {
+        yield put({ type: GET_ENQUIRIES_FILTER_LIST_PENDING });
+        const response = yield call(
+            getAllEnquiriesService.getAllEnquiriesFilter,
+            action.param,
+        );
+        yield put({ 
+            type: GET_ENQUIRIES_FILTER_LIST_SUCCESS,
+            data: response.data
+        });
+        if (typeof action.fn === "function") {
+            action.fn(response.data)
+        }
+    } catch (error) { 
+        yield put({ type: GET_ENQUIRIES_FILTER_LIST_ERROR, error: error});
+        if (typeof action.fn === "function") {
+            action.fn(error)
+        }
+    }
+}
+
 export function* watchAddEnquiries() {
   yield takeEvery(ADD_ENQUIRIES_DATA, addEnquiriesData);
 }
@@ -113,3 +139,8 @@ export function* watchEnquiriesListInformation() {
 export function* watchDeleteEnquiries() {
   yield takeEvery(DELETE_ENQUIRIES_DATA, deleteEnquiriesData);
 }
+
+export function* watchEnquiriesFilterListInformation() {
+    yield takeEvery(GET_ENQUIRIES_FILTER_LIST, getAllEnquiriesFilterInformation);
+}
+

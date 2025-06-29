@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -14,7 +16,7 @@ import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
-import { getEnquiriesListInformation } from "../../store/Enquiries/actions";
+import { getEnquiriesListInformation, getEnquiriesFilterListInformation } from "../../store/Enquiries/actions";
 import { deleteStudent } from "../../store/deleteStudent/actions";
 
 import avatar from "../../assets/img/avatar.png";
@@ -34,26 +36,47 @@ const Enquiries = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [selectedEnquiries, setSelectedEnquiries] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
-const [profileData, setProfileData] = useState([]);
-const enquiriesDataList = useSelector((state) => state.enquiriesInfo.enquiriesList);
+  const [profileData, setProfileData] = useState([]);
+  const enquiriesDataList = useSelector(
+    (state) => state.enquiriesInfo.enquiriesList
+  );
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [filters, setFilters] = useState({
+    month: "",
+    year: "",
+    status: "All",
+  });
 
-const openEnquriesProfile = (data) => {
-  const fields = [
-    { label: "Name", value: data.name },
-    { label: "Mobile Number", value: data.mobile_number },
-    { label: "DOB", value: data.dob },
-    { label: "Referred By", value: data.referred_by },
-    { label: "Email", value: data.email },
-    { label: "Course Interest", value: data.course_interest },
-    { label: "Enquiry Date", value: data.enquiry_date },
-    { label: "Remarks", value: data.remarks },
-    { label: "Follow Up Status", value: data.follow_up_status },
-    // add more if needed
-  ];
-  setProfileData(fields);
-  setShowProfileModal(true);
-};
+  const FilterValidationSchema = Yup.object().shape({
+    month: Yup.number()
+      .typeError("Month must be a number")
+      .min(1, "Min value is 1")
+      .max(12, "Max value is 12")
+      .required("Month is required"),
+    year: Yup.number()
+      .typeError("Year must be a number")
+      .min(2000, "Min value is 2000")
+      .max(2100, "Max value is 2100")
+      .required("Year is required"),
+    status: Yup.string(),
+  });
 
+  const openEnquriesProfile = (data) => {
+    const fields = [
+      { label: "Name", value: data.name },
+      { label: "Mobile Number", value: data.mobile_number },
+      { label: "DOB", value: data.dob },
+      { label: "Referred By", value: data.referred_by },
+      { label: "Email", value: data.email },
+      { label: "Course Interest", value: data.course_interest },
+      { label: "Enquiry Date", value: data.enquiry_date },
+      { label: "Remarks", value: data.remarks },
+      { label: "Follow Up Status", value: data.follow_up_status },
+      // add more if needed
+    ];
+    setProfileData(fields);
+    setShowProfileModal(true);
+  };
 
   const getEnquiriesList = () => {
     const data = {};
@@ -156,7 +179,7 @@ const openEnquriesProfile = (data) => {
             <div className="content-wrapper">
               <div className="content">
                 {/* Breadcrumb */}
-                <div className="row">
+                {/* <div className="row">
                   <div className="breadcrumb-wrapper col-xl-6">
                     <h1>Enquiries</h1>
                     <nav aria-label="breadcrumb">
@@ -183,7 +206,145 @@ const openEnquriesProfile = (data) => {
                       <i className="bi bi-plus-lg"></i> Add Enquiries
                     </button>
                   </div>
+                </div> */}
+
+                <div className="row">
+                  <div className=" breadcrumb-wrapper col-xl-6">
+                    <h1>Enquiries</h1>
+                    <nav aria-label="breadcrumb">
+                      <ol className="breadcrumb p-0">
+                        <li className="breadcrumb-item">
+                          <a href="#">
+                            <span className="mdi mdi-home"></span>
+                          </a>
+                        </li>
+                        <li className="breadcrumb-item">Enquiries</li>
+                        <li className="breadcrumb-item" aria-current="page">
+                          EnquiriesList
+                        </li>
+                      </ol>
+                    </nav>
+                  </div>
+                  <div className="col-xl-6 text-right">
+                    <button
+                      type="button"
+                      className="mb-1 btn btn-secondary mr-2"
+                      onClick={() => setFiltersVisible(!filtersVisible)}
+                    >
+                      <i className="bi bi-funnel"></i> Filter
+                    </button>
+                    <button
+                      type="button"
+                      className="mb-1 btn btn-primary"
+                      onClick={AddEnquiriesModal}
+                    >
+                      <i className="bi bi-plus-lg"></i> Add Enquiries
+                    </button>
+                  </div>
                 </div>
+
+                {filtersVisible && (
+                  <div className="card p-3 mb-4">
+                    <Formik
+  initialValues={filters}
+  validationSchema={FilterValidationSchema}
+  onSubmit={(values) => {
+    console.log("Filter Submit Payload:", values); // 🔍 Log the payload
+
+    dispatch(
+      getEnquiriesFilterListInformation(values, (res) => {
+        const { response, isError } = res;
+
+        if (isError && Array.isArray(response)) {
+          response.forEach((err) => {
+            const field = err?.loc?.[1] || "Field";
+            const message = err?.msg || "Invalid input";
+            toast.error(`${field}: ${message}`);
+          });
+          return;
+        }
+
+        const enquiriesList = response || [];
+        if (Array.isArray(enquiriesList) && enquiriesList.length > 0) {
+          setEnquiriesData(enquiriesList);
+          setError(null);
+        } else {
+          setEnquiriesData([]);
+          setError("No enquiries found.");
+        }
+        setLoading(false);
+      })
+    );
+  }}
+>
+
+                      {({ handleSubmit }) => (
+                        <Form onSubmit={handleSubmit}>
+                          <div className="row">
+                            <div className="col-md-2">
+                              <label>Month</label>
+                              <Field
+                                type="number"
+                                name="month"
+                                className="form-control"
+                              />
+                              <ErrorMessage
+                                name="month"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
+                            <div className="col-md-2">
+                              <label>Year</label>
+                              <Field
+                                type="number"
+                                name="year"
+                                className="form-control"
+                              />
+                              <ErrorMessage
+                                name="year"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
+                            <div className="col-md-3">
+                              <label>Status</label>
+                              <Field
+                                as="select"
+                                name="status"
+                                className="form-control"
+                              >
+                                <option value="All">All</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Contacted">Contacted</option>
+                                <option value="Converted">Converted</option>
+                                <option value="Dropped">Dropped</option>
+                              </Field>
+                              <ErrorMessage
+                                name="status"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
+                            <div className="col-md-1 d-flex">
+                              <div
+                                className="form-group d-flex align-items-end w-100"
+                                style={{ marginTop: "1.75rem" }}
+                              >
+                                <button
+                                  type="submit"
+                                  className="btn btn-primary w-100"
+                                >
+                                  Apply
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </Form>
+                      )}
+                    </Formik>
+                  </div>
+                )}
 
                 {/* Student List */}
                 <div className="container py-0 p-0">
@@ -237,7 +398,11 @@ const openEnquriesProfile = (data) => {
 
                             <div>
                               <div className="card-buttons">
-                                <Link to="#" onClick={() => openEnquriesProfile(enquiries)} className="btn btn-primary btn-sm">
+                                <Link
+                                  to="#"
+                                  onClick={() => openEnquriesProfile(enquiries)}
+                                  className="btn btn-primary btn-sm"
+                                >
                                   View
                                 </Link>
                                 {/* <a href="#" className="btn btn-secondary btn-sm">Schedule</a> */}
@@ -274,12 +439,12 @@ const openEnquriesProfile = (data) => {
               message={"Are you sure want to delete this enquiries?"}
             />
             <ProfileModal
-  show={showProfileModal}
-  onClose={() => setShowProfileModal(false)}
-  title="Enquiries Profile"
-  avatar={avatar}
-  data={profileData}
-/>
+              show={showProfileModal}
+              onClose={() => setShowProfileModal(false)}
+              title="Enquiries Profile"
+              avatar={avatar}
+              data={profileData}
+            />
             <Footer />
           </div>
         </div>

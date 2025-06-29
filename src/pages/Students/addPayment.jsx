@@ -153,8 +153,8 @@ export default function AddPayment({
                   className="form-control"
                 >
                   <option value="">Select method</option>
-                  <option value="cash">Cash</option>
-                  <option value="upi">UPI</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Upi">UPI</option>
                 </Field>
                 <ErrorMessage
                   name="payment_method"

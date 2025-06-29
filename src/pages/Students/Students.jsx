@@ -48,55 +48,53 @@ const Students = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [getStuentData, setGetStuentData] = useState([]);
   const [receiptData, setReceiptData] = useState(null);
-  const studentDataLists = useSelector((state) => state.studentsListInfo.studentsList);
-
+  const studentDataLists = useSelector(
+    (state) => state.studentsListInfo.studentsList
+  );
 
   const [searchParams] = useSearchParams();
-const initialMonth = searchParams.get("month") || "";
-const initialYear = searchParams.get("year") || "";
+  const initialMonth = searchParams.get("month") || "";
+  const initialYear = searchParams.get("year") || "";
 
+  const getOneStudentPaymentData = (flag, student) => {
+    setShowPaymentModal(flag);
+    setGetStuentData(student);
+  };
 
-const getOneStudentPaymentData = (flag, student) => {
-  setShowPaymentModal(flag)
-  setGetStuentData(student)
-}
-
-const [filters, setFilters] = useState({
-  month: initialMonth,
-  year: initialYear,
-  status: "",
-  instructor_mobile: "",
-  test_scheduled: false,
-});
+  const [filters, setFilters] = useState({
+    month: initialMonth,
+    year: initialYear,
+    status: "All",
+    instructor_name: "",
+    test_date: "",
+  });
   // const [filters, setFilters] = useState({
   //   month: "",
   //   year: "",
   //   status: "",
-  //   instructor_mobile: "",
-  //   test_scheduled: "",
+  //   instructor_name: "",
+  //   test_date: "",
   // });
 
   const FilterValidationSchema = Yup.object().shape({
-    month: Yup.number()
-      .typeError("Month must be a number")
-      .min(1, "Min value is 1")
-      .max(12, "Max value is 12")
-      .required("Month is required"),
-    year: Yup.number()
-      .typeError("Year must be a number")
-      .min(2000, "Min value is 2000")
-      .max(2100, "Max value is 2100")
-      .required("Year is required"),
-    status: Yup.string()
-      .oneOf(["pending", "completed"], "Invalid status")
-      .required("Status is required"),
-    instructor_mobile: Yup.string()
-      .matches(/^[6-9]\d{9}$/, "Invalid mobile number")
-      .required("Instructor mobile is required"),
-    test_scheduled: Yup.string()
-      .oneOf(["true", "false"], "Must be Yes or No")
-      .required("Test scheduled is required"),
-  });
+  month: Yup.number()
+    .typeError("Month must be a number")
+    .min(1, "Min value is 1")
+    .max(12, "Max value is 12")
+    .required("Month is required"),
+  year: Yup.number()
+    .typeError("Year must be a number")
+    .min(2000, "Min value is 2000")
+    .max(2100, "Max value is 2100")
+    .required("Year is required"),
+  status: Yup.string(), // Optional
+  instructor_name: Yup.string(), // Optional
+  test_date: Yup.string(),
+  //.matches(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
+ // .nullable(), // optional
+
+});
+
 
   const openProfileModal = (student) => {
     setProfileStudentData(student);
@@ -123,18 +121,16 @@ const [filters, setFilters] = useState({
     );
   };
 
-
-   useEffect(() => {
-   
-      if (studentDataLists?.response?.length > 0) {
-        setStudentsData(studentDataLists.response);
-        setError(null);
-      } else {
-        setStudentsData([]);
-        setError("No students found.");
-      }
-      setLoading(false);
-    }, [studentDataLists]);
+  useEffect(() => {
+    if (studentDataLists?.response?.length > 0) {
+      setStudentsData(studentDataLists.response);
+      setError(null);
+    } else {
+      setStudentsData([]);
+      setError("No students found.");
+    }
+    setLoading(false);
+  }, [studentDataLists]);
 
   const getTariffsList = () => {
     dispatch(
@@ -157,27 +153,27 @@ const [filters, setFilters] = useState({
   };
 
   useEffect(() => {
-   // getStudentsList();
+    // getStudentsList();
     getTariffsList();
     getInstructorsList();
     if (initialMonth && initialYear) {
-    dispatch(
-      getStudentsFilterListInformation(filters, (res) => {
-        const { response, isError } = res;
-        
-        if (!isError && Array.isArray(response) && response.length > 0) {
-          setStudentsData(response);
-          setError(null);
-        } else { 
-          setStudentsData([]);
-          setError("No students found.");
-        }
-        setLoading(false);
-      })
-    );
-  } else {
-    getStudentsList();
-  }
+      dispatch(
+        getStudentsFilterListInformation(filters, (res) => {
+          const { response, isError } = res;
+
+          if (!isError && Array.isArray(response) && response.length > 0) {
+            setStudentsData(response);
+            setError(null);
+          } else {
+            setStudentsData([]);
+            setError("No students found.");
+          }
+          setLoading(false);
+        })
+      );
+    } else {
+      getStudentsList();
+    }
   }, [dispatch]);
 
   const onStudentData = (res, isEdit) => {
@@ -221,48 +217,56 @@ const [filters, setFilters] = useState({
     setSelectedStudent(null);
   };
 
-   const handleAddPayment = (payload) => {
-  console.log("Payment Payload:", payload, getStuentData);
+  const handleAddPayment = (payload) => {
+    console.log("Payment Payload:", payload, getStuentData);
 
-  const initialValues = {
-    appId: getStuentData.application_number,
-    studentPaymentData: {
-      payment_id: getStuentData.payments?.[getStuentData.payments.lenth-1]?.payment_id || '',
-      receipt_no: getStuentData.payments?.[getStuentData.payments.lenth-1]?.receipt_no || '',
-      amount: payload.amount,
-      transaction_id: '',
-      date: payload.date,
-      payment_method: payload.payment_method,
-      payment_status: payload.payment_status,
-      remarks: payload.remarks,
-      payment_received_by: getStuentData.payments?.[getStuentData.payments.lenth-1]?.payment_received_by || ''
-    }
+    const initialValues = {
+      appId: getStuentData.application_number,
+      studentPaymentData: {
+        payment_id:
+          getStuentData.payments?.[getStuentData.payments.lenth - 1]
+            ?.payment_id || "",
+        receipt_no:
+          getStuentData.payments?.[getStuentData.payments.lenth - 1]
+            ?.receipt_no || "",
+        amount: payload.amount,
+        transaction_id: "",
+        date: payload.date,
+        payment_method: payload.payment_method,
+        payment_status: payload.payment_status,
+        remarks: payload.remarks,
+        payment_received_by:
+          getStuentData.payments?.[getStuentData.payments.lenth - 1]
+            ?.payment_received_by || "",
+      },
+    };
+
+    dispatch(
+      addStudentPayment(initialValues, (response) => {
+        const errorList =
+          response?.data?.detail || response?.detail || response;
+
+        if (Array.isArray(errorList)) {
+          errorList.forEach((err) => {
+            const field = err?.loc?.[1];
+            const msg = err?.msg || err?.message || "Invalid input";
+            toast.error(`${field}: ${msg}`);
+          });
+          return;
+        }
+
+        if (response?.isError) {
+          toast.error("Payment failed. Please try again.");
+        } else {
+          
+          setReceiptData(response);
+          toast.success("Payment added successfully!");
+          //setShowPaymentModal(false);
+          getStudentsList(); // refresh student data after payment
+        }
+      })
+    );
   };
-
-  dispatch(addStudentPayment(initialValues, (response) => {
-    const errorList = response?.data?.detail || response?.detail || response;
-
-    if (Array.isArray(errorList)) {
-      errorList.forEach((err) => {
-        const field = err?.loc?.[1];
-        const msg = err?.msg || err?.message || 'Invalid input';
-        toast.error(`${field}: ${msg}`);
-      });
-      return;
-    }
-
-    if (response?.isError) {
-      toast.error("Payment failed. Please try again.");
-    } else {
-      console.info('setReceiptData.......', response)
-      setReceiptData(response)
-      toast.success("Payment added successfully!");
-      //setShowPaymentModal(false);
-      getStudentsList(); // refresh student data after payment
-    }
-  }));
-};
-
 
   return (
     <>
@@ -384,9 +388,11 @@ const [filters, setFilters] = useState({
                                 name="status"
                                 className="form-control"
                               >
-                                <option value="">All</option>
-                                <option value="pending">Pending</option>
-                                <option value="completed">Completed</option>
+                                <option value="All">All</option>
+                                <option value="Process Started">Process Started</option>
+                                <option value="Process failed">Process failed</option>
+                                <option value="Process stalled">Process stalled</option>
+                                <option value="Process completed">Process completed</option>
                               </Field>
                               <ErrorMessage
                                 name="status"
@@ -396,36 +402,33 @@ const [filters, setFilters] = useState({
                             </div>
 
                             <div className="col-md-3">
-                              <label>Instructor Mobile</label>
+                              <label>Instructor Name</label>
                               <Field
                                 type="text"
-                                name="instructor_mobile"
+                                name="instructor_name"
                                 className="form-control"
                               />
                               <ErrorMessage
-                                name="instructor_mobile"
+                                name="instructor_name"
                                 component="div"
                                 className="text-danger"
                               />
                             </div>
 
                             <div className="col-md-2">
-                              <label>Test Scheduled</label>
-                              <Field
-                                as="select"
-                                name="test_scheduled"
-                                className="form-control"
-                              >
-                                <option value="">All</option>
-                                <option value="true">Yes</option>
-                                <option value="false">No</option>
-                              </Field>
-                              <ErrorMessage
-                                name="test_scheduled"
-                                component="div"
-                                className="text-danger"
-                              />
-                            </div>
+  <label>Test Date</label>
+  <Field
+    type="date"
+    name="test_date"
+    className="form-control"
+  />
+  <ErrorMessage
+    name="test_date"
+    component="div"
+    className="text-danger"
+  />
+</div>
+
 
                             <div className="col-md-1 d-flex align-items-end">
                               <button
@@ -483,13 +486,19 @@ const [filters, setFilters] = useState({
                                 <i className="bi bi-trash"></i>
                               </button>
                               <button
-  className="btn btn-sm btn-success"
-  title={Number(student.balance) <= 0 ? "No balance due" : "Add Payment"}
-  onClick={() => getOneStudentPaymentData(true, student)}
-  disabled={Number(student.balance) <= 0}
->
-  <i className="bi bi-currency-rupee"></i>
-</button>
+                                className="btn btn-sm btn-success"
+                                title={
+                                  Number(student.balance) <= 0
+                                    ? "No balance due"
+                                    : "Add Payment"
+                                }
+                                onClick={() =>
+                                  getOneStudentPaymentData(true, student)
+                                }
+                                disabled={Number(student.balance) <= 0}
+                              >
+                                <i className="bi bi-currency-rupee"></i>
+                              </button>
                             </div>
                             <div>
                               <img src={avatar} alt="Avatar" />
@@ -552,12 +561,12 @@ const [filters, setFilters] = useState({
             />
 
             <AddPayment
-  show={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        onSubmit={handleAddPayment}
-        payReceiptData={receiptData}
-        student={getStuentData}
-/>
+              show={showPaymentModal}
+              onClose={() => setShowPaymentModal(false)}
+              onSubmit={handleAddPayment}
+              payReceiptData={receiptData}
+              student={getStuentData}
+            />
 
             <Footer />
           </div>

@@ -104,17 +104,19 @@ export default function StudentProfileModal({ show, onClose, student }) {
           {/* Left Column */}
           <div className="col-md-6">
             <ProfileItem label="Name" value={student.name} />
+            <ProfileItem label="Application Number" value={student.application_number} />
             <ProfileItem label="DOB" value={student.dob} />
             <ProfileItem label="Email" value={student.email} />
             <ProfileItem label="Mobile" value={student.mobile_number} />
             <ProfileItem label="Aadhar Number" value={student.aadhar_number} />
             <ProfileItem label="Plan" value={student.plan} />
             <ProfileItem label="Initial Payment Method" value={student.initial_payment_method} />
-            <ProfileItem label="Paid Amount" value={student.paid_amount} />
+           
           </div>
 
           {/* Right Column */}
           <div className="col-md-6">
+             <ProfileItem label="Paid Amount" value={student.paid_amount} />
             <ProfileItem label="Total Amount" value={student.total_amount} />
             <ProfileItem label="Balance" value={student.balance} />
             <ProfileItem label="Full Payment Status" value={student.full_payment_status} />

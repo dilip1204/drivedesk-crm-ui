@@ -30,10 +30,10 @@ export default function AddEnquiries({
     mobile_number: id?.mobile_number || "",
     dob: id?.dob || "",
     referred_by: id?.referred_by || "",
-    email: id?.email || "",
+    email: id?.email || null,
     course_interest: id?.course_interest || "",
     // enquiry_date: id?.enquiry_date ? formatDateTimeLocal(id.enquiry_date) : formatDateTimeLocal(new Date()),
-    follow_up_status: id?.follow_up_status || "pending",
+    follow_up_status: id?.follow_up_status || "Pending",
     remarks: id?.remarks || "",
   };
 
@@ -65,43 +65,53 @@ export default function AddEnquiries({
     enableReinitialize: true,
     initialValues,
     validationSchema,
-    onSubmit: (values) => {
-      let payload;
-      if (isEdit) {
-        // Only send status for update
-        payload = {
-          id: id?.id, // or use id._id or whatever key uniquely identifies the enquiry
-          status: values.follow_up_status,
-        };
-      } else {
-        payload = { ...values };
-      }
-      const action = isEdit ? updateEnquiries : addEnquiries;
+   onSubmit: (values) => {
+  let payload;
 
-      dispatch(
-        action(payload, (response) => {
-          if (response?.isError === false && response?.response?.message) {
-            formik.resetForm();
-            if (typeof onSaved === 'function') {
-            onEnquiriesAdded();
-            }
-            enquiriesData(response, isEdit);
-            hideModal();
-          } else if (
-            Array.isArray(response?.detail || response?.data?.detail)
-          ) {
-            const errors = response.detail || response.data.detail;
-            errors.forEach((err) => {
-              const field = err?.loc?.[1];
-              const msg = err?.msg || err?.message || "Invalid input";
-              if (field && formik.values.hasOwnProperty(field)) {
-                formik.setFieldError(field, msg);
-              }
-            });
+  if (isEdit) {
+    const changedFields = Object.keys(values).reduce((diff, key) => {
+      if (values[key] !== id?.[key]) {
+        diff[key] = values[key];
+      }
+      return diff;
+    }, {});
+
+    payload = {
+      id: id?.id,
+      ...changedFields
+    };
+
+  } else {
+    payload = { ...values };
+  }
+
+  const action = isEdit ? updateEnquiries : addEnquiries;
+
+  dispatch(
+    action(payload, (response) => {
+      if (response?.isError === false && response?.response?.message) {
+        formik.resetForm();
+        if (typeof onEnquiriesAdded === 'function') {
+          onEnquiriesAdded();
+        }
+        enquiriesData(response, isEdit);
+        hideModal();
+      } else if (
+        Array.isArray(response?.detail || response?.data?.detail)
+      ) {
+        const errors = response.detail || response.data.detail;
+        errors.forEach((err) => {
+          const field = err?.loc?.[1];
+          const msg = err?.msg || err?.message || "Invalid input";
+          if (field && formik.values.hasOwnProperty(field)) {
+            formik.setFieldError(field, msg);
           }
-        })
-      );
-    },
+        });
+      }
+    })
+  );
+}
+
   });
 
   return (
@@ -185,9 +195,10 @@ export default function AddEnquiries({
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                 >
-                  <option value="pending">Pending</option>
-                  <option value="followed">Followed</option>
-                  <option value="closed">Closed</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Contacted">Contacted</option>
+                  <option value="Converted">Enrolled</option>
+                  <option value="Dropped">Dropped</option>
                 </select>
                 {formik.touched.follow_up_status &&
                   formik.errors.follow_up_status && (

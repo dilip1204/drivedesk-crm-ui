@@ -12,7 +12,7 @@ export const getAllStudents = (param) => {
 export const getAllStudentsFilter = (param) => {
     return request(
         METHOD_TYPES.GET,
-        ENDPOINTS.getAllStudentsFilter+'?month='+param.month+'&year='+param.year+'&status='+param.status+'&instructor_mobile='+param.instructor_mobile+'&test_scheduled='+param.test_scheduled
+        ENDPOINTS.getAllStudentsFilter+'?month='+param.month+'&year='+param.year+'&status='+param.status+'&instructor_name='+param.instructor_name+'&test_date='+param.test_date
     )
 } 
 

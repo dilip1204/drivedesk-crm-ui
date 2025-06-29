@@ -14,7 +14,11 @@ import {
 //  DELETE_ENQUIRIES_DATA,
   DELETE_ENQUIRIES_DATA_ERROR,
   DELETE_ENQUIRIES_DATA_PENDING,
-  DELETE_ENQUIRIES_DATA_SUCCESS
+  DELETE_ENQUIRIES_DATA_SUCCESS,
+
+  GET_ENQUIRIES_FILTER_LIST_ERROR,
+  GET_ENQUIRIES_FILTER_LIST_PENDING,
+  GET_ENQUIRIES_FILTER_LIST_SUCCESS,
 } from './types';
 
 const initialState = {
@@ -30,6 +34,10 @@ const initialState = {
   deleteEnquiriesResponse: [],
   deleteEnquiriesLoader: false,
   deleteEnquiriesError: [],
+
+  enquiriesFilterList: [],
+  enquiriesFilterListLoader: false,
+  enquiriesFilterListError: [],
 };
 
 export default function EnquiriesReducer(state = initialState, action) {
@@ -105,6 +113,24 @@ export default function EnquiriesReducer(state = initialState, action) {
         deleteEnquiriesError: action.error,
         deleteEnquiriesLoader: false
       };
+
+      case GET_ENQUIRIES_FILTER_LIST_SUCCESS:
+          return {
+              ...state,
+              enquiriesFilterList: action.data,
+              enquiriesFilterListLoader: false
+          }
+      case GET_ENQUIRIES_FILTER_LIST_PENDING:
+          return {
+              ...state,
+              enquiriesFilterListLoader: true
+          }
+      case GET_ENQUIRIES_FILTER_LIST_ERROR:
+          return {
+              ...state,
+              enquiriesFilterListError: action.error,
+              enquiriesFilterListLoader: false
+          }
 
     default:
       return state;

@@ -18,9 +18,9 @@ export default function AddTariffs({
 
   const initialValues = {
     plan_name: id?.plan_name || "",
-    amount: id?.amount || 0,
-    training_days: id?.training_days || 0,
-    reference_fee: id?.reference_fee || 0,
+    amount: id?.amount,
+    training_days: id?.training_days,
+    reference_fee: id?.reference_fee,
     description: id?.description || "",
     remarks: id?.remarks || "",
     category: id?.category || "",
@@ -34,12 +34,12 @@ export default function AddTariffs({
     training_days: Yup.number()
       .typeError("Training days must be a number")
       .required("Training days are required"),
-    reference_fee: Yup.number()
-      .typeError("Reference fee must be a number")
-      .required("Reference fee is required"),
-    description: Yup.string().required("Description is required"),
-    remarks: Yup.string().required("Remarks are required"),
-    category: Yup.string().required("Category is required"),
+    // reference_fee: Yup.number()
+    //   .typeError("Reference fee must be a number")
+    //   .required("Reference fee is required"),
+    // description: Yup.string().required("Description is required"),
+    // remarks: Yup.string().required("Remarks are required"),
+    // category: Yup.string().required("Category is required"),
   });
 
   const formik = useFormik({
@@ -139,7 +139,9 @@ export default function AddTariffs({
                       {field
                         .replace(/_/g, " ")
                         .replace(/\b\w/g, (c) => c.toUpperCase())}
-                      <span style={{ color: "red" }}>*</span>
+                      {["plan_name", "amount", "training_days"].includes(
+                        field
+                      ) && <span style={{ color: "red" }}>*</span>}
                     </label>
                     <input
                       type={

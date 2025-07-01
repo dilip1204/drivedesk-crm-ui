@@ -111,3 +111,59 @@
 .font-weight-bold {
   font-weight: 600;
 }
+
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .d-print-block,
+  .d-print-block * {
+    visibility: visible !important;
+  }
+
+  .d-print-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: #fff;
+  }
+
+  .btn,
+  .sidebar,
+  .header,
+  .footer,
+  .content-wrapper,
+  .breadcrumb-wrapper,
+  .student-card {
+    display: none !important;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .d-print-block, .d-print-block * {
+    visibility: visible !important;
+  }
+
+  .d-print-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: #fff;
+  }
+
+  /* Optional: Hide page margins and header/footer in browser print preview */
+  @page {
+    margin: 0;
+  }
+}
+

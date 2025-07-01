@@ -48,6 +48,8 @@ const Students = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [getStuentData, setGetStuentData] = useState([]);
   const [receiptData, setReceiptData] = useState(null);
+  const [filterApplied, setFilterApplied] = useState(false);
+
   const studentDataLists = useSelector(
     (state) => state.studentsListInfo.studentsList
   );
@@ -77,24 +79,22 @@ const Students = () => {
   // });
 
   const FilterValidationSchema = Yup.object().shape({
-  month: Yup.number()
-    .typeError("Month must be a number")
-    .min(1, "Min value is 1")
-    .max(12, "Max value is 12")
-    .required("Month is required"),
-  year: Yup.number()
-    .typeError("Year must be a number")
-    .min(2000, "Min value is 2000")
-    .max(2100, "Max value is 2100")
-    .required("Year is required"),
-  status: Yup.string(), // Optional
-  instructor_name: Yup.string(), // Optional
-  test_date: Yup.string(),
-  //.matches(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
- // .nullable(), // optional
-
-});
-
+    month: Yup.number()
+      .typeError("Month must be a number")
+      .min(1, "Min value is 1")
+      .max(12, "Max value is 12")
+      .required("Month is required"),
+    year: Yup.number()
+      .typeError("Year must be a number")
+      .min(2000, "Min value is 2000")
+      .max(2100, "Max value is 2100")
+      .required("Year is required"),
+    status: Yup.string(), // Optional
+    instructor_name: Yup.string(), // Optional
+    test_date: Yup.string(),
+    //.matches(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
+    // .nullable(), // optional
+  });
 
   const openProfileModal = (student) => {
     setProfileStudentData(student);
@@ -120,7 +120,9 @@ const Students = () => {
       })
     );
   };
+useEffect(()=> {
 
+}, [studentsData])
   useEffect(() => {
     if (studentDataLists?.response?.length > 0) {
       setStudentsData(studentDataLists.response);
@@ -177,7 +179,7 @@ const Students = () => {
   }, [dispatch]);
 
   const onStudentData = (res, isEdit) => {
-    setSelectedStudent(res.response)
+    setSelectedStudent(res.response);
     toast[res.isError ? "error" : "success"](
       res.isError
         ? "Failed....!"
@@ -259,7 +261,6 @@ const Students = () => {
         if (response?.isError) {
           toast.error("Payment failed. Please try again.");
         } else {
-          
           setReceiptData(response);
           toast.success("Payment added successfully!");
           //setShowPaymentModal(false);
@@ -268,6 +269,70 @@ const Students = () => {
       })
     );
   };
+
+  const formatDate = (dateStr) => {
+  if (!dateStr) return "-";
+  const date = new Date(dateStr);
+  if (isNaN(date)) return "-";
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
+
+
+  const PrintableStudentTable = ({ students }) => {
+    //if (!students.length) return null;
+
+    return (
+      <div className="printable-student-table mt-3">
+        <table className="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Application No</th>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Status</th>
+              <th>Plan</th>
+              <th>Instructor</th>
+              <th>Balance</th>
+              <th>Test Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {students.map((student, index) => (
+              <tr key={student.application_number || index}>
+                <td>{index + 1}</td>
+                <td>{student.application_number || "-"}</td>
+                <td>{student.name || "-"}</td>
+                <td>{student.mobile_number || "-"}</td>
+                <td>{student.status || "-"}</td>
+                <td>{student.plan || "-"}</td>
+                <td>{student.instructor_name || "-"}</td>
+                <td>₹{student.balance || 0}</td>
+                <td>{formatDate(student.test_date)}</td>
+
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const handlePrint = () => {
+  const originalTitle = document.title;
+  document.title = "Filtered Students Report";
+
+  window.print();
+
+  // Restore original title after a short delay
+  setTimeout(() => {
+    document.title = originalTitle;
+  }, 1000);
+};
+
 
   return (
     <>
@@ -302,17 +367,29 @@ const Students = () => {
                     <button
                       type="button"
                       className="mb-1 btn btn-secondary mr-2"
-                      onClick={() => setFiltersVisible(!filtersVisible)}
+                      // onClick={() => setFiltersVisible(!filtersVisible)}
+                      onClick={() => {
+                        setFiltersVisible(!filtersVisible);
+                        if (!filtersVisible) setFilterApplied(false);
+                      }}
                     >
                       <i className="bi bi-funnel"></i> Filter
                     </button>
                     <button
                       type="button"
-                      className="mb-1 btn btn-primary"
+                      className="mb-1 btn btn-primary mr-2"
                       onClick={AddStudentsModal}
                     >
                       <i className="bi bi-plus-lg"></i> Add Students
                     </button>
+                    {filterApplied && studentsData.length > 0 && (
+                              
+                                <button  type="button" className="mb-1 btn btn-outline-secondary" onClick={handlePrint}>
+  <i className="bi bi-printer"></i> Print
+</button>
+
+                              
+                            )}
                   </div>
                 </div>
 
@@ -322,6 +399,7 @@ const Students = () => {
                       initialValues={filters}
                       validationSchema={FilterValidationSchema}
                       onSubmit={(values) => {
+                        setFilterApplied(true);
                         dispatch(
                           getStudentsFilterListInformation(values, (res) => {
                             const { response, isError } = res;
@@ -454,6 +532,7 @@ const Students = () => {
                                 Apply
                               </button>
                             </div>
+                            
                           </div>
                         </Form>
                       )}
@@ -553,6 +632,9 @@ const Students = () => {
                 </div>
               </div>
             </div>
+
+            
+
             <AddStudents
               showModal={showModal}
               hideModal={handleCloseModal}
@@ -596,6 +678,10 @@ const Students = () => {
         closeOnClick
         pauseOnHover
       />
+      <div className="d-none d-print-block">
+              <h2 className="text-center my-3">Students Test List</h2>
+              <PrintableStudentTable students={studentsData} />
+            </div>
     </>
   );
 };

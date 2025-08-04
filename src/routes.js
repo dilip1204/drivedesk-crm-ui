@@ -4,6 +4,7 @@ import Login from "./pages/Login/Login";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Instructors from "./pages/Instructors/Instructors";
 import Students from "./pages/Students/Students";
+import TrainingSession from "./pages/TrainingSession/TrainingSession";
 import Tariff from "./pages/Tariff/Tariff";
 import Enquiries from "./pages/Enquiries/enquiries";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -55,6 +56,15 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin", "instructor"]}>
             <Enquiries />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/trainingsession"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
+            <TrainingSession />
           </ProtectedRoute>
         }
       />

@@ -167,3 +167,29 @@
   }
 }
 
+input:focus,
+select:focus,
+textarea:focus {
+  border: 2px solid #4c84ff !important; /* GOV.UK blue */
+  box-shadow: 0 0 0 3px rgba(0, 94, 165, 0.3);
+  outline: none;
+  background-color: #fff !important;
+}
+
+
+    .custom-table th,
+    .custom-table td {
+      border-right: none !important; /* Remove column borders */
+      border-left: none !important;
+      background-color: #ffffff;
+    }
+    .custom-table tbody tr {
+      border-bottom: 1px solid #dee2e6;
+    }
+    .status {
+      color: green;
+      font-weight: 600;
+    }
+    .action-btn {
+      margin-right: 5px;
+    }

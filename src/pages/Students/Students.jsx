@@ -282,7 +282,7 @@ useEffect(()=> {
 
 
   const PrintableStudentTable = ({ students }) => {
-    //if (!students.length) return null;
+    if (!students.length) return null;
 
     return (
       <div className="printable-student-table mt-3">
@@ -293,9 +293,10 @@ useEffect(()=> {
               <th>Application No</th>
               <th>Name</th>
               <th>Mobile</th>
+              <th>DOB</th>
               <th>Status</th>
               <th>Plan</th>
-              <th>Instructor</th>
+              {/* <th>Instructor</th> */}
               <th>Balance</th>
               <th>Test Date</th>
             </tr>
@@ -307,9 +308,10 @@ useEffect(()=> {
                 <td>{student.application_number || "-"}</td>
                 <td>{student.name || "-"}</td>
                 <td>{student.mobile_number || "-"}</td>
+                <td>{student.dob ? formatDate(student.dob) : "-"}</td>
                 <td>{student.status || "-"}</td>
                 <td>{student.plan || "-"}</td>
-                <td>{student.instructor_name || "-"}</td>
+                {/* <td>{student.instructor_name || "-"}</td> */}
                 <td>₹{student.balance || 0}</td>
                 <td>{formatDate(student.test_date)}</td>
 
@@ -437,6 +439,7 @@ useEffect(()=> {
                               <Field
                                 type="number"
                                 name="month"
+                                id="month"
                                 className="form-control"
                               />
                               <ErrorMessage
@@ -451,6 +454,7 @@ useEffect(()=> {
                               <Field
                                 type="number"
                                 name="year"
+                                id="year"
                                 className="form-control"
                               />
                               <ErrorMessage
@@ -678,10 +682,11 @@ useEffect(()=> {
         closeOnClick
         pauseOnHover
       />
-      <div className="d-none d-print-block">
-              <h2 className="text-center my-3">Students Test List</h2>
-              <PrintableStudentTable students={studentsData} />
-            </div>
+      
+     <div className="d-none d-print-block" style={{ marginTop: "120px" }}>
+  <h2 className="text-center" style={{ marginBottom: "70px" }}>Students Test List</h2>
+  <PrintableStudentTable students={studentsData} />
+</div>
     </>
   );
 };

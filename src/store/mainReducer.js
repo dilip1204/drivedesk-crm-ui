@@ -9,6 +9,7 @@ import InstructorReducer from "./instructors/reducer";
 import EnquiriesReducer from "./Enquiries/reducer";
 import dashboardSummaryReducer from "./dashboardSummary/reducer";
 import StudentPaymentReducer from "./addStudentPayment/reducer";
+import trainingSessionListReducer from "./trainingSession/reducer";
 
 
 export const mainReducer = combineReducers({
@@ -20,5 +21,6 @@ export const mainReducer = combineReducers({
     instructorInfo: InstructorReducer,
     enquiriesInfo: EnquiriesReducer,
     dashboardSummary: dashboardSummaryReducer,
-    studentPaymentInfo: StudentPaymentReducer
+    studentPaymentInfo: StudentPaymentReducer,
+    trainingSessionListInfo: trainingSessionListReducer
 })

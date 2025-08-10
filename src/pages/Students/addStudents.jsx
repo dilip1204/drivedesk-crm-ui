@@ -198,6 +198,33 @@ export default function AddStudents({
 
   });
 
+ const handleTimeInput = (e) => {
+  const { name, value } = e.target;
+  const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i;
+
+  if (value === "" || timeRegex.test(value.trim())) {
+    formik.setFieldValue(name, value.trim());
+    formik.setFieldError(name, "");
+  } else {
+    formik.setFieldValue(name, value);
+    formik.setFieldError(name, "Invalid time format (HH:MM AM/PM)");
+  }
+};
+
+const formatTime12Hour = (time) => {
+  if (!time || typeof time !== "string") return "";
+  const date = new Date(`1970-01-01T${time}`);
+  if (isNaN(date)) return time;
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${hours}:${String(minutes).padStart(2, "0")} ${ampm}`;
+};
+
+
+
+
   useEffect(() => {
   const paid = parseFloat(formik.values.paid_amount);
   const discount = parseFloat(formik.values.discount) || 0;
@@ -210,10 +237,11 @@ export default function AddStudents({
 }, [formik.values.paid_amount, formik.values.total_amount, formik.values.discount]);
 
 
-  useEffect(() => {
+  useEffect(() => { 
     const selectedPlan = plans.find((p) => p.plan_name === formik.values.plan);
     if (selectedPlan) {
       formik.setFieldValue('total_amount', selectedPlan.amount || 0);
+      formik.setFieldValue('training_days', selectedPlan.training_days || '');
     }
   }, [formik.values.plan, plans]);
 
@@ -415,12 +443,25 @@ const handlePrint = () => {
                             : ""
                         }`}
                         onChange={
-                          ["mobile_number", "aadhar_number", "discount", "training_days"].includes(field)
+                          field === "training_time"
+                            ? handleTimeInput
+                            : [
+                                "mobile_number",
+                                "aadhar_number",
+                                "discount",
+                                "training_days",
+                              ].includes(field)
                             ? handleNumericInput
                             : formik.handleChange
                         }
                         onBlur={formik.handleBlur}
-                        value={formik.values[field]}
+                       
+value={
+  field === "training_time"
+    ? formatTime12Hour(formik.values?.[field] || "")
+    : formik.values?.[field] || ""
+}
+
                         readOnly={[
                           "balance",
                           "total_amount",

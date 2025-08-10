@@ -21,4 +21,7 @@ export const ENDPOINTS = {
     getStudentReceipt: 'student/receipt-preview-by-receiptno/',
     addStudentPayment: 'students/',
     getAllEnquiriesFilter: 'enquiries/filter',
+    getAllTrainingsession: 'training-sessions',
+    getAllTrainingsessionFilter: 'training-sessions/instructor/',
+    editTrainingsession: 'training-sessions/',
 } 

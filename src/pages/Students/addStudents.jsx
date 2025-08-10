@@ -40,57 +40,85 @@ export default function AddStudents({
     balance: id?.balance || 0,
     full_payment_status: id?.full_payment_status || 'Pending',
     instructor_name: id?.instructor_name || '',
+    instructor_id: id?.instructor_id || '',
     instructor_mobile: id?.instructor_mobile || '',
     test_date: id?.test_date || null,
     discount: id?.discount || 0,
+    training_days: id?.training_days || '',
+    training_start_date: id?.training_start_date || '',
+    training_time: id?.training_time || '',
+    attended_days:id?.attended_days || 0
   };
 
   const validationSchema = Yup.object({
     name: Yup.string().required("Name is required"),
     dob: Yup.date()
-  .required("Date of birth is required")
-  .max(new Date(), "DOB cannot be in future")
-  .test("age", "Student must be at least 18 years old", function (value) {
-    if (!value) return false;
-    const today = new Date();
-    const birthDate = new Date(value);
-    const age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    return age > 18 || (age === 18 && m >= 0);
-  }),
-    mobile_number: Yup.string().matches(/^\d{10}$/, "Mobile number must be 10 digits").required("Mobile number is required"),
+      .required("Date of birth is required")
+      .max(new Date(), "DOB cannot be in future")
+      .test("age", "Student must be at least 18 years old", function (value) {
+        if (!value) return false;
+        const today = new Date();
+        const birthDate = new Date(value);
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        return age > 18 || (age === 18 && m >= 0);
+      }),
+    mobile_number: Yup.string()
+      .matches(/^\d{10}$/, "Mobile number must be 10 digits")
+      .required("Mobile number is required"),
     application_number: Yup.string().required("Application number is required"),
     email: "", //Yup.string(), //.email("Invalid email format").required("Email is required"),
     aadhar_number: Yup.string().required("Aadhar number is required"),
     plan: Yup.string().required("Plan is required"),
     payment_method: Yup.string().required("Payment method is required"),
-    paid_amount: Yup.number().required("Paid amount is required").typeError("Must be a number"),
-    total_amount: Yup.number().required("Total amount is required").typeError("Must be a number"),
-    balance: Yup.number().required("Balance is required").typeError("Must be a number"),
-    full_payment_status: Yup.string().required("Full payment status is required"),
+    paid_amount: Yup.number()
+      .required("Paid amount is required")
+      .typeError("Must be a number"),
+    total_amount: Yup.number()
+      .required("Total amount is required")
+      .typeError("Must be a number"),
+    balance: Yup.number()
+      .required("Balance is required")
+      .typeError("Must be a number"),
+    full_payment_status: Yup.string().required(
+      "Full payment status is required"
+    ),
     instructor_name: Yup.string().required("Instructor name is required"),
     instructor_mobile: Yup.string().required("Instructor mobile is required"),
-     ...(isEdit && {
-    test_date: Yup.date().required("Test date is required"),
-    discount: Yup.number()
-  .typeError("Discount must be a number")
-  .min(0, "Discount cannot be negative")
-  .test("discount-not-exceed-balance", "Discount cannot exceed remaining balance", function (value) {
-    const { total_amount, paid_amount } = this.parent;
-    const total = parseFloat(total_amount);
-    const paid = parseFloat(paid_amount);
-    const discount = parseFloat(value);
+    training_days: Yup.number()
+      .nullable()
+      .typeError("Training days must be a number")
+      .min(0, "Cannot be negative"),
 
-    const remaining = total - paid;
+    training_start_date: Yup.date().nullable().typeError("Invalid date format"),
 
-    if (isNaN(discount) || isNaN(remaining)) return true;
-    return discount <= remaining;
-  }),
+    training_time: Yup.string()
+      .nullable()
+      .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)"),
+    ...(isEdit && {
+      test_date: Yup.date().required("Test date is required"),
+      discount: Yup.number()
+        .typeError("Discount must be a number")
+        .min(0, "Discount cannot be negative")
+        .test(
+          "discount-not-exceed-balance",
+          "Discount cannot exceed remaining balance",
+          function (value) {
+            const { total_amount, paid_amount } = this.parent;
+            const total = parseFloat(total_amount);
+            const paid = parseFloat(paid_amount);
+            const discount = parseFloat(value);
 
-  })
+            const remaining = total - paid;
+
+            if (isNaN(discount) || isNaN(remaining)) return true;
+            return discount <= remaining;
+          }
+        ),
+    }),
   }).test(
-    'paid-vs-total',
-    'Paid amount cannot be greater than total amount',
+    "paid-vs-total",
+    "Paid amount cannot be greater than total amount",
     function (values) {
       const paid = parseFloat(values.paid_amount);
       const total = parseFloat(values.total_amount);
@@ -130,6 +158,15 @@ export default function AddStudents({
       status: "Process Started",
     };
 
+
+      // Add instructor_id by looking up selected instructor
+      const selectedInstructor = instructors.find(
+        (ins) => ins.name === values.instructor_name
+      );
+      if (selectedInstructor) {
+        updatedValues.instructor_id = selectedInstructor.id;
+      }
+
     dispatch(addStudent({ studentData: updatedValues }, (response) => {
       handleResponse(response);
     }));
@@ -161,6 +198,33 @@ export default function AddStudents({
 
   });
 
+ const handleTimeInput = (e) => {
+  const { name, value } = e.target;
+  const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i;
+
+  if (value === "" || timeRegex.test(value.trim())) {
+    formik.setFieldValue(name, value.trim());
+    formik.setFieldError(name, "");
+  } else {
+    formik.setFieldValue(name, value);
+    formik.setFieldError(name, "Invalid time format (HH:MM AM/PM)");
+  }
+};
+
+const formatTime12Hour = (time) => {
+  if (!time || typeof time !== "string") return "";
+  const date = new Date(`1970-01-01T${time}`);
+  if (isNaN(date)) return time;
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${hours}:${String(minutes).padStart(2, "0")} ${ampm}`;
+};
+
+
+
+
   useEffect(() => {
   const paid = parseFloat(formik.values.paid_amount);
   const discount = parseFloat(formik.values.discount) || 0;
@@ -173,10 +237,11 @@ export default function AddStudents({
 }, [formik.values.paid_amount, formik.values.total_amount, formik.values.discount]);
 
 
-  useEffect(() => {
+  useEffect(() => { 
     const selectedPlan = plans.find((p) => p.plan_name === formik.values.plan);
     if (selectedPlan) {
       formik.setFieldValue('total_amount', selectedPlan.amount || 0);
+      formik.setFieldValue('training_days', selectedPlan.training_days || '');
     }
   }, [formik.values.plan, plans]);
 
@@ -184,6 +249,7 @@ export default function AddStudents({
     const selectedInstructor = instructors.find((i) => i.name === formik.values.instructor_name);
     if (selectedInstructor) {
       formik.setFieldValue('instructor_mobile', selectedInstructor.mobile_number || '');
+       formik.setFieldValue('instructor_id', selectedInstructor.id || '');
     }
   }, [formik.values.instructor_name, instructors]);
 
@@ -202,7 +268,8 @@ export default function AddStudents({
     'plan', 'payment_method',
     'paid_amount', 'discount','total_amount',
     'balance', 'full_payment_status',
-    'instructor_name', 'instructor_mobile'
+    'instructor_name', 'instructor_mobile', 'training_days', 'training_start_date',
+  'training_time'
   ];
 
   const fieldPairs = [];
@@ -376,12 +443,25 @@ const handlePrint = () => {
                             : ""
                         }`}
                         onChange={
-                          ["mobile_number", "aadhar_number", "discount"].includes(field)
+                          field === "training_time"
+                            ? handleTimeInput
+                            : [
+                                "mobile_number",
+                                "aadhar_number",
+                                "discount",
+                                "training_days",
+                              ].includes(field)
                             ? handleNumericInput
                             : formik.handleChange
                         }
                         onBlur={formik.handleBlur}
-                        value={formik.values[field]}
+                       
+value={
+  field === "training_time"
+    ? formatTime12Hour(formik.values?.[field] || "")
+    : formik.values?.[field] || ""
+}
+
                         readOnly={[
                           "balance",
                           "total_amount",

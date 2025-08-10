@@ -48,11 +48,11 @@ const TrainingSession = () => {
   const initialMonth = searchParams.get("month") || "";
   const initialYear = searchParams.get("year") || "";
 
-  
+  const today = new Date().toISOString().split("T")[0]; // format: 'YYYY-MM-DD'
   const [filters, setFilters] = useState({
   instructor_id: "",
-  start_date: "",
-  end_date: "",
+  start_date: today,
+  end_date: today,
   status: "All",
 });
 

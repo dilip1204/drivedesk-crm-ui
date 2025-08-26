@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -77,14 +77,15 @@ const TrainingSession = () => {
   };
 
   const getTrainingSessionList = () => {
+     const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
     dispatch(
-      getTrainingSessionListInformation({ status: "All" }, (res) => {
+      getTrainingSessionListInformation({ status: "All", date: today }, (res) => {
         const trainingSessionList = res || [];
         if (
           Array.isArray(trainingSessionList) &&
           trainingSessionList.length > 0
         ) {
-          console.info("HI......", res);
+          
           setTrainingSessionData(trainingSessionList);
         } else {
           setTrainingSessionData([]);
@@ -355,6 +356,7 @@ const TrainingSession = () => {
                             <th>Student Name</th>
                             <th>Instructor Name</th>
                             <th>Date</th>
+                            <th>Session Completed</th>
                             <th>Status</th>
                             <th>Actions</th>
                           </tr>
@@ -366,6 +368,7 @@ const TrainingSession = () => {
                               <td>{tsession.student_name || "Student Name"}</td>
                               <td>{tsession.instructor_name || "Instructor Name"}</td>
                               <td>{tsession.date || "N/A"}</td>
+                              <td>{tsession.planned_progress || "N/A"}</td>
                               <td className="status"><i className="bi bi-check-circle"></i>{" "} {tsession.status}</td>
                               <td>
                                 <button className="btn btn-primary btn-sm action-btn" onClick={() => openSessionModal(tsession)}>

@@ -2,10 +2,10 @@ import { METHOD_TYPES } from '../../../shared/constants/methodTypes';
 import { request } from "../../core/networkRequest";
 import { ENDPOINTS } from "../../../shared/constants/endPoints";
 
-export const getAllStudents = (param) => {
+export const getAllStudents = (param) => { console.info('Hi.......', param)
     return request(
         METHOD_TYPES.GET,
-        ENDPOINTS.getAllStudents
+        ENDPOINTS.getAllStudents+'?skip='+param.skip+'&limit='+param.limit
     )
 } 
 

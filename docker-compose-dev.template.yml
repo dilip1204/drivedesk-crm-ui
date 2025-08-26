@@ -10,7 +10,7 @@ services:
     networks:
       - drivedesk-shared-network
     environment:
-      - API_HOST=http://drivedesk-dev-api:8000
+      - API_HOST=drivedesk-dev-api:8000
 
 networks:
   drivedesk-shared-network:

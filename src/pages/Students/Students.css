@@ -193,3 +193,60 @@ textarea:focus {
     .action-btn {
       margin-right: 5px;
     }
+
+
+    .custom-pagination .pagination {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.custom-pagination .page-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.custom-pagination .page-link {
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #495057;
+  font-weight: 500;
+  border: 1px solid #dee2e6;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
+}
+
+.custom-pagination .page-link:hover {
+  background-color: #f1f3f5;
+  color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.custom-pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+.custom-pagination .page-item.disabled .page-link {
+  color: #adb5bd;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+.custom-pagination .page-link i {
+  font-size: 1rem;
+  vertical-align: middle;
+}
+.pagination .page-item:first-child .page-link, .pagination .page-item:last-child .page-link {
+    height: 35px !important;
+    padding: 8px 14px;
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: #495057;
+    font-weight: 500;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}

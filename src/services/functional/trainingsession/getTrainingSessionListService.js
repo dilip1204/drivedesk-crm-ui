@@ -5,7 +5,7 @@ import { ENDPOINTS } from "../../../shared/constants/endPoints";
 export const getAllTrainingsession = (param) => { 
     return request(
         METHOD_TYPES.GET,
-        ENDPOINTS.getAllTrainingsession+'?status='+param.status
+        ENDPOINTS.getAllTrainingsession+'?status='+param.status+'&date='+param.date
     )
 } 
 

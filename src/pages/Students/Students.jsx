@@ -29,6 +29,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import AddPayment from "./addPayment";
 import { addStudentPayment } from "../../store/addStudentPayment/actions";
+import Pagination from "./Pagenation";
 
 const Students = () => {
   const dispatch = useDispatch();
@@ -49,6 +50,13 @@ const Students = () => {
   const [getStuentData, setGetStuentData] = useState([]);
   const [receiptData, setReceiptData] = useState(null);
   const [filterApplied, setFilterApplied] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
+  // before your table rows
+const startIndex = (currentPage - 1) * pageSize;
+
+
 
   const studentDataLists = useSelector(
     (state) => state.studentsListInfo.studentsList
@@ -107,10 +115,12 @@ const Students = () => {
   };
 
   const getStudentsList = () => {
+    const skip = (currentPage - 1) * pageSize;
     dispatch(
-      getStudentsListInformation({}, (res) => {
-        const studentList = res?.response || [];
-        if (Array.isArray(studentList) && studentList.length > 0) {
+      getStudentsListInformation({ skip, limit: pageSize }, (res) =>{
+        const studentList = res?.response?.students || [];
+        setTotalCount(res.response.total);
+        if (studentList.length > 0) {
           setStudentsData(studentList);
         } else {
           setStudentsData([]);
@@ -124,8 +134,8 @@ useEffect(()=> {
 
 }, [studentsData])
   useEffect(() => {
-    if (studentDataLists?.response?.length > 0) {
-      setStudentsData(studentDataLists.response);
+    if (studentDataLists?.response?.students?.length > 0) {
+      setStudentsData(studentDataLists.response?.students);
       setError(null);
     } else {
       setStudentsData([]);
@@ -164,7 +174,7 @@ useEffect(()=> {
           const { response, isError } = res;
 
           if (!isError && Array.isArray(response) && response.length > 0) {
-            setStudentsData(response);
+            setStudentsData(response?.students);
             setError(null);
           } else {
             setStudentsData([]);
@@ -176,7 +186,7 @@ useEffect(()=> {
     } else {
       getStudentsList();
     }
-  }, [dispatch]);
+  }, [dispatch, currentPage, pageSize]);
 
   const onStudentData = (res, isEdit) => {
     setSelectedStudent(res.response);
@@ -335,6 +345,79 @@ useEffect(()=> {
   }, 1000);
 };
 
+const totalPages = Math.ceil(totalCount / pageSize);
+
+const renderPagination = () => {
+  const totalPages = Math.ceil(totalCount / pageSize);
+  if (totalPages <= 1) return null;
+
+  const pageNumbers = [];
+  const maxVisible = 3;
+
+  if (currentPage > 1) pageNumbers.push(1);
+  if (currentPage > maxVisible) pageNumbers.push("...");
+  for (
+    let i = Math.max(2, currentPage - 1);
+    i <= Math.min(totalPages - 1, currentPage + 1);
+    i++
+  ) {
+    pageNumbers.push(i);
+  }
+  if (currentPage < totalPages - (maxVisible - 1)) pageNumbers.push("...");
+  if (currentPage < totalPages) pageNumbers.push(totalPages);
+
+  return (
+    <nav className="custom-pagination mt-4">
+      <ul className="pagination">
+        {/* Prev */}
+        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+          <button
+            className="page-link"
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          >
+            <i className="bi bi-chevron-left"></i>
+          </button>
+        </li>
+
+        {/* Pages */}
+        {pageNumbers.map((page, idx) =>
+          page === "..." ? (
+            <li key={idx} className="page-item disabled">
+              <span className="page-link">...</span>
+            </li>
+          ) : (
+            <li
+              key={idx}
+              className={`page-item ${currentPage === page ? "active" : ""}`}
+            >
+              <button
+                className="page-link"
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </button>
+            </li>
+          )
+        )}
+
+        {/* Next */}
+        <li
+          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+        >
+          <button
+            className="page-link"
+            onClick={() =>
+              setCurrentPage((p) => Math.min(p + 1, totalPages))
+            }
+          >
+            <i className="bi bi-chevron-right"></i>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  );
+};
+
 
   return (
     <>
@@ -402,6 +485,7 @@ useEffect(()=> {
                       validationSchema={FilterValidationSchema}
                       onSubmit={(values) => {
                         setFilterApplied(true);
+                        setCurrentPage(1);
                         dispatch(
                           getStudentsFilterListInformation(values, (res) => {
                             const { response, isError } = res;
@@ -415,7 +499,7 @@ useEffect(()=> {
                               return;
                             }
 
-                            const studentLists = response || [];
+                            const studentLists = response.students || [];
                             if (
                               Array.isArray(studentLists) &&
                               studentLists.length > 0
@@ -551,7 +635,80 @@ useEffect(()=> {
                   ) : error ? (
                     <p className="text-center text-danger my-5">{error}</p>
                   ) : (
-                    <div className="row g-4">
+                    <>
+                     <div className="table-responsive">
+                      <table className="table custom-table text-center align-middle">
+                        <thead className="table-light">
+                          <tr>
+                            <th>S.NO</th>
+                            <th>Student Name</th>
+                            <th>Enrolled Course</th>
+                            <th>Mobile Number</th>
+                            <th>Plan</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {studentsData.map((student, index) => (
+                            <tr key={index}>
+                              <td>{startIndex + index+1}</td>
+                              <td>{student.name || "Student Name"}</td>
+                              <td>{student.courseCount || 0} course(s) Enrolled</td>
+                              <td>{student.mobile_number || "N/A"}</td>
+                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {student.plan}</td>
+                              <td>
+                                 <button
+                                className="btn btn-sm btn-warning"
+                                title="Edit Student"
+                                onClick={() => handleEditStudent(student)}
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </button>{" "}
+                             
+                              <button
+                                className="btn btn-sm btn-success"
+                                title={
+                                  Number(student.balance) <= 0
+                                    ? "No balance due"
+                                    : "Add Payment"
+                                }
+                                onClick={() =>
+                                  getOneStudentPaymentData(true, student)
+                                }
+                                disabled={Number(student.balance) <= 0}
+                              >
+                                <i className="bi bi-currency-rupee"></i>
+                              </button>{" "}
+                            <Link
+                                  to="#"
+                                  onClick={() => openProfileModal(student)}
+                                  className="btn btn-primary btn-sm"
+                                >
+                                  View
+                                </Link>{" "}
+                                <a
+                                  href="#"
+                                  className="btn btn-secondary btn-sm"
+                                >
+                                  Schedule
+                                </a>{" "}
+                                 <button
+                                className="btn btn-sm btn-danger"
+                                title="Delete Student"
+                                onClick={() =>
+                                  deleteUser(student.application_number)
+                                }
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                               
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {/* <div className="row g-4">
                       {studentsData.map((student, index) => (
                         <div
                           className="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3"
@@ -631,11 +788,21 @@ useEffect(()=> {
                           </div>
                         </div>
                       ))}
-                    </div>
+                    </div> */}
+                    </>
                   )}
+                  <Pagination
+  currentPage={currentPage}
+  totalCount={totalCount}
+  pageSize={pageSize}
+  onPageChange={(p) => setCurrentPage(p)}
+  onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1); }}
+/>
                 </div>
               </div>
             </div>
+
+
 
             
 

@@ -1,3 +1,107 @@
 .text-right {
     text-align: right;
 }
+
+/* ---- Calendar grid (7 equal columns) ---- */
+.calendar { --cal-gap: .5rem; }
+
+.calendar__head,
+.calendar__body {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--cal-gap);
+}
+
+.calendar__head {
+  margin-top: .5rem;
+  margin-bottom: .5rem;
+  color: var(--bs-secondary-color);
+  font-size: .875rem;
+  text-align: center;
+}
+
+.calendar__headcell {
+  padding: .5rem 0;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+.calendar__cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: .5rem .5rem .6rem;
+  min-height: 112px;
+  border: 1px solid var(--bs-border-color);
+  border-radius: .5rem;
+  background: var(--bs-body-bg);
+  text-align: left;
+}
+
+.calendar__cell:hover:not(:disabled) {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 0;
+}
+
+.calendar__cell--empty {
+  border: none;
+  background: transparent;
+  min-height: 112px;
+}
+
+.calendar__cell--sunday {
+  background: var(--bs-light) !important;
+  color: var(--bs-secondary-color);
+  cursor: not-allowed;
+  opacity: .85;
+}
+
+.calendar__cell:disabled { cursor: not-allowed; }
+
+.calendar__celltop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar__date { font-weight: 600; }
+
+.calendar__sunday {
+  text-transform: uppercase;
+  font-size: .75rem;
+  color: var(--bs-secondary-color);
+}
+
+.calendar__counts {
+  margin-top: .25rem;
+  font-size: .875rem;
+  color: var(--bs-secondary-color);
+}
+
+/* responsive tile height */
+@media (max-width: 576px) {
+  .calendar__cell,
+  .calendar__cell--empty { min-height: 96px; }
+}
+@media (min-width: 992px) {
+  .calendar__cell,
+  .calendar__cell--empty { min-height: 120px; }
+}
+
+/* ---- Modal slideout (right drawer) ---- */
+.modal-dialog-slideout {
+  margin: 0 0 0 auto;
+  height: 100%;
+  max-width: 640px; /* adjust as needed */
+  transform: translateX(0);
+}
+
+.modal-dialog-slideout .modal-content {
+  height: 100vh;
+  border-radius: 0;
+}
+
+.modal { z-index: 1055; }       /* Bootstrap default layering */
+.modal-backdrop { z-index: 1050; }
+
+

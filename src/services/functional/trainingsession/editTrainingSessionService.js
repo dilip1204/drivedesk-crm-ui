@@ -12,3 +12,14 @@ delete param.session_id;
         param
     )
 } 
+
+export const rescheduleTrainingSessionList = (param) => { //console.info('params.....', param)
+    
+const sessionId = param.session_id;
+delete param.session_id;
+    return request(
+        METHOD_TYPES.PATCH,
+        ENDPOINTS.rescheduleTrainingsession+sessionId+'/plan',
+        param
+    )
+}

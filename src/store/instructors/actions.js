@@ -2,7 +2,8 @@ import {
     ADD_INSTRUCTOR_DATA,
     UPDATE_INSTRUCTOR_DATA,
     GET_INSTRUCTOR_LIST,
-    DELETE_INSTRUCTOR_DATA
+    DELETE_INSTRUCTOR_DATA,
+    GET_INSTRUCTORAVAIL_LIST
  } from "./types";
 
 export function addInstructor(param, fn) {
@@ -24,6 +25,14 @@ export function updateInstructor(param, fn) {
 export function getInstructorsListInformation(param, fn) { 
     return {
         type: GET_INSTRUCTOR_LIST,
+        param,
+        fn,
+    }
+}
+
+export function getInstructorAvailInformation(param, fn) { 
+    return {
+        type: GET_INSTRUCTORAVAIL_LIST,
         param,
         fn,
     }

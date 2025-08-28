@@ -19,6 +19,7 @@ import * as getDashboardSummaryService from './dashboard/getDashboardSummaryServ
 import * as addStudentPaymentList from './students/addPaymentService';
 import * as getAllTrainingsessionService from './trainingsession/getTrainingSessionListService';
 import * as editTrainingSession from './trainingsession/editTrainingSessionService';
+import * as rescheduleTrainingsession from './trainingsession/editTrainingSessionService';
 
 export {
     userLogin,
@@ -41,5 +42,6 @@ export {
     getDashboardSummaryService,
     addStudentPaymentList,
     getAllTrainingsessionService,
-    editTrainingSession  
+    editTrainingSession,
+    rescheduleTrainingsession  
 };

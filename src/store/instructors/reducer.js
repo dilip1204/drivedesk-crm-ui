@@ -14,7 +14,12 @@ import {
    // DELETE_INSTRUCTOR_DATA,
     DELETE_INSTRUCTOR_DATA_ERROR,
     DELETE_INSTRUCTOR_DATA_PENDING,
-    DELETE_INSTRUCTOR_DATA_SUCCESS
+    DELETE_INSTRUCTOR_DATA_SUCCESS,
+
+    // GET_INSTRUCTORAVAIL_LIST,
+    GET_INSTRUCTORAVAIL_LIST_ERROR,
+    GET_INSTRUCTORAVAIL_LIST_PENDING,
+    GET_INSTRUCTORAVAIL_LIST_SUCCESS
 } from './types';
 
 const initialState = {
@@ -30,6 +35,9 @@ const initialState = {
     deleteInstructorResponse: [],
     deleteInstructorLoader: false,
     deleteInstructorError: [],
+    instructorAvailList: [],
+    instructorAvailListLoader: false,
+    instructorAvailListError: [],
 }
 
 export default function InstructorReducer(state = initialState, action) {
@@ -101,6 +109,23 @@ export default function InstructorReducer(state = initialState, action) {
                 ...state,
                 deleteInstructorError: action.error,
                 deleteInstructorLoader: false
+            }
+        case GET_INSTRUCTORAVAIL_LIST_SUCCESS:
+            return {
+                ...state,
+                instructorAvailList: action.data,
+                instructorAvailListLoader: false
+            }
+        case GET_INSTRUCTORAVAIL_LIST_PENDING:
+            return {
+                ...state,
+                instructorAvailListLoader: true
+            }
+        case GET_INSTRUCTORAVAIL_LIST_ERROR:
+            return {
+                ...state,
+                instructorAvailListError: action.error,
+                instructorsAVailListLoader: false
             }
         default:
             return state;

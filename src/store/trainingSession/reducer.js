@@ -9,7 +9,12 @@ import {
 
     UPDATE_TRAINING_SESSION_DATA_ERROR,
     UPDATE_TRAINING_SESSION_DATA_PENDING,
-    UPDATE_TRAINING_SESSION_DATA_SUCCESS
+    UPDATE_TRAINING_SESSION_DATA_SUCCESS,
+
+    RESCHDULE_TRAINING_SESSION_DATA,
+    RESCHDULE_TRAINING_SESSION_DATA_ERROR,
+    RESCHDULE_TRAINING_SESSION_DATA_PENDING,
+    RESCHDULE_TRAINING_SESSION_DATA_SUCCESS,
   
 } from './types';
 
@@ -25,6 +30,10 @@ const initialState = {
     editTrainingSessionResponse: [],
     editTrainingSessionLoader: false,
     editTrainingSessionError: [],
+
+    reTrainingSessionResponse: [],
+    reTrainingSessionLoader: false,
+    reTrainingSessionError: [],
 
 }
 
@@ -80,6 +89,23 @@ export default function trainingSessionListReducer(state = initialState, action)
                         ...state,
                         editTrainingSessionError: action.error,
                         editTrainingSessionLoader: false
+                    }
+        case RESCHDULE_TRAINING_SESSION_DATA_SUCCESS:
+                    return {
+                        ...state,
+                        reTrainingSessionResponse: action.data,
+                        reTrainingSessionLoader: false
+                    }
+                case RESCHDULE_TRAINING_SESSION_DATA_PENDING:
+                    return {
+                        ...state,
+                        reTrainingSessionLoader: true
+                    }
+                case RESCHDULE_TRAINING_SESSION_DATA_ERROR:
+                    return {
+                        ...state,
+                        reTrainingSessionError: action.error,
+                        reTrainingSessionLoader: false
                     }
          
         default:

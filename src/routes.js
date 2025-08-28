@@ -8,6 +8,7 @@ import TrainingSession from "./pages/TrainingSession/TrainingSession";
 import Tariff from "./pages/Tariff/Tariff";
 import Enquiries from "./pages/Enquiries/enquiries";
 import ProtectedRoute from "./components/ProtectedRoute";
+import InstructorAvailabilityDashboard from "./pages/Instructors/InstructorAvailabilityDashboard";
 
 export default function AppRoutes() {
   return (
@@ -68,6 +69,13 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+        <Route
+    path="/instructors/:instructorId/availability"
+    element={<InstructorAvailabilityDashboard />}
+  />
+
+
     </Routes>
   );
 }

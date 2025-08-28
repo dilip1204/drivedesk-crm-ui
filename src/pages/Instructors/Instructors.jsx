@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import "../../assets/plugins/simplebar/simplebar.css";
@@ -26,6 +26,7 @@ import ProfileModal from "../../components/ProfileModal";
 import { useAuth } from "../../hooks/useAuth";
 
 const Instructors = () => {
+   const navigate = useNavigate();
   const { role } = useAuth();
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
@@ -39,6 +40,16 @@ const Instructors = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
 const [profileData, setProfileData] = useState([]);
 const instructorList = useSelector((state) => state.instructorInfo.instructorsList);
+
+  // OPEN Instructor Availability Dashboard
+  const handleInstructor = (instructor) => {
+    // pass both a route param and the full instructor via location state
+    const idOrPhone = instructor?.mobile_number;
+    navigate(`/instructors/${idOrPhone}/availability`, {
+      state: { instructor },
+    });
+  };
+
 
 const openInstructorProfile = (data) => {
   const fields = [
@@ -232,10 +243,18 @@ const openInstructorProfile = (data) => {
                               {" "}
                               <button
                                 className="btn btn-sm btn-danger"
-                                title="Delete INstructor"
+                                title="Delete Isntructor"
                                 onClick={() => deleteUser(ins.mobile_number)}
                               >
                                 <i className="bi bi-trash"></i>
+                              </button>
+                              {" "}
+                              <button
+                                className="btn btn-sm btn-warning"
+                                title="Instructor availability"
+                                onClick={() => handleInstructor(ins)}
+                              >
+                                <i className="bi bi-person-check"></i>
                               </button>
         </>
       ) : (

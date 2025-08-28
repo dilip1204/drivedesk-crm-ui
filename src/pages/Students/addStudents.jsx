@@ -5,9 +5,7 @@ import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import { addStudent, updateStudent } from "../../store/addStudent/actions";
 import { IoClose } from "react-icons/io5";
-import {
-  getStudentReceiptInfo,
-} from "../../store/students/actions";
+import { getStudentReceiptInfo } from "../../store/students/actions";
 
 export default function AddStudents({
   showModal,
@@ -17,37 +15,71 @@ export default function AddStudents({
   onStudentAdded,
   studentData,
   plans = [],
-  instructors = []
+  instructors = [],
 }) {
   const dispatch = useDispatch();
   const [isPrintEnabled, setIsPrintEnabled] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
   const [htmlContent, setHtmlContent] = useState("");
 
+  // --- helpers for time normalization ---
+  // Accepts "HH:MM", "H:MM AM/PM", or "HH:MM AM/PM" -> returns "HH:MM" (24h)
+  const to24h = (input) => {
+    if (!input || typeof input !== "string") return "";
+    const trimmed = input.trim();
 
+    // Already 24h "HH:MM"?
+    const m24 = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(trimmed);
+    if (m24) return `${m24[1]}:${m24[2]}`;
+
+    // 12h "H:MM AM/PM"
+    const m12 = /^(\d{1,2}):([0-5]\d)\s*(AM|PM)$/i.exec(trimmed);
+    if (m12) {
+      let h = parseInt(m12[1], 10);
+      const mm = m12[2];
+      const mer = m12[3].toUpperCase();
+      if (mer === "AM") {
+        if (h === 12) h = 0;
+      } else {
+        if (h !== 12) h += 12;
+      }
+      const hh = String(h).padStart(2, "0");
+      return `${hh}:${mm}`;
+    }
+
+    // Fallback: try to parse via Date if string like "HH:MM:SS"
+    const asDate = new Date(`1970-01-01T${trimmed}`);
+    if (!Number.isNaN(asDate.getTime())) {
+      const hh = String(asDate.getHours()).padStart(2, "0");
+      const mm = String(asDate.getMinutes()).padStart(2, "0");
+      return `${hh}:${mm}`;
+    }
+    return "";
+  };
 
   const initialValues = {
-    name: id?.name || '',
-    dob: id?.dob || '',
-    mobile_number: id?.mobile_number || '',
-    application_number: id?.application_number || '',
+    name: id?.name || "",
+    dob: id?.dob || "",
+    mobile_number: id?.mobile_number || "",
+    application_number: id?.application_number || "",
     email: id?.email || null,
-    aadhar_number: id?.aadhar_number || '',
-    plan: id?.plan || '',
-    payment_method: id?.payment_method || '',
+    aadhar_number: id?.aadhar_number || "",
+    plan: id?.plan || "",
+    payment_method: id?.payment_method || "",
     paid_amount: id?.paid_amount || 0,
     total_amount: id?.total_amount || 0,
     balance: id?.balance || 0,
-    full_payment_status: id?.full_payment_status || 'Pending',
-    instructor_name: id?.instructor_name || '',
-    instructor_id: id?.instructor_id || '',
-    instructor_mobile: id?.instructor_mobile || '',
+    full_payment_status: id?.full_payment_status || "Pending",
+    instructor_name: id?.instructor_name || "",
+    instructor_id: id?.instructor_id || "",
+    instructor_mobile: id?.instructor_mobile || "",
     test_date: id?.test_date || null,
     discount: id?.discount || 0,
-    training_days: id?.training_days || '',
-    training_start_date: id?.training_start_date || '',
-    training_time: id?.training_time || '',
-    attended_days:id?.attended_days || 0
+    training_days: id?.training_days || "",
+    training_start_date: id?.training_start_date || "",
+    // normalize incoming training_time to "HH:MM" so the time input shows it
+    training_time: to24h(id?.training_time) || "",
+    attended_days: id?.attended_days || 0,
   };
 
   const validationSchema = Yup.object({
@@ -59,15 +91,17 @@ export default function AddStudents({
         if (!value) return false;
         const today = new Date();
         const birthDate = new Date(value);
-        const age = today.getFullYear() - birthDate.getFullYear();
+        let age = today.getFullYear() - birthDate.getFullYear();
         const m = today.getMonth() - birthDate.getMonth();
-        return age > 18 || (age === 18 && m >= 0);
+        const d = today.getDate() - birthDate.getDate();
+        if (m < 0 || (m === 0 && d < 0)) age -= 1;
+        return age >= 18;
       }),
     mobile_number: Yup.string()
       .matches(/^\d{10}$/, "Mobile number must be 10 digits")
       .required("Mobile number is required"),
     application_number: Yup.string().required("Application number is required"),
-    email: "", //Yup.string(), //.email("Invalid email format").required("Email is required"),
+    email: "", // optional
     aadhar_number: Yup.string().required("Aadhar number is required"),
     plan: Yup.string().required("Plan is required"),
     payment_method: Yup.string().required("Payment method is required"),
@@ -77,21 +111,16 @@ export default function AddStudents({
     total_amount: Yup.number()
       .required("Total amount is required")
       .typeError("Must be a number"),
-    balance: Yup.number()
-      .required("Balance is required")
-      .typeError("Must be a number"),
-    full_payment_status: Yup.string().required(
-      "Full payment status is required"
-    ),
+    balance: Yup.number().required("Balance is required").typeError("Must be a number"),
+    full_payment_status: Yup.string().required("Full payment status is required"),
     instructor_name: Yup.string().required("Instructor name is required"),
     instructor_mobile: Yup.string().required("Instructor mobile is required"),
     training_days: Yup.number()
       .nullable()
       .typeError("Training days must be a number")
       .min(0, "Cannot be negative"),
-
     training_start_date: Yup.date().nullable().typeError("Invalid date format"),
-
+    // keep 24h HH:MM format for storage
     training_time: Yup.string()
       .nullable()
       .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)"),
@@ -108,9 +137,7 @@ export default function AddStudents({
             const total = parseFloat(total_amount);
             const paid = parseFloat(paid_amount);
             const discount = parseFloat(value);
-
             const remaining = total - paid;
-
             if (isNaN(discount) || isNaN(remaining)) return true;
             return discount <= remaining;
           }
@@ -126,150 +153,151 @@ export default function AddStudents({
     }
   );
 
-  
-
   const formik = useFormik({
     enableReinitialize: true,
     initialValues,
     validationSchema,
     onSubmit: (values) => {
-  let updatedValues = {};
+      let updatedValues = {};
 
-  if (isEdit) {
-    Object.keys(values).forEach((key) => {
-      if (values[key] !== id[key]) {
-        updatedValues[key] = values[key];
-      }
-    });
+      if (isEdit) {
+        Object.keys(values).forEach((key) => {
+          if (values[key] !== id[key]) {
+            updatedValues[key] = values[key];
+          }
+        });
 
-    updatedValues.status = "Process Started";
+        updatedValues.status = "Process Started";
 
-    const payload = {
-      application_number: id?.application_number,
-      studentData: updatedValues,
-    };
+        const payload = {
+          application_number: id?.application_number,
+          studentData: updatedValues,
+        };
 
-    dispatch(updateStudent(payload, (response) => {
-      handleResponse(response);
-    }));
-  } else {
-    updatedValues = {
-      ...values,
-      status: "Process Started",
-    };
+        dispatch(
+          updateStudent(payload, (response) => {
+            handleResponse(response);
+          })
+        );
+      } else {
+        updatedValues = {
+          ...values,
+          status: "Process Started",
+        };
 
-
-      // Add instructor_id by looking up selected instructor
-      const selectedInstructor = instructors.find(
-        (ins) => ins.name === values.instructor_name
-      );
-      if (selectedInstructor) {
-        updatedValues.instructor_id = selectedInstructor.id;
-      }
-
-    dispatch(addStudent({ studentData: updatedValues }, (response) => {
-      handleResponse(response);
-    }));
-  }
-
-  function handleResponse(response) {
-    const errorList = response?.data?.detail || response?.detail || response;
-
-    if (Array.isArray(errorList)) {
-      errorList.forEach((err) => {
-        const field = err?.loc?.[1];
-        const msg = err?.msg || err?.message || 'Invalid input';
-        if (field && formik.values.hasOwnProperty(field)) {
-          formik.setFieldError(field, msg);
+        // Add instructor_id by looking up selected instructor
+        const selectedInstructor = instructors.find(
+          (ins) => ins.name === values.instructor_name
+        );
+        if (selectedInstructor) {
+          updatedValues.instructor_id = selectedInstructor.id;
         }
-      });
-      return;
-    }
 
-    formik.resetForm();
-    if (typeof onStudentAdded === 'function') {
-      onStudentAdded();
-      studentData(response, isEdit);
-      setReceiptData(response?.response || response);
-    }
-    setIsPrintEnabled(true);
-  }
-}
+        dispatch(
+          addStudent({ studentData: updatedValues }, (response) => {
+            handleResponse(response);
+          })
+        );
+      }
 
+      function handleResponse(response) {
+        const errorList = response?.data?.detail || response?.detail || response;
+
+        if (Array.isArray(errorList)) {
+          errorList.forEach((err) => {
+            const field = err?.loc?.[1];
+            const msg = err?.msg || err?.message || "Invalid input";
+            if (field && Object.prototype.hasOwnProperty.call(formik.values, field)) {
+              formik.setFieldError(field, msg);
+            }
+          });
+          return;
+        }
+
+        formik.resetForm();
+        if (typeof onStudentAdded === "function") {
+          onStudentAdded();
+          studentData(response, isEdit);
+          setReceiptData(response?.response || response);
+        }
+        setIsPrintEnabled(true);
+      }
+    },
   });
 
- const handleTimeInput = (e) => {
-  const { name, value } = e.target;
-  const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i;
+  useEffect(() => {
+    const paid = parseFloat(formik.values.paid_amount);
+    const discount = parseFloat(formik.values.discount) || 0;
+    const total = parseFloat(formik.values.total_amount);
 
-  if (value === "" || timeRegex.test(value.trim())) {
-    formik.setFieldValue(name, value.trim());
-    formik.setFieldError(name, "");
-  } else {
-    formik.setFieldValue(name, value);
-    formik.setFieldError(name, "Invalid time format (HH:MM AM/PM)");
-  }
-};
-
-const formatTime12Hour = (time) => {
-  if (!time || typeof time !== "string") return "";
-  const date = new Date(`1970-01-01T${time}`);
-  if (isNaN(date)) return time;
-  let hours = date.getHours();
-  const minutes = date.getMinutes();
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12;
-  return `${hours}:${String(minutes).padStart(2, "0")} ${ampm}`;
-};
-
-
-
+    if (!isNaN(paid) && !isNaN(total)) {
+      const finalBalance = total - discount - paid;
+      formik.setFieldValue("balance", finalBalance);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.paid_amount, formik.values.total_amount, formik.values.discount]);
 
   useEffect(() => {
-  const paid = parseFloat(formik.values.paid_amount);
-  const discount = parseFloat(formik.values.discount) || 0;
-  const total = parseFloat(formik.values.total_amount);
-
-  if (!isNaN(paid) && !isNaN(total)) {
-    const finalBalance = total - discount - paid;
-    formik.setFieldValue('balance', finalBalance);
-  }
-}, [formik.values.paid_amount, formik.values.total_amount, formik.values.discount]);
-
-
-  useEffect(() => { 
     const selectedPlan = plans.find((p) => p.plan_name === formik.values.plan);
     if (selectedPlan) {
-      formik.setFieldValue('total_amount', selectedPlan.amount || 0);
-      formik.setFieldValue('training_days', selectedPlan.training_days || '');
+      formik.setFieldValue("total_amount", selectedPlan.amount || 0);
+      formik.setFieldValue("training_days", selectedPlan.training_days || "");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.plan, plans]);
 
   useEffect(() => {
-    const selectedInstructor = instructors.find((i) => i.name === formik.values.instructor_name);
+    const selectedInstructor = instructors.find(
+      (i) => i.name === formik.values.instructor_name
+    );
     if (selectedInstructor) {
-      formik.setFieldValue('instructor_mobile', selectedInstructor.mobile_number || '');
-       formik.setFieldValue('instructor_id', selectedInstructor.id || '');
+      formik.setFieldValue("instructor_mobile", selectedInstructor.mobile_number || "");
+      formik.setFieldValue("instructor_id", selectedInstructor.id || "");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.instructor_name, instructors]);
+
+  useEffect(() => {
+    if (showModal) {
+      setIsPrintEnabled(false);
+      // normalize training_time once when opening
+      if (formik.values.training_time) {
+        const normalized = to24h(formik.values.training_time);
+        if (normalized && normalized !== formik.values.training_time) {
+          formik.setFieldValue("training_time", normalized);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showModal]);
 
   const handleNumericInput = (e) => {
     const { name, value } = e.target;
-    const numericValue = value.replace(/[^0-9]/g, '');
+    const numericValue = value.replace(/[^0-9]/g, "");
     formik.setFieldValue(name, numericValue);
   };
 
   const showBalanceWarning = parseFloat(formik.values.balance) < 0;
 
   const fields = [
-    'name', 'dob',
-    'mobile_number', 'application_number',
-    'email', 'aadhar_number',
-    'plan', 'payment_method',
-    'paid_amount', 'discount','total_amount',
-    'balance', 'full_payment_status',
-    'instructor_name', 'instructor_mobile', 'training_days', 'training_start_date',
-  'training_time'
+    "name",
+    "dob",
+    "mobile_number",
+    "application_number",
+    "email",
+    "aadhar_number",
+    "plan",
+    "payment_method",
+    "paid_amount",
+    "discount",
+    "total_amount",
+    "balance",
+    "full_payment_status",
+    "instructor_name",
+    "instructor_mobile",
+    "training_days",
+    "training_start_date",
+    "training_time",
   ];
 
   const fieldPairs = [];
@@ -277,55 +305,38 @@ const formatTime12Hour = (time) => {
     fieldPairs.push(fields.slice(i, i + 2));
   }
 
-  useEffect(() => {
-  if (showModal) {
-    setIsPrintEnabled(false);
-  }
-}, [showModal]);
+  const handlePrint = () => {
+    hideModal();
 
+    const receipt_no =
+      receiptData?.payments?.[0]?.receipt_no ||
+      receiptData?.response?.payments?.[0]?.receipt_no;
 
-const handlePrint = () => {
-  hideModal();
-
-  const receipt_no = receiptData?.payments?.[0]?.receipt_no ||
-                     receiptData?.response?.payments?.[0]?.receipt_no;
-
-                     //console.info('receiptData.......', receiptData)
-
-  if (!receipt_no) {
-    alert("Receipt number not available to print.");
-    return;
-  }
-
-  dispatch(getStudentReceiptInfo({ receipt_no }, (response) => {
-    if (response) {
-      setHtmlContent(response);
-      setTimeout(() => {
-        const printWindow = window.open("", "_blank");
-        printWindow.document.write(response);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-      }, 100);
-    } else {
-      alert("Failed to fetch receipt info.");
+    if (!receipt_no) {
+      alert("Receipt number not available to print.");
+      return;
     }
-  }));
-};
 
-
-
-
+    dispatch(
+      getStudentReceiptInfo({ receipt_no }, (response) => {
+        if (response) {
+          setHtmlContent(response);
+          setTimeout(() => {
+            const printWindow = window.open("", "_blank");
+            printWindow.document.write(response);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+          }, 100);
+        } else {
+          alert("Failed to fetch receipt info.");
+        }
+      })
+    );
+  };
 
   return (
-    <Modal
-      show={showModal}
-      onHide={hideModal}
-      backdrop="static"
-      keyboard={false}
-      size="lg"
-      centered
-    >
+    <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered>
       <Modal.Header closeButton>
         <Modal.Title>{isEdit ? "Update Student" : "Add Student"}</Modal.Title>
         <IoClose
@@ -346,19 +357,17 @@ const handlePrint = () => {
         <form onSubmit={formik.handleSubmit}>
           {showBalanceWarning && (
             <Alert variant="warning">
-              Warning: Balance is negative. Please verify paid and total
-              amounts.
+              Warning: Balance is negative. Please verify paid and total amounts.
             </Alert>
           )}
+
           {fieldPairs.map((pair, rowIndex) => (
             <div className="row" key={rowIndex}>
               {pair.map((field) => (
                 <div className="col-md-6" key={field}>
                   <div className="form-group">
                     <label>
-                      {field
-                        .replace(/_/g, " ")
-                        .replace(/\b\w/g, (c) => c.toUpperCase())}
+                      {field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       {[
                         "name",
                         "dob",
@@ -373,31 +382,22 @@ const handlePrint = () => {
                         "full_payment_status",
                         "instructor_name",
                         "instructor_mobile",
-                      ].includes(field) && (
-                        <span style={{ color: "red" }}>*</span>
-                      )}
+                      ].includes(field) && <span style={{ color: "red" }}>*</span>}
                     </label>
 
-                    {[
-                      "full_payment_status",
-                      "payment_method",
-                      "plan",
-                      "instructor_name",
-                    ].includes(field) ? (
+                    {["full_payment_status", "payment_method", "plan", "instructor_name"].includes(
+                      field
+                    ) ? (
                       <select
                         name={field}
                         className={`form-control${
-                          formik.touched[field] && formik.errors[field]
-                            ? " is-invalid"
-                            : ""
+                          formik.touched[field] && formik.errors[field] ? " is-invalid" : ""
                         }`}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         value={formik.values[field]}
                       >
-                        <option value="">
-                          Select {field.replace(/_/g, " ")}
-                        </option>
+                        <option value="">Select {field.replace(/_/g, " ")}</option>
                         {field === "full_payment_status" &&
                           ["Pending", "Completed", "Failed"].map((opt) => (
                             <option key={opt} value={opt}>
@@ -423,6 +423,25 @@ const handlePrint = () => {
                             </option>
                           ))}
                       </select>
+                    ) : field === "training_time" ? (
+                      // --- Native time picker (stores 24h "HH:MM") ---
+                      <input
+                        type="time"
+                        name="training_time"
+                        step="60"
+                        className={`form-control${
+                          formik.touched.training_time && formik.errors.training_time
+                            ? " is-invalid"
+                            : ""
+                        }`}
+                        value={formik.values.training_time || ""}
+                        onChange={(e) => {
+                          // e.target.value is already "HH:MM"
+                          const value24 = to24h(e.target.value);
+                          formik.setFieldValue("training_time", value24);
+                        }}
+                        onBlur={formik.handleBlur}
+                      />
                     ) : (
                       <input
                         type={
@@ -434,39 +453,18 @@ const handlePrint = () => {
                         }
                         name={field}
                         className={`form-control${
-                          formik.touched[field] && formik.errors[field]
-                            ? " is-invalid"
-                            : ""
-                        }${
-                          showBalanceWarning && field === "balance"
-                            ? " is-invalid"
-                            : ""
-                        }`}
+                          formik.touched[field] && formik.errors[field] ? " is-invalid" : ""
+                        }${showBalanceWarning && field === "balance" ? " is-invalid" : ""}`}
                         onChange={
-                          field === "training_time"
-                            ? handleTimeInput
-                            : [
-                                "mobile_number",
-                                "aadhar_number",
-                                "discount",
-                                "training_days",
-                              ].includes(field)
+                          ["mobile_number", "aadhar_number", "discount", "training_days"].includes(
+                            field
+                          )
                             ? handleNumericInput
                             : formik.handleChange
                         }
                         onBlur={formik.handleBlur}
-                       
-value={
-  field === "training_time"
-    ? formatTime12Hour(formik.values?.[field] || "")
-    : formik.values?.[field] || ""
-}
-
-                        readOnly={[
-                          "balance",
-                          "total_amount",
-                          "instructor_mobile",
-                        ].includes(field)}
+                        value={formik.values?.[field] || ""}
+                        readOnly={["balance", "total_amount", "instructor_mobile"].includes(field)}
                         maxLength={
                           field === "mobile_number"
                             ? 10
@@ -481,6 +479,7 @@ value={
                         }
                       />
                     )}
+
                     {formik.touched[field] && formik.errors[field] && (
                       <div className="text-danger">{formik.errors[field]}</div>
                     )}
@@ -489,6 +488,7 @@ value={
               ))}
             </div>
           ))}
+
           {isEdit && (
             <div className="row">
               <div className="col-md-6">
@@ -500,9 +500,7 @@ value={
                     type="date"
                     name="test_date"
                     className={`form-control${
-                      formik.touched.test_date && formik.errors.test_date
-                        ? " is-invalid"
-                        : ""
+                      formik.touched.test_date && formik.errors.test_date ? " is-invalid" : ""
                     }`}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
@@ -534,11 +532,7 @@ value={
               </>
             ) : (
               <>
-                <Button
-                  variant="outline-primary"
-                  onClick={handlePrint}
-                  disabled={!isPrintEnabled}
-                >
+                <Button variant="outline-primary" onClick={handlePrint} disabled={!isPrintEnabled}>
                   Print
                 </Button>
                 <Button

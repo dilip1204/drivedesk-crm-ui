@@ -1,12 +1,11 @@
-import React, {useRef } from "react";
+import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import "./../Students/Students.css"; // Optional custom styles
 import { ToastContainer, toast } from "react-toastify";
 
 export default function StudentTrainingSessionModal({ show, onClose, session }) {
 
- 
-console.info('session......',session)
+
   return (
     <Modal show={show} onHide={onClose} size="lg" centered>
       <Modal.Header closeButton>

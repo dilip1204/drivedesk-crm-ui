@@ -15,7 +15,11 @@ import {
     DELETE_INSTRUCTOR_DATA,
     DELETE_INSTRUCTOR_DATA_ERROR,
     DELETE_INSTRUCTOR_DATA_PENDING,
-    DELETE_INSTRUCTOR_DATA_SUCCESS
+    DELETE_INSTRUCTOR_DATA_SUCCESS,
+    GET_INSTRUCTORAVAIL_LIST,
+    GET_INSTRUCTORAVAIL_LIST_ERROR,
+    GET_INSTRUCTORAVAIL_LIST_PENDING,
+    GET_INSTRUCTORAVAIL_LIST_SUCCESS
 } from './types';
 
 import { addInstructorList, editInstructorList, getAllInstructorsService, deleteInstructorList } from '../../services/functional';
@@ -108,6 +112,28 @@ function* deleteInstructorData(action){
     }
 }
 
+function* getAllInstructorAvailInformation(action){ 
+    try {
+        yield put({ type: GET_INSTRUCTORAVAIL_LIST_PENDING });
+        const response = yield call(
+            getAllInstructorsService.getInstructorAvail,
+            action.param,
+        );
+        yield put({ 
+            type: GET_INSTRUCTORAVAIL_LIST_SUCCESS,
+            data: response.data
+        });
+        if (typeof action.fn === "function") {
+            action.fn(response.data)
+        }
+    } catch (error) { 
+        yield put({ type: GET_INSTRUCTORAVAIL_LIST_ERROR, error: error});
+        if (typeof action.fn === "function") {
+            action.fn(error)
+        }
+    }
+}
+
 export function* watchAddInstructor() {
     yield takeEvery(ADD_INSTRUCTOR_DATA, addInstructorData);
 }
@@ -122,4 +148,8 @@ export function* watchInstructorListInformation() {
 
 export function* watchDeleteInstructor() {
     yield takeEvery(DELETE_INSTRUCTOR_DATA, deleteInstructorData);
+}
+
+export function* watchInstructorAvailListInformation() {
+    yield takeEvery(GET_INSTRUCTORAVAIL_LIST, getAllInstructorAvailInformation);
 }

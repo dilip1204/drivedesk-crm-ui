@@ -1,3 +1,5 @@
+import { rescheduleTrainingSessionList } from "../../services/functional/trainingsession/editTrainingSessionService";
+
 export const ENDPOINTS = {
     userLogin: 'auth/login',
     getAllStudents: 'getAllStudents',
@@ -24,4 +26,6 @@ export const ENDPOINTS = {
     getAllTrainingsession: 'training-sessions',
     getAllTrainingsessionFilter: 'training-sessions/instructor/',
     editTrainingsession: 'training-sessions/',
+    rescheduleTrainingsession: 'training-sessions/',
+    getInstructorAvail: 'instructors/by-mobile/',
 } 

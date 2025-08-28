@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import "../../assets/plugins/simplebar/simplebar.css";
@@ -26,6 +26,7 @@ import ProfileModal from "../../components/ProfileModal";
 import { useAuth } from "../../hooks/useAuth";
 
 const Instructors = () => {
+   const navigate = useNavigate();
   const { role } = useAuth();
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
@@ -39,6 +40,16 @@ const Instructors = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
 const [profileData, setProfileData] = useState([]);
 const instructorList = useSelector((state) => state.instructorInfo.instructorsList);
+
+  // OPEN Instructor Availability Dashboard
+  const handleInstructor = (instructor) => {
+    // pass both a route param and the full instructor via location state
+    const idOrPhone = instructor?.mobile_number;
+    navigate(`/instructors/${idOrPhone}/availability`, {
+      state: { instructor },
+    });
+  };
+
 
 const openInstructorProfile = (data) => {
   const fields = [
@@ -200,14 +211,69 @@ const openInstructorProfile = (data) => {
                   ) : error ? (
                     <p className="text-center text-danger my-5">{error}</p>
                   ) : (
-                    <div className="row g-4">
+                    <>
+                    <div className="table-responsive">
+                      <table className="table custom-table text-center align-middle">
+                        <thead className="table-light">
+                          <tr>
+                            <th>S.NO</th>
+                            <th>Instructor Name</th>
+                            <th>Mobile Number</th>
+                            <th>Availability</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {instructorsData.map((ins, index) => (
+                            <tr key={index}>
+                              <td>{index+1}</td>
+                              <td>{ins.name || "Instructor Name"}</td>
+                              <td>{ins.mobile_number || "N/A"}</td>
+                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {ins.available_from} to {ins.available_to}</td>
+                              <td>
+                               {role === "admin" ? (
+        <>
+         <button
+                                className="btn btn-sm btn-warning"
+                                title="Edit Instructor"
+                                onClick={() => handleEditInstructor(ins)}
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </button>
+                              {" "}
+                              <button
+                                className="btn btn-sm btn-danger"
+                                title="Delete Isntructor"
+                                onClick={() => deleteUser(ins.mobile_number)}
+                              >
+                                <i className="bi bi-trash"></i>
+                              </button>
+                              {" "}
+                              <button
+                                className="btn btn-sm btn-warning"
+                                title="Instructor availability"
+                                onClick={() => handleInstructor(ins)}
+                              >
+                                <i className="bi bi-person-check"></i>
+                              </button>
+        </>
+      ) : (
+        <span>Disable</span>
+      )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {/* <div className="row g-4">
                       {instructorsData.map((ins, index) => (
                         <div
                           className="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3"
                           key={index}
                         >
                           <div className="student-card position-relative">
-                            {/* Top Right Actions */}
+                            
                             <div
                               style={{
                                 position: "absolute",
@@ -244,7 +310,7 @@ const openInstructorProfile = (data) => {
                             <div>
                               <img src={avatar} alt="Avatar" />
                               <h5>{ins.name || "Instructor Name"}</h5>
-                              {/* <p>{student.courseCount || 0} course(s) Enrolled</p> */}
+                              
                               <p>{ins.mobile_number || "N/A"}</p>
                             </div>
 
@@ -253,7 +319,7 @@ const openInstructorProfile = (data) => {
                                 <Link to="#" onClick={() => openInstructorProfile(ins)} className="btn btn-primary btn-sm">
                                   View
                                 </Link>
-                                {/* <a href="#" className="btn btn-secondary btn-sm">Assisgn Student</a> */}
+                                
                               </div>
                               <div className="completed-classes">
                                 <i className="bi bi-check-circle"></i>{" "}
@@ -263,7 +329,8 @@ const openInstructorProfile = (data) => {
                           </div>
                         </div>
                       ))}
-                    </div>
+                    </div> */}
+                    </>
                   )}
                 </div>
               </div>

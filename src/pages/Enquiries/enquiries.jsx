@@ -353,14 +353,56 @@ const Enquiries = () => {
                   ) : error ? (
                     <p className="text-center text-danger my-5">{error}</p>
                   ) : (
-                    <div className="row g-4">
+                    <>
+                    <div className="table-responsive">
+                      <table className="table custom-table text-center align-middle">
+                        <thead className="table-light">
+                          <tr>
+                            <th>S.NO</th>
+                            <th>Student Name</th>
+                            <th>Mobile Number</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {enquiriesData.map((enquiries, index) => (
+                            <tr key={index}>
+                              <td>{index+1}</td>
+                              <td>{enquiries.name || "Name"}</td>
+                              <td>{enquiries.mobile_number || "N/A"}</td>
+                              <td>{enquiries.email || "N/A"}</td>
+                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {enquiries.follow_up_status}</td>
+                              <td>
+                                <button
+                                className="btn btn-sm btn-warning"
+                                title="Edit Enquiries"
+                                onClick={() => handleEditEnquiries(enquiries)}
+                              >
+                                <i className="bi bi-pencil"></i>
+                              </button>{" "}
+                               <Link
+                                  to="#"
+                                  onClick={() => openEnquriesProfile(enquiries)}
+                                  className="btn btn-primary btn-sm"
+                                >
+                                  View
+                                </Link>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {/* <div className="row g-4">
                       {enquiriesData.map((enquiries, index) => (
                         <div
                           className="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3"
                           key={index}
                         >
                           <div className="student-card position-relative">
-                            {/* Top Right Actions */}
+                            
                             <div
                               style={{
                                 position: "absolute",
@@ -378,15 +420,7 @@ const Enquiries = () => {
                               >
                                 <i className="bi bi-pencil"></i>
                               </button>
-                              {/* <button
-                                className="btn btn-sm btn-danger"
-                                title="Delete Enquiries"
-                                onClick={() =>
-                                  deleteUser(enquiries.application_number)
-                                }
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button> */}
+                              
                             </div>
 
                             <div>
@@ -405,7 +439,7 @@ const Enquiries = () => {
                                 >
                                   View
                                 </Link>
-                                {/* <a href="#" className="btn btn-secondary btn-sm">Schedule</a> */}
+                                
                               </div>
                               <div className="completed-classes">
                                 <i className="bi bi-check-circle"></i>{" "}
@@ -415,7 +449,8 @@ const Enquiries = () => {
                           </div>
                         </div>
                       ))}
-                    </div>
+                    </div> */}
+                    </>
                   )}
                 </div>
               </div>

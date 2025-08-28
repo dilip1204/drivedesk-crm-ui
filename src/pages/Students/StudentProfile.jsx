@@ -190,7 +190,7 @@ export default function StudentProfileModal({ show, onClose, student }) {
                       <td>
                         {payment.receipt_no && (
                           <Button
-                            variant="outline-secondary"
+                           
                             size="sm"
                             onClick={() =>
                               handlePrintReceipt(payment.receipt_no)

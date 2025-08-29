@@ -7,6 +7,13 @@ export const getAllTrainingsession = (param) => {
         METHOD_TYPES.GET,
         ENDPOINTS.getAllTrainingsession+'?status='+param.status+'&date='+param.date
     )
+}
+
+export const getStudentCompletedList = (param) => { 
+    return request(
+        METHOD_TYPES.GET,
+        ENDPOINTS.getStudentCompletedList+param.studentId+'?status='+param.status
+    )
 } 
 
 export const getAllTrainingsessionFilter = (param) => {

@@ -371,7 +371,7 @@ const TrainingSession = () => {
                   ) : error ? (
                     <p className="text-center text-danger my-5">{error}</p>
                   ) : (
-                    <div className="table-responsive">
+                    <div className="table-responsive" style={{display: "block"}}>
                       <table className="table custom-table text-center align-middle">
                         <thead className="table-light">
                           <tr>
@@ -395,7 +395,7 @@ const TrainingSession = () => {
                               <td className="status">
                                 <i className="bi bi-check-circle"></i>{" "} {tsession.status}
                               </td>
-                              <td className="d-flex gap-1 justify-content-center">
+                              <td>
                                 <button
                                   className="btn btn-primary btn-sm action-btn"
                                   onClick={() => openSessionModal(tsession)}
@@ -420,6 +420,7 @@ const TrainingSession = () => {
                                 </button>
 
                                 {/* NEW: Completed Sessions */}
+                                {"  "}
                                 <button
                                   className="btn btn-sm btn-success"
                                   title="Show Student Completed Sessions"

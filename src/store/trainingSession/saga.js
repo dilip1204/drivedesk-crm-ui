@@ -15,7 +15,11 @@ import {
     RESCHDULE_TRAINING_SESSION_DATA,
     RESCHDULE_TRAINING_SESSION_DATA_ERROR,
     RESCHDULE_TRAINING_SESSION_DATA_PENDING,
-    RESCHDULE_TRAINING_SESSION_DATA_SUCCESS
+    RESCHDULE_TRAINING_SESSION_DATA_SUCCESS,
+    GET_STUDENT_SESSION_COMPLETED_LIST,
+    GET_STUDENT_SESSION_COMPLETED_LIST_ERROR,
+    GET_STUDENT_SESSION_COMPLETED_LIST_PENDING,
+    GET_STUDENT_SESSION_COMPLETED_LIST_SUCCESS
     
 } from './types';
 
@@ -109,6 +113,28 @@ function* rescheduleTrainingSessionData(action){
     }
 }
 
+function* getStudentcompletedSession(action){ 
+    try {
+        yield put({ type: GET_STUDENT_SESSION_COMPLETED_LIST_PENDING });
+        const response = yield call(
+            getAllTrainingsessionService.getStudentCompletedList,
+            action.param,
+        );
+        yield put({ 
+            type: GET_STUDENT_SESSION_COMPLETED_LIST_SUCCESS,
+            data: response.data
+        });
+        if (typeof action.fn === "function") {
+            action.fn(response.data)
+        }
+    } catch (error) {
+        yield put({ type: GET_STUDENT_SESSION_COMPLETED_LIST_ERROR, error: error});
+        if (typeof action.fn === "function") {
+            action.fn(error.response)
+        }
+    }
+}
+
 
 export function* watchTrainingSessionListInformation() {
     yield takeEvery(GET_TRAINING_SESSION_LIST, getAllTrainingSessionInformation);
@@ -124,4 +150,8 @@ export function* watchEditTrainingSession() {
 
 export function* watchReschduleTrainingSession() {
     yield takeEvery(RESCHDULE_TRAINING_SESSION_DATA, rescheduleTrainingSessionData);
+}
+
+export function* watchStudentCompletedSession() {
+    yield takeEvery(GET_STUDENT_SESSION_COMPLETED_LIST, getStudentcompletedSession);
 }

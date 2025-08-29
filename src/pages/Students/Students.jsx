@@ -51,7 +51,7 @@ const Students = () => {
   const [receiptData, setReceiptData] = useState(null);
   const [filterApplied, setFilterApplied] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   // before your table rows
 const startIndex = (currentPage - 1) * pageSize;

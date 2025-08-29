@@ -642,7 +642,7 @@ const renderPagination = () => {
                           <tr>
                             <th>S.NO</th>
                             <th>Student Name</th>
-                            <th>Enrolled Course</th>
+                            {/* <th>Enrolled Course</th> */}
                             <th>Mobile Number</th>
                             <th>Plan</th>
                             <th>Actions</th>
@@ -653,7 +653,7 @@ const renderPagination = () => {
                             <tr key={index}>
                               <td>{startIndex + index+1}</td>
                               <td>{student.name || "Student Name"}</td>
-                              <td>{student.courseCount || 0} course(s) Enrolled</td>
+                              {/* <td>{student.courseCount || 0} course(s) Enrolled</td> */}
                               <td>{student.mobile_number || "N/A"}</td>
                               <td className="status"><i className="bi bi-check-circle"></i>{" "} {student.plan}</td>
                               <td>
@@ -686,12 +686,7 @@ const renderPagination = () => {
                                 >
                                   View
                                 </Link>{" "}
-                                <a
-                                  href="#"
-                                  className="btn btn-secondary btn-sm"
-                                >
-                                  Schedule
-                                </a>{" "}
+                               
                                  <button
                                 className="btn btn-sm btn-danger"
                                 title="Delete Student"

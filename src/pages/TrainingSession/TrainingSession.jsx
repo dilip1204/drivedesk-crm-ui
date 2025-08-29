@@ -74,9 +74,7 @@ const TrainingSession = () => {
     status: Yup.string().oneOf([
       "All",
       "Scheduled",
-      "Completed",
-      "Missed",
-      "Cancelled",
+      "Completed"
     ]),
   });
 
@@ -350,8 +348,7 @@ const TrainingSession = () => {
                                 <option value="All">All</option>
                                 <option value="Scheduled">Scheduled</option>
                                 <option value="Completed">Completed</option>
-                                <option value="Missed">Missed</option>
-                                <option value="Cancelled">Cancelled</option>
+                               
                               </Field>
                               <div style={{ minHeight: "22px" }}></div>
                             </div>

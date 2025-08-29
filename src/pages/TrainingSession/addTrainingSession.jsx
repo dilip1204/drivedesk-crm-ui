@@ -139,8 +139,8 @@ export default function AddTrainingSession({
                       <option value="">Select Status</option>
                       <option value="Scheduled">Scheduled</option>
                       <option value="Completed">Completed</option>
-                      <option value="Missed">Missed</option>
-                      <option value="Cancelled">Cancelled</option>
+                      {/* <option value="Missed">Missed</option>
+                      <option value="Cancelled">Cancelled</option> */}
                     </select>
                   ) : (
                     <input

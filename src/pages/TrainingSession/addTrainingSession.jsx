@@ -92,7 +92,7 @@ export default function AddTrainingSession({
       size="lg"
       centered
     >
-      <Modal.Header closeButton>
+      <Modal.Header>
         <Modal.Title>{isEdit ? "Update Session" : "Add Session"}</Modal.Title>
         <IoClose
           onClick={() => {

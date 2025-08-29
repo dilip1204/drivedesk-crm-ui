@@ -337,7 +337,7 @@ export default function AddStudents({
 
   return (
     <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered>
-      <Modal.Header closeButton>
+      <Modal.Header>
         <Modal.Title>{isEdit ? "Update Student" : "Add Student"}</Modal.Title>
         <IoClose
           onClick={() => {

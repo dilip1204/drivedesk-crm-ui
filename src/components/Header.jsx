@@ -72,7 +72,7 @@ export default function Header() {
                 </span>
               </button>
               <ul className="dropdown-menu dropdown-menu-right">
-                <li className="dropdown-header">
+                <li className="dropdown-header" style={{margin: 0}}>
                   <img src={avatar} className="img-circle" alt="User Image" />
                   <div className="d-inline-block">
                     {user.email ? user.email.split("@")[0] : "" || "Guest User"}{" "}
@@ -82,7 +82,7 @@ export default function Header() {
                   </div>
                 </li>
 
-                <li>
+                {/* <li>
                   <Link to="#">
                     <i className="mdi mdi-account"></i> My Profile
                   </Link>
@@ -103,9 +103,10 @@ export default function Header() {
                     {" "}
                     <i className="mdi mdi-settings"></i> Setting{" "}
                   </Link>
-                </li>
+                </li> */}
 
-                <li className="dropdown-footer">
+                {/* <li className="dropdown-footer"> */}
+                 <li>
                   <Link
                     to="#"
                     onClick={(e) => {

@@ -296,7 +296,8 @@ useEffect(()=> {
 
     return (
       <div className="printable-student-table mt-3">
-        <table className="table table-bordered table-striped">
+      <table className="table table-bordered table-striped text-start">
+
           <thead>
             <tr>
               <th>#</th>

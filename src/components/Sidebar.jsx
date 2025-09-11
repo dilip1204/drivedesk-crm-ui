@@ -61,14 +61,14 @@ export default function Sidebar() {
                 </Link>
               </li>
             )}
-            {role === "admin" && (
+            
               <li className={`has-sub ${isActive("/trainingsession") ? "active expand" : ""}`}>
                 <Link className="sidenav-item-link" to="/trainingsession">
                   <i className="mdi mdi-chart-multiline"></i>
                   <span className="nav-text">Training Session</span>
                 </Link>
               </li>
-            )}
+            
 
           </ul>
         </div>

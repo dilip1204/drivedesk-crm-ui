@@ -7,8 +7,6 @@ import * as Yup from "yup";
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
-import "../../assets/plugins/daterangepicker/daterangepicker.css";
-// import "../../assets/plugins/toastr/toastr.min.css";
 
 import "../Students/Students.css";
 
@@ -347,7 +345,7 @@ const Enquiries = () => {
                 )}
 
                 {/* Student List */}
-                <div className="container py-0 p-0">
+                <div>
                   {loading ? (
                     <p className="text-center my-5">Loading enquiries...</p>
                   ) : error ? (

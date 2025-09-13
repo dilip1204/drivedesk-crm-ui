@@ -4,8 +4,6 @@ import { Link } from "react-router-dom";
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
-import "../../assets/plugins/daterangepicker/daterangepicker.css";
-// import "../../assets/plugins/toastr/toastr.min.css";
 
 import "./Dashboard.css";
 

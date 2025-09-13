@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
-import "../../assets/plugins/daterangepicker/daterangepicker.css";
-// import "../../assets/plugins/toastr/toastr.min.css";
 
 import "../Students/Students.css";
 
@@ -216,7 +214,7 @@ const formatTo12Hour = (timeStr) => {
                 </div>
 
                 {/* Instructors List */}
-                <div className="container py-0 p-0">
+                <div>
                   {loading ? (
                     <p className="text-center my-5">Loading instructors...</p>
                   ) : error ? (

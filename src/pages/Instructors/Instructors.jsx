@@ -84,6 +84,17 @@ const openInstructorProfile = (data) => {
     );
   };
 
+  // convert "HH:MM" -> "hh:mm AM/PM"
+const formatTo12Hour = (timeStr) => {
+  if (!timeStr) return "-";
+  const [hours, minutes] = timeStr.split(":");
+  let h = parseInt(hours, 10);
+  const meridian = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12; // convert 0 -> 12, 13 -> 1
+  return `${h}:${minutes} ${meridian}`;
+};
+
+
   useEffect(() => {
     if (instructorList?.response?.length > 0) {
       setInstructorsData(instructorList.response);
@@ -229,7 +240,7 @@ const openInstructorProfile = (data) => {
                               <td>{index+1}</td>
                               <td>{ins.name || "Instructor Name"}</td>
                               <td>{ins.mobile_number || "N/A"}</td>
-                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {ins.available_from} to {ins.available_to}</td>
+                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {formatTo12Hour(ins.available_from)} to {formatTo12Hour(ins.available_to)}</td>
                               <td>
                                {role === "admin" ? (
         <>

@@ -125,7 +125,7 @@ export default function AddStudents({
       .nullable()
       .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)"),
     ...(isEdit && {
-      test_date: Yup.date().required("Test date is required"),
+      test_date: Yup.date().nullable().typeError("Invalid date format"),
       discount: Yup.number()
         .typeError("Discount must be a number")
         .min(0, "Discount cannot be negative")
@@ -494,7 +494,7 @@ export default function AddStudents({
               <div className="col-md-6">
                 <div className="form-group">
                   <label>
-                    Test Date <span style={{ color: "red" }}>*</span>
+                    Test Date
                   </label>
                   <input
                     type="date"

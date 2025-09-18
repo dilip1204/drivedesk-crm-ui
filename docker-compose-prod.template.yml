@@ -4,8 +4,7 @@ services:
     image: ${UI_IMAGE_TAG}
     container_name: drivedesk-prod-ui
     restart: unless-stopped
-    ports:
-      - "80:80"
+    expose: ["80"]
     networks:
       - drivedesk-shared-network
     environment:
@@ -14,3 +13,38 @@ services:
 networks:
   drivedesk-shared-network:
     external: true
+ # === HTTPS EDGE (terminates TLS and forwards to UI) ===
+  edge:
+    image: nginx:1.27-alpine
+    container_name: drivedesk-edge
+    depends_on: [drivedesk-prod-ui]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./edge/conf.d:/etc/nginx/conf.d:ro
+      - certbot-etc:/etc/letsencrypt
+      - certbot-web:/var/www/certbot
+    networks:
+      - drivedesk-net
+    restart: unless-stopped
+
+  # === CERTBOT (auto-renew) ===
+  certbot:
+    image: certbot/certbot:latest
+    container_name: drivedesk-certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-web:/var/www/certbot
+    command: >
+      /bin/sh -c 'trap exit TERM;
+      while :; do
+        certbot renew --webroot -w /var/www/certbot --quiet || true;
+        nginx -s reload 2>/dev/null || true;
+        sleep 12h;
+      done'
+    restart: unless-stopped
+
+volumes:
+  certbot-etc:
+  certbot-web:

@@ -206,7 +206,7 @@ const Tariff = () => {
                             <th>Plan Name</th>
                             <th>Training Days</th>
                             <th>Amount</th>
-                            <th>Reference Fee</th>
+                            {/* <th>Reference Fee</th> */}
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -217,7 +217,7 @@ const Tariff = () => {
                               <td>{tariff.plan_name || "Plan Name"}</td>
                               <td>{tariff.training_days || 0} Training days</td>
                               <td>{tariff.amount || "N/A"}</td>
-                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {tariff.reference_fee || 0} Reference fee</td>
+                              {/* <td className="status"><i className="bi bi-check-circle"></i>{" "} {tariff.reference_fee || 0} Reference fee</td> */}
                               <td>
                                 {role === "admin" ? (
                                 <>
@@ -226,7 +226,8 @@ const Tariff = () => {
                                     title="Edit Tariff"
                                     onClick={() => handleEditTariff(tariff)}
                                   >
-                                    <i className="bi bi-pencil"></i>
+                                    {/* <i className="bi bi-pencil"></i> */}
+                                    Edit
                                   </button>{" "}
                                   <button
                                     className="btn btn-sm btn-danger"
@@ -235,7 +236,8 @@ const Tariff = () => {
                                       deleteTariffPlan(tariff.plan_name)
                                     }
                                   >
-                                    <i className="bi bi-trash"></i>
+                                    {/* <i className="bi bi-trash"></i> */}
+                                    Delete
                                   </button>
                                 </>
                               ) : (

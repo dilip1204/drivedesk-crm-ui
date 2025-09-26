@@ -7,8 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
-import "../../assets/plugins/daterangepicker/daterangepicker.css";
-// import "../../assets/plugins/toastr/toastr.min.css";
+
 
 import "../Students/Students.css";
 
@@ -192,7 +191,7 @@ const Tariff = () => {
                 </div>
 
                 {/* Student List */}
-                <div className="container py-0 p-0">
+                <div>
                   {loading ? (
                     <p className="text-center my-5">Loading tariffs...</p>
                   ) : error ? (
@@ -207,7 +206,7 @@ const Tariff = () => {
                             <th>Plan Name</th>
                             <th>Training Days</th>
                             <th>Amount</th>
-                            <th>Reference Fee</th>
+                            {/* <th>Reference Fee</th> */}
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -218,7 +217,7 @@ const Tariff = () => {
                               <td>{tariff.plan_name || "Plan Name"}</td>
                               <td>{tariff.training_days || 0} Training days</td>
                               <td>{tariff.amount || "N/A"}</td>
-                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {tariff.reference_fee || 0} Reference fee</td>
+                              {/* <td className="status"><i className="bi bi-check-circle"></i>{" "} {tariff.reference_fee || 0} Reference fee</td> */}
                               <td>
                                 {role === "admin" ? (
                                 <>
@@ -227,7 +226,8 @@ const Tariff = () => {
                                     title="Edit Tariff"
                                     onClick={() => handleEditTariff(tariff)}
                                   >
-                                    <i className="bi bi-pencil"></i>
+                                    {/* <i className="bi bi-pencil"></i> */}
+                                    Edit
                                   </button>{" "}
                                   <button
                                     className="btn btn-sm btn-danger"
@@ -236,7 +236,8 @@ const Tariff = () => {
                                       deleteTariffPlan(tariff.plan_name)
                                     }
                                   >
-                                    <i className="bi bi-trash"></i>
+                                    {/* <i className="bi bi-trash"></i> */}
+                                    Delete
                                   </button>
                                 </>
                               ) : (

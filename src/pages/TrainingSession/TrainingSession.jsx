@@ -5,7 +5,6 @@ import { useSearchParams } from "react-router-dom";
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
-import "../../assets/plugins/daterangepicker/daterangepicker.css";
 
 import "./../Students/Students.css";
 
@@ -365,7 +364,21 @@ const TrainingSession = () => {
                 )}
 
                 {/* Training session List */}
-                <div className="container py-0 p-0">
+                <div>
+                   <button
+                                  className="btn btn-sm btn-warning"
+                                  title="Reschedule Session"
+                                 
+                                >
+                                  <i className="bi bi-clock-history"></i>
+                                </button> - <span>Reschedule Session</span> {"  "} &nbsp;
+                                <button
+                                  className="btn btn-sm btn-success"
+                                  title="Show Student Completed Sessions"
+                                 
+                                >
+                                  <i className="bi bi-clipboard-check"></i>
+                                </button> - <span>Show Student Completed Sessions</span>
                   {loading ? (
                     <p className="text-center my-5">Loading training session...</p>
                   ) : error ? (
@@ -408,7 +421,8 @@ const TrainingSession = () => {
                                   title="Edit Training Session"
                                   onClick={() => handleEditStudent(tsession)}
                                 >
-                                  <i className="bi bi-pencil"></i>
+                                  {/* <i className="bi bi-pencil"></i> */}
+                                  Edit
                                 </button>
 
                                 <button
@@ -499,7 +513,7 @@ const TrainingSession = () => {
 </div>
 
 
-                  <div className="modal-body">
+                  <div className="modal-body" style={{overflowX: "auto",whiteSpace: "nowrap"}}>
                     {completedLoading ? (
                       <p className="text-center my-4">Loading completed sessions...</p>
                     ) : completedError ? (

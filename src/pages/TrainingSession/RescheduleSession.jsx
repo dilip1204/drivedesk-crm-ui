@@ -89,7 +89,7 @@ export default function RescheduleSession({
   return (
     <Modal
       show={showModal}
-      onHide={hideModal}
+      onHide={hideModal}  
       backdrop="static"
       keyboard={false}
       size="lg"
@@ -97,14 +97,14 @@ export default function RescheduleSession({
     >
       <Modal.Header closeButton>
         <Modal.Title>{isEdit ? "Reschedule Session" : "Add Session"}</Modal.Title>
-        <IoClose
+        {/* <IoClose
           onClick={() => {
             formik.resetForm();
             hideModal();
           }}
           style={{ cursor: "pointer", fontSize: "1.5rem", marginLeft: "auto", color: "#6c757d" }}
           title="Close"
-        />
+        /> */}
       </Modal.Header>
       <Modal.Body>
         <form onSubmit={formik.handleSubmit}>

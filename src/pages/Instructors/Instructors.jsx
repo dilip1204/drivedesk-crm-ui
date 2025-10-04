@@ -247,7 +247,8 @@ const formatTo12Hour = (timeStr) => {
                                 title="Edit Instructor"
                                 onClick={() => handleEditInstructor(ins)}
                               >
-                                <i className="bi bi-pencil"></i>
+                                {/* <i className="bi bi-pencil"></i> */}
+                                Edit
                               </button>
                               {" "}
                               <button
@@ -255,7 +256,8 @@ const formatTo12Hour = (timeStr) => {
                                 title="Delete Isntructor"
                                 onClick={() => deleteUser(ins.mobile_number)}
                               >
-                                <i className="bi bi-trash"></i>
+                                {/* <i className="bi bi-trash"></i> */}
+                                Delete
                               </button>
                               {" "}
                               <button
@@ -263,7 +265,8 @@ const formatTo12Hour = (timeStr) => {
                                 title="Instructor availability"
                                 onClick={() => handleInstructor(ins)}
                               >
-                                <i className="bi bi-person-check"></i>
+                                {/* <i className="bi bi-person-check"></i> */}
+                                Instructor
                               </button>
         </>
       ) : (

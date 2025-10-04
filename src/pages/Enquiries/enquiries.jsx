@@ -378,7 +378,8 @@ const Enquiries = () => {
                                 title="Edit Enquiries"
                                 onClick={() => handleEditEnquiries(enquiries)}
                               >
-                                <i className="bi bi-pencil"></i>
+                                {/* <i className="bi bi-pencil"></i> */}
+                                 Edit
                               </button>{" "}
                                <Link
                                   to="#"

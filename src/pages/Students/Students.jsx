@@ -500,7 +500,7 @@ const renderPagination = () => {
                               return;
                             }
 
-                            const studentLists = response.students || [];
+                            const studentLists = response || [];
                             if (
                               Array.isArray(studentLists) &&
                               studentLists.length > 0
@@ -662,8 +662,8 @@ const renderPagination = () => {
                                 className="btn btn-sm btn-warning"
                                 title="Edit Student"
                                 onClick={() => handleEditStudent(student)}
-                              >
-                                <i className="bi bi-pencil"></i>
+                              >Edit
+                                {/* <i className="bi bi-pencil"></i> */}
                               </button>{" "}
                              
                               <button
@@ -678,7 +678,8 @@ const renderPagination = () => {
                                 }
                                 disabled={Number(student.balance) <= 0}
                               >
-                                <i className="bi bi-currency-rupee"></i>
+                                Fee
+                                {/* <i className="bi bi-currency-rupee"></i> */}
                               </button>{" "}
                             <Link
                                   to="#"
@@ -695,7 +696,8 @@ const renderPagination = () => {
                                   deleteUser(student.application_number)
                                 }
                               >
-                                <i className="bi bi-trash"></i>
+                                Delete
+                                {/* <i className="bi bi-trash"></i> */}
                               </button>
                                
                               </td>

@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
-import "../../assets/plugins/daterangepicker/daterangepicker.css";
-// import "../../assets/plugins/toastr/toastr.min.css";
 
 import "../Students/Students.css";
 
@@ -216,7 +214,7 @@ const formatTo12Hour = (timeStr) => {
                 </div>
 
                 {/* Instructors List */}
-                <div className="container py-0 p-0">
+                <div>
                   {loading ? (
                     <p className="text-center my-5">Loading instructors...</p>
                   ) : error ? (
@@ -249,7 +247,8 @@ const formatTo12Hour = (timeStr) => {
                                 title="Edit Instructor"
                                 onClick={() => handleEditInstructor(ins)}
                               >
-                                <i className="bi bi-pencil"></i>
+                                {/* <i className="bi bi-pencil"></i> */}
+                                Edit
                               </button>
                               {" "}
                               <button
@@ -257,7 +256,8 @@ const formatTo12Hour = (timeStr) => {
                                 title="Delete Isntructor"
                                 onClick={() => deleteUser(ins.mobile_number)}
                               >
-                                <i className="bi bi-trash"></i>
+                                {/* <i className="bi bi-trash"></i> */}
+                                Delete
                               </button>
                               {" "}
                               <button
@@ -265,7 +265,8 @@ const formatTo12Hour = (timeStr) => {
                                 title="Instructor availability"
                                 onClick={() => handleInstructor(ins)}
                               >
-                                <i className="bi bi-person-check"></i>
+                                {/* <i className="bi bi-person-check"></i> */}
+                                Instructor
                               </button>
         </>
       ) : (

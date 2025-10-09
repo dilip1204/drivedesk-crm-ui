@@ -693,7 +693,7 @@ export default function InstructorAvailability() {
                       </li>
                       <li className="breadcrumb-item">Instructor</li>
                       <li className="breadcrumb-item" aria-current="page">
-                        Instructor Availability
+                        Instructor Schedule
                       </li>
                     </ol>
                   </nav>
@@ -724,7 +724,7 @@ export default function InstructorAvailability() {
                           getInstructorAvailInformation(payload, (res, err) => {
                             if (err) {
                               setError(
-                                "Failed to load instructor availability."
+                                "Failed to load instructor Schedule."
                               );
                               setInstructorsData(null);
                               setLoading(false);

@@ -9,6 +9,7 @@ import Tariff from "./pages/Tariff/Tariff";
 import Enquiries from "./pages/Enquiries/enquiries";
 import ProtectedRoute from "./components/ProtectedRoute";
 import InstructorAvailabilityDashboard from "./pages/Instructors/InstructorAvailabilityDashboard";
+import FleetExpenses from "./pages/FleetExpenses/FleetExpenses";
 
 export default function AppRoutes() {
   return (
@@ -66,6 +67,15 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin", "instructor"]}>
             <TrainingSession />
+          </ProtectedRoute>
+        }
+      />
+
+       <Route
+        path="/fleetexpenses"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
+            <FleetExpenses />
           </ProtectedRoute>
         }
       />

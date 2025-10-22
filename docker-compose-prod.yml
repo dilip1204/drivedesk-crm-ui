@@ -7,8 +7,8 @@ services:
       dockerfile: Dockerfile
     container_name: ui
     restart: unless-stopped
-    ports:
-      - "80:80"
+    expose:
+      - "80"            # only expose internally, no host binding
     networks:
       - drivedesk-net
 

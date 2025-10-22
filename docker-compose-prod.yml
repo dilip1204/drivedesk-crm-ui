@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ui
+    restart: unless-stopped
+    expose:
+      - "80"            # only expose internally, no host binding
+    networks:
+      - drivedesk-net
+
+networks:
+  drivedesk-net:
+    external: true

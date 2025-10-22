@@ -262,11 +262,11 @@ const formatTo12Hour = (timeStr) => {
                               {" "}
                               <button
                                 className="btn btn-sm btn-warning"
-                                title="Instructor availability"
+                                title="Instructor Schedule"
                                 onClick={() => handleInstructor(ins)}
                               >
                                 {/* <i className="bi bi-person-check"></i> */}
-                                Instructor
+                                Schedule
                               </button>
         </>
       ) : (

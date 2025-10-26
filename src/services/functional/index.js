@@ -20,6 +20,10 @@ import * as addStudentPaymentList from './students/addPaymentService';
 import * as getAllTrainingsessionService from './trainingsession/getTrainingSessionListService';
 import * as editTrainingSession from './trainingsession/editTrainingSessionService';
 import * as rescheduleTrainingsession from './trainingsession/editTrainingSessionService';
+import * as addExpensesList from "./expenses/addExpenseService";
+import * as editExpensesList from "./expenses/editExpensesService";
+import * as deleteExpensesList from "./expenses/deleteExpensesService";
+import * as getExpensesList from "./expenses/getExpensesListService";
 
 export {
     userLogin,
@@ -43,5 +47,9 @@ export {
     addStudentPaymentList,
     getAllTrainingsessionService,
     editTrainingSession,
-    rescheduleTrainingsession  
+    rescheduleTrainingsession,
+    addExpensesList,
+    editExpensesList,
+    deleteExpensesList,
+    getExpensesList
 };

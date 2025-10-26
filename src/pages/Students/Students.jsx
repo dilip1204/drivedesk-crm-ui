@@ -21,7 +21,6 @@ import {
 import { getTariffsListInformation } from "../../store/tariff/actions";
 import { getInstructorsListInformation } from "../../store/instructors/actions";
 import { deleteStudent } from "../../store/deleteStudent/actions";
-import avatar from "../../assets/img/avatar.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import StudentProfileModal from "./StudentProfile";

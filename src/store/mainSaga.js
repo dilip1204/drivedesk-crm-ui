@@ -9,6 +9,7 @@ import { watchAddEnquiries, watchDeleteEnquiries, watchEnquiriesListInformation,
 import { watchDashboardSummary } from './dashboardSummary/saga'
 import { watchAddStudentPayment } from './addStudentPayment/saga';
 import { watchTrainingSessionListInformation, watchTrainingSessionFilterListInformation, watchEditTrainingSession, watchReschduleTrainingSession, watchStudentCompletedSession } from './trainingSession/saga';
+import { watchAddExpenses, watchEditExpenses, watchDeleteExpenses, watchGetExpenses } from './expenses/saga';
 
 
 export function* mainSaga() {
@@ -40,6 +41,10 @@ export function* mainSaga() {
         watchEditTrainingSession(),
         watchReschduleTrainingSession(),
         watchInstructorAvailListInformation(),
-        watchStudentCompletedSession()
+        watchStudentCompletedSession(),
+        watchAddExpenses(),
+        watchEditExpenses(),
+        watchDeleteExpenses(),
+        watchGetExpenses()
     ])
 }

@@ -56,7 +56,7 @@ export default function Sidebar() {
             {role === "admin" && (
               <li className={`has-sub ${isActive("/tariff") ? "active expand" : ""}`}>
                 <Link className="sidenav-item-link" to="/tariff">
-                  <i className="mdi mdi-chart-multiline"></i>
+                  <i className="mdi mdi-currency-inr"></i>
                   <span className="nav-text">Tariff</span>
                 </Link>
               </li>
@@ -64,8 +64,15 @@ export default function Sidebar() {
             
               <li className={`has-sub ${isActive("/trainingsession") ? "active expand" : ""}`}>
                 <Link className="sidenav-item-link" to="/trainingsession">
-                  <i className="mdi mdi-chart-multiline"></i>
+                  <i className="mdi mdi-school"></i>
                   <span className="nav-text">Training Session</span>
+                </Link>
+              </li>
+
+              <li className={`has-sub ${isActive("/fleetexpenses") ? "active expand" : ""}`}>
+                <Link className="sidenav-item-link" to="/fleetexpenses">
+                <i className="mdi mdi-cash-multiple"></i>
+                  <span className="nav-text">Expenses</span>
                 </Link>
               </li>
             

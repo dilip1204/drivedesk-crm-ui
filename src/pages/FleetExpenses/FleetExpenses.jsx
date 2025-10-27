@@ -164,6 +164,28 @@ const FleetExpenses = () => {
   // KPIs: totalSpend, distanceDriven, costPerKm, perMonth
   const totalSpend = filteredRecords.reduce((s, r) => s + (Number(r.amount) || 0), 0);
 
+  // Compute month key to calculate per-month spend:
+  // - if user selected a month, use that
+  // - otherwise use current month
+  const now = new Date();
+  const defaultMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const monthKeyToCompute = selectedMonth || defaultMonthKey;
+
+  const monthlySpend = filteredRecords.reduce((sum, r) => {
+    const dateStr = (r.date || r.created_at || "").toString();
+    if (!dateStr) return sum;
+    // normalize date to YYYY-MM
+    const dt = new Date(dateStr);
+    if (isNaN(dt)) return sum;
+    const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+    if (key === monthKeyToCompute) {
+      return sum + (Number(r.amount) || 0);
+    }
+    return sum;
+  }, 0);
+
+  const perMonth = monthlySpend; // month spend (current or selected)
+  
   // Collect odometer readings robustly and compute distance (max - min)
   const odometerNumbers = filteredRecords
     .map((r) => {
@@ -189,7 +211,6 @@ const FleetExpenses = () => {
   }
 
   const costPerKm = numericDistance > 0 ? `₹${(totalSpend / numericDistance).toFixed(2)}` : "—";
-  const perMonth = Math.round(totalSpend / 3) || 0;
 
   // Charts helpers
   const getCategoryAggregation = (items) => {
@@ -203,11 +224,11 @@ const FleetExpenses = () => {
   };
 
   const getMonthlyAggregation = (items, monthsBack = 6) => {
-    const now = new Date();
+    const nowLocal = new Date();
     const months = [];
     const sums = [];
     for (let i = monthsBack - 1; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const d = new Date(nowLocal.getFullYear(), nowLocal.getMonth() - i, 1);
       const label = d.toLocaleString("default", { month: "short" });
       months.push(label);
       sums.push(0);
@@ -223,11 +244,11 @@ const FleetExpenses = () => {
   };
 
   const getEfficiencySeries = (items, monthsBack = 6) => {
-    const now = new Date();
+    const nowLocal = new Date();
     const labels = [];
     const values = [];
     for (let i = monthsBack - 1; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const d = new Date(nowLocal.getFullYear(), nowLocal.getMonth() - i, 1);
       labels.push(d.toLocaleString("default", { month: "short" }));
       values.push(+(3 + Math.random() * 0.8).toFixed(2));
     }
@@ -409,7 +430,7 @@ const FleetExpenses = () => {
                     {[ { label: "Total Spend", value: `₹${totalSpend.toLocaleString("en-IN")}` },
                        { label: "Distance Driven", value: distanceDriven },
                        { label: "Cost per Kilometer", value: costPerKm },
-                       { label: "Per Month", value: `₹${perMonth.toLocaleString("en-IN")}` } ].map((k, i) => (
+                       { label: "Month", value: `₹${perMonth.toLocaleString("en-IN")}` } ].map((k, i) => (
                       <div className="col-6 col-md-3" key={i}>
                         <div style={{ borderRadius: 12, padding: 18, border: "1px solid #eef2f6", textAlign: "center" }}>
                           <div style={{ color: "#6c757d", fontSize: 14 }}>{k.label}</div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { userLogin } from "../../store/login/actions";
 import logo from "../../assets/logo/logo.png";
 import "./Login.css";
@@ -18,9 +18,8 @@ const Login = () => {
     email: Yup.string()
       .email("Invalid email")
       .required("Please enter your email."),
-    password: Yup.string()
-      .min(4, "Minimum 4 characters")
-      .required("Please enter your password."),
+    // ✅ Removed min(4) validation for password
+    password: Yup.string().required("Please enter your password."),
   });
 
   const onSubmit = (values, { setSubmitting }) => {
@@ -29,41 +28,45 @@ const Login = () => {
       username: values.email,
       password: values.password,
     };
+
     dispatch(
       userLogin(data, (res) => {
         if (res && !res.isError && res.response?.access_token) {
-        // Save access token
-        localStorage.setItem("token", `Bearer ${res.response.access_token}`);
+          // Save token
+          localStorage.setItem("token", `Bearer ${res.response.access_token}`);
 
-        // Save user details
-        const tenantInfo = res.response.tenant_info;
-        const userRoleInfo = res.response.user_info;
-         userRoleInfo.role = res.response.user_info.role || userRoleInfo.role; // ensure role exists
-        localStorage.setItem("userInfo", JSON.stringify(tenantInfo));
-        localStorage.setItem("userRoleInfo", JSON.stringify(userRoleInfo));
+          // Save user details
+          const tenantInfo = res.response.tenant_info;
+          const userRoleInfo = res.response.user_info || {};
+          userRoleInfo.role =
+            res.response.user_info?.role || userRoleInfo.role || "";
 
-        // Navigate to dashboard
-        navigate("/dashboard");
-      } else if (res?.statusCode === 422 || res?.isError) {
-        const errMsg = res?.message || "Invalid login credentials.";
-        setLoginError(errMsg);
-      } else { 
-        setLoginError(res.response.data.response);
-      }
+          localStorage.setItem("userInfo", JSON.stringify(tenantInfo));
+          localStorage.setItem("userRoleInfo", JSON.stringify(userRoleInfo));
 
+          navigate("/dashboard");
+        } else if (res?.statusCode === 422 || res?.isError) {
+          const errMsg = res?.message || "Invalid login credentials.";
+          setLoginError(errMsg);
+        } else {
+          const msg =
+            res?.response?.data?.response ||
+            res?.message ||
+            "Login failed. Please try again.";
+          setLoginError(msg);
+        }
         setSubmitting(false);
       })
     );
-    //navigate('/dashboard');
   };
 
   return (
     <div
       id="dd-login"
-      className={`d-flex align-items-center justify-content-center`}
+      className="d-flex align-items-center justify-content-center"
       style={{ padding: "25px 0" }}
     >
-      <div className="row justify-content-end" style={{marginLeft: "250px"}}>
+      <div className="row justify-content-end" style={{ marginLeft: "250px" }}>
         <div className="col-lg-6 col-md-10">
           <div className="card">
             <div className="card-header bg-primary card-logo-center">
@@ -76,11 +79,13 @@ const Login = () => {
 
             <div className="card-body p-5">
               <h4 className="text-dark mb-5">Sign In</h4>
+
               {loginError && (
                 <div className="alert alert-danger" role="alert">
                   {loginError}
                 </div>
               )}
+
               <Formik
                 initialValues={initialValues}
                 validationSchema={validationSchema}
@@ -112,9 +117,6 @@ const Login = () => {
                           component="div"
                           className="invalid-feedback"
                         />
-                        {touched.email && !errors.email && (
-                          <div className="valid-feedback">Looks good!</div>
-                        )}
                       </div>
 
                       {/* Password */}
@@ -140,9 +142,6 @@ const Login = () => {
                           component="div"
                           className="invalid-feedback"
                         />
-                        {touched.password && !errors.password && (
-                          <div className="valid-feedback">Looks good!</div>
-                        )}
                       </div>
 
                       {/* Remember + Forgot */}

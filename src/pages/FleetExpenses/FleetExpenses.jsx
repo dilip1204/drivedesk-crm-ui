@@ -58,7 +58,6 @@ const FleetExpenses = () => {
     setLoading(true);
     setError(null);
     const data = {};
-    // if your backend supports server-side month filtering, you can pass: if (opts.month) data.month = opts.month;
     dispatch(
       getExpensesListInformation(data, (res) => {
         const list = res?.response || [];
@@ -91,11 +90,6 @@ const FleetExpenses = () => {
     setSelectedExpenses(null);
   };
 
-  /**
-   * onExpensesData
-   * Called by the Add/Edit modal after a successful add/update.
-   * Merge returned item into local state or replace list if server sent full list.
-   */
   const onExpensesData = (res, wasEdit) => {
     const returned = res?.response || res?.data || res;
 
@@ -161,12 +155,9 @@ const FleetExpenses = () => {
     });
   }, [filteredByCategory, searchText]);
 
-  // KPIs: totalSpend, distanceDriven, costPerKm, perMonth
+  // KPIs: totalSpend and perMonth (month spend)
   const totalSpend = filteredRecords.reduce((s, r) => s + (Number(r.amount) || 0), 0);
 
-  // Compute month key to calculate per-month spend:
-  // - if user selected a month, use that
-  // - otherwise use current month
   const now = new Date();
   const defaultMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const monthKeyToCompute = selectedMonth || defaultMonthKey;
@@ -174,7 +165,6 @@ const FleetExpenses = () => {
   const monthlySpend = filteredRecords.reduce((sum, r) => {
     const dateStr = (r.date || r.created_at || "").toString();
     if (!dateStr) return sum;
-    // normalize date to YYYY-MM
     const dt = new Date(dateStr);
     if (isNaN(dt)) return sum;
     const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
@@ -185,42 +175,31 @@ const FleetExpenses = () => {
   }, 0);
 
   const perMonth = monthlySpend; // month spend (current or selected)
-  
-  // Collect odometer readings robustly and compute distance (max - min)
-  const odometerNumbers = filteredRecords
-    .map((r) => {
-      const raw = r.odo_meter ?? r.odoMeter ?? r.odometer ?? "";
-      if (raw === null || raw === undefined || raw === "") return null;
-      const cleaned = String(raw).replace(/,/g, "").trim();
-      const n = Number(cleaned);
-      return Number.isFinite(n) ? n : null;
-    })
-    .filter((n) => n !== null)
-    .sort((a, b) => a - b);
-
-  let numericDistance = 0;
-  let distanceDriven = "—";
-  if (odometerNumbers.length >= 2) {
-    const minOdo = odometerNumbers[0];
-    const maxOdo = odometerNumbers[odometerNumbers.length - 1];
-    numericDistance = Math.max(0, maxOdo - minOdo);
-    distanceDriven = `${numericDistance.toLocaleString("en-IN")} km`;
-  } else {
-    distanceDriven = "—";
-    numericDistance = 0;
-  }
-
-  const costPerKm = numericDistance > 0 ? `₹${(totalSpend / numericDistance).toFixed(2)}` : "—";
 
   // Charts helpers
   const getCategoryAggregation = (items) => {
-    const categoriesList = ["Fuel", "Service", "Insurance", "Tax", "Toll", "Repairs", "Wash", "Other"];
-    const map = categoriesList.reduce((acc, c) => ({ ...acc, [c]: 0 }), {});
+    const map = new Map();
     items.forEach((r) => {
-      const cat = r.category || "Other";
-      map[cat] = (map[cat] || 0) + (Number(r.amount) || 0);
+      const cat = (r.category || "Other").toString();
+      const amt = Number(r.amount) || 0;
+      map.set(cat, (map.get(cat) || 0) + amt);
     });
-    return { labels: categoriesList, values: categoriesList.map((c) => map[c]) };
+
+    const filteredEntries = Array.from(map.entries()).filter(([, v]) => v > 0);
+    if (filteredEntries.length === 0) return { labels: ["Other"], values: [0] };
+
+    const labels = filteredEntries.map((e) => e[0]);
+    const values = filteredEntries.map((e) => e[1]);
+    return { labels, values };
+  };
+
+  const generateColors = (count) => {
+    const colors = [];
+    for (let i = 0; i < count; i++) {
+      const hue = Math.round((i * 360) / count);
+      colors.push(`hsl(${hue}, 70%, 50%)`);
+    }
+    return colors;
   };
 
   const getMonthlyAggregation = (items, monthsBack = 6) => {
@@ -243,23 +222,9 @@ const FleetExpenses = () => {
     return { labels: months, values: sums };
   };
 
-  const getEfficiencySeries = (items, monthsBack = 6) => {
-    const nowLocal = new Date();
-    const labels = [];
-    const values = [];
-    for (let i = monthsBack - 1; i >= 0; i--) {
-      const d = new Date(nowLocal.getFullYear(), nowLocal.getMonth() - i, 1);
-      labels.push(d.toLocaleString("default", { month: "short" }));
-      values.push(+(3 + Math.random() * 0.8).toFixed(2));
-    }
-    return { labels, values };
-  };
-
   const categoryAgg = useMemo(() => getCategoryAggregation(filteredRecords), [filteredRecords]);
   const monthlyAgg = useMemo(() => getMonthlyAggregation(filteredRecords), [filteredRecords]);
-  const efficiencySeries = useMemo(() => getEfficiencySeries(filteredRecords), [filteredRecords]);
 
-  const efficiencyRef = useRef(null);
   const pieRef = useRef(null);
   const monthlyRef = useRef(null);
   const categoryRef = useRef(null);
@@ -275,20 +240,16 @@ const FleetExpenses = () => {
       scales: { y: { beginAtZero: true } },
     };
 
-    if (efficiencyRef.current) {
-      chartsRef.current.efficiency?.destroy();
-      chartsRef.current.efficiency = new Chart(efficiencyRef.current, {
-        type: "bar",
-        data: { labels: efficiencySeries.labels, datasets: [{ data: efficiencySeries.values, borderRadius: 6, barThickness: 20 }] },
-        options: { ...baseOptions, scales: { y: { suggestedMax: 6 } } },
-      });
-    }
-
     if (pieRef.current) {
       chartsRef.current.pie?.destroy();
+      const nonZeroCount = categoryAgg.values.filter((v) => v > 0).length || categoryAgg.values.length;
+      const colors = generateColors(nonZeroCount);
       chartsRef.current.pie = new Chart(pieRef.current, {
         type: "pie",
-        data: { labels: categoryAgg.labels, datasets: [{ data: categoryAgg.values }] },
+        data: {
+          labels: categoryAgg.labels,
+          datasets: [{ data: categoryAgg.values, backgroundColor: colors, borderColor: "#ffffff", borderWidth: 1 }],
+        },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right" } } },
       });
     }
@@ -328,34 +289,25 @@ const FleetExpenses = () => {
     return () => {
       Object.values(chartsRef.current).forEach((c) => c?.destroy());
     };
-  }, [categoryAgg, monthlyAgg, efficiencySeries]);
+  }, [categoryAgg, monthlyAgg]);
 
   const styles = {
     pageCard: { borderRadius: 18, background: "#fff", padding: 24, boxShadow: "0 6px 20px rgba(29,39,61,0.06)", marginTop: 16 },
     chartTall: { height: 260, borderRadius: 12, border: "1px solid #eef2f6", padding: 16, position: "relative" },
-    pieBox: { width: "100%", height: 280, borderRadius: 12, border: "1px solid #eef2f6", padding: 16, position: "relative" },
+    pieBox: { width: "100%", height: 260, borderRadius: 12, border: "1px solid #eef2f6", padding: 16, position: "relative" },
+    kpiCard: { borderRadius: 12, padding: 18, border: "1px solid #eef2f6", textAlign: "center", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" },
   };
-
-  // if (loading) {
-  //   return (
-  //     <div className="d-flex justify-content-center align-items-center" style={{ height: "60vh" }}>
-  //       <div className="spinner-border text-primary" role="status" />
-  //     </div>
-  //   );
-  // }
 
   const handleDeleteCloseModel = () => {
     setShowDeleteModal(false);
     setSelectedExpensesAppId(null);
   };
 
-  // show delete modal and keep id to delete after confirmation
   const handleDelete = (id) => {
     setShowDeleteModal(true);
     setSelectedExpensesAppId(id);
   };
 
-  // deleteData: call delete action, then remove from local state (no full refetch)
   const deleteData = (appId) => {
     const payloadDeleteExpenses = { id: appId };
 
@@ -367,7 +319,6 @@ const FleetExpenses = () => {
           return;
         }
 
-        // Remove locally
         setExpensesDatas((prev) => prev.filter((p) => p.id !== appId));
 
         handleDeleteCloseModel();
@@ -375,6 +326,14 @@ const FleetExpenses = () => {
       })
     );
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: "60vh" }}>
+        <div className="spinner-border text-primary" role="status" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -409,7 +368,7 @@ const FleetExpenses = () => {
                   {/* Filters */}
                   <div className="row align-items-center mb-3 g-2">
                     <div className="col-auto">
-                      <select className="form-select" value={selectedMonth} onChange={(e) => { const v = e.target.value; setSelectedMonth(v); /* optionally call getExpensesList({ month: v }) */ }}>
+                      <select className="form-select" value={selectedMonth} onChange={(e) => { const v = e.target.value; setSelectedMonth(v); }}>
                         {monthOptions.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
                       </select>
                     </div>
@@ -425,44 +384,41 @@ const FleetExpenses = () => {
                     </div>
                   </div>
 
-                  {/* KPIs */}
+                  {/* Equal-width row: Category Share | Total Spend | Month */}
                   <div className="row g-3 mb-3">
-                    {[ { label: "Total Spend", value: `₹${totalSpend.toLocaleString("en-IN")}` },
-                       { label: "Distance Driven", value: distanceDriven },
-                       { label: "Cost per Kilometer", value: costPerKm },
-                       { label: "Month", value: `₹${perMonth.toLocaleString("en-IN")}` } ].map((k, i) => (
-                      <div className="col-6 col-md-3" key={i}>
-                        <div style={{ borderRadius: 12, padding: 18, border: "1px solid #eef2f6", textAlign: "center" }}>
-                          <div style={{ color: "#6c757d", fontSize: 14 }}>{k.label}</div>
-                          <div style={{ fontSize: 28, fontWeight: 700 }}>{k.value}</div>
-                        </div>
+                    <div className="col-12 col-md-4 d-flex">
+                      <div style={{ ...styles.pieBox, width: "100%" }}>
+                        <div style={{ fontWeight: 600, marginBottom: 10 }}>Category Share</div>
+                        <canvas ref={pieRef} style={{ width: "100%", height: 180 }} />
                       </div>
-                    ))}
+                    </div>
+
+                    <div className="col-12 col-md-4 d-flex">
+                      <div style={{ ...styles.kpiCard, width: "100%" }}>
+                        <div style={{ color: "#6c757d", fontSize: 14 }}>Total Spend</div>
+                        <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>{`₹${totalSpend.toLocaleString("en-IN")}`}</div>
+                      </div>
+                    </div>
+
+                    <div className="col-12 col-md-4 d-flex">
+                      <div style={{ ...styles.kpiCard, width: "100%" }}>
+                        <div style={{ color: "#6c757d", fontSize: 14 }}>{selectedMonth ? `Month (${selectedMonth})` : "This Month"}</div>
+                        <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>{`₹${perMonth.toLocaleString("en-IN")}`}</div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Charts */}
                   <div className="row g-3 mb-3">
-                    <div className="col-lg-8 d-flex">
-                      <div style={{ flex: 1, ...styles.chartTall }}>
-                        <div style={{ fontWeight: 600, marginBottom: 10 }}>Fuel Efficiency (km/L)</div>
-                        <canvas ref={efficiencyRef} style={{ width: "100%", height: "100%" }} />
-                      </div>
-                    </div>
-
-                    <div className="col-lg-4 d-flex">
-                      <div style={styles.pieBox}>
-                        <div style={{ fontWeight: 600, marginBottom: 10 }}>Category Share</div>
-                        <canvas ref={pieRef} style={{ width: "100%", height: "100%" }} />
-                      </div>
-                    </div>
-
-                    <div className="col-12 d-flex gap-3 flex-wrap">
-                      <div style={{ flex: "1 1 48%", minWidth: 260, ...styles.chartTall }}>
+                    <div className="col-12 col-md-6">
+                      <div style={styles.chartTall}>
                         <div style={{ fontWeight: 600, marginBottom: 10 }}>Monthly Spend</div>
                         <canvas ref={monthlyRef} style={{ width: "100%", height: "100%" }} />
                       </div>
+                    </div>
 
-                      <div style={{ flex: "1 1 48%", minWidth: 260, ...styles.chartTall }}>
+                    <div className="col-12 col-md-6">
+                      <div style={styles.chartTall}>
                         <div style={{ fontWeight: 600, marginBottom: 10 }}>Category Breakdown</div>
                         <canvas ref={categoryRef} style={{ width: "100%", height: "100%" }} />
                       </div>

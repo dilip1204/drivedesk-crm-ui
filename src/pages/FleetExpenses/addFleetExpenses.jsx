@@ -98,7 +98,7 @@ export default function AddFleetExpenses({
       if (vt === "stationery") return schema.notRequired().nullable();
       return schema.required("Vehicle name/number is required");
     }),
-    vehicleType: Yup.string().required("Vehicle type is required").oneOf(vehicleTypes, "Invalid vehicle type"),
+    vehicleType: Yup.string().required("Expense type is required").oneOf(vehicleTypes, "Invalid vehicle type"),
     odometer: Yup.number().typeError("Odometer must be a number").min(0, "Odometer cannot be negative").nullable(),
     category: Yup.string().required("Expense category is required").oneOf(CATEGORIES, "Invalid category"),
     vendor: Yup.string().required("Vendor name is required").max(100, "Vendor name too long"),
@@ -276,9 +276,9 @@ export default function AddFleetExpenses({
             </div>
 
             <div className="col-md-6 mb-3">
-              <label>Vehicle Type <span style={{ color: "red" }}>*</span></label>
+              <label>Expense Type <span style={{ color: "red" }}>*</span></label>
               <select name="vehicleType" className={`form-control ${showInvalid("vehicleType")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.vehicleType}>
-                <option value="">Select vehicle type</option>
+                <option value="">Select expense type</option>
                 {vehicleTypes.map((v) => <option key={v} value={v}>{v}</option>)}
               </select>
               <div className="invalid-feedback">{formik.errors.vehicleType}</div>

@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 
 import { addExpenses, updateExpenses } from "../../store/expenses/actions";
 
-// Vehicle types (includes Stationery)
+// Vehicle types (includes Stationery & Salary)
 const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike", "Other", "Stationery", "Salary"];
 const CATEGORIES = [
   "Fuel",
@@ -44,6 +44,8 @@ export default function AddFleetExpenses({
   isEdit = false,
   onExpensesAdded = () => {},
   expensesData = () => {},
+  // optional: pass list of instructors (array of strings or {id,name})
+  instructors = [],
 }) {
   const dispatch = useDispatch();
 
@@ -86,6 +88,8 @@ export default function AddFleetExpenses({
       vehicle_id: expense?.vehicle_id || expense?.vehicle || "",
       stationary: expense?.stationary || "",
       created_by: expense?.created_by || "",
+      // instructor: support different shapes (id or name)
+      instructor: expense?.instructor_id ?? expense?.instructor ?? "",
     };
   }, [expense]);
 
@@ -95,13 +99,27 @@ export default function AddFleetExpenses({
     date: Yup.string().required("Date is required"),
     vehicle: Yup.string().when("vehicleType", (vehicleType, schema) => {
       const vt = normalize(vehicleType);
-      if (vt === "stationery") return schema.notRequired().nullable();
+      if (vt === "stationery" || vt === "salary") return schema.notRequired().nullable();
       return schema.required("Vehicle name/number is required");
     }),
     vehicleType: Yup.string().required("Expense type is required").oneOf(vehicleTypes, "Invalid vehicle type"),
+    // instructor required only if vehicleType is Salary
+    instructor: Yup.string().when("vehicleType", {
+      is: (v) => normalize(v) === "salary",
+      then: (s) => s.required("Instructor is required for Salary expenses"),
+      otherwise: (s) => s.nullable(),
+    }),
     odometer: Yup.number().typeError("Odometer must be a number").min(0, "Odometer cannot be negative").nullable(),
-    category: Yup.string().required("Expense category is required").oneOf(CATEGORIES, "Invalid category"),
-    vendor: Yup.string().required("Vendor name is required").max(100, "Vendor name too long"),
+    category: Yup.string().when("vehicleType", {
+      is: (v) => normalize(v) !== "salary",
+      then: (s) => s.required("Expense category is required").oneOf(CATEGORIES, "Invalid category"),
+      otherwise: (s) => s.nullable(),
+    }),
+    vendor: Yup.string().when("vehicleType", {
+      is: (v) => normalize(v) !== "salary",
+      then: (s) => s.required("Vendor name is required").max(100, "Vendor name too long"),
+      otherwise: (s) => s.nullable(),
+    }),
     liters: Yup.number().typeError("Liters must be a number").min(0, "Liters cannot be negative").nullable(),
     pricePerLiter: Yup.number().typeError("Price per liter must be a number").min(0, "Price per liter cannot be negative").nullable(),
     amount: Yup.number().typeError("Amount must be a number").min(0, "Amount cannot be negative").required("Amount is required"),
@@ -136,6 +154,9 @@ export default function AddFleetExpenses({
         vendor: values.vendor || "",
         created_by: values.created_by || "system_user",
         created_at: new Date().toISOString(),
+        // add instructor info to payload when present
+        instructor: values.instructor || undefined,
+        instructor_id: values.instructor || undefined,
       };
 
       const handleResponse = (response) => {
@@ -218,6 +239,23 @@ export default function AddFleetExpenses({
     if (hideOdometer) {
       if (formik.values.odometer !== "") formik.setFieldValue("odometer", "");
     }
+
+    // When not Salary, clear instructor
+    if (vt !== "salary" && formik.values.instructor !== "") {
+      formik.setFieldValue("instructor", "");
+    }
+
+    // When Salary selected, clear vehicle/category/vendor and fuel/odo fields
+    if (vt === "salary") {
+      if (formik.values.vehicle !== "") formik.setFieldValue("vehicle", "");
+      if (formik.values.category !== "") formik.setFieldValue("category", "");
+      if (formik.values.vendor !== "") formik.setFieldValue("vendor", "");
+      if (formik.values.liters !== "") formik.setFieldValue("liters", "");
+      if (formik.values.pricePerLiter !== "") formik.setFieldValue("pricePerLiter", "");
+      if (formik.values.fullTank) formik.setFieldValue("fullTank", false);
+      if (formik.values.odometer !== "") formik.setFieldValue("odometer", "");
+    }
+
     if (vt === "stationery" && formik.values.vehicle !== "") formik.setFieldValue("vehicle", "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.vehicleType, formik.values.category]);
@@ -227,9 +265,25 @@ export default function AddFleetExpenses({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showModal, initialValues]);
 
-  const hideVehicleField = normalize(formik.values.vehicleType) === "stationery";
-  const showFuelFields = normalize(formik.values.vehicleType) !== "other" && normalize(formik.values.vehicleType) !== "stationery" && formik.values.category === "Fuel";
-  const showOdometer = normalize(formik.values.vehicleType) !== "other" && normalize(formik.values.vehicleType) !== "stationery" && ODOMETER_CATEGORIES.includes(formik.values.category);
+  // hide vehicle for Stationery AND for Salary
+  const hideVehicleField =
+    normalize(formik.values.vehicleType) === "stationery" ||
+    normalize(formik.values.vehicleType) === "salary";
+
+  // helper flag used in several places
+  const isSalary = normalize(formik.values.vehicleType) === "salary";
+
+  const showFuelFields =
+    normalize(formik.values.vehicleType) !== "other" &&
+    normalize(formik.values.vehicleType) !== "stationery" &&
+    formik.values.category === "Fuel";
+  const showOdometer =
+    normalize(formik.values.vehicleType) !== "other" &&
+    normalize(formik.values.vehicleType) !== "stationery" &&
+    ODOMETER_CATEGORIES.includes(formik.values.category);
+
+  // Show instructor only when vehicleType is Salary
+  const showInstructor = isSalary;
 
   const showInvalid = (name) => (formik.touched[name] && formik.errors[name] ? "is-invalid" : "");
 
@@ -285,6 +339,33 @@ export default function AddFleetExpenses({
             </div>
           </div>
 
+          {/* Instructor (only for Salary) */}
+          {showInstructor && (
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label>Instructor <span style={{ color: "red" }}>*</span></label>
+                <select
+                  name="instructor"
+                  className={`form-control ${showInvalid("instructor")}`}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.instructor}
+                >
+                  <option value="">Select instructor</option>
+                  {instructors.map((inst, idx) => {
+                    if (typeof inst === "string") return <option key={idx} value={inst}>{inst}</option>;
+                    return <option key={inst.id ?? idx} value={inst.id ?? inst.name}>{inst.name ?? inst.id}</option>;
+                  })}
+                </select>
+                <div className="invalid-feedback">{formik.errors.instructor}</div>
+              </div>
+
+              <div className="col-md-6 mb-3">
+                {/* optional extra column (keeps your layout consistent) */}
+              </div>
+            </div>
+          )}
+
           {!hideVehicleField && (
             <div className="row">
               <div className="col-md-12 mb-3">
@@ -295,22 +376,24 @@ export default function AddFleetExpenses({
             </div>
           )}
 
-          {/* Category + Vendor */}
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <label>Category <span style={{ color: "red" }}>*</span></label>
-              <select name="category" className={`form-control ${showInvalid("category")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.category}>
-                <option value="">Select category</option>
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <div className="invalid-feedback">{formik.errors.category}</div>
+          {/* Category + Vendor (hidden for Salary) */}
+          {!isSalary && (
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <label>Category <span style={{ color: "red" }}>*</span></label>
+                <select name="category" className={`form-control ${showInvalid("category")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.category}>
+                  <option value="">Select category</option>
+                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <div className="invalid-feedback">{formik.errors.category}</div>
+              </div>
+              <div className="col-md-6 mb-3">
+                <label>Vendor <span style={{ color: "red" }}>*</span></label>
+                <input type="text" name="vendor" className={`form-control ${showInvalid("vendor")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.vendor} placeholder="Enter vendor name" />
+                <div className="invalid-feedback">{formik.errors.vendor}</div>
+              </div>
             </div>
-            <div className="col-md-6 mb-3">
-              <label>Vendor <span style={{ color: "red" }}>*</span></label>
-              <input type="text" name="vendor" className={`form-control ${showInvalid("vendor")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.vendor} placeholder="Enter vendor name" />
-              <div className="invalid-feedback">{formik.errors.vendor}</div>
-            </div>
-          </div>
+          )}
 
           {/* Odometer */}
           <div className="row">

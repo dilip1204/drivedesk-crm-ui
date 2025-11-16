@@ -45,13 +45,16 @@ const Students = () => {
   const [profileStudentData, setProfileStudentData] = useState(null);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  // renamed from getStuentData -> studentForPayment
   const [studentForPayment, setStudentForPayment] = useState(null);
   const [receiptData, setReceiptData] = useState(null);
   const [filterApplied, setFilterApplied] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+
+  // --- New: search state ---
+  const [searchType, setSearchType] = useState("name"); // 'name' | 'mobile_number' | 'month'
+  const [searchValue, setSearchValue] = useState("");
 
   // before your table rows
   const startIndex = (currentPage - 1) * pageSize;
@@ -335,6 +338,79 @@ const Students = () => {
     );
   };
 
+  // ---------- NEW: perform search based on selected searchType ----------
+  const performSearch = (value, type) => {
+    // Trim input
+    const v = String(value ?? "").trim();
+
+    // If empty search, revert to normal list
+    if (!v) {
+      setSearchValue("");
+      setFilterApplied(false);
+      setCurrentPage(1);
+      getStudentsList();
+      return;
+    }
+
+    // Build payload for API - pass pagination (skip/limit) and the search field
+    const skip = 0; // always search from first page
+    const payload = { skip, limit: pageSize };
+
+    if (type === "month") {
+      // Accept numeric month; backend may expect number or string
+      const num = Number(v);
+      if (Number.isNaN(num) || num < 1 || num > 12) {
+        toast.error("Month must be a number between 1 and 12");
+        return;
+      }
+      payload.month = num;
+    } else if (type === "mobile_number") {
+      payload.mobile_number = v;
+    } else {
+      // name search (default)
+      payload.name = v;
+    }
+
+    setFilterApplied(true);
+    setCurrentPage(1);
+    setLoading(true);
+
+    dispatch(
+      getStudentsFilterListInformation(payload, (res) => {
+        const { students, total, isError } = normalizeStudentsResponse(res);
+
+        if (isError && Array.isArray(res?.response)) {
+          (res.response || []).forEach((err) => {
+            const field = err?.loc?.[1] || "Field";
+            const message = err?.msg || "Invalid input";
+            toast.error(`${field}: ${message}`);
+          });
+          setLoading(false);
+          return;
+        }
+
+        if (Array.isArray(students) && students.length > 0) {
+          setStudentsData(students);
+          setError(null);
+        } else {
+          setStudentsData([]);
+          setError("No students found.");
+        }
+        setTotalCount(total ?? 0);
+        setLoading(false);
+      })
+    );
+  };
+
+  // onchange handler for search input
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchValue(val);
+
+    // perform search immediately on change (you can debounce if desired)
+    performSearch(val, searchType);
+  };
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     // If string like 'YYYY-MM-DD' parse manually to avoid timezone shift
@@ -470,6 +546,60 @@ const Students = () => {
                         <i className="bi bi-printer"></i> Print
                       </button>
                     )}
+                  </div>
+                </div>
+
+                {/* ---------- NEW: Search box (above table) ---------- */}
+                <div className="row mb-3" style={{justifyContent: "flex-end"}}>
+                  <div className="col-md-2">
+                    <select
+                      className="form-control"
+                      value={searchType}
+                      onChange={(e) => {
+                        setSearchType(e.target.value);
+                        // Clear current search input whenever type changes
+                        setSearchValue("");
+                        // If you'd like to immediately clear results when type changes, uncomment:
+                        // performSearch("", e.target.value);
+                      }}
+                    >
+                      <option value="name">Name</option>
+                      <option value="mobile_number">Mobile Number</option>
+                      <option value="month">Month</option>
+                    </select>
+                  </div>
+
+                  <div className="col-md-3">
+                    <input
+                      type={searchType === "month" ? "number" : "text"}
+                      min={searchType === "month" ? 1 : undefined}
+                      max={searchType === "month" ? 12 : undefined}
+                      className="form-control"
+                      placeholder={
+                        searchType === "month"
+                          ? "Enter month (1-12)"
+                          : searchType === "mobile_number"
+                          ? "Search by mobile number"
+                          : "Search by name"
+                      }
+                      value={searchValue}
+                      onChange={handleSearchChange}
+                    />
+                  </div>
+
+                  <div className="col-md-2" style={{justifyContent: "flex-end", maxWidth: "13%"}}>
+                    <button
+                      className="btn btn-outline-secondary"
+                      onClick={() => {
+                        // Clear search and reload list
+                        setSearchValue("");
+                        setFilterApplied(false);
+                        setCurrentPage(1);
+                        getStudentsList();
+                      }}
+                    >
+                      Clear Search
+                    </button>
                   </div>
                 </div>
 

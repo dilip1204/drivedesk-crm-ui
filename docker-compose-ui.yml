@@ -1,6 +1,0 @@
-services:
-  drivedesk-ui:
-    build: .
-    container_name: drivedesk-ui
-    ports:
-      - "3000:80"

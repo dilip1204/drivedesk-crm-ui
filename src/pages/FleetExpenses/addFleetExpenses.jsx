@@ -1,11 +1,11 @@
-// src/pages/FleetExpenses/AddFleetExpenses.jsx
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Modal } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 
 import { addExpenses, updateExpenses } from "../../store/expenses/actions";
+import { getInstructorsListInformation } from "../../store/instructors/actions";
 
 // Vehicle types (includes Stationery & Salary)
 const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike", "Other", "Stationery", "Salary"];
@@ -13,6 +13,7 @@ const CATEGORIES = [
   "Fuel",
   "Service",
   "Repairs",
+
   "Insurance",
   "Tax",
   "Toll",
@@ -45,9 +46,10 @@ export default function AddFleetExpenses({
   onExpensesAdded = () => {},
   expensesData = () => {},
   // optional: pass list of instructors (array of strings or {id,name})
-  instructors = [],
+  //instructors = [],
 }) {
   const dispatch = useDispatch();
+  const [instructors, setInstructorsData] = useState([]);
 
   const vehicleTypes = useMemo(() => {
     const incoming =
@@ -157,6 +159,7 @@ export default function AddFleetExpenses({
         // add instructor info to payload when present
         instructor: values.instructor || undefined,
         instructor_id: values.instructor || undefined,
+        employee_name: values.instructor || "",
       };
 
       const handleResponse = (response) => {
@@ -208,6 +211,22 @@ export default function AddFleetExpenses({
       }
     },
   });
+
+  const getInstructorsList = useCallback(() => {
+      dispatch(
+        getInstructorsListInformation({}, (res) => {
+          const instructorsList = res?.response || [];
+          setInstructorsData(
+            Array.isArray(instructorsList) ? instructorsList : []
+          );
+        })
+      );
+    }, [dispatch]);
+
+  useEffect(() => {
+      getInstructorsList();
+  }, [dispatch]);
+  
 
   // Auto-calc fuel amount
   useEffect(() => {
@@ -351,7 +370,7 @@ export default function AddFleetExpenses({
                   onBlur={formik.handleBlur}
                   value={formik.values.instructor}
                 >
-                  <option value="">Select instructor</option>
+                  <option value="">Select Employee</option>
                   {instructors.map((inst, idx) => {
                     if (typeof inst === "string") return <option key={idx} value={inst}>{inst}</option>;
                     return <option key={inst.id ?? idx} value={inst.id ?? inst.name}>{inst.name ?? inst.id}</option>;

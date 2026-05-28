@@ -8,21 +8,21 @@ import { addExpenses, updateExpenses } from "../../store/expenses/actions";
 import { getInstructorsListInformation } from "../../store/instructors/actions";
 
 // Vehicle types (includes Stationery & Salary)
-const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike", "Other", "Stationery", "Salary"];
+const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike", "Other", "Stationery", "Salary","Trailer"];
 const CATEGORIES = [
   "Fuel",
   "Service",
   "Repairs",
-
   "Insurance",
   "Tax",
-  "Toll",
+  "Rent",
   "Parking",
   "Wash",
   "Accessories",
   "Other",
+  "Stationaries"
 ];
-const ODOMETER_CATEGORIES = ["Fuel", "Service", "Repairs", "Wash", "Toll", "Parking"];
+const ODOMETER_CATEGORIES = ["Fuel", "Service", "Repairs", "Wash", "Parking"];
 
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);

@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import { addExpenses, updateExpenses } from "../../store/expenses/actions";
 
 // Vehicle types (includes Stationery)
-const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike", "Other", "Stationery"];
+const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike", "Other", "Stationery","Trailer"];
 const CATEGORIES = [
   "Fuel",
   "Service",

@@ -15,13 +15,14 @@ const CATEGORIES = [
   "Repairs",
   "Insurance",
   "Tax",
-  "Toll",
+  "Rent",
   "Parking",
   "Wash",
   "Accessories",
   "Other",
+  "Stationaries"
 ];
-const ODOMETER_CATEGORIES = ["Fuel", "Service", "Repairs", "Wash", "Toll", "Parking"];
+const ODOMETER_CATEGORIES = ["Fuel", "Service", "Repairs", "Wash", "Parking"];
 
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);

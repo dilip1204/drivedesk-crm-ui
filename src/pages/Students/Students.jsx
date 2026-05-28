@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useSearchParams } from "react-router-dom";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
-
 
 import "./Students.css";
 
@@ -46,16 +45,19 @@ const Students = () => {
   const [profileStudentData, setProfileStudentData] = useState(null);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [getStuentData, setGetStuentData] = useState([]);
+  const [studentForPayment, setStudentForPayment] = useState(null);
   const [receiptData, setReceiptData] = useState(null);
   const [filterApplied, setFilterApplied] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+
+  // --- New: search state ---
+  const [searchType, setSearchType] = useState("name"); // 'name' | 'mobile_number' | 'month'
+  const [searchValue, setSearchValue] = useState("");
+
   // before your table rows
-const startIndex = (currentPage - 1) * pageSize;
-
-
+  const startIndex = (currentPage - 1) * pageSize;
 
   const studentDataLists = useSelector(
     (state) => state.studentsListInfo.studentsList
@@ -67,40 +69,42 @@ const startIndex = (currentPage - 1) * pageSize;
 
   const getOneStudentPaymentData = (flag, student) => {
     setShowPaymentModal(flag);
-    setGetStuentData(student);
+    setStudentForPayment(student);
   };
 
   const [filters, setFilters] = useState({
-    month: initialMonth,
-    year: initialYear,
+    month: initialMonth || "",
+    year: initialYear || "",
     status: "All",
     instructor_name: "",
     test_date: "",
   });
-  // const [filters, setFilters] = useState({
-  //   month: "",
-  //   year: "",
-  //   status: "",
-  //   instructor_name: "",
-  //   test_date: "",
-  // });
 
+  // Updated Validation: IF year is selected -> month is mandatory
   const FilterValidationSchema = Yup.object().shape({
     month: Yup.number()
-      .typeError("Month must be a number")
+      .nullable()
+      .transform((value, originalValue) =>
+        String(originalValue).trim() === "" ? null : value
+      )
       .min(1, "Min value is 1")
       .max(12, "Max value is 12")
-      .required("Month is required"),
+      .when("year", {
+        is: (year) => year != null,
+        then: (schema) =>
+          schema.required("Month is required when Year is provided"),
+        otherwise: (schema) => schema,
+      }),
     year: Yup.number()
-      .typeError("Year must be a number")
+      .nullable()
+      .transform((value, originalValue) =>
+        String(originalValue).trim() === "" ? null : value
+      )
       .min(2000, "Min value is 2000")
-      .max(2100, "Max value is 2100")
-      .required("Year is required"),
-    status: Yup.string(), // Optional
-    instructor_name: Yup.string(), // Optional
-    test_date: Yup.string(),
-    //.matches(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")
-    // .nullable(), // optional
+      .max(2100, "Max value is 2100"),
+    status: Yup.string().nullable(),
+    instructor_name: Yup.string().nullable(),
+    test_date: Yup.string().nullable(),
   });
 
   const openProfileModal = (student) => {
@@ -113,14 +117,24 @@ const startIndex = (currentPage - 1) * pageSize;
     setProfileStudentData(null);
   };
 
-  const getStudentsList = () => {
+  const normalizeStudentsResponse = (res) => {
+    const response = res?.response ?? res;
+    const students = response?.students ?? (Array.isArray(response) ? response : []);
+    const total = response?.total ?? (Array.isArray(response) ? students.length : 0);
+    const isError = res?.isError ?? false;
+    return { students: Array.isArray(students) ? students : [], total, isError };
+  };
+
+  const getStudentsList = useCallback(() => {
     const skip = (currentPage - 1) * pageSize;
+    setLoading(true);
     dispatch(
-      getStudentsListInformation({ skip, limit: pageSize }, (res) =>{
-        const studentList = res?.response?.students || [];
-        setTotalCount(res.response.total);
-        if (studentList.length > 0) {
-          setStudentsData(studentList);
+      getStudentsListInformation({ skip, limit: pageSize }, (res) => {
+        const { students, total } = normalizeStudentsResponse(res);
+        setTotalCount(total ?? (students.length ?? 0));
+        if (students.length > 0) {
+          setStudentsData(students);
+          setError(null);
         } else {
           setStudentsData([]);
           setError("No students found.");
@@ -128,10 +142,8 @@ const startIndex = (currentPage - 1) * pageSize;
         setLoading(false);
       })
     );
-  };
-useEffect(()=> {
+  }, [dispatch, currentPage, pageSize]);
 
-}, [studentsData])
   useEffect(() => {
     if (studentDataLists?.response?.students?.length > 0) {
       setStudentsData(studentDataLists.response?.students);
@@ -143,16 +155,16 @@ useEffect(()=> {
     setLoading(false);
   }, [studentDataLists]);
 
-  const getTariffsList = () => {
+  const getTariffsList = useCallback(() => {
     dispatch(
       getTariffsListInformation({}, (res) => {
         const tariffsList = res?.response || [];
         setTariffsData(Array.isArray(tariffsList) ? tariffsList : []);
       })
     );
-  };
+  }, [dispatch]);
 
-  const getInstructorsList = () => {
+  const getInstructorsList = useCallback(() => {
     dispatch(
       getInstructorsListInformation({}, (res) => {
         const instructorsList = res?.response || [];
@@ -161,31 +173,59 @@ useEffect(()=> {
         );
       })
     );
-  };
+  }, [dispatch]);
 
   useEffect(() => {
-    // getStudentsList();
     getTariffsList();
     getInstructorsList();
-    if (initialMonth && initialYear) {
-      dispatch(
-        getStudentsFilterListInformation(filters, (res) => {
-          const { response, isError } = res;
 
-          if (!isError && Array.isArray(response) && response.length > 0) {
-            setStudentsData(response?.students);
+    // Ensure loader shows for initial fetch
+    setLoading(true);
+
+    // If any initial query param is present (month, year, status, instructor_name, test_date)
+    // apply filters; previously code required both month AND year which prevented year-only filters.
+    const hasQueryFilters =
+      (initialMonth && initialMonth !== "") ||
+      (initialYear && initialYear !== "") ||
+      (filters.status && filters.status !== "All") ||
+      (filters.instructor_name && filters.instructor_name !== "") ||
+      (filters.test_date && filters.test_date !== "");
+
+    if (hasQueryFilters) {
+      // Build cleaned filter object from current filters (use initialMonth/year from URL first)
+      const initialFilterPayload = {
+        ...filters,
+        month: initialMonth || filters.month,
+        year: initialYear || filters.year,
+      };
+      // Remove empty values
+      const cleanedInitial = Object.fromEntries(
+        Object.entries(initialFilterPayload).filter(
+          ([, v]) => v !== "" && v !== null && v !== undefined
+        )
+      );
+
+      dispatch(
+        getStudentsFilterListInformation(cleanedInitial, (res) => {
+          const { students, total } = normalizeStudentsResponse(res);
+          if (Array.isArray(students) && students.length > 0) {
+            setStudentsData(students);
             setError(null);
           } else {
             setStudentsData([]);
             setError("No students found.");
           }
+          setTotalCount(total ?? 0);
           setLoading(false);
         })
       );
     } else {
+      // default: load paginated students list
       getStudentsList();
     }
-  }, [dispatch, currentPage, pageSize]);
+    // include the variables that should trigger re-run when they change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, currentPage, pageSize, initialMonth, initialYear]);
 
   const onStudentData = (res, isEdit) => {
     setSelectedStudent(res.response);
@@ -204,8 +244,26 @@ useEffect(()=> {
     dispatch(
       deleteStudent({ appId }, (res) => {
         handleDeleteCloseModel();
-        getStudentsList();
-        toast.success("Student deleted successfully.....");
+
+        // if filters are applied, re-run filter; else load normal list (respects pagination)
+        if (filterApplied) {
+          setLoading(true);
+          dispatch(
+            getStudentsFilterListInformation(filters, (fres) => {
+              const { students, total } = normalizeStudentsResponse(fres);
+              setStudentsData(Array.isArray(students) ? students : []);
+              setTotalCount(total ?? 0);
+              setError(
+                Array.isArray(students) && students.length ? null : "No students found."
+              );
+              setLoading(false);
+            })
+          );
+        } else {
+          getStudentsList();
+        }
+
+        toast.success("Student deleted successfully.");
       })
     );
   };
@@ -229,27 +287,28 @@ useEffect(()=> {
     setSelectedStudent(null);
   };
 
+  // Fixed payments access (was using .lenth typo and unsafe access)
   const handleAddPayment = (payload) => {
-    console.log("Payment Payload:", payload, getStuentData);
+    console.log("Payment Payload:", payload, studentForPayment);
+
+    const payments = Array.isArray(studentForPayment?.payments)
+      ? studentForPayment.payments
+      : [];
+
+    const lastPayment = payments.length > 0 ? payments[payments.length - 1] : {};
 
     const initialValues = {
-      appId: getStuentData.application_number,
+      appId: studentForPayment?.application_number,
       studentPaymentData: {
-        payment_id:
-          getStuentData.payments?.[getStuentData.payments.lenth - 1]
-            ?.payment_id || "",
-        receipt_no:
-          getStuentData.payments?.[getStuentData.payments.lenth - 1]
-            ?.receipt_no || "",
+        payment_id: lastPayment?.payment_id || "",
+        receipt_no: lastPayment?.receipt_no || "",
         amount: payload.amount,
         transaction_id: "",
         date: payload.date,
         payment_method: payload.payment_method,
         payment_status: payload.payment_status,
         remarks: payload.remarks,
-        payment_received_by:
-          getStuentData.payments?.[getStuentData.payments.lenth - 1]
-            ?.payment_received_by || "",
+        payment_received_by: lastPayment?.payment_received_by || "",
       },
     };
 
@@ -279,24 +338,103 @@ useEffect(()=> {
     );
   };
 
-  const formatDate = (dateStr) => {
-  if (!dateStr) return "-";
-  const date = new Date(dateStr);
-  if (isNaN(date)) return "-";
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
+  // ---------- NEW: perform search based on selected searchType ----------
+  const performSearch = (value, type) => {
+    // Trim input
+    const v = String(value ?? "").trim();
 
+    // If empty search, revert to normal list
+    if (!v) {
+      setSearchValue("");
+      setFilterApplied(false);
+      setCurrentPage(1);
+      getStudentsList();
+      return;
+    }
+
+    // Build payload for API - pass pagination (skip/limit) and the search field
+    const skip = 0; // always search from first page
+    const payload = { skip, limit: pageSize };
+
+    if (type === "month") {
+      // Accept numeric month; backend may expect number or string
+      const num = Number(v);
+      if (Number.isNaN(num) || num < 1 || num > 12) {
+        toast.error("Month must be a number between 1 and 12");
+        return;
+      }
+      payload.month = num;
+    } else if (type === "mobile_number") {
+      payload.mobile_number = v;
+    } else {
+      // name search (default)
+      payload.name = v;
+    }
+
+    setFilterApplied(true);
+    setCurrentPage(1);
+    setLoading(true);
+
+    dispatch(
+      getStudentsFilterListInformation(payload, (res) => {
+        const { students, total, isError } = normalizeStudentsResponse(res);
+
+        if (isError && Array.isArray(res?.response)) {
+          (res.response || []).forEach((err) => {
+            const field = err?.loc?.[1] || "Field";
+            const message = err?.msg || "Invalid input";
+            toast.error(`${field}: ${message}`);
+          });
+          setLoading(false);
+          return;
+        }
+
+        if (Array.isArray(students) && students.length > 0) {
+          setStudentsData(students);
+          setError(null);
+        } else {
+          setStudentsData([]);
+          setError("No students found.");
+        }
+        setTotalCount(total ?? 0);
+        setLoading(false);
+      })
+    );
+  };
+
+  // onchange handler for search input
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchValue(val);
+
+    // perform search immediately on change (you can debounce if desired)
+    performSearch(val, searchType);
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    // If string like 'YYYY-MM-DD' parse manually to avoid timezone shift
+    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
+    if (isoMatch) {
+      const year = Number(isoMatch[1]);
+      const month = Number(isoMatch[2]);
+      const day = Number(isoMatch[3]);
+      return `${String(day).padStart(2, "0")}-${String(month).padStart(2, "0")}-${year}`;
+    }
+    const date = new Date(dateStr);
+    if (isNaN(date)) return "-";
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   const PrintableStudentTable = ({ students }) => {
     if (!students.length) return null;
 
     return (
       <div className="printable-student-table mt-3">
-      <table className="table table-bordered table-striped text-start">
-
+        <table className="table table-bordered table-striped text-start">
           <thead>
             <tr>
               <th>#</th>
@@ -306,7 +444,6 @@ useEffect(()=> {
               <th>DOB</th>
               <th>Status</th>
               <th>Plan</th>
-              {/* <th>Instructor</th> */}
               <th>Balance</th>
               <th>Test Date</th>
             </tr>
@@ -321,10 +458,8 @@ useEffect(()=> {
                 <td>{student.dob ? formatDate(student.dob) : "-"}</td>
                 <td>{student.status || "-"}</td>
                 <td>{student.plan || "-"}</td>
-                {/* <td>{student.instructor_name || "-"}</td> */}
                 <td>₹{student.balance || 0}</td>
                 <td>{formatDate(student.test_date)}</td>
-
               </tr>
             ))}
           </tbody>
@@ -334,90 +469,26 @@ useEffect(()=> {
   };
 
   const handlePrint = () => {
-  const originalTitle = document.title;
-  document.title = "Filtered Students Report";
+    const originalTitle = document.title;
+    document.title = "Filtered Students Report";
 
-  window.print();
+    window.print();
 
-  // Restore original title after a short delay
-  setTimeout(() => {
-    document.title = originalTitle;
-  }, 1000);
-};
+    // Restore original title after printing (use afterprint if available)
+    const restore = () => {
+      document.title = originalTitle;
+      window.removeEventListener("afterprint", restore);
+    };
+    window.addEventListener("afterprint", restore);
 
-const totalPages = Math.ceil(totalCount / pageSize);
+    // Fallback restore in case afterprint isn't fired
+    setTimeout(() => {
+      document.title = originalTitle;
+      window.removeEventListener("afterprint", restore);
+    }, 2000);
+  };
 
-const renderPagination = () => {
   const totalPages = Math.ceil(totalCount / pageSize);
-  if (totalPages <= 1) return null;
-
-  const pageNumbers = [];
-  const maxVisible = 3;
-
-  if (currentPage > 1) pageNumbers.push(1);
-  if (currentPage > maxVisible) pageNumbers.push("...");
-  for (
-    let i = Math.max(2, currentPage - 1);
-    i <= Math.min(totalPages - 1, currentPage + 1);
-    i++
-  ) {
-    pageNumbers.push(i);
-  }
-  if (currentPage < totalPages - (maxVisible - 1)) pageNumbers.push("...");
-  if (currentPage < totalPages) pageNumbers.push(totalPages);
-
-  return (
-    <nav className="custom-pagination mt-4">
-      <ul className="pagination">
-        {/* Prev */}
-        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-          <button
-            className="page-link"
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-          >
-            <i className="bi bi-chevron-left"></i>
-          </button>
-        </li>
-
-        {/* Pages */}
-        {pageNumbers.map((page, idx) =>
-          page === "..." ? (
-            <li key={idx} className="page-item disabled">
-              <span className="page-link">...</span>
-            </li>
-          ) : (
-            <li
-              key={idx}
-              className={`page-item ${currentPage === page ? "active" : ""}`}
-            >
-              <button
-                className="page-link"
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            </li>
-          )
-        )}
-
-        {/* Next */}
-        <li
-          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
-        >
-          <button
-            className="page-link"
-            onClick={() =>
-              setCurrentPage((p) => Math.min(p + 1, totalPages))
-            }
-          >
-            <i className="bi bi-chevron-right"></i>
-          </button>
-        </li>
-      </ul>
-    </nav>
-  );
-};
-
 
   return (
     <>
@@ -452,7 +523,6 @@ const renderPagination = () => {
                     <button
                       type="button"
                       className="mb-1 btn btn-secondary mr-2"
-                      // onClick={() => setFiltersVisible(!filtersVisible)}
                       onClick={() => {
                         setFiltersVisible(!filtersVisible);
                         if (!filtersVisible) setFilterApplied(false);
@@ -463,53 +533,128 @@ const renderPagination = () => {
                     <button
                       type="button"
                       className="mb-1 btn btn-primary mr-2"
-                      onClick={AddStudentsModal}
+                      onClick={() => setShowModal(true)}
                     >
                       <i className="bi bi-plus-lg"></i> Add Students
                     </button>
                     {filterApplied && studentsData.length > 0 && (
-                              
-                                <button  type="button" className="mb-1 btn btn-outline-secondary" onClick={handlePrint}>
-  <i className="bi bi-printer"></i> Print
-</button>
+                      <button
+                        type="button"
+                        className="mb-1 btn btn-outline-secondary"
+                        onClick={handlePrint}
+                      >
+                        <i className="bi bi-printer"></i> Print
+                      </button>
+                    )}
+                  </div>
+                </div>
 
-                              
-                            )}
+                {/* ---------- NEW: Search box (above table) ---------- */}
+                <div className="row mb-3" style={{justifyContent: "flex-end"}}>
+                  <div className="col-md-2">
+                    <select
+                      className="form-control"
+                      value={searchType}
+                      onChange={(e) => {
+                        setSearchType(e.target.value);
+                        // Clear current search input whenever type changes
+                        setSearchValue("");
+                        // If you'd like to immediately clear results when type changes, uncomment:
+                        // performSearch("", e.target.value);
+                      }}
+                    >
+                      <option value="name">Name</option>
+                      <option value="mobile_number">Mobile Number</option>
+                      <option value="month">Month</option>
+                    </select>
+                  </div>
+
+                  <div className="col-md-3">
+                    <input
+                      type={searchType === "month" ? "number" : "text"}
+                      min={searchType === "month" ? 1 : undefined}
+                      max={searchType === "month" ? 12 : undefined}
+                      className="form-control"
+                      placeholder={
+                        searchType === "month"
+                          ? "Enter month (1-12)"
+                          : searchType === "mobile_number"
+                          ? "Search by mobile number"
+                          : "Search by name"
+                      }
+                      value={searchValue}
+                      onChange={handleSearchChange}
+                    />
+                  </div>
+
+                  <div className="col-md-2" style={{justifyContent: "flex-end", maxWidth: "13%"}}>
+                    <button
+                      className="btn btn-outline-secondary"
+                      onClick={() => {
+                        // Clear search and reload list
+                        setSearchValue("");
+                        setFilterApplied(false);
+                        setCurrentPage(1);
+                        getStudentsList();
+                      }}
+                    >
+                      Clear Search
+                    </button>
                   </div>
                 </div>
 
                 {filtersVisible && (
                   <div className="card p-3 mb-4">
                     <Formik
-                      initialValues={filters}
+                      initialValues={{
+                        month: filters.month ?? "",
+                        year: filters.year ?? "",
+                        status: filters.status ?? "All",
+                        instructor_name: filters.instructor_name ?? "",
+                        test_date: filters.test_date ?? "",
+                      }}
                       validationSchema={FilterValidationSchema}
                       onSubmit={(values) => {
                         setFilterApplied(true);
                         setCurrentPage(1);
-                        dispatch(
-                          getStudentsFilterListInformation(values, (res) => {
-                            const { response, isError } = res;
 
-                            if (isError && Array.isArray(response)) {
-                              response.forEach((err) => {
+                        const cleanedValues = Object.fromEntries(
+                          Object.entries(values).filter(
+                            ([, v]) => v !== "" && v !== null && v !== undefined
+                          )
+                        );
+
+                        if (Object.keys(cleanedValues).length === 0) {
+                          toast.warn("Please enter at least one filter value.");
+                          return;
+                        }
+
+                        setFilters(cleanedValues);
+                        setLoading(true); // show loader while filter fetches
+
+                        dispatch(
+                          getStudentsFilterListInformation(cleanedValues, (res) => {
+                            const { students, total, isError } = normalizeStudentsResponse(res);
+
+                            if (isError && Array.isArray(res?.response)) {
+                              // backend validation errors - preserve existing behavior
+                              (res.response || []).forEach((err) => {
                                 const field = err?.loc?.[1] || "Field";
                                 const message = err?.msg || "Invalid input";
                                 toast.error(`${field}: ${message}`);
                               });
+                              setLoading(false);
                               return;
                             }
 
-                            const studentLists = response || [];
-                            if (
-                              Array.isArray(studentLists) &&
-                              studentLists.length > 0
-                            ) {
-                              setStudentsData(studentLists);
+                            if (Array.isArray(students) && students.length > 0) {
+                              setStudentsData(students);
                               setError(null);
                             } else {
                               setStudentsData([]);
                               setError("No students found.");
                             }
+                            setTotalCount(total ?? 0);
                             setLoading(false);
                           })
                         );
@@ -620,7 +765,6 @@ const renderPagination = () => {
                                 Apply
                               </button>
                             </div>
-                            
                           </div>
                         </Form>
                       )}
@@ -636,172 +780,86 @@ const renderPagination = () => {
                     <p className="text-center text-danger my-5">{error}</p>
                   ) : (
                     <>
-                     <div className="table-responsive">
-                      <table className="table custom-table text-center align-middle">
-                        <thead className="table-light">
-                          <tr>
-                            <th>S.NO</th>
-                            <th>Student Name</th>
-                            {/* <th>Enrolled Course</th> */}
-                            <th>Mobile Number</th>
-                            <th>Plan</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {studentsData.map((student, index) => (
-                            <tr key={index}>
-                              <td>{startIndex + index+1}</td>
-                              <td>{student.name || "Student Name"}</td>
-                              {/* <td>{student.courseCount || 0} course(s) Enrolled</td> */}
-                              <td>{student.mobile_number || "N/A"}</td>
-                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {student.plan}</td>
-                              <td>
-                                 <button
-                                className="btn btn-sm btn-warning"
-                                title="Edit Student"
-                                onClick={() => handleEditStudent(student)}
-                              >Edit
-                                {/* <i className="bi bi-pencil"></i> */}
-                              </button>{" "}
-                             
-                              <button
-                                className="btn btn-sm btn-success"
-                                title={
-                                  Number(student.balance) <= 0
-                                    ? "No balance due"
-                                    : "Add Payment"
-                                }
-                                onClick={() =>
-                                  getOneStudentPaymentData(true, student)
-                                }
-                                disabled={Number(student.balance) <= 0}
-                              >
-                                Fee
-                                {/* <i className="bi bi-currency-rupee"></i> */}
-                              </button>{" "}
-                            <Link
-                                  to="#"
-                                  onClick={() => openProfileModal(student)}
-                                  className="btn btn-primary btn-sm"
-                                >
-                                  View
-                                </Link>{" "}
-                               
-                                 <button
-                                className="btn btn-sm btn-danger"
-                                title="Delete Student"
-                                onClick={() =>
-                                  deleteUser(student.application_number)
-                                }
-                              >
-                                Delete
-                                {/* <i className="bi bi-trash"></i> */}
-                              </button>
-                               
-                              </td>
+                      <div className="table-responsive">
+                        <table className="table custom-table text-center align-middle">
+                          <thead className="table-light">
+                            <tr>
+                              <th>S.NO</th>
+                              <th>Student Name</th>
+                              <th>Mobile Number</th>
+                              <th>Plan</th>
+                              <th>Actions</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    {/* <div className="row g-4">
-                      {studentsData.map((student, index) => (
-                        <div
-                          className="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3"
-                          key={index}
-                        >
-                          <div className="student-card position-relative">
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: "5px",
-                                right: "5px",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "5px",
-                              }}
-                            >
-                              <button
-                                className="btn btn-sm btn-warning"
-                                title="Edit Student"
-                                onClick={() => handleEditStudent(student)}
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </button>
-                              <button
-                                className="btn btn-sm btn-danger"
-                                title="Delete Student"
-                                onClick={() =>
-                                  deleteUser(student.application_number)
-                                }
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
-                              <button
-                                className="btn btn-sm btn-success"
-                                title={
-                                  Number(student.balance) <= 0
-                                    ? "No balance due"
-                                    : "Add Payment"
-                                }
-                                onClick={() =>
-                                  getOneStudentPaymentData(true, student)
-                                }
-                                disabled={Number(student.balance) <= 0}
-                              >
-                                <i className="bi bi-currency-rupee"></i>
-                              </button>
-                            </div>
-                            <div>
-                              <img src={avatar} alt="Avatar" />
-                              <h5>{student.name || "Student Name"}</h5>
-                              <p>
-                                {student.courseCount || 0} course(s) Enrolled
-                              </p>
-                              <p>{student.mobile_number || "N/A"}</p>
-                            </div>
-                            <div>
-                              <div className="card-buttons">
-                                <Link
-                                  to="#"
-                                  onClick={() => openProfileModal(student)}
-                                  className="btn btn-primary btn-sm"
-                                >
-                                  View
-                                </Link>
-                                <a
-                                  href="#"
-                                  className="btn btn-secondary btn-sm"
-                                >
-                                  Schedule
-                                </a>
-                              </div>
-                              <div className="completed-classes">
-                                <i className="bi bi-check-circle"></i>{" "}
-                                {student.plan}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div> */}
+                          </thead>
+                          <tbody>
+                            {studentsData.map((student, index) => (
+                              <tr key={student.application_number || index}>
+                                <td>{startIndex + index + 1}</td>
+                                <td>{student.name || "Student Name"}</td>
+                                <td>{student.mobile_number || "N/A"}</td>
+                                <td className="status">
+                                  <i className="bi bi-check-circle"></i>{" "}
+                                  {student.plan}
+                                </td>
+                                <td>
+                                  <button
+                                    className="btn btn-sm btn-warning"
+                                    title="Edit Student"
+                                    onClick={() => handleEditStudent(student)}
+                                  >
+                                    Edit
+                                  </button>{" "}
+                                  <button
+                                    className="btn btn-sm btn-success"
+                                    title={
+                                      Number(student.balance) <= 0
+                                        ? "No balance due"
+                                        : "Add Payment"
+                                    }
+                                    onClick={() =>
+                                      getOneStudentPaymentData(true, student)
+                                    }
+                                    disabled={Number(student.balance) <= 0}
+                                  >
+                                    Fee
+                                  </button>{" "}
+                                  <button
+                                    type="button"
+                                    onClick={() => openProfileModal(student)}
+                                    className="btn btn-primary btn-sm"
+                                  >
+                                    View
+                                  </button>{" "}
+                                  <button
+                                    className="btn btn-sm btn-danger"
+                                    title="Delete Student"
+                                    onClick={() =>
+                                      deleteUser(student.application_number)
+                                    }
+                                  >
+                                    Delete
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </>
                   )}
                   <Pagination
-  currentPage={currentPage}
-  totalCount={totalCount}
-  pageSize={pageSize}
-  onPageChange={(p) => setCurrentPage(p)}
-  onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1); }}
-/>
+                    currentPage={currentPage}
+                    totalCount={totalCount}
+                    pageSize={pageSize}
+                    onPageChange={(p) => setCurrentPage(p)}
+                    onPageSizeChange={(s) => {
+                      setPageSize(s);
+                      setCurrentPage(1);
+                    }}
+                  />
                 </div>
               </div>
             </div>
-
-
-
-            
 
             <AddStudents
               showModal={showModal}
@@ -831,7 +889,7 @@ const renderPagination = () => {
               onClose={() => setShowPaymentModal(false)}
               onSubmit={handleAddPayment}
               payReceiptData={receiptData}
-              student={getStuentData}
+              student={studentForPayment}
             />
 
             <Footer />
@@ -846,11 +904,13 @@ const renderPagination = () => {
         closeOnClick
         pauseOnHover
       />
-      
-     <div className="d-none d-print-block" style={{ marginTop: "120px" }}>
-  <h2 className="text-center" style={{ marginBottom: "70px" }}>Students Test List</h2>
-  <PrintableStudentTable students={studentsData} />
-</div>
+
+      <div className="d-none d-print-block" style={{ marginTop: "120px" }}>
+        <h2 className="text-center" style={{ marginBottom: "70px" }}>
+          Students Test List
+        </h2>
+        <PrintableStudentTable students={studentsData} />
+      </div>
     </>
   );
 };

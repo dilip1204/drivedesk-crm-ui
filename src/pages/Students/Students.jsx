@@ -298,7 +298,7 @@ const Students = () => {
     const lastPayment = payments.length > 0 ? payments[payments.length - 1] : {};
 
     const initialValues = {
-      appId: studentForPayment?.application_number,
+      appId: studentForPayment?.mobile_number,
       studentPaymentData: {
         payment_id: lastPayment?.payment_id || "",
         receipt_no: lastPayment?.receipt_no || "",
@@ -834,7 +834,7 @@ const Students = () => {
                                     className="btn btn-sm btn-danger"
                                     title="Delete Student"
                                     onClick={() =>
-                                      deleteUser(student.application_number)
+                                      deleteUser(student.mobile_number)
                                     }
                                   >
                                     Delete

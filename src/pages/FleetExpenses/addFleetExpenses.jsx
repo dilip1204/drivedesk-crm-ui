@@ -8,14 +8,13 @@ import { addExpenses, updateExpenses } from "../../store/expenses/actions";
 import { getInstructorsListInformation } from "../../store/instructors/actions";
 
 // Vehicle types (includes Stationery & Salary)
-const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike", "Other", "Stationery", "Salary","Trailer"];
+const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike","Rent", "Other", "Stationery", "Salary","Trailer"];
 const CATEGORIES = [
   "Fuel",
   "Service",
   "Repairs",
   "Insurance",
   "Tax",
-  "Rent",
   "Parking",
   "Wash",
   "Accessories",
@@ -100,10 +99,11 @@ export default function AddFleetExpenses({
   const validationSchema = Yup.object().shape({
     date: Yup.string().required("Date is required"),
     vehicle: Yup.string().when("vehicleType", (vehicleType, schema) => {
-      const vt = normalize(vehicleType);
-      if (vt === "stationery" || vt === "salary") return schema.notRequired().nullable();
-      return schema.required("Vehicle name/number is required");
-    }),
+  const vt = normalize(vehicleType);
+  if (vt === "stationery" || vt === "salary" || vt === "rent")
+    return schema.notRequired().nullable();
+  return schema.required("Vehicle name/number is required");
+}),
     vehicleType: Yup.string().required("Expense type is required").oneOf(vehicleTypes, "Invalid vehicle type"),
     // instructor required only if vehicleType is Salary
     instructor: Yup.string().when("vehicleType", {
@@ -113,15 +113,18 @@ export default function AddFleetExpenses({
     }),
     odometer: Yup.number().typeError("Odometer must be a number").min(0, "Odometer cannot be negative").nullable(),
     category: Yup.string().when("vehicleType", {
-      is: (v) => normalize(v) !== "salary",
-      then: (s) => s.required("Expense category is required").oneOf(CATEGORIES, "Invalid category"),
-      otherwise: (s) => s.nullable(),
-    }),
-    vendor: Yup.string().when("vehicleType", {
-      is: (v) => normalize(v) !== "salary",
-      then: (s) => s.required("Vendor name is required").max(100, "Vendor name too long"),
-      otherwise: (s) => s.nullable(),
-    }),
+  is: (v) => {
+    const vt = normalize(v);
+    return vt !== "salary" && vt !== "rent";
+  },
+  then: (s) =>
+    s.required("Expense category is required")
+      .oneOf(CATEGORIES, "Invalid category"),
+  otherwise: (s) => s.nullable(),
+}),
+    vendor: Yup.string()
+  .nullable()
+  .max(100, "Vendor name too long"),
     liters: Yup.number().typeError("Liters must be a number").min(0, "Liters cannot be negative").nullable(),
     pricePerLiter: Yup.number().typeError("Price per liter must be a number").min(0, "Price per liter cannot be negative").nullable(),
     amount: Yup.number().typeError("Amount must be a number").min(0, "Amount cannot be negative").required("Amount is required"),
@@ -142,7 +145,10 @@ export default function AddFleetExpenses({
       const payload = {
         id: values.id || uid(),
         type: "vehicle",
-        category: values.category || "",
+        category:
+  normalize(values.vehicleType) === "rent"
+    ? "Rent"
+    : values.category || "",
         vehicle_id: values.vehicle_id || values.vehicle || "",
         vehicle: values.vehicle || values.vehicle_id || "",
         vehicleType: values.vehicleType || "",
@@ -259,6 +265,16 @@ export default function AddFleetExpenses({
       if (formik.values.odometer !== "") formik.setFieldValue("odometer", "");
     }
 
+    if (vt === "rent") {
+  if (formik.values.vehicle !== "")
+    formik.setFieldValue("vehicle", "");
+
+  if (formik.values.vendor !== "")
+    formik.setFieldValue("vendor", "");
+
+  if (formik.values.category !== "")
+    formik.setFieldValue("category", "");
+}
     // When not Salary, clear instructor
     if (vt !== "salary" && formik.values.instructor !== "") {
       formik.setFieldValue("instructor", "");
@@ -286,8 +302,9 @@ export default function AddFleetExpenses({
 
   // hide vehicle for Stationery AND for Salary
   const hideVehicleField =
-    normalize(formik.values.vehicleType) === "stationery" ||
-    normalize(formik.values.vehicleType) === "salary";
+  normalize(formik.values.vehicleType) === "stationery" ||
+  normalize(formik.values.vehicleType) === "salary" ||
+  normalize(formik.values.vehicleType) === "rent";
 
   // helper flag used in several places
   const isSalary = normalize(formik.values.vehicleType) === "salary";
@@ -396,7 +413,8 @@ export default function AddFleetExpenses({
           )}
 
           {/* Category + Vendor (hidden for Salary) */}
-          {!isSalary && (
+          {!isSalary &&
+  normalize(formik.values.vehicleType) !== "rent" && (
             <div className="row">
               <div className="col-md-6 mb-3">
                 <label>Category <span style={{ color: "red" }}>*</span></label>
@@ -407,7 +425,7 @@ export default function AddFleetExpenses({
                 <div className="invalid-feedback">{formik.errors.category}</div>
               </div>
               <div className="col-md-6 mb-3">
-                <label>Vendor <span style={{ color: "red" }}>*</span></label>
+                <label>Vendor</label>
                 <input type="text" name="vendor" className={`form-control ${showInvalid("vendor")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.vendor} placeholder="Enter vendor name" />
                 <div className="invalid-feedback">{formik.errors.vendor}</div>
               </div>

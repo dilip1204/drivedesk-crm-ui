@@ -172,6 +172,7 @@ export default function AddStudents({
         const payload = {
           application_number: id?.application_number,
           studentData: updatedValues,
+          mobile_number: id?.mobile_number,
         };
 
         dispatch(

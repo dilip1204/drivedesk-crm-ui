@@ -100,7 +100,7 @@ export default function AddStudents({
     mobile_number: Yup.string()
       .matches(/^\d{10}$/, "Mobile number must be 10 digits")
       .required("Mobile number is required"),
-    application_number: Yup.string().nullable(),
+    application_number: Yup.string().required("Application Number is required"),
     email: "", // optional
     aadhar_number: Yup.string().required("Aadhar number is required"),
     plan: Yup.string().required("Plan is required"),
@@ -373,6 +373,7 @@ export default function AddStudents({
                         "name",
                         "dob",
                         "mobile_number",
+                        "application_number",
                         "aadhar_number",
                         "plan",
                         "payment_method",

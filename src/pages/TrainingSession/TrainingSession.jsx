@@ -116,7 +116,8 @@ const TrainingSession = () => {
     const today = new Date().toISOString().split("T")[0];
     dispatch(
       getTrainingSessionListInformation({ status: "Scheduled", date: today }, (res) => {
-        const trainingSessionList = res || [];
+        //console.info("Training session list response:", res);
+        const trainingSessionList = res?.response?.sessions || [];
         if (Array.isArray(trainingSessionList) && trainingSessionList.length > 0) {
           setTrainingSessionData(trainingSessionList);
           setError(null);

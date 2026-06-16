@@ -37,6 +37,11 @@ export default function AddPayment({
     remarks: Yup.string(),
   });
 
+  const onCloseFun = () => {
+    setIsPrintEnabled(false);
+    onClose();
+  } 
+
   const handleFormSubmit = (values, { resetForm }) => {
     const enteredAmount = Number(values.amount);
     const balance = Number(student?.balance || 0);
@@ -218,7 +223,7 @@ export default function AddPayment({
                   >
                     Print
                   </Button>
-                  <Button variant="secondary" onClick={onClose}>
+                  <Button variant="secondary" onClick={onCloseFun}>
                     Close
                   </Button>
                 </>

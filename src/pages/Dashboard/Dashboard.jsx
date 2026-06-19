@@ -11,11 +11,12 @@ import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 
+
 import { getDashboardSummary } from "../../store/dashboardSummary/actions";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const role = useSelector((state) => state.auth.user?.role);
+  
   const summary = useSelector((state) => state.dashboardSummary.dashboardSummary || {});
   console.log("Dashboard summary:", summary);
   const loader = useSelector((state) => state.dashboardSummary.dashboardSummaryLoader);
@@ -143,8 +144,8 @@ const Dashboard = () => {
                           <h2 className="mb-1 text-primary">&#8377;{total_outstanding_amount}</h2>
                           <p className="mb-2">Total OutStanding</p>
                           <div className="d-flex justify-content-between align-items-center">
-                            <span className="badge badge-primary">Net Payment</span>
-                            <span className="text-muted small">Current month</span>
+                            <span className="badge badge-primary">Total OutStanding</span>
+                            <span className="text-muted small">Total Pending Payments</span>
                           </div>
                         </div>
                       </div>

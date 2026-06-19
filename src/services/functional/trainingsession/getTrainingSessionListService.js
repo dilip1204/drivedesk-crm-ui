@@ -3,9 +3,10 @@ import { request } from "../../core/networkRequest";
 import { ENDPOINTS } from "../../../shared/constants/endPoints";
 
 export const getAllTrainingsession = (param) => { 
+  //console.log("Fetching all training sessions with params:", param);
     return request(
         METHOD_TYPES.GET,
-        ENDPOINTS.getAllTrainingsession+'?status=All'  
+        ENDPOINTS.getAllTrainingsession+'?status=All'+'&from_date='+param.date+'&to_date='+param.date
     )
 }
 

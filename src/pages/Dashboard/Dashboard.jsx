@@ -16,6 +16,7 @@ import { getDashboardSummary } from "../../store/dashboardSummary/actions";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const summary = useSelector((state) => state.dashboardSummary.dashboardSummary || {});
+  console.log("Dashboard summary:", summary);
   const loader = useSelector((state) => state.dashboardSummary.dashboardSummaryLoader);
   const today = new Date();
   const year = today.getFullYear();
@@ -35,12 +36,13 @@ const Dashboard = () => {
   }, [dispatch]);
 
   const formatValue = (value) => (typeof value === "number" ? value : 0);
-  const registrationCount = formatValue(summary.registration_count);
-  const processCompletedCount = formatValue(summary.process_completed_count);
-  const processFailedCount = formatValue(summary.process_failed_count);
-  const paymentPendingCount = formatValue(summary.payment_pending_count);
-  const paymentCompletedCount = formatValue(summary.payment_completed_count);
-  const paymentFailedCount = formatValue(summary.payment_failed_count);
+  const registrationCount = formatValue(summary?.response?.registration_count);
+  const processCompletedCount = formatValue(summary?.response?.process_completed_count);
+  const processFailedCount = formatValue(summary?.response?.process_failed_count);
+  const paymentPendingCount = formatValue(summary?.response?.payment_pending_count);
+  const paymentCompletedCount = formatValue(summary?.response?.payment_completed_count);
+  const paymentFailedCount = formatValue(summary?.response?.payment_failed_count);
+  const total_outstanding_amount = formatValue(summary?.response?.total_outstanding_amount);
   const paymentTotalCount = paymentPendingCount + paymentCompletedCount + paymentFailedCount;
   const processSuccessRate = registrationCount ? Math.round((processCompletedCount / registrationCount) * 100) : 0;
   const paymentSuccessRate = paymentTotalCount ? Math.round((paymentCompletedCount / paymentTotalCount) * 100) : 0;
@@ -98,9 +100,6 @@ const Dashboard = () => {
                       <div className="card-body">
                         <h2 className="mb-1 text-success">{processCompletedCount}</h2>
                         <p className="mb-2">Process Completed</p>
-                        <small className="text-muted d-block mb-2">
-                          {processSuccessRate}% completion rate
-                        </small>
                         <div className="d-flex justify-content-between align-items-center">
                           <span className="badge badge-success">Healthy</span>
                           <span className="text-muted small">Compared to registrations</span>
@@ -109,28 +108,12 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  <div className="col-xl-3 col-sm-6">
-                    <div className="card card-mini mb-4 border-danger">
-                      <div className="card-body">
-                        <h2 className="mb-1 text-danger">{processFailedCount}</h2>
-                        <p className="mb-2">Process Failed</p>
-                        <small className="text-muted d-block mb-2">
-                          {registrationCount > 0 ? `${Math.round((processFailedCount / registrationCount) * 100)}% of enrollments` : "No data yet"}
-                        </small>
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span className="badge badge-danger">Review</span>
-                          <span className="text-muted small">Needs attention</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
                   <div className="col-xl-3 col-sm-6">
                     <div className="card card-mini mb-4 border-warning">
                       <div className="card-body">
                         <h2 className="mb-1 text-warning">{paymentPendingCount}</h2>
                         <p className="mb-2">Payment Pending</p>
-                        <small className="text-muted d-block mb-2">Awaiting clearance</small>
                         <div className="d-flex justify-content-between align-items-center">
                           <span className="badge badge-warning">Pending</span>
                           <span className="text-muted small">Follow-up required</span>
@@ -144,9 +127,6 @@ const Dashboard = () => {
                       <div className="card-body">
                         <h2 className="mb-1 text-success">{paymentCompletedCount}</h2>
                         <p className="mb-2">Payment Completed</p>
-                        <small className="text-muted d-block mb-2">
-                          {paymentSuccessRate}% success rate
-                        </small>
                         <div className="d-flex justify-content-between align-items-center">
                           <span className="badge badge-success">Collected</span>
                           <span className="text-muted small">Revenue secured</span>
@@ -155,20 +135,20 @@ const Dashboard = () => {
                     </div>
                   </div>
 
+                 
                   <div className="col-xl-3 col-sm-6">
-                    <div className="card card-mini mb-4 border-secondary">
-                      <div className="card-body">
-                        <h2 className="mb-1 text-secondary">{paymentFailedCount}</h2>
-                        <p className="mb-2">Payment Failed</p>
-                        <small className="text-muted d-block mb-2">
-                          {paymentTotalCount > 0 ? `${Math.round((paymentFailedCount / paymentTotalCount) * 100)}% of payments` : "No payment activity"}
-                        </small>
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span className="badge badge-secondary">Retry</span>
-                          <span className="text-muted small">Resolve on priority</span>
+                    <Link to={`/students?month=${month}&year=${year}`}>
+                      <div className="card card-mini mb-4 border-primary">
+                        <div className="card-body">
+                          <h2 className="mb-1 text-primary">&#8377;{total_outstanding_amount}</h2>
+                          <p className="mb-2">Total Payment</p>
+                          <div className="d-flex justify-content-between align-items-center">
+                            <span className="badge badge-primary">Net Payment</span>
+                            <span className="text-muted small">Current month</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   </div>
                 </div>
 

@@ -15,6 +15,7 @@ import { getDashboardSummary } from "../../store/dashboardSummary/actions";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const role = useSelector((state) => state.auth.user?.role);
   const summary = useSelector((state) => state.dashboardSummary.dashboardSummary || {});
   console.log("Dashboard summary:", summary);
   const loader = useSelector((state) => state.dashboardSummary.dashboardSummaryLoader);
@@ -137,16 +138,18 @@ const Dashboard = () => {
 
                  
                   <div className="col-xl-3 col-sm-6">
+                     {role === "admin" ? (
                       <div className="card card-mini mb-4 border-primary">
                         <div className="card-body">
                           <h2 className="mb-1 text-primary">&#8377;{total_outstanding_amount}</h2>
-                          <p className="mb-2">Total Payment</p>
+                          <p className="mb-2">Total OutStanding</p>
                           <div className="d-flex justify-content-between align-items-center">
                             <span className="badge badge-primary">Net Payment</span>
                             <span className="text-muted small">Current month</span>
                           </div>
                         </div>
                       </div>
+                     ) : null}
                   </div>
                 </div>
                 

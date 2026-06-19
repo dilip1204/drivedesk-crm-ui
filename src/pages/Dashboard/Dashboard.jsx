@@ -135,7 +135,7 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                 {role === "admin" ? (
+                 
                   <div className="col-xl-3 col-sm-6">
                       <div className="card card-mini mb-4 border-primary">
                         <div className="card-body">
@@ -148,7 +148,6 @@ const Dashboard = () => {
                         </div>
                       </div>
                   </div>
-                  ) : null}
                 </div>
                 
 

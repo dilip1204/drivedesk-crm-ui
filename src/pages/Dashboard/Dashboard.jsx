@@ -138,7 +138,6 @@ const Dashboard = () => {
 
                  
                   <div className="col-xl-3 col-sm-6">
-                     {role === "admin" ? (
                       <div className="card card-mini mb-4 border-primary">
                         <div className="card-body">
                           <h2 className="mb-1 text-primary">&#8377;{total_outstanding_amount}</h2>
@@ -149,7 +148,6 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
-                     ) : null}
                   </div>
                 </div>
                 

@@ -135,9 +135,8 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                 
+                 {role === "admin" ? (
                   <div className="col-xl-3 col-sm-6">
-                    <Link to={`/students?month=${month}&year=${year}`}>
                       <div className="card card-mini mb-4 border-primary">
                         <div className="card-body">
                           <h2 className="mb-1 text-primary">&#8377;{total_outstanding_amount}</h2>
@@ -148,9 +147,10 @@ const Dashboard = () => {
                           </div>
                         </div>
                       </div>
-                    </Link>
                   </div>
+                  ) : null}
                 </div>
+                
 
                 <div className="row">
                   <div className="col-12">

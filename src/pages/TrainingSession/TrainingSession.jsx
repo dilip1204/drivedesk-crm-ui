@@ -53,7 +53,7 @@ const TrainingSession = () => {
   const trainingSessionDataLists = useSelector(
     (state) => state.trainingSessionListInfo.trainingSessionList
   );
-
+  //console.log("Training session data from Redux:", trainingSessionDataLists);
   const [searchParams] = useSearchParams();
   const initialMonth = searchParams.get("month") || "";
   const initialYear = searchParams.get("year") || "";
@@ -116,9 +116,9 @@ const TrainingSession = () => {
     const today = new Date().toISOString().split("T")[0];
     dispatch(
       getTrainingSessionListInformation({ status: "Scheduled", date: today }, (res) => {
-        //console.info("Training session list response:", res);
+       // console.info("Training session list response:", res);
         const trainingSessionList = res?.response?.sessions || [];
-        if (Array.isArray(trainingSessionList) && trainingSessionList.length > 0) {
+        if (trainingSessionList.length > 0) {
           setTrainingSessionData(trainingSessionList);
           setError(null);
         } else {
@@ -133,8 +133,8 @@ const TrainingSession = () => {
   useEffect(() => {}, [trainingSessionData]);
 
   useEffect(() => {
-    if (trainingSessionDataLists?.length > 0) {
-      setTrainingSessionData(trainingSessionDataLists);
+    if (trainingSessionDataLists?.response?.sessions?.length > 0) {
+      setTrainingSessionData(trainingSessionDataLists.response?.sessions || []);
       setError(null);
     } else {
       setTrainingSessionData([]);

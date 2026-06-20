@@ -115,10 +115,10 @@ const Dashboard = () => {
                     <div className="card card-mini mb-4 border-warning">
                       <div className="card-body">
                         <h2 className="mb-1 text-warning">{paymentPendingCount}</h2>
-                        <p className="mb-2">Payment Pending</p>
+                        <p className="mb-2">Pending Students</p>
                         <div className="d-flex justify-content-between align-items-center">
                           <span className="badge badge-warning">Pending</span>
-                          <span className="text-muted small">Follow-up required</span>
+                          <span className="text-muted small">Students with balance due</span>
                         </div>
                       </div>
                     </div>
@@ -142,10 +142,10 @@ const Dashboard = () => {
                       <div className="card card-mini mb-4 border-primary">
                         <div className="card-body">
                           <h2 className="mb-1 text-primary">&#8377;{total_outstanding_amount}</h2>
-                          <p className="mb-2">Total OutStanding</p>
+                          <p className="mb-2">Outstanding Amount</p>
                           <div className="d-flex justify-content-between align-items-center">
-                            <span className="badge badge-primary">Total OutStanding</span>
-                            <span className="text-muted small">Total Pending Payments</span>
+                            <span className="badge badge-primary">OUTSTANDING</span>
+                            <span className="text-muted small">Pending fee collection</span>
                           </div>
                         </div>
                       </div>

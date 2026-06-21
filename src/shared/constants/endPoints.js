@@ -30,5 +30,6 @@ export const ENDPOINTS = {
     addExpenses: 'expenses',
     editExpenses: 'expenses/',
     deleteExpenses: 'expenses/',
-    getAllExpenses: 'expenses'
+    getAllExpenses: 'expenses',
+    getOutstandingFees: 'dashboard/students/pending-balance',
 } 

@@ -10,6 +10,7 @@ import Enquiries from "./pages/Enquiries/enquiries";
 import ProtectedRoute from "./components/ProtectedRoute";
 import InstructorAvailabilityDashboard from "./pages/Instructors/InstructorAvailabilityDashboard";
 import FleetExpenses from "./pages/FleetExpenses/FleetExpenses";
+import OutstandingFees from "./pages/OutstandingFees/outstandingFees";
 
 export default function AppRoutes() {
   return (
@@ -76,6 +77,15 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin", "instructor"]}>
             <FleetExpenses />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/outstandingfees"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <OutstandingFees />
           </ProtectedRoute>
         }
       />

@@ -140,6 +140,7 @@ const Dashboard = () => {
                   </div>
 
                   <div className="col-xl-3 col-sm-6">
+                    <Link to={`/outstandingfees`}>
                     <div className="card card-mini mb-4 border-success">
                       <div className="card-body">
                         <h2 className="mb-1 text-success">{paymentCompletedCount}</h2>
@@ -153,6 +154,7 @@ const Dashboard = () => {
                         </div>
                       </div>
                     </div>
+                    </Link>
                   </div>
 
                   <div className="col-xl-3 col-sm-6">

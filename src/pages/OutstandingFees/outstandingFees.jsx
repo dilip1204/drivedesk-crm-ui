@@ -37,36 +37,41 @@ const OutstandingFees = () => {
 
   const startIndex = (currentPage - 1) * pageSize;
 
-  const currentRecords = outstandingFeesData.slice(
-    startIndex,
-    startIndex + pageSize
-  );
+ const currentRecords = outstandingFeesData;
 
   const totalCount = outstandingFeesData.length;
     
 
   const getOutstandingFeesList = () => {
-    const data = {};
-    dispatch(
-      getOutstandingFees(data, (res) => {
-        const outstandingFees = res?.response?.length > 0 ? res.response : [];
-         
-        if (outstandingFees.length > 0) { 
-          setOutstandingFeesData(outstandingFees);
-        } else {  
-          setOutstandingFeesData([]);
-          setError("No Outstanding Fees found.");
-        }
-        setLoading(false);
-      })
-    );
+  const data = {
+    page: currentPage,
+    limit: pageSize,
   };
+
+  dispatch(
+    getOutstandingFees(data, (res) => {
+      const response = res?.response || {};
+      const students = response?.students || [];
+
+      if (students.length > 0) {
+        setOutstandingFeesData(students);
+        setError(null);
+      } else {
+        setOutstandingFeesData([]);
+        setError("No Outstanding Fees found.");
+      }
+
+      setLoading(false);
+    })
+  );
+};
 
   
 
   useEffect(() => {
-    getOutstandingFeesList();
-  }, []);
+  setLoading(true);
+  getOutstandingFeesList();
+}, [currentPage, pageSize]);
 
   useEffect(() => {
   }, [outstandingFeesData]);

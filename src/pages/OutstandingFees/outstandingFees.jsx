@@ -19,6 +19,7 @@ import { getOutstandingFees } from "../../store/dashboardSummary/actions";
 
 
 import avatar from "../../assets/img/avatar.png";
+import Pagination from "../Students/Pagenation";
 
 import { useAuth } from "../../hooks/useAuth";
 
@@ -31,8 +32,18 @@ const OutstandingFees = () => {
   const [outstandingFeesData, setOutstandingFeesData] = useState([]);
 
   const outstandingFeesLists = useSelector((state) => state.outstandingFeesInfo.outstandingFees);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  
+  const startIndex = (currentPage - 1) * pageSize;
+
+  const currentRecords = outstandingFeesData.slice(
+    startIndex,
+    startIndex + pageSize
+  );
+
+  const totalCount = outstandingFeesData.length;
+    
 
   const getOutstandingFeesList = () => {
     const data = {};
@@ -51,16 +62,7 @@ const OutstandingFees = () => {
     );
   };
 
-  // useEffect(() => { 
-  //   if (outstandingFeesLists?.response?.length > 0) {
-  //     setOutstandingFeesData(outstandingFeesLists.response);
-  //     setError(null);
-  //   } else {
-  //     setOutstandingFeesData([]);
-  //     setError("No Outstanding Fees found.");
-  //   }
-  //   setLoading(false);
-  // }, [outstandingFeesLists]);
+  
 
   useEffect(() => {
     getOutstandingFeesList();
@@ -129,9 +131,9 @@ const OutstandingFees = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {outstandingFeesData.map((outstandingFees, index) => (
+                          {currentRecords.map((outstandingFees, index) => (
                             <tr key={index}>
-                              <td>{index+1}</td>
+                              <td>{startIndex + index + 1}</td>
                               <td>{outstandingFees?.name || "Name"}</td>
                               <td>{outstandingFees?.mobile_number || 0}</td>
                               <td>{outstandingFees?.balance || "N/A"}</td>
@@ -141,6 +143,16 @@ const OutstandingFees = () => {
                           ))}
                         </tbody>
                       </table>
+                      <Pagination
+                      currentPage={currentPage}
+                      totalCount={totalCount}
+                      pageSize={pageSize}
+                      onPageChange={(p) => setCurrentPage(p)}
+                      onPageSizeChange={(s) => {
+                        setPageSize(s);
+                        setCurrentPage(1);
+                      }}
+                    />
                     </div>
                     
                     </>

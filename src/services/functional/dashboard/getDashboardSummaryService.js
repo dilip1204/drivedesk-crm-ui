@@ -9,9 +9,11 @@ export const getDashboardSummary = (param) => {
     )
 } 
 
-export const getOutstandingFees = () => {
+export const getOutstandingFees = (param) => {
     return request(
         METHOD_TYPES.GET,
-        ENDPOINTS.getOutstandingFees+'?skip=0&limit=50'
-    )
-} 
+        ENDPOINTS.getOutstandingFees +
+            '?skip=' + param.skip +
+            '&limit=' + param.limit
+    );
+}

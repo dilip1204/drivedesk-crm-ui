@@ -39,7 +39,7 @@ const OutstandingFees = () => {
 
  const currentRecords = outstandingFeesData;
 
-  const totalCount = outstandingFeesData.length;
+  const [totalCount, setTotalCount] = useState(0);
     
 
   const getOutstandingFeesList = () => {
@@ -53,12 +53,15 @@ const OutstandingFees = () => {
       const response = res?.response || {};
       const students = response?.students || [];
 
+      setTotalCount(response.total_count || 0);
+
       if (students.length > 0) {
-        setOutstandingFeesData(students);
-        setError(null);
+          console.log("Outstanding API:", students);
+          setOutstandingFeesData(students);
+          setError(null);
       } else {
-        setOutstandingFeesData([]);
-        setError("No Outstanding Fees found.");
+          setOutstandingFeesData([]);
+          setError("No Outstanding Fees found.");
       }
 
       setLoading(false);

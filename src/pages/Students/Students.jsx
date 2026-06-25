@@ -128,32 +128,16 @@ const Students = () => {
   const getStudentsList = useCallback(() => {
     const skip = (currentPage - 1) * pageSize;
     setLoading(true);
-    dispatch(
+     dispatch(
       getStudentsListInformation({ skip, limit: pageSize }, (res) => {
         const { students, total } = normalizeStudentsResponse(res);
-        setTotalCount(total ?? (students.length ?? 0));
-        if (students.length > 0) {
-          setStudentsData(students);
-          setError(null);
-        } else {
-          setStudentsData([]);
-          setError("No students found.");
-        }
-        setLoading(false);
+        //console.log("Students from API:", students);
+        setTotalCount(total);
+        setStudentsData(students);
+        setLoading(false); 
       })
     );
   }, [dispatch, currentPage, pageSize]);
-
-  useEffect(() => {
-    if (studentDataLists?.response?.students?.length > 0) {
-      setStudentsData(studentDataLists.response?.students);
-      setError(null);
-    } else {
-      setStudentsData([]);
-      setError("No students found.");
-    }
-    setLoading(false);
-  }, [studentDataLists]);
 
   const getTariffsList = useCallback(() => {
     dispatch(
@@ -178,7 +162,6 @@ const Students = () => {
   useEffect(() => {
     getTariffsList();
     getInstructorsList();
-
     // Ensure loader shows for initial fetch
     setLoading(true);
 

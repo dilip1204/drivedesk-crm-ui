@@ -39,6 +39,7 @@ function* getOutstandingFees(action){
         yield put({ type: GET_OUTSTANDING_FEES_PENDING });
         const response = yield call(
             getDashboardSummaryService.getOutstandingFees,
+            action.param
         );
         yield put({ 
             type: GET_OUTSTANDING_FEES_SUCCESS,

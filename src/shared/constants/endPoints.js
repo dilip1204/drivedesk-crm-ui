@@ -32,4 +32,5 @@ export const ENDPOINTS = {
     deleteExpenses: 'expenses/',
     getAllExpenses: 'expenses',
     getOutstandingFees: 'dashboard/students/pending-balance',
+    historicalPaymentAdjustment: 'students/historical-payment-adjustment',
 } 

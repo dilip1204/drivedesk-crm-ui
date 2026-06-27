@@ -17,3 +17,11 @@ export const getOutstandingFees = (param) => {
             '&limit=' + param.limit
     );
 }
+
+export const historicalPaymentAdjustment = (param) => {
+    return request(
+        METHOD_TYPES.POST,
+        ENDPOINTS.historicalPaymentAdjustment,
+        { id: param.id }
+    );
+}

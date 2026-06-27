@@ -192,6 +192,7 @@ const OutstandingFees = () => {
                             <th>Name</th>
                             <th>Mobile Number</th>
                             <th>Balance</th>
+                            <th>Registered Date</th>
                             <th>Status</th>
                             <th>Full Payment Status</th>
                           </tr>
@@ -212,6 +213,7 @@ const OutstandingFees = () => {
                               <td>{outstandingFees?.name || "Name"}</td>
                               <td>{outstandingFees?.mobile_number || 0}</td>
                               <td>{outstandingFees?.balance || "N/A"}</td>
+                              <td>{outstandingFees?.registered_date || "N/A"}</td>
                               <td>{outstandingFees?.status || "N/A"}</td>
                               <td>{outstandingFees?.full_payment_status || "N/A"}</td>
                             </tr>

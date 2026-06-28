@@ -44,7 +44,9 @@ const Login = () => {
           localStorage.setItem("userInfo", JSON.stringify(tenantInfo));
           localStorage.setItem("userRoleInfo", JSON.stringify(userRoleInfo));
 
-          navigate("/dashboard");
+          const redirectPath =
+            userRoleInfo.role === "super_admin" ? "/superadmin" : "/dashboard";
+          navigate(redirectPath);
         } else if (res?.statusCode === 422 || res?.isError) {
           const errMsg = res?.message || "Invalid login credentials.";
           setLoginError(errMsg);

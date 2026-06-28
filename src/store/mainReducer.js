@@ -10,7 +10,8 @@ import EnquiriesReducer from "./Enquiries/reducer";
 import dashboardSummaryReducer from "./dashboardSummary/reducer";
 import StudentPaymentReducer from "./addStudentPayment/reducer";
 import trainingSessionListReducer from "./trainingSession/reducer";
-import expensesReducer from "./expenses/reducer";   
+import expensesReducer from "./expenses/reducer";
+import superAdminReducer from "./superAdmin/reducer";
 import { getOutstandingFees } from "./dashboardSummary/actions";
 
 
@@ -26,5 +27,6 @@ export const mainReducer = combineReducers({
     studentPaymentInfo: StudentPaymentReducer,
     trainingSessionListInfo: trainingSessionListReducer,
     expensesInfo: expensesReducer,
+    superAdminInfo: superAdminReducer,
     outstandingFeesInfo: getOutstandingFees
 })

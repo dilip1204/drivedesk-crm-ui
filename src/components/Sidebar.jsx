@@ -13,13 +13,16 @@ export default function Sidebar() {
     <aside className="left-sidebar bg-sidebar">
       <div id="sidebar" className="sidebar sidebar-with-footer">
         <div className="app-brand app-logo">
-          <Link to="/dashboard" title="Dashboard">
+          <Link to={role === "super_admin" ? "/superadmin" : "/dashboard"} title="Dashboard">
             <img src={logo} alt="logo" />
           </Link>
         </div>
 
         <div data-simplebar style={{ height: "100%" }}>
           <ul className="nav sidebar-inner" id="sidebar-menu">
+
+            {role !== "super_admin" && (
+              <>
 
             {/* Accessible by both admin and instructor */}
             <li className={`has-sub ${isActive("/dashboard") ? "active expand" : ""}`}>
@@ -75,6 +78,17 @@ export default function Sidebar() {
                   <span className="nav-text">Expenses</span>
                 </Link>
               </li>
+              </>
+            )}
+
+            {role === "super_admin" && (
+              <li className={`has-sub ${isActive("/superadmin") ? "active expand" : ""}`}>
+                <Link className="sidenav-item-link" to="/superadmin">
+                  <i className="mdi mdi-shield-account"></i>
+                  <span className="nav-text">Super Admin</span>
+                </Link>
+              </li>
+            )}
             
 
           </ul>

@@ -124,7 +124,13 @@ export default function AddPayment({
                 <label>
                   Amount <span style={{ color: "red" }}>*</span>
                 </label>
-                <Field type="number" name="amount" className="form-control" />
+                <Field
+                  type="text"
+                  inputMode="decimal"
+                  name="amount"
+                  className="form-control"
+                  placeholder="Enter amount"
+                />
                 <ErrorMessage
                   name="amount"
                   component="div"

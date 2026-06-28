@@ -119,11 +119,12 @@ export default function AddStudents({
       .nullable()
       .typeError("Training days must be a number")
       .min(0, "Cannot be negative"),
-    training_start_date: Yup.date().nullable().typeError("Invalid date format"),
+    training_start_date: Yup.date().nullable().typeError("Invalid date format").required("Training start date is required"),
     // keep 24h HH:MM format for storage
     training_time: Yup.string()
       .nullable()
-      .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)"),
+      .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)")
+      .required("Training time is required"),
     ...(isEdit && {
       test_date: Yup.date().nullable().typeError("Invalid date format"),
       discount: Yup.number()
@@ -383,6 +384,9 @@ export default function AddStudents({
                         "full_payment_status",
                         "instructor_name",
                         "instructor_mobile",
+                        "training_days",
+                        "training_start_date",
+                        "training_time",
                       ].includes(field) && <span style={{ color: "red" }}>*</span>}
                     </label>
 

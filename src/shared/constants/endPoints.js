@@ -33,4 +33,7 @@ export const ENDPOINTS = {
     getAllExpenses: 'expenses',
     getOutstandingFees: 'dashboard/students/pending-balance',
     historicalPaymentAdjustment: 'students/historical-payment-adjustment',
+    addSuperAdmin: 'auth/register',
+    getSuperAdminList: 'auth/tenants',
+    editSuperAdmin: 'auth/tenants/',
 } 

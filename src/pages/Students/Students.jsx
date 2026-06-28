@@ -309,8 +309,13 @@ const Students = () => {
           return;
         }
 
-        if (response?.isError) {
-          toast.error("Payment failed. Please try again.");
+        if (response?.isError || (response?.status >= 400) || (response?.statusCode >= 400)) {
+          const msg =
+            response?.data?.message ||
+            response?.data?.detail ||
+            response?.message ||
+            "Payment failed. Please try again.";
+          toast.error(typeof msg === "string" ? msg : "Payment failed. Please try again.");
         } else {
           setReceiptData(response);
           toast.success("Payment added successfully!");

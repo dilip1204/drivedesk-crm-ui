@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import InstructorAvailabilityDashboard from "./pages/Instructors/InstructorAvailabilityDashboard";
 import FleetExpenses from "./pages/FleetExpenses/FleetExpenses";
 import OutstandingFees from "./pages/OutstandingFees/outstandingFees";
+import SuperAdmin from "./pages/SuperAdmin/SuperAdmin";
 
 export default function AppRoutes() {
   return (
@@ -86,6 +87,15 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <OutstandingFees />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <SuperAdmin />
           </ProtectedRoute>
         }
       />

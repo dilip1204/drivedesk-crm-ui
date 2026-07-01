@@ -4,17 +4,27 @@ import { Link, useNavigate } from "react-router-dom";
 import avatar from "../assets/img/avatar.png";
 
 export default function Header() {
-  const [user, setUser] = useState({});
+  const [displayName, setDisplayName] = useState("Guest User");
   const navigate = useNavigate();
 
   useEffect(() => {
+    const roleInfo = JSON.parse(localStorage.getItem("userRoleInfo") || "{}");
+    const tenantInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    const role = (roleInfo?.role || "").toLowerCase();
 
+    const fallbackName =
+      (roleInfo?.email ? roleInfo.email.split("@")[0] : "") || "Guest User";
 
-    const user = JSON.parse(localStorage.getItem('userRoleInfo'));
-    const userInfo = user.role === "admin" ? localStorage.getItem("userInfo"):localStorage.getItem('userRoleInfo');
-    if (userInfo) {
-      setUser(JSON.parse(userInfo));
-    }
+    const resolvedName =
+      role === "super_admin"
+        ? "superadmin"
+        : role === "instructor"
+        ? roleInfo?.name || roleInfo?.instructor_name || roleInfo?.full_name || fallbackName
+        : role === "admin"
+        ? tenantInfo?.org_name || tenantInfo?.organization_name || tenantInfo?.name || fallbackName
+        : fallbackName;
+
+    setDisplayName(resolvedName);
   }, []);
 
   return (
@@ -68,17 +78,17 @@ export default function Header() {
               >
                 <img src={avatar} className="user-image" alt="User Image" />
                 <span className="d-none d-lg-inline-block">
-                  {user.email ? user.email.split("@")[0] : "" || "Guest User"}
+                  {displayName}
                 </span>
               </button>
               <ul className="dropdown-menu dropdown-menu-right">
                 <li className="dropdown-header" style={{margin: 0}}>
                   <img src={avatar} className="img-circle" alt="User Image" />
                   <div className="d-inline-block">
-                    {user.email ? user.email.split("@")[0] : "" || "Guest User"}{" "}
-                    <small className="pt-1">
+                    {displayName}{" "}
+                    {/* <small className="pt-1">
                       {user.email || "Email not found"}
-                    </small>
+                    </small> */}
                   </div>
                 </li>
 

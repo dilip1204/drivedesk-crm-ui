@@ -98,7 +98,7 @@ const SuperAdmin = () => {
                                     </div>
                                     <div className="col-xl-6 d-flex align-items-center justify-content-end">
                                         <button className="btn btn-primary btn-sm" onClick={handleAdd} style={{ fontSize: "13px" }}>
-                                            <i className="mdi mdi-plus me-1"></i> Add Super Admin
+                                            <i className="mdi mdi-plus me-1"></i> Add Tenant
                                         </button>
                                     </div>
                                 </div>

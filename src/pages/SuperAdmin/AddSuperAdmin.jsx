@@ -111,7 +111,7 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
         <Modal show={showModal} onHide={hideModal} size="lg" centered>
             <Modal.Header style={{ padding: "14px 20px" }}>
                 <Modal.Title style={{ fontSize: "16px", fontWeight: 600 }}>
-                    {isEdit ? "Edit Super Admin" : "Add Super Admin"}
+                    {isEdit ? "Edit Tenant" : "Add Tenant"}
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body style={{ padding: "20px" }}>

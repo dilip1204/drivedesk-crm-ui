@@ -48,6 +48,8 @@ const Dashboard = () => {
   const paymentTotalCount = paymentPendingCount + paymentCompletedCount + paymentFailedCount;
   const processSuccessRate = registrationCount ? Math.round((processCompletedCount / registrationCount) * 100) : 0;
   const paymentSuccessRate = paymentTotalCount ? Math.round((paymentCompletedCount / paymentTotalCount) * 100) : 0;
+  const userRoleInfo = JSON.parse(localStorage.getItem("userRoleInfo") || "{}");
+  const isInstructorUser = userRoleInfo?.role === "instructor";
 
   return (
     <>
@@ -111,47 +113,53 @@ const Dashboard = () => {
                   </div>
 
 
-                  <div className="col-xl-3 col-sm-6">
-                    <div className="card card-mini mb-4 border-warning">
-                      <div className="card-body">
-                        <h2 className="mb-1 text-warning">{paymentPendingCount}</h2>
-                        <p className="mb-2">Pending Students</p>
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span className="badge badge-warning">Pending</span>
-                          <span className="text-muted small">Students with balance due</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="col-xl-3 col-sm-6">
-                    <div className="card card-mini mb-4 border-success">
-                      <div className="card-body">
-                        <h2 className="mb-1 text-success">{paymentCompletedCount}</h2>
-                        <p className="mb-2">Payment Completed</p>
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span className="badge badge-success">Collected</span>
-                          <span className="text-muted small">Revenue secured</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                 
-                  <div className="col-xl-3 col-sm-6">
-                    <Link to={`/outstandingfees`}>
-                      <div className="card card-mini mb-4 border-primary">
+                  {!isInstructorUser && (
+                    <div className="col-xl-3 col-sm-6">
+                      <div className="card card-mini mb-4 border-warning">
                         <div className="card-body">
-                          <h2 className="mb-1 text-primary">&#8377;{total_outstanding_amount}</h2>
-                          <p className="mb-2">Outstanding Amount</p>
+                          <h2 className="mb-1 text-warning">{paymentPendingCount}</h2>
+                          <p className="mb-2">Pending Students</p>
                           <div className="d-flex justify-content-between align-items-center">
-                            <span className="badge badge-primary">OUTSTANDING</span>
-                            <span className="text-muted small">Pending fee collection</span>
+                            <span className="badge badge-warning">Pending</span>
+                            <span className="text-muted small">Students with balance due</span>
                           </div>
                         </div>
                       </div>
-                    </Link>
-                  </div>
+                    </div>
+                  )}
+
+                  {!isInstructorUser && (
+                    <div className="col-xl-3 col-sm-6">
+                      <div className="card card-mini mb-4 border-success">
+                        <div className="card-body">
+                          <h2 className="mb-1 text-success">{paymentCompletedCount}</h2>
+                          <p className="mb-2">Payment Completed</p>
+                          <div className="d-flex justify-content-between align-items-center">
+                            <span className="badge badge-success">Collected</span>
+                            <span className="text-muted small">Revenue secured</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                 
+                    {!isInstructorUser && (
+                      <div className="col-xl-3 col-sm-6">
+                        <Link to={`/outstandingfees`}>
+                          <div className="card card-mini mb-4 border-primary">
+                            <div className="card-body">
+                              <h2 className="mb-1 text-primary">&#8377;{total_outstanding_amount}</h2>
+                              <p className="mb-2">Outstanding Amount</p>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <span className="badge badge-primary">OUTSTANDING</span>
+                                <span className="text-muted small">Pending fee collection</span>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                    )}
                 </div>
                 
 

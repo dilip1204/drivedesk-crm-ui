@@ -6,6 +6,18 @@ import { useDispatch } from "react-redux";
 import { addInstructor, updateInstructor } from "../../store/instructors/actions";
 import { IoClose } from "react-icons/io5";
 
+const WEEK_DAYS = [
+  { label: "Monday", value: "MON" },
+  { label: "Tuesday", value: "TUE" },
+  { label: "Wednesday", value: "WED" },
+  { label: "Thursday", value: "THU" },
+  { label: "Friday", value: "FRI" },
+  { label: "Saturday", value: "SAT" },
+  { label: "Sunday", value: "SUN" },
+];
+
+const DEFAULT_WORKING_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
 export default function Instructors({ showModal, hideModal, id, isEdit, onSaved, instructorsData }) {
   const dispatch = useDispatch();
 
@@ -16,6 +28,11 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
     mobile_number: id?.mobile_number || '',
     available_from: id?.available_from || '',
     available_to: id?.available_to || '',
+    working_days: Array.isArray(id?.working_days)
+      ? id.working_days
+      : isEdit
+        ? []
+        : DEFAULT_WORKING_DAYS,
     is_active: id?.is_active ?? true,
     role: id?.role || 'instructor'
   };
@@ -39,7 +56,10 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
     initialValues,
     validationSchema,
     onSubmit: (values) => { 
-      const payload = { ...values };
+      const payload = {
+        ...values,
+        working_days: values.working_days || [],
+      };
 
       const action = isEdit ? updateInstructor : addInstructor;
 
@@ -64,6 +84,15 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
       }));
     }
   });
+
+  const handleWorkingDayChange = (day) => {
+    const selectedDays = formik.values.working_days || [];
+    const nextDays = selectedDays.includes(day)
+      ? selectedDays.filter((selectedDay) => selectedDay !== day)
+      : [...selectedDays, day];
+
+    formik.setFieldValue('working_days', nextDays);
+  };
 
   return (
     <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered>
@@ -109,6 +138,42 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
                 </div>
               </div>
             ))}
+
+            <div className="col-md-12">
+              <div className="form-group">
+                <label>Working Days</label>
+                <div className="border rounded p-3">
+                  <div className="d-flex flex-wrap">
+                    {WEEK_DAYS.map(({ label, value }) => (
+                      <div
+                        key={value}
+                        className="d-flex align-items-center mb-2 mr-4"
+                        style={{ minWidth: '140px' }}
+                      >
+                          <input
+                            className="mr-2"
+                            type="checkbox"
+                            name="working_days"
+                            value={value}
+                            id={`working-day-${value}`}
+                            checked={(formik.values.working_days || []).includes(value)}
+                            onChange={() => handleWorkingDayChange(value)}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          <label
+                            htmlFor={`working-day-${value}`}
+                            className="mb-0"
+                            style={{ cursor: 'pointer' }}
+                          >
+                            {label}
+                          </label>
+                      </div>
+                    ))}
+                  </div>
+                  <small className="text-muted">Select only the days this instructor is available to work.</small>
+                </div>
+              </div>
+            </div>
 
             <div className="col-md-6">
               <div className="form-group">

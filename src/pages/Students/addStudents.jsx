@@ -123,7 +123,22 @@ export default function AddStudents({
       .nullable()
       .typeError("Training days must be a number")
       .min(0, "Cannot be negative"),
-    training_start_date: Yup.date().nullable().typeError("Invalid date format").required("Training start date is required"),
+    training_start_date: Yup.date()
+      .nullable()
+      .typeError("Invalid date format")
+      .required("Training start date is required")
+      .test(
+        "not-past-date",
+        "Training start date cannot be in the past",
+        function (value) {
+          if (!value) return false;
+          const selectedDate = new Date(value);
+          selectedDate.setHours(0, 0, 0, 0);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          return selectedDate >= today;
+        }
+      ),
     // keep 24h HH:MM format for storage
     training_time: Yup.string()
       .nullable()
@@ -531,6 +546,11 @@ export default function AddStudents({
                         }
                         onBlur={formik.handleBlur}
                         value={formik.values?.[field] || ""}
+                        min={
+                          field === "training_start_date"
+                            ? new Date().toISOString().split("T")[0]
+                            : undefined
+                        }
                         readOnly={["balance", "total_amount", "instructor_mobile"].includes(field)}
                         maxLength={
                           field === "mobile_number"

@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { addStudent, updateStudent } from "../../store/addStudent/actions";
 import { IoClose } from "react-icons/io5";
 import { getStudentReceiptInfo } from "../../store/students/actions";
+import { getInstructorAvailInformation } from "../../store/instructors/actions";
 
 export default function AddStudents({
   showModal,
@@ -21,6 +22,9 @@ export default function AddStudents({
   const [isPrintEnabled, setIsPrintEnabled] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
   const [htmlContent, setHtmlContent] = useState("");
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState("");
+  const [availabilityDay, setAvailabilityDay] = useState(null);
 
   // --- helpers for time normalization ---
   // Accepts "HH:MM", "H:MM AM/PM", or "HH:MM AM/PM" -> returns "HH:MM" (24h)
@@ -260,6 +264,65 @@ export default function AddStudents({
   }, [formik.values.instructor_name, instructors]);
 
   useEffect(() => {
+    const selectedInstructor = instructors.find(
+      (i) => i.name === formik.values.instructor_name
+    );
+
+    const selectedDate = formik.values.training_start_date || formik.values.test_date;
+
+    if (!showModal || !selectedInstructor || !selectedDate) {
+      setAvailabilityDay(null);
+      setAvailabilityError("");
+      setAvailabilityLoading(false);
+      return;
+    }
+
+    const month = selectedDate.slice(0, 7);
+    const instructorKey =
+      selectedInstructor.mobile_number ||
+      selectedInstructor.id ||
+      formik.values.instructor_mobile;
+
+    if (!instructorKey || !month) {
+      setAvailabilityDay(null);
+      setAvailabilityError("Select valid instructor and date to view availability.");
+      return;
+    }
+
+    setAvailabilityLoading(true);
+    setAvailabilityError("");
+
+    dispatch(
+      getInstructorAvailInformation(
+        { mobile_number: instructorKey, month },
+        (res, err) => {
+          if (err) {
+            setAvailabilityDay(null);
+            setAvailabilityError("Failed to load instructor availability.");
+            setAvailabilityLoading(false);
+            return;
+          }
+
+          const payload = res?.response ?? res;
+          const days = Array.isArray(payload?.days) ? payload.days : [];
+          const dayInfo = days.find((d) => (d?.date || "").startsWith(selectedDate));
+
+          setAvailabilityDay(dayInfo || null);
+          setAvailabilityLoading(false);
+        }
+      )
+    );
+  }, [
+    dispatch,
+    formik.values.instructor_name,
+    formik.values.instructor_mobile,
+    formik.values.training_start_date,
+    formik.values.test_date,
+    instructors,
+    showModal,
+  ]);
+
+  useEffect(() => {
     if (showModal) {
       setIsPrintEnabled(false);
       // normalize training_time once when opening
@@ -286,7 +349,6 @@ export default function AddStudents({
     "dob",
     "mobile_number",
     "application_number",
-    "email",
     "aadhar_number",
     "plan",
     "payment_method",
@@ -513,6 +575,91 @@ export default function AddStudents({
                   />
                   {formik.touched.test_date && formik.errors.test_date && (
                     <div className="text-danger">{formik.errors.test_date}</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {(formik.values.instructor_name &&
+            (formik.values.training_start_date || formik.values.test_date)) && (
+            <div className="row">
+              <div className="col-12">
+                <div
+                  className="p-3 mb-3"
+                  style={{ border: "1px solid #e9ecef", borderRadius: 8 }}
+                >
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h6 className="mb-0">Instructor Availability</h6>
+                    <a
+                      href={`/instructors/${formik.values.instructor_mobile || formik.values.instructor_id}/availability`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-sm btn-outline-primary"
+                    >
+                      Open Full Schedule
+                    </a>
+                  </div>
+
+                  <div className="small text-muted mb-2">
+                    Date: {formik.values.training_start_date || formik.values.test_date}
+                  </div>
+
+                  {availabilityLoading && (
+                    <div className="text-secondary small">Loading availability...</div>
+                  )}
+
+                  {!availabilityLoading && availabilityError && (
+                    <div className="text-danger small">{availabilityError}</div>
+                  )}
+
+                  {!availabilityLoading && !availabilityError && availabilityDay && (
+                    <>
+                      <div className="d-flex flex-wrap gap-3 mb-2 small">
+                        <span>
+                          Available: <strong>{availabilityDay.available_slots?.length || 0}</strong>
+                        </span>
+                        <span>
+                          Booked: <strong>{availabilityDay.booked_slots?.length || 0}</strong>
+                        </span>
+                        {availabilityDay.is_sunday && (
+                          <span className="text-warning"><strong>Sunday (off day)</strong></span>
+                        )}
+                      </div>
+
+                      <div className="d-flex flex-wrap gap-2">
+                        {(availabilityDay.available_slots || []).length > 0 ? (
+                          availabilityDay.available_slots.map((slot) => (
+                            <button
+                              key={slot}
+                              type="button"
+                              className={`btn btn-sm ${
+                                formik.values.training_time === to24h(slot)
+                                  ? "btn-primary"
+                                  : "btn-outline-success"
+                              }`}
+                              onClick={() => {
+                                const normalizedSlot = to24h(slot);
+                                if (normalizedSlot) {
+                                  formik.setFieldValue("training_time", normalizedSlot);
+                                }
+                              }}
+                              title="Select this slot as training time"
+                            >
+                              {slot}
+                            </button>
+                          ))
+                        ) : (
+                          <span className="text-muted small">No available slots for selected date.</span>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {!availabilityLoading && !availabilityError && !availabilityDay && (
+                    <div className="text-muted small">
+                      No availability data found for the selected date.
+                    </div>
                   )}
                 </div>
               </div>

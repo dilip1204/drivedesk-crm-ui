@@ -5,16 +5,41 @@ const instance = axios.create({
     baseURL: process.env.REACT_APP_BASE_API_URL || '/api/',
 })
 
+let hasHandledAuthError = false;
+
+const isTokenExpiredDetail = (data) => {
+    const detail = data?.detail;
+    return typeof detail === 'string' && detail.toLowerCase().includes('token has expired');
+};
+
+const forceLogout = () => {
+    if (hasHandledAuthError) {
+        return;
+    }
+
+    hasHandledAuthError = true;
+    localStorage.clear();
+
+    if (window.location.pathname !== '/login') {
+        window.location.replace('/login');
+    }
+};
+
 
 instance.interceptors.request.use(
     (config) => {
         config.headers['Content-Type'] = 'application/json';
         config.headers['Accept'] = 'application/json';
-        config.headers['Authorization'] = localStorage.getItem('token');
+
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers['Authorization'] = token;
+        }
+
         return config;
     },
     (error) => {
-        Promise.reject(error);
+        return Promise.reject(error);
     }
 );
 
@@ -23,9 +48,13 @@ instance.interceptors.response.use(
         return response;
     },
     (error) => {
-        if(error.response.status === 401) {
-            console.info('error')
+        const statusCode = error?.response?.status;
+        const responseData = error?.response?.data;
+
+        if (statusCode === 401 || isTokenExpiredDetail(responseData)) {
+            forceLogout();
         }
+
     return Promise.reject(error);
     }
 );

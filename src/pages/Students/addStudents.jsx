@@ -246,6 +246,30 @@ export default function AddStudents({
     },
   });
 
+  const selectedTrainingDate = formik.values.training_start_date || formik.values.test_date || "";
+  const selectedTrainingTime = to24h(formik.values.training_time || "");
+
+  const bookedTimesForDay = Array.isArray(availabilityDay?.booked_slots)
+    ? availabilityDay.booked_slots
+        .map((slot) => to24h(slot?.time || slot?.slot_time || slot?.start_time || ""))
+        .filter(Boolean)
+    : [];
+  const availableTimesForDay = Array.isArray(availabilityDay?.available_slots)
+    ? availabilityDay.available_slots.map((slot) => to24h(slot)).filter(Boolean)
+    : [];
+  const combinedTimesForDay = Array.from(
+    new Set([...bookedTimesForDay, ...availableTimesForDay])
+  ).sort();
+  const isSelectedTimeBooked = Boolean(
+    selectedTrainingTime && bookedTimesForDay.includes(selectedTrainingTime)
+  );
+  const isSelectedTimeUnavailable = Boolean(
+    selectedTrainingTime &&
+      availableTimesForDay.length > 0 &&
+      !availableTimesForDay.includes(selectedTrainingTime)
+  );
+  const hasTimeConflict = isSelectedTimeBooked || isSelectedTimeUnavailable;
+
   useEffect(() => {
     const paid = parseFloat(formik.values.paid_amount);
     const discount = parseFloat(formik.values.discount) || 0;
@@ -350,6 +374,28 @@ export default function AddStudents({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showModal]);
+
+  useEffect(() => {
+    if (!formik.values.training_time) return;
+
+    if (hasTimeConflict) {
+      formik.setFieldError(
+        "training_time",
+        isSelectedTimeBooked
+          ? "Selected time is already booked for this instructor. Choose another slot."
+          : "Selected time is not available for this instructor on the chosen date."
+      );
+      return;
+    }
+
+    if (formik.errors.training_time &&
+      typeof formik.errors.training_time === "string" &&
+      (formik.errors.training_time.includes("already booked") ||
+        formik.errors.training_time.includes("not available"))) {
+      formik.setFieldError("training_time", undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasTimeConflict, selectedTrainingTime, selectedTrainingDate, availabilityDay]);
 
   const handleNumericInput = (e) => {
     const { name, value } = e.target;
@@ -647,32 +693,56 @@ export default function AddStudents({
                         )}
                       </div>
 
+                      {hasTimeConflict && (
+                        <Alert variant="danger" className="py-2 mb-2">
+                          {isSelectedTimeBooked
+                            ? "Selected training time is already booked for this instructor. Choose another slot."
+                            : "Selected training time is not available for this instructor on the chosen date."
+                          }
+                        </Alert>
+                      )}
+
                       <div className="d-flex flex-wrap gap-2">
-                        {(availabilityDay.available_slots || []).length > 0 ? (
-                          availabilityDay.available_slots.map((slot) => (
-                            <button
-                              key={slot}
-                              type="button"
-                              className={`btn btn-sm ${
-                                formik.values.training_time === to24h(slot)
-                                  ? "btn-primary"
-                                  : "btn-outline-success"
-                              }`}
-                              onClick={() => {
-                                const normalizedSlot = to24h(slot);
-                                if (normalizedSlot) {
-                                  formik.setFieldValue("training_time", normalizedSlot);
-                                }
-                              }}
-                              title="Select this slot as training time"
-                            >
-                              {slot}
-                            </button>
-                          ))
+                        {combinedTimesForDay.length > 0 ? (
+                          combinedTimesForDay.map((slot) => {
+                            const isBooked = bookedTimesForDay.includes(slot);
+                            const isSelected = formik.values.training_time === slot;
+
+                            if (isBooked) {
+                              return (
+                                <button
+                                  key={slot}
+                                  type="button"
+                                  className="btn btn-sm btn-danger"
+                                  disabled
+                                  title="Already booked"
+                                >
+                                  {slot}
+                                </button>
+                              );
+                            }
+
+                            return (
+                              <button
+                                key={slot}
+                                type="button"
+                                className={`btn btn-sm ${
+                                  isSelected ? "btn-primary" : "btn-outline-success"
+                                }`}
+                                onClick={() => {
+                                  formik.setFieldValue("training_time", slot);
+                                }}
+                                title="Select this slot as training time"
+                              >
+                                {slot}
+                              </button>
+                            );
+                          })
                         ) : (
                           <span className="text-muted small">No available slots for selected date.</span>
                         )}
                       </div>
+
                     </>
                   )}
 
@@ -698,7 +768,7 @@ export default function AddStudents({
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary">
+                <Button type="submit" variant="primary" disabled={hasTimeConflict}>
                   {isEdit ? "Update" : "Add"}
                 </Button>
               </>

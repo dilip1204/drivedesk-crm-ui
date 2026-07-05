@@ -8,6 +8,7 @@ import { getInstructorAvailInformation } from "../../store/instructors/actions";
 import Sidebar from "../../components/Sidebar"; // <-- adjust path
 import Header from "../../components/Header"; // <-- adjust path
 import Footer from "../../components/Footer"; // <-- adjust path
+import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 
 /********************
  * small helpers
@@ -219,11 +220,7 @@ function DayDetailDrawer({ day, onClose }) {
         <div className="modal-content" style={{ zIndex: "99999999" }}>
           <div className="modal-header">
             <h5 className="modal-title">
-              {new Date(day.date).toLocaleDateString(undefined, {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              })}
+              {formatDateDDMMYYYY(day.date)}
             </h5>
             <button
               type="button"
@@ -269,19 +266,19 @@ function DayDetailDrawer({ day, onClose }) {
                     booked.map((b) => (
                       <div
                         key={b.id}
-                        className="d-flex align-items-center justify-content-between border rounded p-2"
+                        className="d-flex align-items-center justify-content-between border rounded p-2 bg-danger-subtle border-danger"
                       >
                         <div>
-                          <div className="fw-medium">
+                          <div className="fw-semibold text-danger">
                             {formatTimeLabel(b.time)}
                           </div>
-                          <div className="small text-secondary">
+                          <div className="small text-danger-emphasis">
                             {b.student}
                           </div>
                         </div>
                         <span
                           className={clsx(
-                            "badge border",
+                            "badge border text-bg-danger",
                             badgeColorByStatus(b.status)
                           )}
                         >

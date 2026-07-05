@@ -17,6 +17,7 @@ import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfir
 
 import { getExpensesListInformation, deleteExpenses } from "../../store/expenses/actions";
 import { Chart, registerables } from "chart.js";
+import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 Chart.register(...registerables);
 
 const FleetExpenses = () => {
@@ -450,7 +451,7 @@ const FleetExpenses = () => {
                           {filteredRecords.length > 0 ? (
                             filteredRecords.map((r) => (
                               <tr key={r.id}>
-                                <td>{r.date ? new Date(r.date).toLocaleDateString("en-IN") : "-"}</td>
+                                <td>{formatDateDDMMYYYY(r.date)}</td>
                                 <td>{r.category || "-"}</td>
                                 <td>{r.odo_meter || r.odoMeter || "-"}</td>
                                 <td>₹{Number(r.amount || 0).toLocaleString("en-IN")}</td>

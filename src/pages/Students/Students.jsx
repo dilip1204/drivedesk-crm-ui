@@ -28,6 +28,7 @@ import * as Yup from "yup";
 import AddPayment from "./addPayment";
 import { addStudentPayment } from "../../store/addStudentPayment/actions";
 import Pagination from "./Pagenation";
+import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 
 const Students = () => {
   const dispatch = useDispatch();
@@ -399,24 +400,6 @@ const Students = () => {
     performSearch(val, searchType);
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    // If string like 'YYYY-MM-DD' parse manually to avoid timezone shift
-    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
-    if (isoMatch) {
-      const year = Number(isoMatch[1]);
-      const month = Number(isoMatch[2]);
-      const day = Number(isoMatch[3]);
-      return `${String(day).padStart(2, "0")}-${String(month).padStart(2, "0")}-${year}`;
-    }
-    const date = new Date(dateStr);
-    if (isNaN(date)) return "-";
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
-
   const PrintableStudentTable = ({ students }) => {
     if (!students.length) return null;
 
@@ -443,11 +426,11 @@ const Students = () => {
                 <td>{student.application_number || "-"}</td>
                 <td>{student.name || "-"}</td>
                 <td>{student.mobile_number || "-"}</td>
-                <td>{student.dob ? formatDate(student.dob) : "-"}</td>
+                <td>{student.dob ? formatDateDDMMYYYY(student.dob) : "-"}</td>
                 <td>{student.status || "-"}</td>
                 <td>{student.plan || "-"}</td>
                 <td>₹{student.balance || 0}</td>
-                <td>{formatDate(student.test_date)}</td>
+                <td>{formatDateDDMMYYYY(student.test_date)}</td>
               </tr>
             ))}
           </tbody>

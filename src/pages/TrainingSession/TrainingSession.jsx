@@ -27,6 +27,7 @@ import "react-toastify/dist/ReactToastify.css";
 import StudentTrainingSessionModal from "./StudentTrainingSession";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 
 const TrainingSession = () => {
   const dispatch = useDispatch();
@@ -235,16 +236,6 @@ const TrainingSession = () => {
         }
       )
     );
-  };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    if (isNaN(date)) return "-";
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
   };
 
   return (
@@ -536,7 +527,7 @@ const TrainingSession = () => {
     {completedSessions.map((row, idx) => (
       <tr key={idx}>
         <td>{idx + 1}</td>
-        <td>{formatDate(row?.date)}</td>
+        <td>{formatDateDDMMYYYY(row?.date)}</td>
         <td>{row?.instructor_name || "-"}</td>
         <td>{row?.student_name || "-"}</td>
         <td>{row?.remarks || "-"}</td>

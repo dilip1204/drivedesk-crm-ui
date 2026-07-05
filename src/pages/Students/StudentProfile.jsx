@@ -5,6 +5,7 @@ import "./Students.css"; // Optional custom styles
 import { useDispatch } from "react-redux";
 import { getStudentReceiptInfo } from "../../store/students/actions"; // adjust the path if needed
 import { ToastContainer, toast } from "react-toastify";
+import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 
 export default function StudentProfileModal({ show, onClose, student }) {
 
@@ -182,7 +183,7 @@ export default function StudentProfileModal({ show, onClose, student }) {
                     <tr key={index}>
                       <td>{payment.receipt_no || "-"}</td>
                       <td>{payment.amount}</td>
-                      <td>{new Date(payment.date).toLocaleString()}</td>
+                      <td>{formatDateDDMMYYYY(payment.date)}</td>
                       <td>{payment.payment_method || payment.method || "-"}</td>
                       <td>{payment.payment_status || payment.status || "-"}</td>
                       <td>{payment.remarks || "-"}</td>

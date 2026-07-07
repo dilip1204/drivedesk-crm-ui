@@ -182,7 +182,10 @@ export default function AddStudents({
       .nullable()
       .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)")
       .required("Training time is required"),
-    test_date: Yup.date().nullable().typeError("Invalid date format"),
+    test_date: Yup.date()
+      .nullable()
+      .transform((value, originalValue) => (originalValue === "" ? null : value))
+      .typeError("Invalid date format"),
     ...(isEdit && {
       discount: Yup.number()
         .typeError("Discount must be a number")
@@ -216,12 +219,17 @@ export default function AddStudents({
     initialValues,
     validationSchema,
     onSubmit: (values) => {
+      const normalizedValues = {
+        ...values,
+        test_date: values.test_date ? values.test_date : null,
+      };
+
       let updatedValues = {};
 
       if (isEdit) {
-        Object.keys(values).forEach((key) => {
-          if (values[key] !== id[key]) {
-            updatedValues[key] = values[key];
+        Object.keys(normalizedValues).forEach((key) => {
+          if (normalizedValues[key] !== id[key]) {
+            updatedValues[key] = normalizedValues[key];
           }
         });
 
@@ -240,7 +248,7 @@ export default function AddStudents({
         );
       } else {
         updatedValues = {
-          ...values,
+          ...normalizedValues,
           status: "Process Started",
         };
 

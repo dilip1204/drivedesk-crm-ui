@@ -473,6 +473,18 @@ const Students = () => {
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
+  let orgNameForPrint = "Students Test List";
+  try {
+    const tenantInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    orgNameForPrint =
+      tenantInfo?.org_name ||
+      tenantInfo?.organization_name ||
+      tenantInfo?.name ||
+      "Students Test List";
+  } catch (e) {
+    orgNameForPrint = "Students Test List";
+  }
+
   return (
     <>
       <div
@@ -892,7 +904,7 @@ const Students = () => {
 
       <div className="d-none d-print-block" style={{ marginTop: "120px" }}>
         <h2 className="text-center" style={{ marginBottom: "70px" }}>
-          Students Test List
+          {orgNameForPrint}
         </h2>
         <PrintableStudentTable students={studentsData} />
       </div>

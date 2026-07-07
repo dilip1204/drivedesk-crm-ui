@@ -59,6 +59,18 @@ const TrainingSession = () => {
   const initialMonth = searchParams.get("month") || "";
   const initialYear = searchParams.get("year") || "";
 
+  let orgNameForReport = "";
+  try {
+    const tenantInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    orgNameForReport =
+      tenantInfo?.org_name ||
+      tenantInfo?.organization_name ||
+      tenantInfo?.name ||
+      "";
+  } catch (e) {
+    orgNameForReport = "";
+  }
+
   const today = new Date().toISOString().split("T")[0];
   const [filters, setFilters] = useState({
     instructor_id: "",
@@ -95,17 +107,19 @@ const TrainingSession = () => {
   <html>
     <head>
       <meta charset="utf-8"/>
-      <title>Completed Sessions</title>
+      <title>Progress Report</title>
       <style>
         body{font-family:Arial,Helvetica,sans-serif;margin:24px;}
-        h2{margin:0 0 12px;}
+        h2{margin:0 0 12px;text-align:center;font-size:22px;}
+        h4{margin:0 0 8px;text-align:center;font-size:20px;font-weight:700;}
         table{width:100%;border-collapse:collapse;}
         th,td{border:1px solid #333;padding:8px;text-align:center;}
         thead th{background:#f2f2f2;}
       </style>
     </head>
     <body>
-      <h2>Completed Sessions</h2>
+      ${orgNameForReport ? `<h4>${orgNameForReport}</h4>` : ""}
+      <h2>Progress Report</h2>
       ${content}
       <script>window.onload=function(){window.print();window.close();}</script>
     </body>
@@ -481,8 +495,15 @@ const TrainingSession = () => {
                 <div className="modal-content">
                  
 
-                  <div className="modal-header">
-  <h5 className="modal-title">Completed Sessions</h5>
+                  <div className="modal-header align-items-start">
+  <div className="flex-grow-1 text-center">
+    {orgNameForReport && (
+      <div className="mb-1" style={{ fontSize: "1rem", fontWeight: 700, color: "#1b223c" }}>
+        {orgNameForReport}
+      </div>
+    )}
+    <h5 className="modal-title mb-0" style={{ fontSize: "1.05rem" }}>Progress Report</h5>
+  </div>
   <div className="d-flex gap-2">
     <button
       type="button"

@@ -126,6 +126,15 @@ const Students = () => {
     return { students: Array.isArray(students) ? students : [], total, isError };
   };
 
+  const withPagination = (payload = {}, page = currentPage, limit = pageSize) => {
+    const skip = (page - 1) * limit;
+    return {
+      ...payload,
+      skip,
+      limit,
+    };
+  };
+
   const getStudentsList = useCallback(() => {
     const skip = (currentPage - 1) * pageSize;
     setLoading(true);
@@ -189,8 +198,10 @@ const Students = () => {
         )
       );
 
+      const paginatedInitial = withPagination(cleanedInitial, currentPage, pageSize);
+
       dispatch(
-        getStudentsFilterListInformation(cleanedInitial, (res) => {
+        getStudentsFilterListInformation(paginatedInitial, (res) => {
           const { students, total } = normalizeStudentsResponse(res);
           if (Array.isArray(students) && students.length > 0) {
             setStudentsData(students);
@@ -232,8 +243,9 @@ const Students = () => {
         // if filters are applied, re-run filter; else load normal list (respects pagination)
         if (filterApplied) {
           setLoading(true);
+          const paginatedFilters = withPagination(filters, currentPage, pageSize);
           dispatch(
-            getStudentsFilterListInformation(filters, (fres) => {
+            getStudentsFilterListInformation(paginatedFilters, (fres) => {
               const { students, total } = normalizeStudentsResponse(fres);
               setStudentsData(Array.isArray(students) ? students : []);
               setTotalCount(total ?? 0);
@@ -524,7 +536,7 @@ const Students = () => {
                 <div className="row mb-3" style={{justifyContent: "flex-end"}}>
                   <div className="col-md-2">
                     <select
-                      className="form-control"
+                      className="form-control students-select-arrow"
                       value={searchType}
                       onChange={(e) => {
                         setSearchType(e.target.value);
@@ -603,8 +615,10 @@ const Students = () => {
                         setFilters(cleanedValues);
                         setLoading(true); // show loader while filter fetches
 
+                        const paginatedFilters = withPagination(cleanedValues, 1, pageSize);
+
                         dispatch(
-                          getStudentsFilterListInformation(cleanedValues, (res) => {
+                          getStudentsFilterListInformation(paginatedFilters, (res) => {
                             const { students, total, isError } = normalizeStudentsResponse(res);
 
                             if (isError && Array.isArray(res?.response)) {
@@ -669,7 +683,7 @@ const Students = () => {
                               <Field
                                 as="select"
                                 name="status"
-                                className="form-control"
+                                className="form-control students-select-arrow"
                               >
                                 <option value="All">All</option>
                                 <option value="Process Started">
@@ -697,7 +711,7 @@ const Students = () => {
                               <Field
                                 as="select"
                                 name="instructor_name"
-                                className="form-control"
+                                className="form-control students-select-arrow"
                               >
                                 <option value="">--Select--</option>
                                 {instructorsData.map((instructor, idx) => (

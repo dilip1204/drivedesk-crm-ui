@@ -25,6 +25,47 @@ export default function AddStudents({
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState("");
   const [availabilityDay, setAvailabilityDay] = useState(null);
+  const getLocalISODate = (date = new Date()) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  const todayISO = getLocalISODate();
+
+  const normalizeDateForInput = (value) => {
+    if (!value) return "";
+
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      const y = value.getFullYear();
+      const m = String(value.getMonth() + 1).padStart(2, "0");
+      const d = String(value.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    const str = String(value).trim();
+
+    // Already yyyy-mm-dd or yyyy-mm-ddTHH:mm:ss
+    const isoLike = /^(\d{4})-(\d{2})-(\d{2})/.exec(str);
+    if (isoLike) {
+      return `${isoLike[1]}-${isoLike[2]}-${isoLike[3]}`;
+    }
+
+    // dd-mm-yyyy -> yyyy-mm-dd
+    const dmy = /^(\d{2})-(\d{2})-(\d{4})$/.exec(str);
+    if (dmy) {
+      return `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+    }
+
+    // yyyy/mm/dd -> yyyy-mm-dd
+    const ymdSlash = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(str);
+    if (ymdSlash) {
+      return `${ymdSlash[1]}-${ymdSlash[2]}-${ymdSlash[3]}`;
+    }
+
+    return "";
+  };
 
   // --- helpers for time normalization ---
   // Accepts "HH:MM", "H:MM AM/PM", or "HH:MM AM/PM" -> returns "HH:MM" (24h)
@@ -63,7 +104,7 @@ export default function AddStudents({
 
   const initialValues = {
     name: id?.name || "",
-    dob: id?.dob || "",
+    dob: normalizeDateForInput(id?.dob),
     mobile_number: id?.mobile_number || "",
     application_number: id?.application_number || "",
     email: id?.email || null,
@@ -77,14 +118,16 @@ export default function AddStudents({
     instructor_name: id?.instructor_name || "",
     instructor_id: id?.instructor_id || "",
     instructor_mobile: id?.instructor_mobile || "",
-    test_date: id?.test_date || null,
+    test_date: normalizeDateForInput(id?.test_date),
     discount: id?.discount || 0,
     training_days: id?.training_days || "",
-    training_start_date: id?.training_start_date || "",
+    training_start_date: normalizeDateForInput(id?.training_start_date),
     // normalize incoming training_time to "HH:MM" so the time input shows it
     training_time: to24h(id?.training_time) || "",
     attended_days: id?.attended_days || 0,
   };
+
+  const trainingStartMinDate = isEdit ? undefined : todayISO;
 
   const validationSchema = Yup.object({
     name: Yup.string().required("Name is required"),
@@ -119,6 +162,17 @@ export default function AddStudents({
     full_payment_status: Yup.string().required("Full payment status is required"),
     instructor_name: Yup.string().required("Instructor name is required"),
     instructor_mobile: Yup.string().required("Instructor mobile is required"),
+    training_start_date: Yup.date()
+      .required("Training Start Date is required")
+      .typeError("Invalid date format")
+      .test("training-start-date-min", "Training Start Date cannot be in the past", function (value) {
+        if (!value) return false;
+        if (isEdit) return true;
+
+        const selected = normalizeDateForInput(value);
+        if (!selected) return false;
+        return selected >= todayISO;
+      }),
     training_days: Yup.number()
       .nullable()
       .typeError("Training days must be a number")
@@ -128,8 +182,8 @@ export default function AddStudents({
       .nullable()
       .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)")
       .required("Training time is required"),
+    test_date: Yup.date().nullable().typeError("Invalid date format"),
     ...(isEdit && {
-      test_date: Yup.date().nullable().typeError("Invalid date format"),
       discount: Yup.number()
         .typeError("Discount must be a number")
         .min(0, "Discount cannot be negative")
@@ -232,6 +286,16 @@ export default function AddStudents({
 
   //const selectedTrainingDate = formik.values.training_start_date || formik.values.test_date || "";
   const selectedTrainingTime = to24h(formik.values.training_time || "");
+  const selectedTrainingDate = formik.values.training_start_date || formik.values.test_date || "";
+  const originalTrainingDate = normalizeDateForInput(id?.training_start_date || id?.test_date);
+  const originalTrainingTime = to24h(id?.training_time || "");
+  const isSameStudentOriginalSlot = Boolean(
+    isEdit &&
+      selectedTrainingDate &&
+      selectedTrainingTime &&
+      selectedTrainingDate === originalTrainingDate &&
+      selectedTrainingTime === originalTrainingTime
+  );
 
   const bookedTimesForDay = Array.isArray(availabilityDay?.booked_slots)
     ? availabilityDay.booked_slots
@@ -252,7 +316,9 @@ export default function AddStudents({
       availableTimesForDay.length > 0 &&
       !availableTimesForDay.includes(selectedTrainingTime)
   );
-  const hasTimeConflict = isSelectedTimeBooked || isSelectedTimeUnavailable;
+  const hasTimeConflict =
+    (isSelectedTimeBooked && !isSameStudentOriginalSlot) ||
+    isSelectedTimeUnavailable;
 
   useEffect(() => {
     const paid = parseFloat(formik.values.paid_amount);
@@ -366,7 +432,7 @@ export default function AddStudents({
       formik.setFieldError(
         "training_time",
         isSelectedTimeBooked
-          ? "Selected time is already booked for this instructor. Choose another slot."
+          ? "The selected training time is already booked for this instructor. Please choose another slot."
           : "Selected time is not available for this instructor on the chosen date."
       );
       return;
@@ -379,7 +445,7 @@ export default function AddStudents({
       formik.setFieldError("training_time", undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasTimeConflict, selectedTrainingTime, /*selectedTrainingDate*/, availabilityDay]);
+  }, [hasTimeConflict, selectedTrainingTime, selectedTrainingDate, availabilityDay, isSelectedTimeBooked]);
 
   const handleNumericInput = (e) => {
     const { name, value } = e.target;
@@ -388,6 +454,16 @@ export default function AddStudents({
   };
 
   const showBalanceWarning = parseFloat(formik.values.balance) < 0;
+
+  const hasTrainingFieldChanged =
+    formik.values.training_time !== initialValues.training_time ||
+    formik.values.training_start_date !== initialValues.training_start_date ||
+    formik.values.instructor_name !== initialValues.instructor_name ||
+    formik.values.instructor_mobile !== initialValues.instructor_mobile;
+
+  const shouldDisableSubmit = !isEdit
+    ? hasTimeConflict
+    : hasTimeConflict && hasTrainingFieldChanged;
 
   const fields = [
     "name",
@@ -576,7 +652,7 @@ export default function AddStudents({
                         }
                         onBlur={formik.handleBlur}
                         value={formik.values?.[field] || ""}
-                        min={undefined}
+                        min={field === "training_start_date" ? trainingStartMinDate : undefined}
                         readOnly={["balance", "total_amount", "instructor_mobile"].includes(field)}
                         maxLength={
                           field === "mobile_number"
@@ -602,30 +678,28 @@ export default function AddStudents({
             </div>
           ))}
 
-          {isEdit && (
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label>
-                    Test Date
-                  </label>
-                  <input
-                    type="date"
-                    name="test_date"
-                    className={`form-control${
-                      formik.touched.test_date && formik.errors.test_date ? " is-invalid" : ""
-                    }`}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.test_date}
-                  />
-                  {formik.touched.test_date && formik.errors.test_date && (
-                    <div className="text-danger">{formik.errors.test_date}</div>
-                  )}
-                </div>
+          <div className="row">
+            <div className="col-md-6">
+              <div className="form-group">
+                <label>
+                  Test Date
+                </label>
+                <input
+                  type="date"
+                  name="test_date"
+                  className={`form-control${
+                    formik.touched.test_date && formik.errors.test_date ? " is-invalid" : ""
+                  }`}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.test_date || ""}
+                />
+                {formik.touched.test_date && formik.errors.test_date && (
+                  <div className="text-danger">{formik.errors.test_date}</div>
+                )}
               </div>
             </div>
-          )}
+          </div>
 
           {(formik.values.instructor_name &&
             (formik.values.training_start_date || formik.values.test_date)) && (
@@ -676,7 +750,7 @@ export default function AddStudents({
                       {hasTimeConflict && (
                         <Alert variant="danger" className="py-2 mb-2">
                           {isSelectedTimeBooked
-                            ? "Selected training time is already booked for this instructor. Choose another slot."
+                            ? "The selected training time is already booked for this instructor. Please choose another slot."
                             : "Selected training time is not available for this instructor on the chosen date."
                           }
                         </Alert>
@@ -748,7 +822,7 @@ export default function AddStudents({
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" disabled={hasTimeConflict}>
+                <Button type="submit" variant="primary" disabled={shouldDisableSubmit}>
                   {isEdit ? "Update" : "Add"}
                 </Button>
               </>

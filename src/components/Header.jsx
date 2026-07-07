@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import avatar from "../assets/img/avatar.png";
+import "./Header.css";
 
 export default function Header() {
   const [displayName, setDisplayName] = useState("Guest User");
@@ -77,14 +78,14 @@ export default function Header() {
                 data-toggle="dropdown"
               >
                 <img src={avatar} className="user-image" alt="User Image" />
-                <span className="d-none d-lg-inline-block">
+                <span className="d-none d-lg-inline-block header-user-display-name" title={displayName}>
                   {displayName}
                 </span>
               </button>
               <ul className="dropdown-menu dropdown-menu-right">
                 <li className="dropdown-header" style={{margin: 0}}>
                   <img src={avatar} className="img-circle" alt="User Image" />
-                  <div className="d-inline-block">
+                  <div className="d-inline-block header-user-dropdown-name" title={displayName}>
                     {displayName}{" "}
                     {/* <small className="pt-1">
                       {user.email || "Email not found"}

@@ -124,21 +124,8 @@ export default function AddStudents({
       .typeError("Training days must be a number")
       .min(0, "Cannot be negative"),
     training_start_date: Yup.date()
-      .nullable()
-      .typeError("Invalid date format")
-      .required("Training start date is required")
-      .test(
-        "not-past-date",
-        "Training start date cannot be in the past",
-        function (value) {
-          if (!value) return false;
-          const selectedDate = new Date(value);
-          selectedDate.setHours(0, 0, 0, 0);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          return selectedDate >= today;
-        }
-      ),
+  .nullable()
+  .typeError("Invalid date format"),
     // keep 24h HH:MM format for storage
     training_time: Yup.string()
       .nullable()

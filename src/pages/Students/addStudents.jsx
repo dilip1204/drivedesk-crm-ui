@@ -123,7 +123,6 @@ export default function AddStudents({
       .nullable()
       .typeError("Training days must be a number")
       .min(0, "Cannot be negative"),
-    training_start_date: Yup.mixed().nullable(),
     // keep 24h HH:MM format for storage
     training_time: Yup.string()
       .nullable()
@@ -231,7 +230,7 @@ export default function AddStudents({
     },
   });
 
-  const selectedTrainingDate = formik.values.training_start_date || formik.values.test_date || "";
+  //const selectedTrainingDate = formik.values.training_start_date || formik.values.test_date || "";
   const selectedTrainingTime = to24h(formik.values.training_time || "");
 
   const bookedTimesForDay = Array.isArray(availabilityDay?.booked_slots)
@@ -380,7 +379,7 @@ export default function AddStudents({
       formik.setFieldError("training_time", undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasTimeConflict, selectedTrainingTime, selectedTrainingDate, availabilityDay]);
+  }, [hasTimeConflict, selectedTrainingTime, /*selectedTrainingDate*/, availabilityDay]);
 
   const handleNumericInput = (e) => {
     const { name, value } = e.target;
@@ -577,11 +576,7 @@ export default function AddStudents({
                         }
                         onBlur={formik.handleBlur}
                         value={formik.values?.[field] || ""}
-                        min={
-                          field === "training_start_date"
-                            ? new Date().toISOString().split("T")[0]
-                            : undefined
-                        }
+                        min={undefined}
                         readOnly={["balance", "total_amount", "instructor_mobile"].includes(field)}
                         maxLength={
                           field === "mobile_number"

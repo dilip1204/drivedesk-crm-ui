@@ -87,7 +87,7 @@ const OutstandingFees = () => {
       const students = Array.isArray(res?.response)
         ? res.response
         : res?.students || res?.response?.students || [];
-      const count = res?.total_count ?? res?.response?.total_count ?? students.length ?? 0;
+      const count = res?.total ?? res?.response?.total ?? students.length ?? 0;
 
       setTotalCount(count);
 

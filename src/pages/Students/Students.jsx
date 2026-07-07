@@ -903,9 +903,10 @@ const Students = () => {
       />
 
       <div className="d-none d-print-block" style={{ marginTop: "120px" }}>
-        <h2 className="text-center" style={{ marginBottom: "70px" }}>
-          {orgNameForPrint}
-        </h2>
+        <div className="text-center" style={{ marginBottom: "70px" }}>
+          <h2 style={{ marginBottom: "12px" }}>{orgNameForPrint}</h2>
+          <h4 style={{ marginBottom: 0 }}>Student Test List</h4>
+        </div>
         <PrintableStudentTable students={studentsData} />
       </div>
     </>

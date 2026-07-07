@@ -123,9 +123,7 @@ export default function AddStudents({
       .nullable()
       .typeError("Training days must be a number")
       .min(0, "Cannot be negative"),
-    training_start_date: Yup.date()
-  .nullable()
-  .typeError("Invalid date format"),
+    training_start_date: Yup.mixed().nullable(),
     // keep 24h HH:MM format for storage
     training_time: Yup.string()
       .nullable()

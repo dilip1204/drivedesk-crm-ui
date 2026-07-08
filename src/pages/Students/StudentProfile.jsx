@@ -112,7 +112,6 @@ export default function StudentProfileModal({ show, onClose, student }) {
               value={student.application_number}
             />
             <ProfileItem label="DOB" value={student.dob} />
-            <ProfileItem label="Email" value={student.email} />
             <ProfileItem label="Mobile" value={student.mobile_number} />
             <ProfileItem label="Aadhar Number" value={student.aadhar_number} />
             <ProfileItem label="Plan" value={student.plan} />
@@ -121,6 +120,11 @@ export default function StudentProfileModal({ show, onClose, student }) {
               value={student.initial_payment_method}
             />
             <ProfileItem label="Test Date" value={student.test_date} />
+            <ProfileItem
+              label="Training Start Date"
+              value={formatDateDDMMYYYY(student.training_start_date)}
+            />
+            <ProfileItem label="Training Time" value={student.training_time} />
           </div>
 
           {/* Right Column */}

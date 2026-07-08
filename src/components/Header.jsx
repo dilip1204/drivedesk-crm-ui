@@ -6,7 +6,13 @@ import "./Header.css";
 
 export default function Header() {
   const [displayName, setDisplayName] = useState("Guest User");
+  const [displayRole, setDisplayRole] = useState("");
   const navigate = useNavigate();
+
+  const formatRoleLabel = (role) => {
+    if (!role) return "";
+    return role.toString().replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+  };
 
   useEffect(() => {
     const roleInfo = JSON.parse(localStorage.getItem("userRoleInfo") || "{}");
@@ -26,6 +32,7 @@ export default function Header() {
         : fallbackName;
 
     setDisplayName(resolvedName);
+    setDisplayRole(formatRoleLabel(roleInfo?.role || role));
   }, []);
 
   return (
@@ -86,7 +93,8 @@ export default function Header() {
                 <li className="dropdown-header" style={{margin: 0}}>
                   <img src={avatar} className="img-circle" alt="User Image" />
                   <div className="d-inline-block header-user-dropdown-name" title={displayName}>
-                    {displayName}{" "}
+                    <div>{displayName}</div>
+                    {displayRole && <small className="text-muted">{displayRole}</small>}
                     {/* <small className="pt-1">
                       {user.email || "Email not found"}
                     </small> */}

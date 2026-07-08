@@ -21,3 +21,8 @@
   word-break: break-word;
   line-height: 1.35;
 }
+
+.main-header .header-user-dropdown-name small {
+  display: block;
+  margin-top: 2px;
+}

@@ -1,11 +1,13 @@
 import React from "react";
 
 export default function Footer() {
+  const year = new Date().getFullYear();
+
   return (
     <footer className="footer mt-auto">
     <div className="copyright bg-white">
       <p>
-        Copyright &copy; <span id="copy-year">2025</span>{" "}
+        Copyright &copy; {year}{" "}
         <a
           className="text-primary"
           href="#"
@@ -16,10 +18,6 @@ export default function Footer() {
         .
       </p>
     </div>
-    <script>
-      var d = new Date(); var year = d.getFullYear();
-      document.getElementById("copy-year").innerHTML = year;
-    </script>
   </footer>
   );
 }

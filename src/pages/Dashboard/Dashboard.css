@@ -1,3 +1,26 @@
-.app-brand.app-logo>a{
-  padding-left: 0 !important;
+.dashboard-caret-fix,
+.dashboard-caret-fix * {
+  caret-color: transparent !important;
+}
+
+.dashboard-caret-fix h1,
+.dashboard-caret-fix h2,
+.dashboard-caret-fix h3,
+.dashboard-caret-fix h4,
+.dashboard-caret-fix h5,
+.dashboard-caret-fix h6,
+.dashboard-caret-fix p,
+.dashboard-caret-fix span,
+.dashboard-caret-fix div {
+  user-select: none;
+}
+
+.dashboard-caret-fix input,
+.dashboard-caret-fix textarea,
+.dashboard-caret-fix select,
+.dashboard-caret-fix [contenteditable="true"],
+.dashboard-caret-fix a,
+.dashboard-caret-fix button {
+  caret-color: auto !important;
+  user-select: auto;
 }

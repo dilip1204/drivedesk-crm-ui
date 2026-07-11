@@ -488,7 +488,7 @@ const Students = () => {
   return (
     <>
       <div
-        className="header-fixed sidebar-fixed sidebar-dark header-light"
+        className="header-fixed sidebar-fixed sidebar-dark header-light students-page"
         id="body"
       >
         <div className="wrapper">

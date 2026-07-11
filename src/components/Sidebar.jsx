@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import logo from "./../assets/logo/logo.png";
+import logoIcon from "./../assets/logo/logo_icon_white.png";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -14,7 +14,8 @@ export default function Sidebar() {
       <div id="sidebar" className="sidebar sidebar-with-footer">
         <div className="app-brand app-logo">
           <Link to={role === "super_admin" ? "/superadmin" : "/dashboard"} title="Dashboard">
-            <img src={logo} alt="logo" />
+            <img src={logoIcon} alt="drivedesk logo" className="brand-icon" />
+            <span className="brand-name">drivedesk</span>
           </Link>
         </div>
 

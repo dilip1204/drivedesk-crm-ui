@@ -26,3 +26,16 @@
   display: block;
   margin-top: 2px;
 }
+
+#sidebar-toggler-react {
+  border-right: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#sidebar-toggler-react:focus,
+#sidebar-toggler-react:active,
+#sidebar-toggler-react:hover {
+  outline: none !important;
+  box-shadow: none !important;
+}

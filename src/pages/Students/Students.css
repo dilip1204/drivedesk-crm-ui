@@ -167,9 +167,9 @@
   }
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+.students-page input:focus,
+.students-page select:focus,
+.students-page textarea:focus {
   border: 2px solid #4c84ff !important; /* GOV.UK blue */
   box-shadow: 0 0 0 3px rgba(0, 94, 165, 0.3);
   outline: none;
@@ -177,7 +177,7 @@ textarea:focus {
 }
 
 /* Ensure dropdown indicator is visible for Students page selects. */
-.students-select-arrow {
+.students-page .students-select-arrow {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -188,7 +188,7 @@ textarea:focus {
   background-size: 12px 8px;
 }
 
-.students-select-arrow::-ms-expand {
+.students-page .students-select-arrow::-ms-expand {
   display: none;
 }
 

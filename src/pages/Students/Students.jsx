@@ -29,6 +29,7 @@ import AddPayment from "./addPayment";
 import { addStudentPayment } from "../../store/addStudentPayment/actions";
 import Pagination from "./Pagenation";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
+import schoolPrintLogo from "../../assets/logo/school_print_logo.png";
 
 const Students = () => {
   const dispatch = useDispatch();
@@ -474,16 +475,26 @@ const Students = () => {
   const totalPages = Math.ceil(totalCount / pageSize);
 
   let orgNameForPrint = "Students Test List";
+  let tenantInfoForPrint = {};
   try {
-    const tenantInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    tenantInfoForPrint = JSON.parse(localStorage.getItem("userInfo") || "{}");
     orgNameForPrint =
-      tenantInfo?.org_name ||
-      tenantInfo?.organization_name ||
-      tenantInfo?.name ||
+      tenantInfoForPrint?.org_name ||
+      tenantInfoForPrint?.organization_name ||
+      tenantInfoForPrint?.name ||
       "Students Test List";
   } catch (e) {
     orgNameForPrint = "Students Test List";
   }
+
+  const normalizedOrgName = (orgNameForPrint || "").toLowerCase();
+  const isCustomWatermarkOrg = normalizedOrgName.includes("sri ragavendra");
+  const apiLogo =
+    tenantInfoForPrint?.logo_url ||
+    tenantInfoForPrint?.org_logo ||
+    tenantInfoForPrint?.logo ||
+    null;
+  const schoolLogo = apiLogo || (isCustomWatermarkOrg ? schoolPrintLogo : null);
 
   return (
     <>
@@ -902,12 +913,40 @@ const Students = () => {
         pauseOnHover
       />
 
-      <div className="d-none d-print-block" style={{ marginTop: "120px" }}>
-        <div className="text-center" style={{ marginBottom: "70px" }}>
-          <h2 style={{ marginBottom: "12px" }}>{orgNameForPrint}</h2>
-          <h4 style={{ marginBottom: 0 }}>Student Test List</h4>
+      <div className="d-none d-print-block print-page-wrapper">
+
+        {/* ── Watermark layers (behind everything) ── */}
+        <div className="print-watermark-layer">
+          {/* Logo watermark – large, centered */}
+          {schoolLogo && (
+            <img src={schoolLogo} alt="" className="print-wm-logo" aria-hidden="true" />
+          )}
         </div>
-        <PrintableStudentTable students={studentsData} />
+
+        {/* ── Foreground content ── */}
+        <div className="print-foreground">
+          {/* Header */}
+          <div className="print-header-top">
+            <div className="print-logo-area">
+              {schoolLogo ? (
+                <img src={schoolLogo} alt="School Logo" className="print-school-logo" />
+              ) : (
+                <div className="print-logo-placeholder">
+                  <span>{orgNameForPrint.charAt(0).toUpperCase()}</span>
+                </div>
+              )}
+            </div>
+            <div className="print-title-area">
+              <h2 className="print-org-name">{orgNameForPrint}</h2>
+              <h4 className="print-list-title">Student Test List</h4>
+            </div>
+          </div>
+          <hr className="print-divider" />
+
+          {/* Student table */}
+          <PrintableStudentTable students={studentsData} />
+        </div>
+
       </div>
     </>
   );

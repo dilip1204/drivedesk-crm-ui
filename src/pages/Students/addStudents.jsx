@@ -268,7 +268,8 @@ export default function AddStudents({
       }
 
       function handleResponse(response) {
-        const errorList = response?.data?.detail || response?.detail || response;
+        const responseData = response?.data || response || {};
+        const errorList = responseData?.detail || response?.detail;
 
         if (Array.isArray(errorList)) {
           errorList.forEach((err) => {
@@ -281,13 +282,39 @@ export default function AddStudents({
           return;
         }
 
+        const hasError =
+          responseData?.isError === true ||
+          Number(responseData?.statusCode) >= 400 ||
+          Number(response?.status) >= 400;
+
+        if (hasError) {
+          if (typeof studentData === "function") {
+            studentData(responseData, isEdit);
+          }
+          return;
+        }
+
+        // PATCH success: clear stale field errors (e.g., training_time conflict) and proceed.
+        formik.setErrors({});
+        formik.setTouched({});
+        setAvailabilityError("");
+        setAvailabilityDay(null);
+
         formik.resetForm();
         if (typeof onStudentAdded === "function") {
           onStudentAdded();
-          studentData(response, isEdit);
-          setReceiptData(response?.response || response);
         }
-        setIsPrintEnabled(true);
+        if (typeof studentData === "function") {
+          studentData(responseData, isEdit);
+        }
+        setReceiptData(responseData?.response || responseData);
+
+        if (isEdit) {
+          setIsPrintEnabled(false);
+          hideModal();
+        } else {
+          setIsPrintEnabled(true);
+        }
       }
     },
   });

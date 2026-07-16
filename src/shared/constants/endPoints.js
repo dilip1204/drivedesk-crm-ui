@@ -35,5 +35,5 @@ export const ENDPOINTS = {
     historicalPaymentAdjustment: 'students/historical-payment-adjustment',
     addSuperAdmin: 'auth/register',
     getSuperAdminList: 'auth/tenants',
-    editSuperAdmin: 'auth/tenants/',
+    editSuperAdmin: 'auth/tenant/',
 } 

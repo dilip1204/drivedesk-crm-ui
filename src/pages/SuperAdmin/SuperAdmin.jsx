@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { Modal } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../Students/Students.css";
+import "./SuperAdmin.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
@@ -28,6 +30,8 @@ const SuperAdmin = () => {
     const [showModal, setShowModal] = useState(false);
     const [isEdit, setIsEdit] = useState(false);
     const [selected, setSelected] = useState(null);
+    const [showViewModal, setShowViewModal] = useState(false);
+    const [viewTenant, setViewTenant] = useState(null);
 
     const fetchList = (page = currentPage, limit = pageSize) => {
         setLoading(true);
@@ -61,6 +65,11 @@ const SuperAdmin = () => {
         setShowModal(true);
     };
 
+    const handleView = (tenant) => {
+        setViewTenant(tenant);
+        setShowViewModal(true);
+    };
+
     const handleSuccess = (action, errRes) => {
         setShowModal(false);
         if (action) {
@@ -75,19 +84,18 @@ const SuperAdmin = () => {
 
     return (
         <>
-            <div className="header-fixed sidebar-fixed sidebar-dark header-light" id="body">
+            <div className="header-fixed sidebar-fixed sidebar-dark header-light superadmin-page" id="body">
                 <div className="wrapper">
                     <Sidebar />
                     <div className="page-wrapper">
                         <Header />
                         <div className="content-wrapper">
-                            <div className="content">
-                                {/* Breadcrumb */}
-                                <div className="row">
-                                    <div className="breadcrumb-wrapper col-xl-6">
-                                        <h1>Super Admin</h1>
+                            <div className="content superadmin-content">
+                                <div className="superadmin-card superadmin-hero mb-4">
+                                    <div className="superadmin-hero__text">
+                                        <h1 className="superadmin-title mb-1">Super Admin</h1>
                                         <nav aria-label="breadcrumb">
-                                            <ol className="breadcrumb p-0">
+                                            <ol className="breadcrumb p-0 mb-0 superadmin-breadcrumb">
                                                 <li className="breadcrumb-item">
                                                     <a href="#"><span className="mdi mdi-home"></span></a>
                                                 </li>
@@ -96,15 +104,15 @@ const SuperAdmin = () => {
                                             </ol>
                                         </nav>
                                     </div>
-                                    <div className="col-xl-6 d-flex align-items-center justify-content-end">
-                                        <button className="btn btn-primary btn-sm" onClick={handleAdd} style={{ fontSize: "13px" }}>
+                                    <div className="superadmin-hero__actions">
+                                        <button className="btn btn-primary btn-sm superadmin-add-btn" onClick={handleAdd}>
                                             <i className="mdi mdi-plus me-1"></i> Add Tenant
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* Table */}
-                                <div>
+                                <div className="superadmin-card superadmin-table-card">
                                     {loading ? (
                                         <p className="text-center my-5">Loading...</p>
                                     ) : error ? (
@@ -112,7 +120,7 @@ const SuperAdmin = () => {
                                     ) : (
                                         <>
                                             <div className="table-responsive">
-                                                <table className="table custom-table text-center align-middle">
+                                                <table className="table custom-table align-middle superadmin-table">
                                                     <thead className="table-light">
                                                         <tr>
                                                             <th>S.No</th>
@@ -129,23 +137,32 @@ const SuperAdmin = () => {
                                                     <tbody>
                                                         {tenants.map((tenant, index) => (
                                                             <tr key={tenant.tenant_id || index}>
-                                                                <td>{startIndex + index + 1}</td>
-                                                                <td>{tenant.org_name || "—"}</td>
-                                                                <td style={{ maxWidth: 200, whiteSpace: "normal", textAlign: "left" }}>
+                                                                <td className="superadmin-col-sn">{startIndex + index + 1}</td>
+                                                                <td className="superadmin-cell-wrap superadmin-col-org">
+                                                                    {tenant.org_name || "—"}
+                                                                </td>
+                                                                <td className="superadmin-cell-wrap superadmin-col-address">
                                                                     {tenant.address || "—"}
                                                                 </td>
-                                                                <td>{tenant.pincode || "—"}</td>
-                                                                <td>{tenant.mobile_number_primary || "—"}</td>
-                                                                <td>{tenant.mobile_number_secondary || "—"}</td>
-                                                                <td>{tenant.email || "—"}</td>
-                                                                <td>
-                                                                    <span className={`badge ${tenant.whatsapp_enabled ? "bg-success" : "bg-secondary"}`}>
+                                                                <td className="superadmin-col-pincode">{tenant.pincode || "—"}</td>
+                                                                <td className="superadmin-col-mobile">{tenant.mobile_number_primary || "—"}</td>
+                                                                <td className="superadmin-col-mobile">{tenant.mobile_number_secondary || "—"}</td>
+                                                                <td className="superadmin-cell-wrap superadmin-col-email">{tenant.email || "—"}</td>
+                                                                <td className="superadmin-col-status">
+                                                                    <span className={`badge superadmin-status-badge ${tenant.whatsapp_enabled ? "is-enabled" : "is-disabled"}`}>
                                                                         {tenant.whatsapp_enabled ? "Enabled" : "Disabled"}
                                                                     </span>
                                                                 </td>
-                                                                <td>
+                                                                <td className="superadmin-actions">
                                                                     <button
-                                                                        className="btn btn-sm btn-outline-primary"
+                                                                        className="btn btn-sm btn-outline-info superadmin-icon-btn"
+                                                                        title="View"
+                                                                        onClick={() => handleView(tenant)}
+                                                                    >
+                                                                        <i className="mdi mdi-eye"></i>
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn btn-sm btn-outline-primary superadmin-icon-btn"
                                                                         title="Edit"
                                                                         onClick={() => handleEdit(tenant)}
                                                                     >
@@ -181,6 +198,50 @@ const SuperAdmin = () => {
                 selected={selected}
                 onSuccess={handleSuccess}
             />
+
+            <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg" centered>
+                <Modal.Header style={{ padding: "14px 20px" }} closeButton>
+                    <Modal.Title style={{ fontSize: "16px", fontWeight: 600 }}>
+                        Tenant Details
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ padding: "20px" }}>
+                    {viewTenant ? (
+                        <div className="row g-3 superadmin-detail-grid">
+                            {[
+                                ["Tenant ID", viewTenant.tenant_id || "—"],
+                                ["Organisation Name", viewTenant.org_name || "—"],
+                                ["Proprietor", viewTenant.proprietor || "—"],
+                                ["Address", viewTenant.address || "—"],
+                                ["Pincode", viewTenant.pincode || "—"],
+                                ["Primary Mobile", viewTenant.mobile_number_primary || "—"],
+                                ["Secondary Mobile", viewTenant.mobile_number_secondary || "—"],
+                                ["Email", viewTenant.email || "—"],
+                                ["WhatsApp Enabled", viewTenant.whatsapp_enabled ? "Enabled" : "Disabled"],
+                                ["WhatsApp Phone Number ID", viewTenant.whatsapp_phone_number_id || "—"],
+                                ["WhatsApp Access Token", viewTenant.whatsapp_access_token ? "••••••••••" : "—"],
+                                ["WhatsApp Business Account ID", viewTenant.whatsapp_business_account_id || "—"],
+                                ["WhatsApp Registered Number", viewTenant.whatsapp_registered_number || "—"],
+                                ["Google Review Link", viewTenant.google_review_link || "—"],
+                            ].map(([label, value]) => (
+                                <div className="col-md-6" key={label}>
+                                    <div className="superadmin-detail-item h-100">
+                                        <div className="text-muted small mb-1 superadmin-detail-label">{label}</div>
+                                        <div className="superadmin-detail-value">
+                                            {value}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : null}
+                </Modal.Body>
+                <Modal.Footer style={{ padding: "14px 20px" }}>
+                    <button className="btn btn-secondary btn-sm" onClick={() => setShowViewModal(false)}>
+                        Close
+                    </button>
+                </Modal.Footer>
+            </Modal>
 
             <ToastContainer position="top-right" autoClose={4000} hideProgressBar={false} closeOnClick pauseOnHover />
         </>

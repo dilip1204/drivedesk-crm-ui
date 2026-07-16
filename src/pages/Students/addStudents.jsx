@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Modal, Button, Alert } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -25,6 +25,7 @@ export default function AddStudents({
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState("");
   const [availabilityDay, setAvailabilityDay] = useState(null);
+  const previousInstructorNameRef = useRef("");
   const getLocalISODate = (date = new Date()) => {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -380,6 +381,23 @@ export default function AddStudents({
     const selectedInstructor = instructors.find(
       (i) => i.name === formik.values.instructor_name
     );
+
+    const currentInstructorName = formik.values.instructor_name || "";
+    const previousInstructorName = previousInstructorNameRef.current;
+
+    if (
+      showModal &&
+      previousInstructorName &&
+      previousInstructorName !== currentInstructorName
+    ) {
+      formik.setFieldValue("training_time", "", false);
+      formik.setFieldError("training_time", undefined);
+      setAvailabilityDay(null);
+      setAvailabilityError("");
+    }
+
+    previousInstructorNameRef.current = currentInstructorName;
+
     if (selectedInstructor) {
       formik.setFieldValue("instructor_mobile", selectedInstructor.mobile_number || "");
       formik.setFieldValue("instructor_id", selectedInstructor.id || "");

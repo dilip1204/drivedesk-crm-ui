@@ -1,0 +1,230 @@
+.superadmin-page {
+  background: linear-gradient(180deg, #f6f8fc 0%, #eef3f9 100%);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.superadmin-content {
+  padding-top: 8px;
+}
+
+.superadmin-card {
+  background: #ffffff;
+  border: 1px solid #e7ecf3;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.superadmin-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+}
+
+.superadmin-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #111827;
+}
+
+.superadmin-breadcrumb {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.superadmin-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+  color: #94a3b8;
+}
+
+.superadmin-hero__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.superadmin-add-btn {
+  min-width: 118px;
+  height: 40px;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 10px 18px rgba(59, 130, 246, 0.18);
+}
+
+.superadmin-table-card {
+  padding: 8px 10px 14px;
+}
+
+.superadmin-table {
+  width: 100%;
+  margin-bottom: 0;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.superadmin-table thead th {
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 13px 12px;
+  border-bottom: 1px solid #dbe3ee;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.superadmin-table tbody td {
+  padding: 12px 12px;
+  vertical-align: top;
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  border-top: 1px solid #e8edf4;
+  white-space: nowrap;
+}
+
+.superadmin-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.superadmin-cell-wrap {
+  white-space: nowrap;
+  word-break: normal;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.superadmin-col-sn {
+  width: 56px;
+  min-width: 56px;
+  text-align: center;
+}
+
+.superadmin-col-org {
+  width: 18%;
+}
+
+.superadmin-col-address {
+  width: 24%;
+}
+
+.superadmin-col-pincode {
+  width: 88px;
+  text-align: center;
+}
+
+.superadmin-col-mobile {
+  width: 11%;
+  text-align: center;
+}
+
+.superadmin-col-email {
+  width: 17%;
+}
+
+.superadmin-col-status {
+  width: 110px;
+  text-align: center;
+}
+
+.superadmin-actions {
+  width: 100px;
+  min-width: 100px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.superadmin-icon-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 10px;
+}
+
+.superadmin-actions .superadmin-icon-btn + .superadmin-icon-btn {
+  margin-left: 3px;
+}
+
+.superadmin-status-badge {
+  min-width: 72px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.superadmin-status-badge.is-enabled {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.superadmin-status-badge.is-disabled {
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+}
+
+.superadmin-detail-grid {
+  margin-top: 4px;
+}
+
+.superadmin-detail-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.superadmin-detail-label {
+  font-size: 11px !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475569 !important;
+}
+
+.superadmin-detail-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  word-break: break-word;
+  line-height: 1.45;
+  text-shadow: none;
+}
+
+@media (max-width: 1199.98px) {
+  .superadmin-col-org,
+  .superadmin-col-address,
+  .superadmin-col-email,
+  .superadmin-col-mobile {
+    width: auto;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .superadmin-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .superadmin-hero__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .superadmin-title {
+    font-size: 24px;
+  }
+
+  .superadmin-table {
+    min-width: 980px;
+  }
+}

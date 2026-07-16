@@ -73,14 +73,14 @@ const TrainingSession = () => {
 
   const today = new Date().toISOString().split("T")[0];
   const [filters, setFilters] = useState({
-    instructor_id: "",
+    instructor_id: "ALL",
     start_date: today,
     end_date: today,
     status: "All",
   });
 
   const FilterValidationSchema = Yup.object().shape({
-    instructor_id: Yup.string().required("Instructor is required"),
+    instructor_id: Yup.string().nullable(),
     start_date: Yup.date().nullable(),
     end_date: Yup.date().nullable(),
     status: Yup.string().oneOf([
@@ -297,8 +297,13 @@ const TrainingSession = () => {
                       validationSchema={FilterValidationSchema}
                       enableReinitialize
                       onSubmit={(values) => {
+                        const payload = {
+                          ...values,
+                          instructor_id: values.instructor_id === "ALL" ? "" : values.instructor_id,
+                        };
+
                         dispatch(
-                          getTrainingSessionFilterListInformation(values, (res) => {
+                          getTrainingSessionFilterListInformation(payload, (res) => {
                             const trainingSessionList = res || [];
                             if (Array.isArray(trainingSessionList) && trainingSessionList.length > 0) {
                               setTrainingSessionData(trainingSessionList);
@@ -323,7 +328,7 @@ const TrainingSession = () => {
                                 name="instructor_id"
                                 className={`form-control ${errors.instructor_id && touched.instructor_id ? "is-invalid" : ""}`}
                               >
-                                <option value="">--Select--</option>
+                                <option value="ALL">All</option>
                                 {instructorsData.map((instructor) => (
                                   <option key={instructor.id} value={instructor.id}>
                                     {instructor.name}

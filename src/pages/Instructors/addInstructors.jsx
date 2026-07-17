@@ -55,7 +55,7 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
     enableReinitialize: true,
     initialValues,
     validationSchema,
-    onSubmit: (values) => { 
+    onSubmit: (values) => {
       const payload = {
         ...values,
         working_days: values.working_days || [],
@@ -64,15 +64,24 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
       const action = isEdit ? updateInstructor : addInstructor;
 
       dispatch(action(payload, (response) => {
-        if (!response?.isError && response?.response?.message) {
+        const responseData = response?.data || response;
+        const hasError =
+          responseData?.isError === true ||
+          Number(responseData?.statusCode) >= 400 ||
+          Number(response?.status) >= 400;
+
+        if (!hasError) {
           formik.resetForm();
-          if (typeof onSaved === 'function') { 
+          if (typeof onSaved === 'function') {
             onSaved();
           }
-          instructorsData(response, isEdit);
+          instructorsData(responseData, isEdit);
           hideModal();
-        } else if (Array.isArray(response?.detail || response?.data?.detail)) {
-          const errors = response.detail || response.data.detail;
+          return;
+        }
+
+        if (Array.isArray(responseData?.detail)) {
+          const errors = responseData.detail;
           errors.forEach((err) => {
             const field = err?.loc?.[1];
             const msg = err?.msg || err?.message || 'Invalid input';
@@ -80,6 +89,10 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
               formik.setFieldError(field, msg);
             }
           });
+        }
+
+        if (typeof instructorsData === 'function') {
+          instructorsData(responseData, isEdit);
         }
       }));
     }

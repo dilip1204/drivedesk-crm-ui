@@ -310,12 +310,9 @@ export default function AddStudents({
         }
         setReceiptData(responseData?.response || responseData);
 
-        if (isEdit) {
-          setIsPrintEnabled(false);
-          hideModal();
-        } else {
-          setIsPrintEnabled(true);
-        }
+        // Auto-close modal after successful save for both Add and Edit flows.
+        setIsPrintEnabled(false);
+        hideModal();
       }
     },
   });

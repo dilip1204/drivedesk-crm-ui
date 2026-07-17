@@ -162,7 +162,12 @@ const formatTo12Hour = (timeStr) => {
           : "Instructor added successfully!"
       );
     } else {
-      toast.error("Failed....!");
+      const msg =
+        (typeof res?.response === "string" && res.response) ||
+        res?.message ||
+        res?.response?.message ||
+        "Failed....!";
+      toast.error(msg);
     }
   };
   return (

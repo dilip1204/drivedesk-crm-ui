@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
@@ -25,6 +26,7 @@ import ProfileModal from "../../components/ProfileModal";
 
 const Enquiries = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [enquiriesData, setEnquiriesData] = useState([]);
@@ -151,16 +153,55 @@ const Enquiries = () => {
     setSelectedEnquiries(null); // clear after closing
   };
 
-  const onEnquiriesData = (res, isEdit) => {
+  const onEnquiriesData = (res, isEdit, meta = {}) => {
     if (!res.isError) {
       getEnquiriesList();
-      toast.success(
-        isEdit
-          ? "Enquiries updated successfully!"
-          : "Enquiries added successfully!"
-      );
+      if (meta?.enrolledFlow) {
+        if (meta?.studentCreated) {
+          toast.success(
+            isEdit
+              ? "Enquiry updated and student added successfully!"
+              : "Enquiry and student added successfully!"
+          );
+          navigate("/students");
+        } else {
+          const studentError = meta?.studentResponse || {};
+          const studentDetailMessage = Array.isArray(studentError?.detail)
+            ? studentError.detail
+                .map((d) => d?.msg || d?.message)
+                .filter(Boolean)
+                .join(", ")
+            : "";
+          const studentMsg =
+            studentDetailMessage ||
+            (typeof studentError?.response === "string" && studentError.response) ||
+            studentError?.message ||
+            studentError?.response?.message ||
+            "Failed to add student from enrolled enquiry.";
+          toast.error(
+            `${
+              isEdit ? "Enquiry updated" : "Enquiry saved"
+            }, but student add failed: ${studentMsg}`
+          );
+        }
+      } else {
+        toast.success(
+          isEdit
+            ? "Enquiries updated successfully!"
+            : "Enquiries added successfully!"
+        );
+      }
     } else {
-      toast.error("Failed....!");
+      const detailMessage = Array.isArray(res?.detail)
+        ? res.detail.map((d) => d?.msg || d?.message).filter(Boolean).join(", ")
+        : "";
+      const msg =
+        detailMessage ||
+        (typeof res?.response === "string" && res.response) ||
+        res?.message ||
+        res?.response?.message ||
+        "Failed....!";
+      toast.error(msg);
     }
   };
   return (
@@ -367,6 +408,13 @@ const Enquiries = () => {
                         <tbody>
                           {enquiriesData.map((enquiries, index) => (
                             <tr key={index}>
+                              {(() => {
+                                const isEnrolled =
+                                  String(enquiries?.follow_up_status || "")
+                                    .trim()
+                                    .toLowerCase() === "enrolled";
+                                return (
+                                  <>
                               <td>{index+1}</td>
                               <td>{enquiries.name || "Name"}</td>
                               <td>{enquiries.mobile_number || "N/A"}</td>
@@ -376,6 +424,7 @@ const Enquiries = () => {
                                 <button
                                 className="btn btn-sm btn-warning"
                                 title="Edit Enquiries"
+                                disabled={isEnrolled}
                                 onClick={() => handleEditEnquiries(enquiries)}
                               >
                                 {/* <i className="bi bi-pencil"></i> */}
@@ -383,12 +432,25 @@ const Enquiries = () => {
                               </button>{" "}
                                <Link
                                   to="#"
-                                  onClick={() => openEnquriesProfile(enquiries)}
-                                  className="btn btn-primary btn-sm"
+                                  onClick={(e) => {
+                                    if (isEnrolled) {
+                                      e.preventDefault();
+                                      return;
+                                    }
+                                    openEnquriesProfile(enquiries);
+                                  }}
+                                  className={`btn btn-primary btn-sm${
+                                    isEnrolled ? " disabled" : ""
+                                  }`}
+                                  aria-disabled={isEnrolled}
+                                  tabIndex={isEnrolled ? -1 : 0}
                                 >
                                   View
                                 </Link>
                               </td>
+                                  </>
+                                );
+                              })()}
                             </tr>
                           ))}
                         </tbody>

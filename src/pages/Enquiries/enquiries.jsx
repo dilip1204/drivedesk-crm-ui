@@ -67,14 +67,12 @@ const Enquiries = () => {
     const fields = [
       { label: "Name", value: data.name },
       { label: "Mobile Number", value: data.mobile_number },
-      { label: "DOB", value: data.dob },
       { label: "Referred By", value: data.referred_by },
-      { label: "Email", value: data.email },
       { label: "Course Interest", value: data.course_interest },
       { label: "Enquiry Date", value: data.enquiry_date },
-      { label: "Remarks", value: data.remarks },
       { label: "Follow Up Status", value: data.follow_up_status },
-      // add more if needed
+      { label: "Follow Up Date", value: data.follow_up_date || null },
+      { label: "Remarks", value: data.remarks },
     ];
     setProfileData(fields);
     setShowProfileModal(true);

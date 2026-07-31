@@ -8,7 +8,7 @@ import { addExpenses, updateExpenses } from "../../store/expenses/actions";
 import { getInstructorsListInformation } from "../../store/instructors/actions";
 
 // Vehicle types (includes Stationery & Salary)
-const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike","Rent", "Other", "Stationery", "Salary","Trailer"];
+const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike","Rent", "Other", "Food & Snacks", "Stationery", "Salary","Trailer"];
 const CATEGORIES = [
   "Fuel",
   "Service",
@@ -100,7 +100,7 @@ export default function AddFleetExpenses({
     date: Yup.string().required("Date is required"),
     vehicle: Yup.string().when("vehicleType", (vehicleType, schema) => {
   const vt = normalize(vehicleType);
-  if (vt === "stationery" || vt === "salary" || vt === "rent")
+  if (vt === "stationery" || vt === "salary" || vt === "rent" || vt === "other" || vt === "food & snacks")
     return schema.notRequired().nullable();
   return schema.required("Vehicle name/number is required");
 }),
@@ -300,11 +300,13 @@ export default function AddFleetExpenses({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showModal, initialValues]);
 
-  // hide vehicle for Stationery AND for Salary
+  // hide vehicle for Stationery, Salary, Other, Food & Snacks
   const hideVehicleField =
   normalize(formik.values.vehicleType) === "stationery" ||
   normalize(formik.values.vehicleType) === "salary" ||
-  normalize(formik.values.vehicleType) === "rent";
+  normalize(formik.values.vehicleType) === "rent" ||
+  normalize(formik.values.vehicleType) === "other" ||
+  normalize(formik.values.vehicleType) === "food & snacks";
 
   // helper flag used in several places
   const isSalary = normalize(formik.values.vehicleType) === "salary";

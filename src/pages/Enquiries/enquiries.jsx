@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
@@ -23,6 +23,7 @@ import AddEnquiries from "./addEnquiries";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProfileModal from "../../components/ProfileModal";
+import Pagination from "../Students/Pagenation";
 
 const Enquiries = () => {
   const dispatch = useDispatch();
@@ -37,15 +38,16 @@ const Enquiries = () => {
   const [selectedEnquiries, setSelectedEnquiries] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileData, setProfileData] = useState([]);
-  const enquiriesDataList = useSelector(
-    (state) => state.enquiriesInfo.enquiriesList
-  );
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filters, setFilters] = useState({
     month: "",
     year: "",
     status: "All",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const startIndex = (currentPage - 1) * pageSize;
 
   const FilterValidationSchema = Yup.object().shape({
     month: Yup.number()
@@ -78,15 +80,50 @@ const Enquiries = () => {
     setShowProfileModal(true);
   };
 
-  const getEnquiriesList = () => {
-    const data = {};
+  const parseEnquiriesResponse = (res, fallbackPageSize = 10) => {
+    const response = res?.response;
+
+    if (Array.isArray(response)) {
+      return {
+        list: response,
+        total: response.length,
+        skip: 0,
+        limit: fallbackPageSize,
+      };
+    }
+
+    const list = Array.isArray(response?.enquiries) ? response.enquiries : [];
+    const limit = Number(response?.limit);
+    const skip = Number(response?.skip);
+    const total = Number(response?.total);
+
+    return {
+      list,
+      total: Number.isFinite(total) ? total : list.length,
+      skip: Number.isFinite(skip) ? skip : 0,
+      limit: Number.isFinite(limit) && limit > 0 ? limit : fallbackPageSize,
+    };
+  };
+
+  const getEnquiriesList = (page = currentPage, limit = pageSize) => {
+    const safePage = Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+    const safeLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+    const data = { skip: (safePage - 1) * safeLimit, limit: safeLimit };
+    setLoading(true);
+
     dispatch(
       getEnquiriesListInformation(data, (res) => {
-        const enquiresList = res?.response || [];
-        if (Array.isArray(enquiresList) && enquiresList.length > 0) {
-          setEnquiriesData(enquiresList);
+        const parsed = parseEnquiriesResponse(res, safeLimit);
+        if (parsed.list.length > 0) {
+          setEnquiriesData(parsed.list);
+          setTotalCount(parsed.total);
+          setPageSize(parsed.limit);
+          setCurrentPage(Math.floor(parsed.skip / parsed.limit) + 1);
+          setError(null);
         } else {
           setEnquiriesData([]);
+          setTotalCount(0);
+          setCurrentPage(1);
           setError("No enquiries found.");
         }
         setLoading(false);
@@ -95,19 +132,8 @@ const Enquiries = () => {
   };
 
   useEffect(() => {
-    if (enquiriesDataList?.response?.length > 0) {
-      setEnquiriesData(enquiriesDataList.response);
-      setError(null);
-    } else {
-      setEnquiriesData([]);
-      setError("No enquiries found.");
-    }
-    setLoading(false);
-  }, [enquiriesDataList]);
-
-  useEffect(() => {
-    getEnquiriesList();
-  }, [dispatch]);
+    getEnquiriesList(currentPage, pageSize);
+  }, [dispatch, currentPage, pageSize]);
 
   const handleDeleteCloseModel = () => {
     setShowDeleteModal(false);
@@ -303,12 +329,17 @@ const Enquiries = () => {
           return;
         }
 
-        const enquiriesList = response || [];
-        if (Array.isArray(enquiriesList) && enquiriesList.length > 0) {
-          setEnquiriesData(enquiriesList);
+        const parsed = parseEnquiriesResponse(res, pageSize);
+        if (parsed.list.length > 0) {
+          setEnquiriesData(parsed.list);
+          setTotalCount(parsed.total);
+          setCurrentPage(Math.floor(parsed.skip / parsed.limit) + 1);
+          setPageSize(parsed.limit);
           setError(null);
         } else {
           setEnquiriesData([]);
+          setTotalCount(0);
+          setCurrentPage(1);
           setError("No enquiries found.");
         }
         setLoading(false);
@@ -415,7 +446,7 @@ const Enquiries = () => {
                                     .toLowerCase() === "enrolled";
                                 return (
                                   <>
-                              <td>{index+1}</td>
+                              <td>{startIndex + index + 1}</td>
                               <td>{enquiries.name || "Name"}</td>
                               <td>{enquiries.mobile_number || "N/A"}</td>
                               <td>{enquiries.email || "N/A"}</td>
@@ -456,6 +487,16 @@ const Enquiries = () => {
                         </tbody>
                       </table>
                     </div>
+                    <Pagination
+                      currentPage={currentPage}
+                      totalCount={totalCount}
+                      pageSize={pageSize}
+                      onPageChange={(p) => setCurrentPage(p)}
+                      onPageSizeChange={(s) => {
+                        setPageSize(s);
+                        setCurrentPage(1);
+                      }}
+                    />
                     {/* <div className="row g-4">
                       {enquiriesData.map((enquiries, index) => (
                         <div

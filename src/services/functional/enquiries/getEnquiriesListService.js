@@ -3,9 +3,12 @@ import { request } from "../../core/networkRequest";
 import { ENDPOINTS } from "../../../shared/constants/endPoints";
 
 export const getAllEnquiries = (param) => {
+    const skip = Number.isFinite(Number(param?.skip)) ? Number(param.skip) : 0;
+    const limit = Number.isFinite(Number(param?.limit)) ? Number(param.limit) : 10;
     return request(
         METHOD_TYPES.GET,
-        ENDPOINTS.getAllEnquiries    )
+        `${ENDPOINTS.getAllEnquiries}?skip=${skip}&limit=${limit}`
+    )
 }
 
 export const getAllEnquiriesFilter = (param) => {

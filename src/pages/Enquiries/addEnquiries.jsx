@@ -56,6 +56,16 @@ export default function AddEnquiries({
     return `${yyyy}-${mm}-${dd}`;
   };
 
+  const formatDateInput = (dateValue) => {
+    if (!dateValue) return "";
+    const d = new Date(dateValue);
+    if (Number.isNaN(d.getTime())) return "";
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   const isEnrolledStatus = (status) => {
     const normalized = String(status || "").trim().toLowerCase();
     return normalized === "converted" || normalized === "enrolled";
@@ -71,9 +81,23 @@ export default function AddEnquiries({
     return "Pending";
   };
 
+  const getTariffAmountByCourse = (courseInterest) => {
+    const selectedPlan = String(courseInterest || "").trim().toLowerCase();
+    if (!selectedPlan) return 0;
+
+    const matchedTariff = (tariffsData || []).find(
+      (tariff) =>
+        String(tariff?.plan_name || "").trim().toLowerCase() === selectedPlan
+    );
+
+    const amount = Number(matchedTariff?.amount || 0);
+    return Number.isFinite(amount) ? amount : 0;
+  };
+
   const buildStudentPayloadFromEnquiry = (values) => {
     const now = Date.now();
     const today = new Date().toISOString().slice(0, 10);
+    const totalAmount = Number(values?.total_amount || 0);
     const paidAmount = Number(values?.paid_amount || 0);
 
     return {
@@ -87,8 +111,13 @@ export default function AddEnquiries({
         plan: values?.course_interest || "",
         payment_method: "Cash",
         paid_amount: Number.isFinite(paidAmount) ? paidAmount : 0,
-        total_amount: 0,
-        balance: 0,
+        total_amount: Number.isFinite(totalAmount) ? totalAmount : 0,
+        balance:
+          Number.isFinite(totalAmount) && Number.isFinite(paidAmount)
+            ? Math.max(totalAmount - paidAmount, 0)
+            : Number.isFinite(totalAmount)
+            ? totalAmount
+            : 0,
         full_payment_status: "Pending",
         instructor_name: "Not Assigned",
         instructor_id: "",
@@ -121,6 +150,8 @@ export default function AddEnquiries({
     course_interest: id?.course_interest || "",
     // enquiry_date: id?.enquiry_date ? formatDateTimeLocal(id.enquiry_date) : formatDateTimeLocal(new Date()),
     follow_up_status: normalizeFollowUpStatus(id?.follow_up_status || "Pending"),
+    follow_up_date: formatDateInput(id?.follow_up_date),
+    total_amount: getTariffAmountByCourse(id?.course_interest),
     paid_amount: "",
     remarks: id?.remarks || "",
   };
@@ -139,12 +170,16 @@ export default function AddEnquiries({
       .transform((value, originalValue) =>
         originalValue === "" || originalValue === null ? undefined : value
       )
-      .when("follow_up_status", {
+      .when(["follow_up_status", "course_interest"], {
         is: (status) => isEnrolledStatus(status),
         then: (schema) =>
           schema
             .typeError("Paid amount must be a valid number")
             .min(0, "Paid amount cannot be negative")
+            .max(
+              Yup.ref("total_amount"),
+              "Paid amount cannot be greater than total amount"
+            )
             .required("Paid amount is required for enrolled status"),
         otherwise: (schema) => schema.notRequired(),
       }),
@@ -162,7 +197,12 @@ export default function AddEnquiries({
         ...values,
         follow_up_status: normalizeFollowUpStatus(values?.follow_up_status),
       };
+      normalizedValues.follow_up_date = normalizedValues.follow_up_date || null;
+      normalizedValues.total_amount = getTariffAmountByCourse(
+        normalizedValues.course_interest
+      );
       if (!isEnrolledStatus(normalizedValues.follow_up_status)) {
+        normalizedValues.total_amount = "";
         normalizedValues.paid_amount = "";
       }
       // DOB is hidden in UI; send a valid value to satisfy backend schema.
@@ -386,6 +426,42 @@ export default function AddEnquiries({
                   )}
               </div>
             </div>
+
+            {!isEnrolledStatus(formik.values.follow_up_status) && (
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>Follow Up Date</label>
+                  <input
+                    type="date"
+                    name="follow_up_date"
+                    className="form-control"
+                    value={formik.values.follow_up_date}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                </div>
+              </div>
+            )}
+
+            {isEnrolledStatus(formik.values.follow_up_status) && (
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>
+                    Total Amount <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="total_amount"
+                    min="0"
+                    step="0.01"
+                    className="form-control"
+                    value={getTariffAmountByCourse(formik.values.course_interest)}
+                    readOnly
+                    placeholder="Auto-filled from selected course"
+                  />
+                </div>
+              </div>
+            )}
 
             {isEnrolledStatus(formik.values.follow_up_status) && (
               <div className="col-md-6">

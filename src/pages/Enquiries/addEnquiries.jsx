@@ -74,6 +74,7 @@ export default function AddEnquiries({
   const buildStudentPayloadFromEnquiry = (values) => {
     const now = Date.now();
     const today = new Date().toISOString().slice(0, 10);
+    const paidAmount = Number(values?.paid_amount || 0);
 
     return {
       studentData: {
@@ -85,7 +86,7 @@ export default function AddEnquiries({
         aadhar_number: "000000000000",
         plan: values?.course_interest || "",
         payment_method: "Cash",
-        paid_amount: 0,
+        paid_amount: Number.isFinite(paidAmount) ? paidAmount : 0,
         total_amount: 0,
         balance: 0,
         full_payment_status: "Pending",
@@ -120,6 +121,7 @@ export default function AddEnquiries({
     course_interest: id?.course_interest || "",
     // enquiry_date: id?.enquiry_date ? formatDateTimeLocal(id.enquiry_date) : formatDateTimeLocal(new Date()),
     follow_up_status: normalizeFollowUpStatus(id?.follow_up_status || "Pending"),
+    paid_amount: "",
     remarks: id?.remarks || "",
   };
 
@@ -133,6 +135,19 @@ export default function AddEnquiries({
     course_interest: Yup.string().required("Course interest is required"),
     //enquiry_date: Yup.date().required("Enquiry date is required"),
     follow_up_status: Yup.string().required("Follow-up status is required"),
+    paid_amount: Yup.number()
+      .transform((value, originalValue) =>
+        originalValue === "" || originalValue === null ? undefined : value
+      )
+      .when("follow_up_status", {
+        is: (status) => isEnrolledStatus(status),
+        then: (schema) =>
+          schema
+            .typeError("Paid amount must be a valid number")
+            .min(0, "Paid amount cannot be negative")
+            .required("Paid amount is required for enrolled status"),
+        otherwise: (schema) => schema.notRequired(),
+      }),
     //remarks: Yup.string().required("Remarks are required")
   });
 
@@ -147,6 +162,9 @@ export default function AddEnquiries({
         ...values,
         follow_up_status: normalizeFollowUpStatus(values?.follow_up_status),
       };
+      if (!isEnrolledStatus(normalizedValues.follow_up_status)) {
+        normalizedValues.paid_amount = "";
+      }
       // DOB is hidden in UI; send a valid value to satisfy backend schema.
       normalizedValues.dob = normalizedValues.dob || id?.dob || getDefaultDob();
 
@@ -280,7 +298,6 @@ export default function AddEnquiries({
               ["name", "text"],
               ["mobile_number", "text"],
               ["referred_by", "text"],
-              ["email", "email"],
               // ['enquiry_date', 'datetime-local'],
               ["remarks", "text"],
             ].map(([field, type]) => (
@@ -369,6 +386,34 @@ export default function AddEnquiries({
                   )}
               </div>
             </div>
+
+            {isEnrolledStatus(formik.values.follow_up_status) && (
+              <div className="col-md-6">
+                <div className="form-group">
+                  <label>
+                    Paid Amount <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="paid_amount"
+                    min="0"
+                    step="0.01"
+                    className={`form-control${
+                      formik.touched.paid_amount && formik.errors.paid_amount
+                        ? " is-invalid"
+                        : ""
+                    }`}
+                    value={formik.values.paid_amount}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    placeholder="Enter paid amount"
+                  />
+                  {formik.touched.paid_amount && formik.errors.paid_amount && (
+                    <div className="text-danger">{formik.errors.paid_amount}</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <Modal.Footer>

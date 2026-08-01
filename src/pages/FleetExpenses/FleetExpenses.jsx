@@ -26,6 +26,7 @@ const FleetExpenses = () => {
   // UI state
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [isView, setIsView] = useState(false);
   const [selectedExpenses, setSelectedExpenses] = useState(null);
 
   // Data state
@@ -82,12 +83,21 @@ const FleetExpenses = () => {
   const handleEditExpenses = (expense) => {
     setSelectedExpenses(expense);
     setIsEdit(true);
+    setIsView(false);
+    setShowModal(true);
+  };
+
+  const handleViewExpenses = (expense) => {
+    setSelectedExpenses(expense);
+    setIsEdit(false);
+    setIsView(true);
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setIsEdit(false);
+    setIsView(false);
     setSelectedExpenses(null);
   };
 
@@ -438,9 +448,7 @@ const FleetExpenses = () => {
                           <tr>
                             <th>Date</th>
                             <th>Category</th>
-                            <th>Odometer</th>
                             <th>Amount</th>
-                            <th>Vendor</th>
                             <th>Notes</th>
                             <th>Created By</th>
                             <th className="text-end">Actions</th>
@@ -453,13 +461,12 @@ const FleetExpenses = () => {
                               <tr key={r.id}>
                                 <td>{formatDateDDMMYYYY(r.date)}</td>
                                 <td>{r.category || "-"}</td>
-                                <td>{r.odo_meter || r.odoMeter || "-"}</td>
                                 <td>₹{Number(r.amount || 0).toLocaleString("en-IN")}</td>
-                                <td>{r.vendor || "-"}</td>
                                 <td>{r.notes || "-"}</td>
                                 <td>{r.created_by || r.createdBy || "-"}</td>
                                 <td className="text-end">
-                                  <button className="btn btn-sm btn-warning" onClick={() => handleEditExpenses(r)} title="Edit Expense">Edit</button>{" "}
+                                  <button className="btn btn-sm btn-warning me-2" onClick={() => handleEditExpenses(r)} title="Edit Expense">Edit</button>
+                                  <button className="btn btn-sm btn-primary me-2" onClick={() => handleViewExpenses(r)} title="View Expense">View</button>
                                   <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r.id)} title="Delete Expense">Delete</button>
                                 </td>
                               </tr>
@@ -482,6 +489,7 @@ const FleetExpenses = () => {
               hideModal={handleCloseModal}
               expense={selectedExpenses}
               isEdit={isEdit}
+              viewOnly={isView}
               onExpensesAdded={() => {}}
               expensesData={onExpensesData}
             />

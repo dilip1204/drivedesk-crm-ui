@@ -19,7 +19,8 @@ const CATEGORIES = [
   "Wash",
   "Accessories",
   "Other",
-  "Stationaries"
+  "Stationaries",
+  "RTO payment"
 ];
 const ODOMETER_CATEGORIES = ["Fuel", "Service", "Repairs", "Wash", "Parking"];
 
@@ -42,6 +43,7 @@ export default function AddFleetExpenses({
   hideModal,
   expense = null,
   isEdit = false,
+  viewOnly = false,
   onExpensesAdded = () => {},
   expensesData = () => {},
   // optional: pass list of instructors (array of strings or {id,name})
@@ -80,7 +82,6 @@ export default function AddFleetExpenses({
       vehicleType: vehicleTypeVal || "",
       odometer: odometerVal?.toString() || "",
       category: expense?.category || "",
-      vendor: expense?.vendor || "",
       liters: litersVal?.toString() || "",
       pricePerLiter: pricePerLiterVal?.toString() || "",
       fullTank: !!fullTankBool,
@@ -122,9 +123,6 @@ export default function AddFleetExpenses({
       .oneOf(CATEGORIES, "Invalid category"),
   otherwise: (s) => s.nullable(),
 }),
-    vendor: Yup.string()
-  .nullable()
-  .max(100, "Vendor name too long"),
     liters: Yup.number().typeError("Liters must be a number").min(0, "Liters cannot be negative").nullable(),
     pricePerLiter: Yup.number().typeError("Price per liter must be a number").min(0, "Price per liter cannot be negative").nullable(),
     amount: Yup.number().typeError("Amount must be a number").min(0, "Amount cannot be negative").required("Amount is required"),
@@ -159,7 +157,6 @@ export default function AddFleetExpenses({
         odo_meter: values.odometer || "",
         stationary: values.stationary || "",
         full_tank: values.fullTank ? "Yes" : "No",
-        vendor: values.vendor || "",
         created_by: values.created_by || "system_user",
         created_at: new Date().toISOString(),
         // add instructor info to payload when present
@@ -354,13 +351,87 @@ export default function AddFleetExpenses({
       centered
     >
       <Modal.Header closeButton>
-        <Modal.Title>{isEdit ? "Update Expense" : "Add Expense"}</Modal.Title>
+        <Modal.Title>{viewOnly ? "View Expense" : isEdit ? "Update Expense" : "Add Expense"}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
-        <form noValidate onSubmit={(e) => { e.preventDefault(); explicitSubmit(); }}>
-          {/* Date + VehicleType */}
-          <div className="row">
+        {viewOnly ? (
+          <div style={{ padding: "0" }}>
+            <div style={{ marginBottom: "20px", paddingBottom: "16px", borderBottom: "1px solid #e0e0e0" }}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "48px", height: "48px", borderRadius: "50%", backgroundColor: "#c9cfe8", display: "flex", alignItems: "center", justifyContent: "center", marginRight: "12px", fontSize: "24px", color: "#6c757d" }}>📋</div>
+                <div style={{ fontSize: "14px", fontWeight: "600", color: "#212529" }}>{formik.values.vehicle || formik.values.vehicleType || "Expense"}</div>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: "32px", rowGap: "12px" }}>
+              <div style={{ display: "flex" }}>
+                <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "80px" }}>Date:</span>
+                <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.date || "N/A"}</span>
+              </div>
+              <div style={{ display: "flex" }}>
+                <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "100px" }}>Expense Type:</span>
+                <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.vehicleType || "N/A"}</span>
+              </div>
+
+              <div style={{ display: "flex" }}>
+                <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "80px" }}>Category:</span>
+                <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.category || "N/A"}</span>
+              </div>
+              <div style={{ display: "flex" }}>
+                <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "100px" }}>Vehicle:</span>
+                <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.vehicle || "N/A"}</span>
+              </div>
+
+              <div style={{ display: "flex" }}>
+                <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "80px" }}>Amount:</span>
+                <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>₹{Number(formik.values.amount || 0).toLocaleString("en-IN")}</span>
+              </div>
+              {showOdometer && (
+                <div style={{ display: "flex" }}>
+                  <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "100px" }}>Odometer (km):</span>
+                  <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.odometer || "N/A"}</span>
+                </div>
+              )}
+
+              {showFuelFields && (
+                <>
+                  <div style={{ display: "flex" }}>
+                    <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "80px" }}>Liters:</span>
+                    <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.liters || "N/A"}</span>
+                  </div>
+                  <div style={{ display: "flex" }}>
+                    <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "100px" }}>Price/Liter:</span>
+                    <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>₹{formik.values.pricePerLiter || "N/A"}</span>
+                  </div>
+                </>
+              )}
+
+              {formik.values.notes && (
+                <div style={{ gridColumn: "1 / -1", display: "flex" }}>
+                  <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "80px" }}>Notes:</span>
+                  <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.notes}</span>
+                </div>
+              )}
+
+              {showInstructor && (
+                <div style={{ gridColumn: "1 / -1", display: "flex" }}>
+                  <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "80px" }}>Instructor:</span>
+                  <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.instructor || "N/A"}</span>
+                </div>
+              )}
+            </div>
+
+            <div style={{ marginTop: "20px", textAlign: "right", paddingTop: "16px", borderTop: "1px solid #e0e0e0" }}>
+              <button type="button" onClick={() => { formik.resetForm(); hideModal(); }} style={{ backgroundColor: "#7a8a99", color: "white", border: "none", padding: "6px 16px", fontSize: "13px", borderRadius: "4px", cursor: "pointer", fontWeight: "500" }}>
+                Close
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form noValidate onSubmit={(e) => { e.preventDefault(); explicitSubmit(); }}>
+            {/* Date + VehicleType */}
+            <div className="row">
             <div className="col-md-6 mb-3">
               <label>Date <span style={{ color: "red" }}>*</span></label>
               <input type="date" name="date" className={`form-control ${showInvalid("date")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.date} />
@@ -414,22 +485,17 @@ export default function AddFleetExpenses({
             </div>
           )}
 
-          {/* Category + Vendor (hidden for Salary) */}
+          {/* Category (hidden for Salary) */}
           {!isSalary &&
   normalize(formik.values.vehicleType) !== "rent" && (
             <div className="row">
-              <div className="col-md-6 mb-3">
+              <div className="col-md-12 mb-3">
                 <label>Category <span style={{ color: "red" }}>*</span></label>
                 <select name="category" className={`form-control ${showInvalid("category")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.category}>
                   <option value="">Select category</option>
                   {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
                 <div className="invalid-feedback">{formik.errors.category}</div>
-              </div>
-              <div className="col-md-6 mb-3">
-                <label>Vendor</label>
-                <input type="text" name="vendor" className={`form-control ${showInvalid("vendor")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.vendor} placeholder="Enter vendor name" />
-                <div className="invalid-feedback">{formik.errors.vendor}</div>
               </div>
             </div>
           )}
@@ -489,7 +555,8 @@ export default function AddFleetExpenses({
               {isEdit ? "Update" : "Add"}
             </button>
           </div>
-        </form>
+          </form>
+        )}
       </Modal.Body>
     </Modal>
   );

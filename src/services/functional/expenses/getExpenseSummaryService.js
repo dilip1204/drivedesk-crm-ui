@@ -2,10 +2,10 @@ import { METHOD_TYPES } from "../../../shared/constants/methodTypes";
 import { request } from "../../core/networkRequest";
 import { ENDPOINTS } from "../../../shared/constants/endPoints";
 
-export const getExpenseSummary = ({ fromDate, toDate, skip, limit }) => {
+export const getExpenseSummary = ({ month, year, skip, limit }) => {
   const params = new URLSearchParams({
-    from_date: fromDate,
-    to_date: toDate,
+    month,
+    year,
     skip: String(skip),
     limit: String(limit),
   });

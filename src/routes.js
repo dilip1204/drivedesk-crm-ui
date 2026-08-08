@@ -14,6 +14,7 @@ import OutstandingFees from "./pages/OutstandingFees/outstandingFees";
 import SuperAdmin from "./pages/SuperAdmin/SuperAdmin";
 import Tutorials from "./pages/Tutorials/Tutorials";
 import ExpenseReport from "./pages/FleetExpenses/ExpenseReport";
+import IncomeReport from "./pages/IncomeReport/IncomeReport";
 
 export default function AppRoutes() {
   return (
@@ -98,6 +99,15 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin"]}>
             <ExpenseReport />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/income-report"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <IncomeReport />
           </ProtectedRoute>
         }
       />

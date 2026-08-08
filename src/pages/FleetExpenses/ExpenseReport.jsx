@@ -212,17 +212,6 @@ const ExpenseReport = () => {
                 </div>
               </div>
 
-              {!loading && !error && (
-                <div className="row mb-4">
-                  <div className="col-md-6 mb-3">
-                    <div className="card border-danger h-100"><div className="card-body"><div className="text-muted">Current Month Expenses</div><h3 className="text-danger mb-0">₹{totalAmount.toLocaleString("en-IN")}</h3></div></div>
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <div className="card border-primary h-100"><div className="card-body"><div className="text-muted">Total Expense Records</div><h3 className="text-primary mb-0">{totalCount}</h3></div></div>
-                  </div>
-                </div>
-              )}
-
               <div className="card">
                 <div className="card-body">
                   {loading ? (

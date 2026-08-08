@@ -155,17 +155,6 @@ const IncomeReport = () => {
                 </div>
               </div>
 
-              {!loading && !error && (
-                <div className="row mb-4">
-                  <div className="col-md-6 mb-3">
-                    <div className="card border-info h-100"><div className="card-body"><div className="text-muted">Current Month Income</div><h3 className="text-info mb-0">₹{currentPageIncome.toLocaleString("en-IN")}</h3></div></div>
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <div className="card border-primary h-100"><div className="card-body"><div className="text-muted">Total Student Records</div><h3 className="text-primary mb-0">{totalCount}</h3></div></div>
-                  </div>
-                </div>
-              )}
-
               <div className="card">
                 <div className="card-body">
                   {loading ? (

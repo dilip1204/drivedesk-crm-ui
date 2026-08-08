@@ -32,6 +32,7 @@ const OTHER_CATEGORIES = [
   "Track Maintenance",
   "Painting",
   "Flower",
+  "Mobile Recharge",
 ];
 const FOOD_AND_SNACK_CATEGORIES = [
   "Tea/Coffee and Snacks",

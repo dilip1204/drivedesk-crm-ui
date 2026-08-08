@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -13,72 +16,48 @@ import Pagination from "../Students/Pagenation";
 import { getExpenseSummaryService } from "../../services/functional";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 import { useAuth } from "../../hooks/useAuth";
+import AddFleetExpenses from "./addFleetExpenses";
+import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
+import { deleteExpenses } from "../../store/expenses/actions";
 
 const pad = (value) => String(value).padStart(2, "0");
 
-const toApiDate = (inputDate) => {
-  const [year, month, day] = (inputDate || "").split("-");
-  return year && month && day ? `${day}-${month}-${year}` : "";
-};
-
-const toInputDate = (apiDate) => {
-  const [day, month, year] = (apiDate || "").split("-");
-  return year && month && day ? `${year}-${month}-${day}` : "";
-};
-
-const getDefaultRange = () => {
+const getCurrentMonth = () => {
   const today = new Date();
-  return {
-    fromDate: `${today.getFullYear()}-${pad(today.getMonth() + 1)}-01`,
-    toDate: `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`,
-  };
+  return `${today.getFullYear()}-${pad(today.getMonth() + 1)}`;
 };
 
 const ExpenseReport = () => {
+  const dispatch = useDispatch();
   const { role } = useAuth();
   const isAdmin = String(role || "").toLowerCase() === "admin";
   const reportTableRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  const defaults = getDefaultRange();
-  const [fromDate, setFromDate] = useState(
-    toInputDate(searchParams.get("from_date")) || defaults.fromDate
-  );
-  const [toDate, setToDate] = useState(
-    toInputDate(searchParams.get("to_date")) || defaults.toDate
-  );
-  const [appliedRange, setAppliedRange] = useState({
-    fromDate: toInputDate(searchParams.get("from_date")) || defaults.fromDate,
-    toDate: toInputDate(searchParams.get("to_date")) || defaults.toDate,
-  });
+  const queryMonth = `${searchParams.get("year") || ""}-${pad(searchParams.get("month") || "")}`;
+  const initialMonth = /^\d{4}-\d{2}$/.test(queryMonth) ? queryMonth : getCurrentMonth();
+  const [selectedMonth, setSelectedMonth] = useState(initialMonth);
+  const [appliedMonth, setAppliedMonth] = useState(initialMonth);
   const [rows, setRows] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const [isView, setIsView] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedExpenseId, setSelectedExpenseId] = useState(null);
 
   const fetchReport = useCallback(async () => {
-    if (!appliedRange.fromDate || !appliedRange.toDate) {
-      setError("From date and To date are required.");
-      setRows([]);
-      setTotalCount(0);
-      setLoading(false);
-      return;
-    }
-    if (appliedRange.fromDate > appliedRange.toDate) {
-      setError("From date cannot be after To date.");
-      setRows([]);
-      setTotalCount(0);
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     setError("");
     try {
+      const [year, month] = appliedMonth.split("-");
       const response = await getExpenseSummaryService.getExpenseSummary({
-        fromDate: toApiDate(appliedRange.fromDate),
-        toDate: toApiDate(appliedRange.toDate),
+        month,
+        year,
         skip: (currentPage - 1) * pageSize,
         limit: pageSize,
       });
@@ -86,7 +65,7 @@ const ExpenseReport = () => {
       const reportRows = Array.isArray(responseData.expenses) ? responseData.expenses : [];
       setRows(reportRows);
       setTotalCount(Number(responseData.total) || 0);
-      if (reportRows.length === 0) setError("No expense report data found for this date range.");
+      if (reportRows.length === 0) setError("No expense report data found for this month.");
     } catch (requestError) {
       setRows([]);
       setTotalCount(0);
@@ -94,7 +73,7 @@ const ExpenseReport = () => {
     } finally {
       setLoading(false);
     }
-  }, [appliedRange, currentPage, pageSize]);
+  }, [appliedMonth, currentPage, pageSize]);
 
   useEffect(() => {
     fetchReport();
@@ -107,17 +86,11 @@ const ExpenseReport = () => {
 
   const applyFilters = (event) => {
     event.preventDefault();
-    if (!fromDate || !toDate) {
-      setError("From date and To date are required.");
-      return;
-    }
-    if (fromDate > toDate) {
-      setError("From date cannot be after To date.");
-      return;
-    }
-    setSearchParams({ from_date: toApiDate(fromDate), to_date: toApiDate(toDate) });
+    if (!selectedMonth) return;
+    const [year, month] = selectedMonth.split("-");
+    setSearchParams({ month, year });
     setCurrentPage(1);
-    setAppliedRange({ fromDate, toDate });
+    setAppliedMonth(selectedMonth);
   };
 
   const printReport = () => {
@@ -136,16 +109,58 @@ const ExpenseReport = () => {
             table{width:100%;border-collapse:collapse;font-size:11px;}
             th,td{border:1px solid #333;padding:6px;text-align:center;}
             thead th{background:#f2f2f2;}
+            .no-print{display:none;}
           </style>
         </head>
         <body>
           <h2>Expense Report</h2>
-          <p>${formatDateDDMMYYYY(appliedRange.fromDate)} to ${formatDateDDMMYYYY(appliedRange.toDate)}</p>
+          <p>${appliedMonth.split("-").reverse().join("/")}</p>
           ${content}
           <script>window.onload=function(){window.print();window.close();}</script>
         </body>
       </html>`);
     printWindow.document.close();
+  };
+
+  const openExpenseModal = (expense, viewOnly) => {
+    setSelectedExpense(expense);
+    setIsEdit(!viewOnly);
+    setIsView(viewOnly);
+    setShowExpenseModal(true);
+  };
+
+  const closeExpenseModal = () => {
+    setShowExpenseModal(false);
+    setSelectedExpense(null);
+    setIsEdit(false);
+    setIsView(false);
+  };
+
+  const handleExpenseUpdated = (response) => {
+    if (response?.isError) {
+      toast.error("Expense update failed.");
+      return;
+    }
+    toast.success("Expense updated successfully.");
+    closeExpenseModal();
+    fetchReport();
+  };
+
+  const confirmDelete = (id) => {
+    dispatch(deleteExpenses({ id }, (response) => {
+      setShowDeleteModal(false);
+      setSelectedExpenseId(null);
+      if (response?.isError) {
+        toast.error("Delete failed.");
+        return;
+      }
+      toast.success("Expense deleted successfully.");
+      if (rows.length === 1 && currentPage > 1) {
+        setCurrentPage((page) => page - 1);
+      } else {
+        fetchReport();
+      }
+    }));
   };
 
   return (
@@ -156,8 +171,8 @@ const ExpenseReport = () => {
           <Header />
           <div className="content-wrapper">
             <div className="content">
-              <div className="d-flex flex-wrap justify-content-between align-items-start mb-4">
-                <div>
+              <div className="row mb-4">
+                <div className="breadcrumb-wrapper col-xl-6">
                   <h1>Expense Report</h1>
                   <nav aria-label="breadcrumb">
                     <ol className="breadcrumb p-0">
@@ -166,28 +181,26 @@ const ExpenseReport = () => {
                     </ol>
                   </nav>
                 </div>
-                <div className="d-flex gap-2">
+                <div className="col-xl-6 text-right">
+                  <div className="d-flex justify-content-end gap-2">
                   {isAdmin && (
                     <button type="button" className="btn btn-outline-primary" onClick={printReport} disabled={loading || !!error || rows.length === 0}>
                       <i className="bi bi-printer"></i> Print
                     </button>
                   )}
                   <Link to="/dashboard" className="btn btn-secondary">Back to Dashboard</Link>
+                  </div>
                 </div>
               </div>
 
               <div className="card mb-4">
                 <div className="card-body">
                   <form className="row align-items-end" onSubmit={applyFilters}>
-                    <div className="col-md-4 mb-3">
-                      <label htmlFor="expense-report-from">From Date</label>
-                      <input id="expense-report-from" type="date" className="form-control" value={fromDate} onChange={(event) => setFromDate(event.target.value)} required />
+                    <div className="col-md-6 mb-3">
+                      <label htmlFor="expense-report-month">Month</label>
+                      <input id="expense-report-month" type="month" className="form-control" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} required />
                     </div>
-                    <div className="col-md-4 mb-3">
-                      <label htmlFor="expense-report-to">To Date</label>
-                      <input id="expense-report-to" type="date" className="form-control" value={toDate} onChange={(event) => setToDate(event.target.value)} required />
-                    </div>
-                    <div className="col-md-4 mb-3">
+                    <div className="col-md-6 mb-3">
                       <button type="submit" className="btn btn-primary" disabled={loading}>View Report</button>
                     </div>
                   </form>
@@ -217,8 +230,7 @@ const ExpenseReport = () => {
                         <thead className="table-light">
                           <tr>
                             <th>S.NO</th><th>Date</th><th>Expense Type</th><th>Category</th>
-                            <th>Employee</th><th>Vehicle</th><th>Amount</th><th>Notes</th>
-                            <th>Odometer</th><th>Stationary</th><th>Created By</th>
+                            <th>Amount</th><th>Notes</th><th>Created By</th><th className="no-print">Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -228,13 +240,14 @@ const ExpenseReport = () => {
                               <td>{formatDateDDMMYYYY(row?.date)}</td>
                               <td>{row?.type || "-"}</td>
                               <td>{row?.category || "-"}</td>
-                              <td>{row?.employee_name || "-"}</td>
-                              <td>{row?.vehicle_id || "-"}</td>
                               <td>₹{Number(row?.amount || 0).toLocaleString("en-IN")}</td>
                               <td>{row?.notes || "-"}</td>
-                              <td>{row?.odo_meter || "-"}</td>
-                              <td>{row?.stationary || "-"}</td>
                               <td>{row?.created_by || "-"}</td>
+                              <td className="no-print text-nowrap">
+                                <button className="btn btn-sm btn-warning me-2" onClick={() => openExpenseModal(row, false)}>Edit</button>
+                                <button className="btn btn-sm btn-primary me-2" onClick={() => openExpenseModal(row, true)}>View</button>
+                                <button className="btn btn-sm btn-danger" onClick={() => { setSelectedExpenseId(row.id); setShowDeleteModal(true); }}>Delete</button>
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -252,6 +265,23 @@ const ExpenseReport = () => {
               </div>
             </div>
           </div>
+          <AddFleetExpenses
+            showModal={showExpenseModal}
+            hideModal={closeExpenseModal}
+            expense={selectedExpense}
+            isEdit={isEdit}
+            viewOnly={isView}
+            onExpensesAdded={() => {}}
+            expensesData={handleExpenseUpdated}
+          />
+          <DeleteConfirmation
+            showDeleteModal={showDeleteModal}
+            hideDeleteModal={() => { setShowDeleteModal(false); setSelectedExpenseId(null); }}
+            confirmModal={confirmDelete}
+            id={selectedExpenseId}
+            message="Are you sure you want to delete this expense?"
+          />
+          <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} closeButton={false} closeOnClick pauseOnHover />
           <Footer />
         </div>
       </div>

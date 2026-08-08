@@ -64,7 +64,6 @@ const Dashboard = () => {
 
   const formatValue = (value) => (typeof value === "number" ? value : 0);
   const registrationCount = formatValue(summary?.response?.registration_count);
-  const processCompletedCount = formatValue(summary?.response?.process_completed_count);
   const processFailedCount = formatValue(summary?.response?.process_failed_count);
   const paymentPendingCount = formatValue(summary?.response?.payment_pending_count);
   const paymentCompletedCount = formatValue(summary?.response?.payment_completed_count);
@@ -74,16 +73,7 @@ const Dashboard = () => {
   const totalExpense = formatValue(summary?.response?.total_expense);
   const netIncome = formatValue(summary?.response?.net_income);
   const paymentTotalCount = paymentPendingCount + paymentCompletedCount + paymentFailedCount;
-  const processSuccessRate = registrationCount ? Math.round((processCompletedCount / registrationCount) * 100) : 0;
   const paymentSuccessRate = paymentTotalCount ? Math.round((paymentCompletedCount / paymentTotalCount) * 100) : 0;
-
-  const formatReportDate = (date) => {
-    const day = String(date.getDate()).padStart(2, "0");
-    const reportMonth = String(date.getMonth() + 1).padStart(2, "0");
-    return `${day}-${reportMonth}-${date.getFullYear()}`;
-  };
-  const expenseReportFromDate = formatReportDate(new Date(today.getFullYear(), today.getMonth(), 1));
-  const expenseReportToDate = formatReportDate(today);
 
   return (
     <>
@@ -158,20 +148,6 @@ const Dashboard = () => {
                   </div>
 
                   <div className="col-xl-3 col-sm-6">
-                    <div className="card card-mini mb-4 border-success">
-                      <div className="card-body">
-                        <h2 className="mb-1 text-success">{processCompletedCount}</h2>
-                        <p className="mb-2">Process Completed</p>
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span className="badge badge-success">Healthy</span>
-                          <span className="text-muted small">Compared to registrations</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div className="col-xl-3 col-sm-6">
                     <div className="card card-mini mb-4 border-warning">
                       <div className="card-body">
                         <h2 className="mb-1 text-warning">{paymentPendingCount}</h2>
@@ -216,20 +192,22 @@ const Dashboard = () => {
                   {isAdmin && (
                     <>
                       <div className="col-xl-3 col-sm-6">
-                        <div className="card card-mini mb-4 border-info">
-                          <div className="card-body">
-                            <h2 className="mb-1 text-info">&#8377;{totalIncome}</h2>
-                            <p className="mb-2">Total Income</p>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <span className="badge badge-info">INCOME</span>
-                              <span className="text-muted small">Filtered by month/date</span>
+                        <Link to={`/income-report?month=${month}&year=${year}`}>
+                          <div className="card card-mini mb-4 border-info">
+                            <div className="card-body">
+                              <h2 className="mb-1 text-info">&#8377;{totalIncome}</h2>
+                              <p className="mb-2">Total Income</p>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <span className="badge badge-info">INCOME</span>
+                                <span className="text-muted small">View income report</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       </div>
 
                       <div className="col-xl-3 col-sm-6">
-                        <Link to={`/expense-report?from_date=${expenseReportFromDate}&to_date=${expenseReportToDate}`}>
+                        <Link to={`/expense-report?month=${month}&year=${year}`}>
                           <div className="card card-mini mb-4 border-danger">
                             <div className="card-body">
                               <h2 className="mb-1 text-danger">&#8377;{totalExpense}</h2>

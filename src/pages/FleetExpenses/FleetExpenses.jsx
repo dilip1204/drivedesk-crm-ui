@@ -20,6 +20,15 @@ import { Chart, registerables } from "chart.js";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 Chart.register(...registerables);
 
+const getExpenseType = (expense) =>
+  expense.expenseType ||
+  expense.expense_type ||
+  expense.vehicleType ||
+  expense.vehicle_type ||
+  expense.vehicle_type_name ||
+  expense.type ||
+  "Other";
+
 const FleetExpenses = () => {
   const dispatch = useDispatch();
 
@@ -36,7 +45,7 @@ const FleetExpenses = () => {
 
   // Filters & search
   const [searchText, setSearchText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedExpenseType, setSelectedExpenseType] = useState("All");
   const [selectedMonth, setSelectedMonth] = useState("");
 
   // Delete modal state
@@ -130,10 +139,10 @@ const FleetExpenses = () => {
     handleCloseModal();
   };
 
-  // Category list from server data
-  const categories = useMemo(() => {
+  // Expense type list from server data
+  const expenseTypes = useMemo(() => {
     const set = new Set();
-    expensesDatas.forEach((r) => r.category && set.add(r.category));
+    expensesDatas.forEach((expense) => set.add(getExpenseType(expense)));
     return ["All", ...Array.from(set)];
   }, [expensesDatas]);
 
@@ -146,15 +155,15 @@ const FleetExpenses = () => {
     });
   }, [expensesDatas, selectedMonth]);
 
-  const filteredByCategory = useMemo(() => {
-    if (selectedCategory === "All") return filteredByMonth;
-    return filteredByMonth.filter((r) => r.category === selectedCategory);
-  }, [filteredByMonth, selectedCategory]);
+  const filteredByExpenseType = useMemo(() => {
+    if (selectedExpenseType === "All") return filteredByMonth;
+    return filteredByMonth.filter((expense) => getExpenseType(expense) === selectedExpenseType);
+  }, [filteredByMonth, selectedExpenseType]);
 
   const filteredRecords = useMemo(() => {
     const q = (searchText || "").trim().toLowerCase();
-    if (!q) return filteredByCategory;
-    return filteredByCategory.filter((r) => {
+    if (!q) return filteredByExpenseType;
+    return filteredByExpenseType.filter((r) => {
       const match =
         (r.category || "").toString().toLowerCase().includes(q) ||
         (r.notes || "").toString().toLowerCase().includes(q) ||
@@ -164,7 +173,7 @@ const FleetExpenses = () => {
         (r.amount || "").toString().toLowerCase().includes(q);
       return match;
     });
-  }, [filteredByCategory, searchText]);
+  }, [filteredByExpenseType, searchText]);
 
   // KPIs: totalSpend and perMonth (month spend)
   const totalSpend = filteredRecords.reduce((s, r) => s + (Number(r.amount) || 0), 0);
@@ -188,12 +197,12 @@ const FleetExpenses = () => {
   const perMonth = monthlySpend; // month spend (current or selected)
 
   // Charts helpers
-  const getCategoryAggregation = (items) => {
+  const getExpenseTypeAggregation = (items) => {
     const map = new Map();
     items.forEach((r) => {
-      const cat = (r.category || "Other").toString();
+      const expenseType = getExpenseType(r).toString();
       const amt = Number(r.amount) || 0;
-      map.set(cat, (map.get(cat) || 0) + amt);
+      map.set(expenseType, (map.get(expenseType) || 0) + amt);
     });
 
     const filteredEntries = Array.from(map.entries()).filter(([, v]) => v > 0);
@@ -205,12 +214,19 @@ const FleetExpenses = () => {
   };
 
   const generateColors = (count) => {
-    const colors = [];
-    for (let i = 0; i < count; i++) {
-      const hue = Math.round((i * 360) / count);
-      colors.push(`hsl(${hue}, 70%, 50%)`);
-    }
-    return colors;
+    const palette = [
+      "#e52521",
+      "#9bd817",
+      "#20c96b",
+      "#2d6fd3",
+      "#ad25d8",
+      "#f39c12",
+      "#00a6a6",
+      "#d94f8a",
+      "#6c5ce7",
+      "#607d8b",
+    ];
+    return Array.from({ length: count }, (_, index) => palette[index % palette.length]);
   };
 
   const getMonthlyAggregation = (items, monthsBack = 6) => {
@@ -233,12 +249,12 @@ const FleetExpenses = () => {
     return { labels: months, values: sums };
   };
 
-  const categoryAgg = useMemo(() => getCategoryAggregation(filteredRecords), [filteredRecords]);
+  const expenseTypeAgg = useMemo(() => getExpenseTypeAggregation(filteredRecords), [filteredRecords]);
   const monthlyAgg = useMemo(() => getMonthlyAggregation(filteredRecords), [filteredRecords]);
 
   const pieRef = useRef(null);
   const monthlyRef = useRef(null);
-  const categoryRef = useRef(null);
+  const expenseTypeRef = useRef(null);
   const chartsRef = useRef({});
 
   useEffect(() => {
@@ -253,15 +269,33 @@ const FleetExpenses = () => {
 
     if (pieRef.current) {
       chartsRef.current.pie?.destroy();
-      const nonZeroCount = categoryAgg.values.filter((v) => v > 0).length || categoryAgg.values.length;
-      const colors = generateColors(nonZeroCount);
+      const colors = generateColors(expenseTypeAgg.values.length);
+      const totalExpense = expenseTypeAgg.values.reduce((sum, value) => sum + value, 0);
+      const minimumVisibleSlice = totalExpense > 0 ? totalExpense / 180 : 0;
+      const pieDisplayValues = expenseTypeAgg.values.map((value) =>
+        value > 0 ? Math.max(value, minimumVisibleSlice) : value
+      );
       chartsRef.current.pie = new Chart(pieRef.current, {
         type: "pie",
         data: {
-          labels: categoryAgg.labels,
-          datasets: [{ data: categoryAgg.values, backgroundColor: colors, borderColor: "#ffffff", borderWidth: 1 }],
+          labels: expenseTypeAgg.labels,
+          datasets: [{ data: pieDisplayValues, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }],
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "right" } } },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "right" },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const actualValue = expenseTypeAgg.values[context.dataIndex] || 0;
+                  return `${context.label}: ₹${actualValue.toLocaleString("en-IN")}`;
+                },
+              },
+            },
+          },
+        },
       });
     }
 
@@ -288,11 +322,19 @@ const FleetExpenses = () => {
       });
     }
 
-    if (categoryRef.current) {
-      chartsRef.current.category?.destroy();
-      chartsRef.current.category = new Chart(categoryRef.current, {
+    if (expenseTypeRef.current) {
+      chartsRef.current.expenseType?.destroy();
+      chartsRef.current.expenseType = new Chart(expenseTypeRef.current, {
         type: "bar",
-        data: { labels: categoryAgg.labels, datasets: [{ data: categoryAgg.values, borderRadius: 6, barThickness: 18 }] },
+        data: {
+          labels: expenseTypeAgg.labels,
+          datasets: [{
+            data: expenseTypeAgg.values,
+            backgroundColor: generateColors(expenseTypeAgg.values.length),
+            borderRadius: 6,
+            barThickness: 18,
+          }],
+        },
         options: baseOptions,
       });
     }
@@ -300,7 +342,7 @@ const FleetExpenses = () => {
     return () => {
       Object.values(chartsRef.current).forEach((c) => c?.destroy());
     };
-  }, [categoryAgg, monthlyAgg]);
+  }, [expenseTypeAgg, monthlyAgg]);
 
   const styles = {
     pageCard: { borderRadius: 18, background: "#fff", padding: 24, boxShadow: "0 6px 20px rgba(29,39,61,0.06)", marginTop: 16 },
@@ -385,8 +427,8 @@ const FleetExpenses = () => {
                     </div>
 
                     <div className="col-auto">
-                      <select className="form-select" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-                        {categories.map((c) => <option key={c} value={c}>{c === "All" ? "All categories" : c}</option>)}
+                      <select className="form-select" value={selectedExpenseType} onChange={(e) => setSelectedExpenseType(e.target.value)}>
+                        {expenseTypes.map((type) => <option key={type} value={type}>{type === "All" ? "All expense types" : type}</option>)}
                       </select>
                     </div>
 
@@ -395,11 +437,11 @@ const FleetExpenses = () => {
                     </div>
                   </div>
 
-                  {/* Equal-width row: Category Share | Total Spend | Month */}
+                  {/* Equal-width row: Expense Type Share | Total Spend | Month */}
                   <div className="row g-3 mb-3">
                     <div className="col-12 col-md-4 d-flex">
                       <div style={{ ...styles.pieBox, width: "100%" }}>
-                        <div style={{ fontWeight: 600, marginBottom: 10 }}>Category Share</div>
+                        <div style={{ fontWeight: 600, marginBottom: 10 }}>Expense Type Share</div>
                         <canvas ref={pieRef} style={{ width: "100%", height: 180 }} />
                       </div>
                     </div>
@@ -430,8 +472,8 @@ const FleetExpenses = () => {
 
                     <div className="col-12 col-md-6">
                       <div style={styles.chartTall}>
-                        <div style={{ fontWeight: 600, marginBottom: 10 }}>Category Breakdown</div>
-                        <canvas ref={categoryRef} style={{ width: "100%", height: "100%" }} />
+                        <div style={{ fontWeight: 600, marginBottom: 10 }}>Expense Type Breakdown</div>
+                        <canvas ref={expenseTypeRef} style={{ width: "100%", height: "100%" }} />
                       </div>
                     </div>
                   </div>
@@ -447,6 +489,7 @@ const FleetExpenses = () => {
                         <thead className="table-light">
                           <tr>
                             <th>Date</th>
+                            <th>Expense Type</th>
                             <th>Category</th>
                             <th>Amount</th>
                             <th>Notes</th>
@@ -460,6 +503,7 @@ const FleetExpenses = () => {
                             filteredRecords.map((r) => (
                               <tr key={r.id}>
                                 <td>{formatDateDDMMYYYY(r.date)}</td>
+                                <td>{getExpenseType(r)}</td>
                                 <td>{r.category || "-"}</td>
                                 <td>₹{Number(r.amount || 0).toLocaleString("en-IN")}</td>
                                 <td>{r.notes || "-"}</td>
@@ -473,7 +517,7 @@ const FleetExpenses = () => {
                             ))
                           ) : (
                             <tr>
-                              <td colSpan="8" className="text-center text-muted">{error || "No expenses found."}</td>
+                              <td colSpan="7" className="text-center text-muted">{error || "No expenses found."}</td>
                             </tr>
                           )}
                         </tbody>

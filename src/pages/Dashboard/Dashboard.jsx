@@ -77,6 +77,14 @@ const Dashboard = () => {
   const processSuccessRate = registrationCount ? Math.round((processCompletedCount / registrationCount) * 100) : 0;
   const paymentSuccessRate = paymentTotalCount ? Math.round((paymentCompletedCount / paymentTotalCount) * 100) : 0;
 
+  const formatReportDate = (date) => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const reportMonth = String(date.getMonth() + 1).padStart(2, "0");
+    return `${day}-${reportMonth}-${date.getFullYear()}`;
+  };
+  const expenseReportFromDate = formatReportDate(new Date(today.getFullYear(), today.getMonth(), 1));
+  const expenseReportToDate = formatReportDate(today);
+
   return (
     <>
       <div
@@ -221,16 +229,18 @@ const Dashboard = () => {
                       </div>
 
                       <div className="col-xl-3 col-sm-6">
-                        <div className="card card-mini mb-4 border-danger">
-                          <div className="card-body">
-                            <h2 className="mb-1 text-danger">&#8377;{totalExpense}</h2>
-                            <p className="mb-2">Total Expense</p>
-                            <div className="d-flex justify-content-between align-items-center">
-                              <span className="badge badge-danger">EXPENSE</span>
-                              <span className="text-muted small">Filtered by month/date</span>
+                        <Link to={`/expense-report?from_date=${expenseReportFromDate}&to_date=${expenseReportToDate}`}>
+                          <div className="card card-mini mb-4 border-danger">
+                            <div className="card-body">
+                              <h2 className="mb-1 text-danger">&#8377;{totalExpense}</h2>
+                              <p className="mb-2">Total Expense</p>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <span className="badge badge-danger">EXPENSE</span>
+                                <span className="text-muted small">View current month report</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       </div>
 
                       <div className="col-xl-3 col-sm-6">

@@ -173,13 +173,14 @@ export default function AddFleetExpenses({
 
       const payload = {
         id: values.id || uid(),
-        type: "vehicle",
+        type: values.vehicleType || "",
         category:
   normalize(values.vehicleType) === "rent"
     ? "Rent"
     : values.category || "",
         vehicle_id: values.vehicle_id || values.vehicle || "",
         vehicle: values.vehicle || values.vehicle_id || "",
+        expense_type: values.vehicleType || "",
         vehicleType: values.vehicleType || "",
         vehicle_type: values.vehicleType || "",
         amount: values.amount === "" ? 0 : Number(values.amount),

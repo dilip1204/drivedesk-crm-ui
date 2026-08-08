@@ -27,6 +27,11 @@ const getCurrentMonth = () => {
   return `${today.getFullYear()}-${pad(today.getMonth() + 1)}`;
 };
 
+const truncateText = (value, maxLength = 15) => {
+  const text = (value || "-").toString();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
+};
+
 const ExpenseReport = () => {
   const dispatch = useDispatch();
   const { role } = useAuth();
@@ -210,7 +215,7 @@ const ExpenseReport = () => {
               {!loading && !error && (
                 <div className="row mb-4">
                   <div className="col-md-6 mb-3">
-                    <div className="card border-danger h-100"><div className="card-body"><div className="text-muted">Current Page Total</div><h3 className="text-danger mb-0">₹{totalAmount.toLocaleString("en-IN")}</h3></div></div>
+                    <div className="card border-danger h-100"><div className="card-body"><div className="text-muted">Current Month Expenses</div><h3 className="text-danger mb-0">₹{totalAmount.toLocaleString("en-IN")}</h3></div></div>
                   </div>
                   <div className="col-md-6 mb-3">
                     <div className="card border-primary h-100"><div className="card-body"><div className="text-muted">Total Expense Records</div><h3 className="text-primary mb-0">{totalCount}</h3></div></div>
@@ -242,7 +247,7 @@ const ExpenseReport = () => {
                               <td>{row?.category || "-"}</td>
                               <td>₹{Number(row?.amount || 0).toLocaleString("en-IN")}</td>
                               <td>{row?.notes || "-"}</td>
-                              <td>{row?.created_by || "-"}</td>
+                              <td title={row?.created_by || "-"}>{truncateText(row?.created_by)}</td>
                               <td className="no-print text-nowrap">
                                 <button className="btn btn-sm btn-warning me-2" onClick={() => openExpenseModal(row, false)}>Edit</button>
                                 <button className="btn btn-sm btn-primary me-2" onClick={() => openExpenseModal(row, true)}>View</button>

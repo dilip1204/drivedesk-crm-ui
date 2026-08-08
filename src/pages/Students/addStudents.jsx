@@ -673,6 +673,7 @@ export default function AddStudents({
                             : ""
                         }`}
                         value={formik.values.training_time || ""}
+                        readOnly
                         onChange={(e) => {
                           // e.target.value is already "HH:MM"
                           const value24 = to24h(e.target.value);

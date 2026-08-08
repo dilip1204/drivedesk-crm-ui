@@ -79,6 +79,13 @@ export default function Sidebar() {
                   <span className="nav-text">Expenses</span>
                 </Link>
               </li>
+
+              <li className={`has-sub ${isActive("/tutorials") ? "active expand" : ""}`}>
+                <Link className="sidenav-item-link" to="/tutorials">
+                  <i className="mdi mdi-play-circle-outline"></i>
+                  <span className="nav-text">Tutorials</span>
+                </Link>
+              </li>
               </>
             )}
 

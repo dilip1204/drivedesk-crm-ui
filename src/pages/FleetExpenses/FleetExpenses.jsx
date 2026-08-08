@@ -29,6 +29,11 @@ const getExpenseType = (expense) =>
   expense.type ||
   "Other";
 
+const truncateText = (value, maxLength = 15) => {
+  const text = (value || "-").toString();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
+};
+
 const FleetExpenses = () => {
   const dispatch = useDispatch();
 
@@ -507,7 +512,9 @@ const FleetExpenses = () => {
                                 <td>{r.category || "-"}</td>
                                 <td>₹{Number(r.amount || 0).toLocaleString("en-IN")}</td>
                                 <td>{r.notes || "-"}</td>
-                                <td>{r.created_by || r.createdBy || "-"}</td>
+                                <td title={r.created_by || r.createdBy || "-"}>
+                                  {truncateText(r.created_by || r.createdBy)}
+                                </td>
                                 <td className="text-end">
                                   <button className="btn btn-sm btn-warning me-2" onClick={() => handleEditExpenses(r)} title="Edit Expense">Edit</button>
                                   <button className="btn btn-sm btn-primary me-2" onClick={() => handleViewExpenses(r)} title="View Expense">View</button>

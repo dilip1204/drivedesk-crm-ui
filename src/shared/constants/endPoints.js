@@ -31,6 +31,7 @@ export const ENDPOINTS = {
     editExpenses: 'expenses/',
     deleteExpenses: 'expenses/',
     getAllExpenses: 'expenses',
+    getExpenseSummary: 'expenses/summary',
     getOutstandingFees: 'dashboard/students/pending-balance',
     historicalPaymentAdjustment: 'students/historical-payment-adjustment',
     addSuperAdmin: 'auth/register',

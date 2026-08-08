@@ -31,6 +31,7 @@ const OTHER_CATEGORIES = [
   "One Time Purchase",
   "Track Maintenance",
   "Painting",
+  "Flower",
 ];
 const FOOD_AND_SNACK_CATEGORIES = [
   "Tea/Coffee and Snacks",

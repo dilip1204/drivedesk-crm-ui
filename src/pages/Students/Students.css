@@ -169,6 +169,11 @@
   padding: 4px;
 }
 
+.print-school-logo.drivedesk-print-logo {
+  background: #1b2230;
+  padding: 8px;
+}
+
 .print-logo-placeholder {
   width: 72px;
   height: 72px;

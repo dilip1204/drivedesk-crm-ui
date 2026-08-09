@@ -28,6 +28,7 @@ import StudentTrainingSessionModal from "./StudentTrainingSession";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
+import { getAdminPrintWatermark } from "../../utils/printBranding";
 
 const TrainingSession = () => {
   const dispatch = useDispatch();
@@ -101,31 +102,90 @@ const TrainingSession = () => {
   };
 
   const printCompletedTable = () => {
-  const content = completedTableRef.current?.outerHTML || "<p>No data</p>";
-  const win = window.open("", "", "width=900,height=700");
-  win.document.write(`<!doctype html>
-  <html>
-    <head>
-      <meta charset="utf-8"/>
-      <title>Progress Report</title>
-      <style>
-        body{font-family:Arial,Helvetica,sans-serif;margin:24px;}
-        h2{margin:0 0 12px;text-align:center;font-size:22px;}
-        h4{margin:0 0 8px;text-align:center;font-size:20px;font-weight:700;}
-        table{width:100%;border-collapse:collapse;}
-        th,td{border:1px solid #333;padding:8px;text-align:center;}
-        thead th{background:#f2f2f2;}
-      </style>
-    </head>
-    <body>
-      ${orgNameForReport ? `<h4>${orgNameForReport}</h4>` : ""}
-      <h2>Progress Report</h2>
-      ${content}
-      <script>window.onload=function(){window.print();window.close();}</script>
-    </body>
-  </html>`);
-  win.document.close();
-};
+    const content = completedTableRef.current?.outerHTML || "<p>No data</p>";
+    const firstSession = completedSessions[0] || {};
+    const studentName = firstSession?.student_name || "-";
+    const instructorNames = [
+      ...new Set(
+        completedSessions
+          .map((session) => session?.instructor_name)
+          .filter(Boolean)
+      ),
+    ].join(", ") || "-";
+    const reportDate = formatDateDDMMYYYY(new Date().toISOString());
+    const sessionDates = completedSessions
+      .map((session) => session?.date)
+      .filter(Boolean)
+      .sort();
+    const period = sessionDates.length
+      ? `${formatDateDDMMYYYY(sessionDates[0])} - ${formatDateDDMMYYYY(
+          sessionDates[sessionDates.length - 1]
+        )}`
+      : "-";
+    const escapeHtml = (value) =>
+      String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    const win = window.open("", "", "width=900,height=700");
+    win.document.write(`<!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8"/>
+        <title>Progress Report - ${escapeHtml(studentName)}</title>
+        <style>
+          @page { size: A4 portrait; margin: 16mm; }
+          * { box-sizing: border-box; }
+          body { margin: 0; color: #172033; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+          .report { position: relative; z-index: 1; min-height: 250mm; }
+          .report-header { padding-bottom: 14px; border-bottom: 2px solid #1f4e78; text-align: center; }
+          .org-name { margin: 0 0 5px; color: #172033; font-size: 21px; font-weight: 700; }
+          .report-title { margin: 0; color: #1f4e78; font-size: 17px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+          .report-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; margin: 18px 0; padding: 12px 14px; border: 1px solid #d5dce5; border-radius: 4px; background: #f7f9fc; }
+          .meta-item { display: flex; gap: 7px; }
+          .meta-label { min-width: 92px; color: #566273; font-weight: 700; }
+          .meta-value { color: #172033; font-weight: 600; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { padding: 9px 7px; border: 1px solid #9aa7b5; text-align: center; vertical-align: middle; }
+          thead th { background: #1f4e78 !important; color: #fff !important; font-size: 11px; letter-spacing: .25px; text-transform: uppercase; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          tbody tr:nth-child(even) { background: #f4f7fa; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          .badge { padding: 0; background: transparent !important; color: #18733c !important; font-weight: 700; }
+          .summary { margin-top: 10px; color: #566273; text-align: right; }
+          .signatures { display: flex; justify-content: space-between; gap: 80px; margin-top: 72px; }
+          .signature { width: 220px; padding-top: 7px; border-top: 1px solid #172033; text-align: center; font-weight: 700; }
+          .signature small { display: block; margin-top: 4px; color: #6a7482; font-weight: 400; }
+          .report-footer { position: absolute; right: 0; bottom: 0; left: 0; padding-top: 8px; border-top: 1px solid #d5dce5; color: #7a8491; font-size: 10px; text-align: center; }
+        </style>
+      </head>
+      <body>
+        ${getAdminPrintWatermark()}
+        <main class="report">
+          <header class="report-header">
+            ${orgNameForReport ? `<h1 class="org-name">${escapeHtml(orgNameForReport)}</h1>` : ""}
+            <h2 class="report-title">Student Completed Progress Report</h2>
+          </header>
+          <section class="report-meta">
+            <div class="meta-item"><span class="meta-label">Student:</span><span class="meta-value">${escapeHtml(studentName)}</span></div>
+            <div class="meta-item"><span class="meta-label">Instructor:</span><span class="meta-value">${escapeHtml(instructorNames)}</span></div>
+            <div class="meta-item"><span class="meta-label">Report period:</span><span class="meta-value">${escapeHtml(period)}</span></div>
+            <div class="meta-item"><span class="meta-label">Generated on:</span><span class="meta-value">${escapeHtml(reportDate)}</span></div>
+          </section>
+          ${content}
+          <div class="summary">Total completed sessions: <strong>${completedSessions.length}</strong></div>
+          <section class="signatures">
+            <div class="signature">Instructor Signature<small>${escapeHtml(instructorNames)}</small></div>
+            <div class="signature">Authorized Signature<small>Driving School Authority</small></div>
+          </section>
+          <footer class="report-footer">This report was generated through DriveDesk.</footer>
+        </main>
+        <script>window.onload=function(){window.print();window.close();}</script>
+      </body>
+    </html>`);
+    win.document.close();
+  };
 
   const getTrainingSessionList = () => {
     const today = new Date().toISOString().split("T")[0];

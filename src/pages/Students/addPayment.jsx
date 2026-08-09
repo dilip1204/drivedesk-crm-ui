@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import { getStudentReceiptInfo } from "../../store/students/actions";
 import { ToastContainer, toast } from "react-toastify";
+import { addAdminPrintLogo } from "../../utils/printBranding";
 
 export default function AddPayment({
   show,
@@ -91,7 +92,7 @@ export default function AddPayment({
         if (response) {
           //setHtmlContent(response);
           const printWindow = window.open("", "_blank");
-          printWindow.document.write(response);
+          printWindow.document.write(addAdminPrintLogo(response));
           printWindow.document.close();
           printWindow.focus();
           printWindow.print();

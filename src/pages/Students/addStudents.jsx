@@ -7,6 +7,7 @@ import { addStudent, updateStudent } from "../../store/addStudent/actions";
 import { IoClose } from "react-icons/io5";
 import { getStudentReceiptInfo } from "../../store/students/actions";
 import { getInstructorAvailInformation } from "../../store/instructors/actions";
+import { addAdminPrintLogo } from "../../utils/printBranding";
 
 export default function AddStudents({
   showModal,
@@ -558,7 +559,7 @@ export default function AddStudents({
           setHtmlContent(response);
           setTimeout(() => {
             const printWindow = window.open("", "_blank");
-            printWindow.document.write(response);
+            printWindow.document.write(addAdminPrintLogo(response));
             printWindow.document.close();
             printWindow.focus();
             printWindow.print();

@@ -30,6 +30,7 @@ import { addStudentPayment } from "../../store/addStudentPayment/actions";
 import Pagination from "./Pagenation";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 import schoolPrintLogo from "../../assets/logo/school_print_logo.png";
+import { getAdminPrintLogoSource, isDriveDeskAdmin } from "../../utils/printBranding";
 
 const Students = () => {
   const dispatch = useDispatch();
@@ -494,7 +495,10 @@ const Students = () => {
     tenantInfoForPrint?.org_logo ||
     tenantInfoForPrint?.logo ||
     null;
-  const schoolLogo = apiLogo || (isCustomWatermarkOrg ? schoolPrintLogo : null);
+  const driveDeskAdmin = isDriveDeskAdmin();
+  const schoolLogo = driveDeskAdmin
+    ? getAdminPrintLogoSource()
+    : apiLogo || (isCustomWatermarkOrg ? schoolPrintLogo : null);
 
   return (
     <>
@@ -927,15 +931,6 @@ const Students = () => {
         <div className="print-foreground">
           {/* Header */}
           <div className="print-header-top">
-            <div className="print-logo-area">
-              {schoolLogo ? (
-                <img src={schoolLogo} alt="School Logo" className="print-school-logo" />
-              ) : (
-                <div className="print-logo-placeholder">
-                  <span>{orgNameForPrint.charAt(0).toUpperCase()}</span>
-                </div>
-              )}
-            </div>
             <div className="print-title-area">
               <h2 className="print-org-name">{orgNameForPrint}</h2>
               <h4 className="print-list-title">Student Test List</h4>

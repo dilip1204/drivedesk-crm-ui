@@ -14,6 +14,13 @@ const TUTORIALS = [
     duration: "1:20",
     topic: "Training Session",
   },
+  {
+    id: "LMNIul6XC2c",
+    title: "DriveDesk Track Every Rupee with Ease!",
+    description: "With the new Expense Tracker in DriveDesk, you can easily record daily expenses like fuel, vehicle maintenance, repairs, office expenses, and more—all in one place.",
+    duration: "2:26",
+    topic: "Expense Tracker",
+  },
 ];
 
 export default function Tutorials() {

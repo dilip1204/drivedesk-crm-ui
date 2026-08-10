@@ -28,7 +28,10 @@ import StudentTrainingSessionModal from "./StudentTrainingSession";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
-import { getAdminPrintWatermark } from "../../utils/printBranding";
+import {
+  getAdminPrintWatermark,
+  isSriRagavendraOrganization,
+} from "../../utils/printBranding";
 
 const TrainingSession = () => {
   const dispatch = useDispatch();
@@ -137,13 +140,15 @@ const TrainingSession = () => {
         <meta charset="utf-8"/>
         <title>Progress Report - ${escapeHtml(studentName)}</title>
         <style>
-          @page { size: A4 portrait; margin: 16mm; }
+          @page { size: A4 portrait; margin: 0; }
           * { box-sizing: border-box; }
-          body { margin: 0; color: #172033; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
-          .report { position: relative; z-index: 1; min-height: 250mm; }
+          html, body { width: 210mm; min-height: 297mm; margin: 0; padding: 0; }
+          body { color: #172033; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+          .report { position: relative; z-index: 1; width: 210mm; min-height: 297mm; padding: 16mm; }
           .report-header { padding-bottom: 14px; border-bottom: 2px solid #1f4e78; text-align: center; }
-          .org-name { margin: 0 0 5px; color: #172033; font-size: 21px; font-weight: 700; }
+          .org-name { margin: 0 0 5px; color: #172033; font-size: 21px; font-weight: 700; text-transform: uppercase; }
           .report-title { margin: 0; color: #1f4e78; font-size: 17px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+          .website { margin: 5px 0 0; color: #1f4e78; font-size: 11px; font-weight: 600; }
           .report-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; margin: 18px 0; padding: 12px 14px; border: 1px solid #d5dce5; border-radius: 4px; background: #f7f9fc; }
           .meta-item { display: flex; gap: 7px; }
           .meta-label { min-width: 92px; color: #566273; font-weight: 700; }
@@ -158,6 +163,10 @@ const TrainingSession = () => {
           .signature { width: 220px; padding-top: 7px; border-top: 1px solid #172033; text-align: center; font-weight: 700; }
           .signature small { display: block; margin-top: 4px; color: #6a7482; font-weight: 400; }
           .report-footer { position: absolute; right: 0; bottom: 0; left: 0; padding-top: 8px; border-top: 1px solid #d5dce5; color: #7a8491; font-size: 10px; text-align: center; }
+          @media print {
+            html, body, .report { width: 210mm; height: 297mm; }
+            .report { overflow: hidden; }
+          }
         </style>
       </head>
       <body>
@@ -165,7 +174,8 @@ const TrainingSession = () => {
         <main class="report">
           <header class="report-header">
             ${orgNameForReport ? `<h1 class="org-name">${escapeHtml(orgNameForReport)}</h1>` : ""}
-            <h2 class="report-title">Student Completed Progress Report</h2>
+            <h2 class="report-title">Student - Progress Report</h2>
+            ${isSriRagavendraOrganization() ? '<p class="website">www.sriragavendradrivingschool.com</p>' : ""}
           </header>
           <section class="report-meta">
             <div class="meta-item"><span class="meta-label">Student:</span><span class="meta-value">${escapeHtml(studentName)}</span></div>
@@ -179,7 +189,11 @@ const TrainingSession = () => {
             <div class="signature">Instructor Signature<small>${escapeHtml(instructorNames)}</small></div>
             <div class="signature">Authorized Signature<small>Driving School Authority</small></div>
           </section>
-          <footer class="report-footer">This report was generated through DriveDesk.</footer>
+          <footer class="report-footer">${
+            isSriRagavendraOrganization()
+              ? "www.sriragavendradrivingschool.com &nbsp; | &nbsp; "
+              : ""
+          }This report was generated through DriveDesk.</footer>
         </main>
         <script>window.onload=function(){window.print();window.close();}</script>
       </body>

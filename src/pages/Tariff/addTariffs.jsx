@@ -112,7 +112,7 @@ export default function AddTariffs({
       size="lg"
       centered
     >
-      <Modal.Header closeButton>
+      <Modal.Header>
         <Modal.Title>{isEdit ? "Update Tariff" : "Add Tariff"}</Modal.Title>
         <IoClose
           onClick={() => {

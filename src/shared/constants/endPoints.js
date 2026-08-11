@@ -2,8 +2,8 @@ export const ENDPOINTS = {
     userLogin: 'auth/login',
     getAllStudents: 'getAllStudents',
     addStudent: 'students/',
-    deleteStudent: 'students/application-number/',
-    editStudent: 'students/application-number/',
+    deleteStudent: 'students/mobile-number/',
+    editStudent: 'students/mobile-number/',
     addTariff: 'tariff_router/tariff',
     editTariff: 'tariff_router/tariff/',
     getAllTariffs: 'tariff_router/tariff',
@@ -30,5 +30,10 @@ export const ENDPOINTS = {
     addExpenses: 'expenses',
     editExpenses: 'expenses/',
     deleteExpenses: 'expenses/',
-    getAllExpenses: 'expenses'
+    getAllExpenses: 'expenses',
+    getOutstandingFees: 'dashboard/students/pending-balance',
+    historicalPaymentAdjustment: 'students/historical-payment-adjustment',
+    addSuperAdmin: 'auth/register',
+    getSuperAdminList: 'auth/tenants',
+    editSuperAdmin: 'auth/tenant/',
 } 

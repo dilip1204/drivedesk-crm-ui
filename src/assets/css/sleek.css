@@ -15751,7 +15751,7 @@ div.copied {
   flex-direction: row;
   align-items: center;
   height: 75px;
-  line-height: 75px;
+  line-height: normal;
   width: 250px;
   transition: width 0.3s ease-in-out;
   padding-left: 1.56rem;
@@ -15769,16 +15769,30 @@ div.copied {
   }
 }
 
-.app-brand a img {
-  max-width: 80px;
-  vertical-align: middle;
+.left-sidebar .app-brand .brand-icon {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  max-width: 34px;
+  display: block;
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 3px;
 }
 
 .app-brand .brand-name {
   color: #ffffff;
-  font-size: 1.12rem;
-  margin-left: 0.94rem;
-  max-width: 170px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-left: 0.6rem;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 /*  Nav menus Icon Styles */
@@ -15949,13 +15963,34 @@ div.copied {
     width: 75px;
     transition: width .3s ease-in;
   }
+
+  .sidebar-minified .left-sidebar .app-brand {
+    overflow: hidden;
+  }
+
+  .sidebar-minified .left-sidebar .app-brand a {
+    width: 75px;
+    justify-content: center;
+    padding-left: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-minified .left-sidebar .app-brand .brand-icon {
+    margin-left: 0;
+  }
 }
 
 @media (min-width: 768px) {
   .sidebar-minified .left-sidebar .app-brand .brand-name {
+    display: none !important;
     visibility: hidden;
     opacity: 0;
+    margin-left: 0;
     transition: opacity 0.3s ease-in-out;
+  }
+
+  .sidebar-minified .left-sidebar .sidebar .sidebar-inner > li > a:before {
+    opacity: 0 !important;
   }
 }
 
@@ -16084,6 +16119,7 @@ div.copied {
 }
 
 .sidebar-minified .left-sidebar:hover .brand-name {
+  display: none !important;
   opacity: 1;
   visibility: visible;
   transition: opacity 0.3s ease;
@@ -16098,6 +16134,7 @@ div.copied {
 
 @media (min-width: 768px) {
   .sidebar-minified .left-sidebar:hover .app-brand .brand-name {
+    display: none !important;
     opacity: 1;
     visibility: visible;
     transition-delay: 0.3s;

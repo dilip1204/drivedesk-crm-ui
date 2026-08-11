@@ -1,0 +1,41 @@
+.main-header .navbar .navbar-right .navbar-nav .user-menu .dropdown-toggle {
+  max-width: 340px;
+}
+
+.main-header .header-user-display-name {
+  display: inline-block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.main-header .navbar .dropdown-menu {
+  width: 320px;
+}
+
+.main-header .header-user-dropdown-name {
+  max-width: calc(100% - 64px);
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+.main-header .header-user-dropdown-name small {
+  display: block;
+  margin-top: 2px;
+}
+
+#sidebar-toggler-react {
+  border-right: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#sidebar-toggler-react:focus,
+#sidebar-toggler-react:active,
+#sidebar-toggler-react:hover {
+  outline: none !important;
+  box-shadow: none !important;
+}

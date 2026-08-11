@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Modal, Button, Alert } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -6,6 +6,8 @@ import { useDispatch } from "react-redux";
 import { addStudent, updateStudent } from "../../store/addStudent/actions";
 import { IoClose } from "react-icons/io5";
 import { getStudentReceiptInfo } from "../../store/students/actions";
+import { getInstructorAvailInformation } from "../../store/instructors/actions";
+import { addAdminPrintLogo } from "../../utils/printBranding";
 
 export default function AddStudents({
   showModal,
@@ -21,6 +23,51 @@ export default function AddStudents({
   const [isPrintEnabled, setIsPrintEnabled] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
   const [htmlContent, setHtmlContent] = useState("");
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState("");
+  const [availabilityDay, setAvailabilityDay] = useState(null);
+  const previousInstructorNameRef = useRef("");
+  const getLocalISODate = (date = new Date()) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  const todayISO = getLocalISODate();
+
+  const normalizeDateForInput = (value) => {
+    if (!value) return "";
+
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      const y = value.getFullYear();
+      const m = String(value.getMonth() + 1).padStart(2, "0");
+      const d = String(value.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    const str = String(value).trim();
+
+    // Already yyyy-mm-dd or yyyy-mm-ddTHH:mm:ss
+    const isoLike = /^(\d{4})-(\d{2})-(\d{2})/.exec(str);
+    if (isoLike) {
+      return `${isoLike[1]}-${isoLike[2]}-${isoLike[3]}`;
+    }
+
+    // dd-mm-yyyy -> yyyy-mm-dd
+    const dmy = /^(\d{2})-(\d{2})-(\d{4})$/.exec(str);
+    if (dmy) {
+      return `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+    }
+
+    // yyyy/mm/dd -> yyyy-mm-dd
+    const ymdSlash = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(str);
+    if (ymdSlash) {
+      return `${ymdSlash[1]}-${ymdSlash[2]}-${ymdSlash[3]}`;
+    }
+
+    return "";
+  };
 
   // --- helpers for time normalization ---
   // Accepts "HH:MM", "H:MM AM/PM", or "HH:MM AM/PM" -> returns "HH:MM" (24h)
@@ -59,7 +106,7 @@ export default function AddStudents({
 
   const initialValues = {
     name: id?.name || "",
-    dob: id?.dob || "",
+    dob: normalizeDateForInput(id?.dob),
     mobile_number: id?.mobile_number || "",
     application_number: id?.application_number || "",
     email: id?.email || null,
@@ -73,14 +120,16 @@ export default function AddStudents({
     instructor_name: id?.instructor_name || "",
     instructor_id: id?.instructor_id || "",
     instructor_mobile: id?.instructor_mobile || "",
-    test_date: id?.test_date || null,
+    test_date: normalizeDateForInput(id?.test_date),
     discount: id?.discount || 0,
     training_days: id?.training_days || "",
-    training_start_date: id?.training_start_date || "",
+    training_start_date: normalizeDateForInput(id?.training_start_date),
     // normalize incoming training_time to "HH:MM" so the time input shows it
     training_time: to24h(id?.training_time) || "",
     attended_days: id?.attended_days || 0,
   };
+
+  const trainingStartMinDate = isEdit ? undefined : todayISO;
 
   const validationSchema = Yup.object({
     name: Yup.string().required("Name is required"),
@@ -100,7 +149,7 @@ export default function AddStudents({
     mobile_number: Yup.string()
       .matches(/^\d{10}$/, "Mobile number must be 10 digits")
       .required("Mobile number is required"),
-    application_number: Yup.string().required("Application number is required"),
+    application_number: Yup.string().required("Application Number is required"),
     email: "", // optional
     aadhar_number: Yup.string().required("Aadhar number is required"),
     plan: Yup.string().required("Plan is required"),
@@ -115,17 +164,31 @@ export default function AddStudents({
     full_payment_status: Yup.string().required("Full payment status is required"),
     instructor_name: Yup.string().required("Instructor name is required"),
     instructor_mobile: Yup.string().required("Instructor mobile is required"),
+    training_start_date: Yup.date()
+      .required("Training Start Date is required")
+      .typeError("Invalid date format")
+      .test("training-start-date-min", "Training Start Date cannot be in the past", function (value) {
+        if (!value) return false;
+        if (isEdit) return true;
+
+        const selected = normalizeDateForInput(value);
+        if (!selected) return false;
+        return selected >= todayISO;
+      }),
     training_days: Yup.number()
       .nullable()
       .typeError("Training days must be a number")
       .min(0, "Cannot be negative"),
-    training_start_date: Yup.date().nullable().typeError("Invalid date format"),
     // keep 24h HH:MM format for storage
     training_time: Yup.string()
       .nullable()
-      .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)"),
+      .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)")
+      .required("Training time is required"),
+    test_date: Yup.date()
+      .nullable()
+      .transform((value, originalValue) => (originalValue === "" ? null : value))
+      .typeError("Invalid date format"),
     ...(isEdit && {
-      test_date: Yup.date().nullable().typeError("Invalid date format"),
       discount: Yup.number()
         .typeError("Discount must be a number")
         .min(0, "Discount cannot be negative")
@@ -158,12 +221,17 @@ export default function AddStudents({
     initialValues,
     validationSchema,
     onSubmit: (values) => {
+      const normalizedValues = {
+        ...values,
+        test_date: values.test_date ? values.test_date : null,
+      };
+
       let updatedValues = {};
 
       if (isEdit) {
-        Object.keys(values).forEach((key) => {
-          if (values[key] !== id[key]) {
-            updatedValues[key] = values[key];
+        Object.keys(normalizedValues).forEach((key) => {
+          if (normalizedValues[key] !== id[key]) {
+            updatedValues[key] = normalizedValues[key];
           }
         });
 
@@ -172,6 +240,7 @@ export default function AddStudents({
         const payload = {
           application_number: id?.application_number,
           studentData: updatedValues,
+          mobile_number: id?.mobile_number,
         };
 
         dispatch(
@@ -181,7 +250,7 @@ export default function AddStudents({
         );
       } else {
         updatedValues = {
-          ...values,
+          ...normalizedValues,
           status: "Process Started",
         };
 
@@ -201,7 +270,8 @@ export default function AddStudents({
       }
 
       function handleResponse(response) {
-        const errorList = response?.data?.detail || response?.detail || response;
+        const responseData = response?.data || response || {};
+        const errorList = responseData?.detail || response?.detail;
 
         if (Array.isArray(errorList)) {
           errorList.forEach((err) => {
@@ -214,16 +284,75 @@ export default function AddStudents({
           return;
         }
 
+        const hasError =
+          responseData?.isError === true ||
+          Number(responseData?.statusCode) >= 400 ||
+          Number(response?.status) >= 400;
+
+        if (hasError) {
+          if (typeof studentData === "function") {
+            studentData(responseData, isEdit);
+          }
+          return;
+        }
+
+        // PATCH success: clear stale field errors (e.g., training_time conflict) and proceed.
+        formik.setErrors({});
+        formik.setTouched({});
+        setAvailabilityError("");
+        setAvailabilityDay(null);
+
         formik.resetForm();
         if (typeof onStudentAdded === "function") {
           onStudentAdded();
-          studentData(response, isEdit);
-          setReceiptData(response?.response || response);
         }
-        setIsPrintEnabled(true);
+        if (typeof studentData === "function") {
+          studentData(responseData, isEdit);
+        }
+        setReceiptData(responseData?.response || responseData);
+
+        // Auto-close modal after successful save for both Add and Edit flows.
+        setIsPrintEnabled(false);
+        hideModal();
       }
     },
   });
+
+  //const selectedTrainingDate = formik.values.training_start_date || formik.values.test_date || "";
+  const selectedTrainingTime = to24h(formik.values.training_time || "");
+  const selectedTrainingDate = formik.values.training_start_date || formik.values.test_date || "";
+  const originalTrainingDate = normalizeDateForInput(id?.training_start_date || id?.test_date);
+  const originalTrainingTime = to24h(id?.training_time || "");
+  const isSameStudentOriginalSlot = Boolean(
+    isEdit &&
+      selectedTrainingDate &&
+      selectedTrainingTime &&
+      selectedTrainingDate === originalTrainingDate &&
+      selectedTrainingTime === originalTrainingTime
+  );
+
+  const bookedTimesForDay = Array.isArray(availabilityDay?.booked_slots)
+    ? availabilityDay.booked_slots
+        .map((slot) => to24h(slot?.time || slot?.slot_time || slot?.start_time || ""))
+        .filter(Boolean)
+    : [];
+  const availableTimesForDay = Array.isArray(availabilityDay?.available_slots)
+    ? availabilityDay.available_slots.map((slot) => to24h(slot)).filter(Boolean)
+    : [];
+  const combinedTimesForDay = Array.from(
+    new Set([...bookedTimesForDay, ...availableTimesForDay])
+  ).sort();
+  const isSelectedTimeBooked = Boolean(
+    selectedTrainingTime && bookedTimesForDay.includes(selectedTrainingTime)
+  );
+  const isSelectedTimeUnavailable = Boolean(
+    selectedTrainingTime &&
+      availableTimesForDay.length > 0 &&
+      !availableTimesForDay.includes(selectedTrainingTime)
+  );
+  const hasTimeConflict =
+    (isSelectedTimeBooked && !isSameStudentOriginalSlot) ||
+    isSelectedTimeUnavailable;
 
   useEffect(() => {
     const paid = parseFloat(formik.values.paid_amount);
@@ -250,12 +379,88 @@ export default function AddStudents({
     const selectedInstructor = instructors.find(
       (i) => i.name === formik.values.instructor_name
     );
+
+    const currentInstructorName = formik.values.instructor_name || "";
+    const previousInstructorName = previousInstructorNameRef.current;
+
+    if (
+      showModal &&
+      previousInstructorName &&
+      previousInstructorName !== currentInstructorName
+    ) {
+      formik.setFieldValue("training_time", "", false);
+      formik.setFieldError("training_time", undefined);
+      setAvailabilityDay(null);
+      setAvailabilityError("");
+    }
+
+    previousInstructorNameRef.current = currentInstructorName;
+
     if (selectedInstructor) {
       formik.setFieldValue("instructor_mobile", selectedInstructor.mobile_number || "");
       formik.setFieldValue("instructor_id", selectedInstructor.id || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.instructor_name, instructors]);
+
+  useEffect(() => {
+    const selectedInstructor = instructors.find(
+      (i) => i.name === formik.values.instructor_name
+    );
+
+    const selectedDate = formik.values.training_start_date || formik.values.test_date;
+
+    if (!showModal || !selectedInstructor || !selectedDate) {
+      setAvailabilityDay(null);
+      setAvailabilityError("");
+      setAvailabilityLoading(false);
+      return;
+    }
+
+    const month = selectedDate.slice(0, 7);
+    const instructorKey =
+      selectedInstructor.mobile_number ||
+      selectedInstructor.id ||
+      formik.values.instructor_mobile;
+
+    if (!instructorKey || !month) {
+      setAvailabilityDay(null);
+      setAvailabilityError("Select valid instructor and date to view availability.");
+      return;
+    }
+
+    setAvailabilityLoading(true);
+    setAvailabilityError("");
+
+    dispatch(
+      getInstructorAvailInformation(
+        { mobile_number: instructorKey, month },
+        (res, err) => {
+          if (err) {
+            setAvailabilityDay(null);
+            setAvailabilityError("Failed to load instructor availability.");
+            setAvailabilityLoading(false);
+            return;
+          }
+
+          const payload = res?.response ?? res;
+          const days = Array.isArray(payload?.days) ? payload.days : [];
+          const dayInfo = days.find((d) => (d?.date || "").startsWith(selectedDate));
+
+          setAvailabilityDay(dayInfo || null);
+          setAvailabilityLoading(false);
+        }
+      )
+    );
+  }, [
+    dispatch,
+    formik.values.instructor_name,
+    formik.values.instructor_mobile,
+    formik.values.training_start_date,
+    formik.values.test_date,
+    instructors,
+    showModal,
+  ]);
 
   useEffect(() => {
     if (showModal) {
@@ -271,6 +476,28 @@ export default function AddStudents({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showModal]);
 
+  useEffect(() => {
+    if (!formik.values.training_time) return;
+
+    if (hasTimeConflict) {
+      formik.setFieldError(
+        "training_time",
+        isSelectedTimeBooked
+          ? "The selected training time is already booked for this instructor. Please choose another slot."
+          : "Selected time is not available for this instructor on the chosen date."
+      );
+      return;
+    }
+
+    if (formik.errors.training_time &&
+      typeof formik.errors.training_time === "string" &&
+      (formik.errors.training_time.includes("already booked") ||
+        formik.errors.training_time.includes("not available"))) {
+      formik.setFieldError("training_time", undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasTimeConflict, selectedTrainingTime, selectedTrainingDate, availabilityDay, isSelectedTimeBooked]);
+
   const handleNumericInput = (e) => {
     const { name, value } = e.target;
     const numericValue = value.replace(/[^0-9]/g, "");
@@ -279,12 +506,21 @@ export default function AddStudents({
 
   const showBalanceWarning = parseFloat(formik.values.balance) < 0;
 
+  const hasTrainingFieldChanged =
+    formik.values.training_time !== initialValues.training_time ||
+    formik.values.training_start_date !== initialValues.training_start_date ||
+    formik.values.instructor_name !== initialValues.instructor_name ||
+    formik.values.instructor_mobile !== initialValues.instructor_mobile;
+
+  const shouldDisableSubmit = !isEdit
+    ? hasTimeConflict
+    : hasTimeConflict && hasTrainingFieldChanged;
+
   const fields = [
     "name",
     "dob",
     "mobile_number",
     "application_number",
-    "email",
     "aadhar_number",
     "plan",
     "payment_method",
@@ -323,7 +559,7 @@ export default function AddStudents({
           setHtmlContent(response);
           setTimeout(() => {
             const printWindow = window.open("", "_blank");
-            printWindow.document.write(response);
+            printWindow.document.write(addAdminPrintLogo(response));
             printWindow.document.close();
             printWindow.focus();
             printWindow.print();
@@ -382,6 +618,9 @@ export default function AddStudents({
                         "full_payment_status",
                         "instructor_name",
                         "instructor_mobile",
+                        "training_days",
+                        "training_start_date",
+                        "training_time",
                       ].includes(field) && <span style={{ color: "red" }}>*</span>}
                     </label>
 
@@ -435,6 +674,7 @@ export default function AddStudents({
                             : ""
                         }`}
                         value={formik.values.training_time || ""}
+                        readOnly
                         onChange={(e) => {
                           // e.target.value is already "HH:MM"
                           const value24 = to24h(e.target.value);
@@ -464,6 +704,7 @@ export default function AddStudents({
                         }
                         onBlur={formik.handleBlur}
                         value={formik.values?.[field] || ""}
+                        min={field === "training_start_date" ? trainingStartMinDate : undefined}
                         readOnly={["balance", "total_amount", "instructor_mobile"].includes(field)}
                         maxLength={
                           field === "mobile_number"
@@ -489,25 +730,132 @@ export default function AddStudents({
             </div>
           ))}
 
-          {isEdit && (
+          <div className="row">
+            <div className="col-md-6">
+              <div className="form-group">
+                <label>
+                  Test Date
+                </label>
+                <input
+                  type="date"
+                  name="test_date"
+                  className={`form-control${
+                    formik.touched.test_date && formik.errors.test_date ? " is-invalid" : ""
+                  }`}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.test_date || ""}
+                />
+                {formik.touched.test_date && formik.errors.test_date && (
+                  <div className="text-danger">{formik.errors.test_date}</div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {(formik.values.instructor_name &&
+            (formik.values.training_start_date || formik.values.test_date)) && (
             <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label>
-                    Test Date
-                  </label>
-                  <input
-                    type="date"
-                    name="test_date"
-                    className={`form-control${
-                      formik.touched.test_date && formik.errors.test_date ? " is-invalid" : ""
-                    }`}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.test_date}
-                  />
-                  {formik.touched.test_date && formik.errors.test_date && (
-                    <div className="text-danger">{formik.errors.test_date}</div>
+              <div className="col-12">
+                <div
+                  className="p-3 mb-3"
+                  style={{ border: "1px solid #e9ecef", borderRadius: 8 }}
+                >
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h6 className="mb-0">Instructor Availability</h6>
+                    <a
+                      href={`/instructors/${formik.values.instructor_mobile || formik.values.instructor_id}/availability`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-sm btn-outline-primary"
+                    >
+                      Open Full Schedule
+                    </a>
+                  </div>
+
+                  <div className="small text-muted mb-2">
+                    Date: {formik.values.training_start_date || formik.values.test_date}
+                  </div>
+
+                  {availabilityLoading && (
+                    <div className="text-secondary small">Loading availability...</div>
+                  )}
+
+                  {!availabilityLoading && availabilityError && (
+                    <div className="text-danger small">{availabilityError}</div>
+                  )}
+
+                  {!availabilityLoading && !availabilityError && availabilityDay && (
+                    <>
+                      <div className="d-flex flex-wrap gap-3 mb-2 small">
+                        <span>
+                          Available: <strong>{availabilityDay.available_slots?.length || 0}</strong>
+                        </span>
+                        <span>
+                          Booked: <strong>{availabilityDay.booked_slots?.length || 0}</strong>
+                        </span>
+                        {availabilityDay.is_sunday && (
+                          <span className="text-warning"><strong>Sunday (off day)</strong></span>
+                        )}
+                      </div>
+
+                      {hasTimeConflict && (
+                        <Alert variant="danger" className="py-2 mb-2">
+                          {isSelectedTimeBooked
+                            ? "The selected training time is already booked for this instructor. Please choose another slot."
+                            : "Selected training time is not available for this instructor on the chosen date."
+                          }
+                        </Alert>
+                      )}
+
+                      <div className="d-flex flex-wrap gap-2">
+                        {combinedTimesForDay.length > 0 ? (
+                          combinedTimesForDay.map((slot) => {
+                            const isBooked = bookedTimesForDay.includes(slot);
+                            const isSelected = formik.values.training_time === slot;
+
+                            if (isBooked) {
+                              return (
+                                <button
+                                  key={slot}
+                                  type="button"
+                                  className="btn btn-sm btn-danger"
+                                  disabled
+                                  title="Already booked"
+                                >
+                                  {slot}
+                                </button>
+                              );
+                            }
+
+                            return (
+                              <button
+                                key={slot}
+                                type="button"
+                                className={`btn btn-sm ${
+                                  isSelected ? "btn-primary" : "btn-outline-success"
+                                }`}
+                                onClick={() => {
+                                  formik.setFieldValue("training_time", slot);
+                                }}
+                                title="Select this slot as training time"
+                              >
+                                {slot}
+                              </button>
+                            );
+                          })
+                        ) : (
+                          <span className="text-muted small">No available slots for selected date.</span>
+                        )}
+                      </div>
+
+                    </>
+                  )}
+
+                  {!availabilityLoading && !availabilityError && !availabilityDay && (
+                    <div className="text-muted small">
+                      No availability data found for the selected date.
+                    </div>
                   )}
                 </div>
               </div>
@@ -526,7 +874,7 @@ export default function AddStudents({
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary">
+                <Button type="submit" variant="primary" disabled={shouldDisableSubmit}>
                   {isEdit ? "Update" : "Add"}
                 </Button>
               </>

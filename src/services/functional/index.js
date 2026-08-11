@@ -24,6 +24,7 @@ import * as addExpensesList from "./expenses/addExpenseService";
 import * as editExpensesList from "./expenses/editExpensesService";
 import * as deleteExpensesList from "./expenses/deleteExpensesService";
 import * as getExpensesList from "./expenses/getExpensesListService";
+import * as superAdminService from "./superAdmin/superAdminService";
 
 export {
     userLogin,
@@ -51,5 +52,6 @@ export {
     addExpensesList,
     editExpensesList,
     deleteExpensesList,
-    getExpensesList
+    getExpensesList,
+    superAdminService
 };

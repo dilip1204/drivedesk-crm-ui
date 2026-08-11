@@ -27,6 +27,11 @@ import "react-toastify/dist/ReactToastify.css";
 import StudentTrainingSessionModal from "./StudentTrainingSession";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { formatDateDDMMYYYY } from "../../utils/dateFormat";
+import {
+  getAdminPrintWatermark,
+  isSriRagavendraOrganization,
+} from "../../utils/printBranding";
 
 const TrainingSession = () => {
   const dispatch = useDispatch();
@@ -53,21 +58,33 @@ const TrainingSession = () => {
   const trainingSessionDataLists = useSelector(
     (state) => state.trainingSessionListInfo.trainingSessionList
   );
-
+  //console.log("Training session data from Redux:", trainingSessionDataLists);
   const [searchParams] = useSearchParams();
   const initialMonth = searchParams.get("month") || "";
   const initialYear = searchParams.get("year") || "";
 
+  let orgNameForReport = "";
+  try {
+    const tenantInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    orgNameForReport =
+      tenantInfo?.org_name ||
+      tenantInfo?.organization_name ||
+      tenantInfo?.name ||
+      "";
+  } catch (e) {
+    orgNameForReport = "";
+  }
+
   const today = new Date().toISOString().split("T")[0];
   const [filters, setFilters] = useState({
-    instructor_id: "",
+    instructor_id: "ALL",
     start_date: today,
     end_date: today,
     status: "All",
   });
 
   const FilterValidationSchema = Yup.object().shape({
-    instructor_id: Yup.string().required("Instructor is required"),
+    instructor_id: Yup.string().nullable(),
     start_date: Yup.date().nullable(),
     end_date: Yup.date().nullable(),
     status: Yup.string().oneOf([
@@ -88,36 +105,109 @@ const TrainingSession = () => {
   };
 
   const printCompletedTable = () => {
-  const content = completedTableRef.current?.outerHTML || "<p>No data</p>";
-  const win = window.open("", "", "width=900,height=700");
-  win.document.write(`<!doctype html>
-  <html>
-    <head>
-      <meta charset="utf-8"/>
-      <title>Completed Sessions</title>
-      <style>
-        body{font-family:Arial,Helvetica,sans-serif;margin:24px;}
-        h2{margin:0 0 12px;}
-        table{width:100%;border-collapse:collapse;}
-        th,td{border:1px solid #333;padding:8px;text-align:center;}
-        thead th{background:#f2f2f2;}
-      </style>
-    </head>
-    <body>
-      <h2>Completed Sessions</h2>
-      ${content}
-      <script>window.onload=function(){window.print();window.close();}</script>
-    </body>
-  </html>`);
-  win.document.close();
-};
+    const content = completedTableRef.current?.outerHTML || "<p>No data</p>";
+    const firstSession = completedSessions[0] || {};
+    const studentName = firstSession?.student_name || "-";
+    const instructorNames = [
+      ...new Set(
+        completedSessions
+          .map((session) => session?.instructor_name)
+          .filter(Boolean)
+      ),
+    ].join(", ") || "-";
+    const reportDate = formatDateDDMMYYYY(new Date().toISOString());
+    const sessionDates = completedSessions
+      .map((session) => session?.date)
+      .filter(Boolean)
+      .sort();
+    const period = sessionDates.length
+      ? `${formatDateDDMMYYYY(sessionDates[0])} - ${formatDateDDMMYYYY(
+          sessionDates[sessionDates.length - 1]
+        )}`
+      : "-";
+    const escapeHtml = (value) =>
+      String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    const win = window.open("", "", "width=900,height=700");
+    win.document.write(`<!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8"/>
+        <title>Progress Report - ${escapeHtml(studentName)}</title>
+        <style>
+          @page { size: A4 portrait; margin: 0; }
+          * { box-sizing: border-box; }
+          html, body { width: 210mm; min-height: 297mm; margin: 0; padding: 0; }
+          body { color: #172033; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+          .report { position: relative; z-index: 1; width: 210mm; min-height: 297mm; padding: 16mm; }
+          .report-header { padding-bottom: 14px; border-bottom: 2px solid #1f4e78; text-align: center; }
+          .org-name { margin: 0 0 5px; color: #172033; font-size: 21px; font-weight: 700; text-transform: uppercase; }
+          .report-title { margin: 0; color: #1f4e78; font-size: 17px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+          .website { margin: 5px 0 0; color: #1f4e78; font-size: 11px; font-weight: 600; }
+          .report-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; margin: 18px 0; padding: 12px 14px; border: 1px solid #d5dce5; border-radius: 4px; background: #f7f9fc; }
+          .meta-item { display: flex; gap: 7px; }
+          .meta-label { min-width: 92px; color: #566273; font-weight: 700; }
+          .meta-value { color: #172033; font-weight: 600; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { padding: 9px 7px; border: 1px solid #9aa7b5; text-align: center; vertical-align: middle; }
+          thead th { background: #1f4e78 !important; color: #fff !important; font-size: 11px; letter-spacing: .25px; text-transform: uppercase; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          tbody tr:nth-child(even) { background: #f4f7fa; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          .badge { padding: 0; background: transparent !important; color: #18733c !important; font-weight: 700; }
+          .summary { margin-top: 10px; color: #566273; text-align: right; }
+          .signatures { display: flex; justify-content: space-between; gap: 80px; margin-top: 72px; }
+          .signature { width: 220px; padding-top: 7px; border-top: 1px solid #172033; text-align: center; font-weight: 700; }
+          .signature small { display: block; margin-top: 4px; color: #6a7482; font-weight: 400; }
+          .report-footer { position: absolute; right: 0; bottom: 0; left: 0; padding-top: 8px; border-top: 1px solid #d5dce5; color: #7a8491; font-size: 10px; text-align: center; }
+          @media print {
+            html, body, .report { width: 210mm; height: 297mm; }
+            .report { overflow: hidden; }
+          }
+        </style>
+      </head>
+      <body>
+        ${getAdminPrintWatermark()}
+        <main class="report">
+          <header class="report-header">
+            ${orgNameForReport ? `<h1 class="org-name">${escapeHtml(orgNameForReport)}</h1>` : ""}
+            <h2 class="report-title">Student - Progress Report</h2>
+            ${isSriRagavendraOrganization() ? '<p class="website">www.sriragavendradrivingschool.com</p>' : ""}
+          </header>
+          <section class="report-meta">
+            <div class="meta-item"><span class="meta-label">Student:</span><span class="meta-value">${escapeHtml(studentName)}</span></div>
+            <div class="meta-item"><span class="meta-label">Instructor:</span><span class="meta-value">${escapeHtml(instructorNames)}</span></div>
+            <div class="meta-item"><span class="meta-label">Report period:</span><span class="meta-value">${escapeHtml(period)}</span></div>
+            <div class="meta-item"><span class="meta-label">Generated on:</span><span class="meta-value">${escapeHtml(reportDate)}</span></div>
+          </section>
+          ${content}
+          <div class="summary">Total completed sessions: <strong>${completedSessions.length}</strong></div>
+          <section class="signatures">
+            <div class="signature">Instructor Signature<small>${escapeHtml(instructorNames)}</small></div>
+            <div class="signature">Authorized Signature<small>Driving School Authority</small></div>
+          </section>
+          <footer class="report-footer">${
+            isSriRagavendraOrganization()
+              ? "www.sriragavendradrivingschool.com &nbsp; | &nbsp; "
+              : ""
+          }This report was generated through DriveDesk.</footer>
+        </main>
+        <script>window.onload=function(){window.print();window.close();}</script>
+      </body>
+    </html>`);
+    win.document.close();
+  };
 
   const getTrainingSessionList = () => {
     const today = new Date().toISOString().split("T")[0];
     dispatch(
       getTrainingSessionListInformation({ status: "Scheduled", date: today }, (res) => {
-        const trainingSessionList = res || [];
-        if (Array.isArray(trainingSessionList) && trainingSessionList.length > 0) {
+       // console.info("Training session list response:", res);
+        const trainingSessionList = res?.response?.sessions || [];
+        if (trainingSessionList.length > 0) {
           setTrainingSessionData(trainingSessionList);
           setError(null);
         } else {
@@ -132,8 +222,8 @@ const TrainingSession = () => {
   useEffect(() => {}, [trainingSessionData]);
 
   useEffect(() => {
-    if (trainingSessionDataLists?.length > 0) {
-      setTrainingSessionData(trainingSessionDataLists);
+    if (trainingSessionDataLists?.response?.sessions?.length > 0) {
+      setTrainingSessionData(trainingSessionDataLists.response?.sessions || []);
       setError(null);
     } else {
       setTrainingSessionData([]);
@@ -236,16 +326,6 @@ const TrainingSession = () => {
     );
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    if (isNaN(date)) return "-";
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
-
   return (
     <>
       <div className="header-fixed sidebar-fixed sidebar-dark header-light" id="body">
@@ -291,8 +371,13 @@ const TrainingSession = () => {
                       validationSchema={FilterValidationSchema}
                       enableReinitialize
                       onSubmit={(values) => {
+                        const payload = {
+                          ...values,
+                          instructor_id: values.instructor_id === "ALL" ? "" : values.instructor_id,
+                        };
+
                         dispatch(
-                          getTrainingSessionFilterListInformation(values, (res) => {
+                          getTrainingSessionFilterListInformation(payload, (res) => {
                             const trainingSessionList = res || [];
                             if (Array.isArray(trainingSessionList) && trainingSessionList.length > 0) {
                               setTrainingSessionData(trainingSessionList);
@@ -317,7 +402,7 @@ const TrainingSession = () => {
                                 name="instructor_id"
                                 className={`form-control ${errors.instructor_id && touched.instructor_id ? "is-invalid" : ""}`}
                               >
-                                <option value="">--Select--</option>
+                                <option value="ALL">All</option>
                                 {instructorsData.map((instructor) => (
                                   <option key={instructor.id} value={instructor.id}>
                                     {instructor.name}
@@ -489,8 +574,15 @@ const TrainingSession = () => {
                 <div className="modal-content">
                  
 
-                  <div className="modal-header">
-  <h5 className="modal-title">Completed Sessions</h5>
+                  <div className="modal-header align-items-start">
+  <div className="flex-grow-1 text-center">
+    {orgNameForReport && (
+      <div className="mb-1" style={{ fontSize: "1rem", fontWeight: 700, color: "#1b223c" }}>
+        {orgNameForReport}
+      </div>
+    )}
+    <h5 className="modal-title mb-0" style={{ fontSize: "1.05rem" }}>Progress Report</h5>
+  </div>
   <div className="d-flex gap-2">
     <button
       type="button"
@@ -535,7 +627,7 @@ const TrainingSession = () => {
     {completedSessions.map((row, idx) => (
       <tr key={idx}>
         <td>{idx + 1}</td>
-        <td>{formatDate(row?.date)}</td>
+        <td>{formatDateDDMMYYYY(row?.date)}</td>
         <td>{row?.instructor_name || "-"}</td>
         <td>{row?.student_name || "-"}</td>
         <td>{row?.remarks || "-"}</td>

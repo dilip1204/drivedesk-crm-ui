@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import { getStudentReceiptInfo } from "../../store/students/actions";
 import { ToastContainer, toast } from "react-toastify";
+import { addAdminPrintLogo } from "../../utils/printBranding";
 
 export default function AddPayment({
   show,
@@ -36,6 +37,11 @@ export default function AddPayment({
     payment_status: Yup.string().required("Payment status is required"),
     remarks: Yup.string(),
   });
+
+  const onCloseFun = () => {
+    setIsPrintEnabled(false);
+    onClose();
+  } 
 
   const handleFormSubmit = (values, { resetForm }) => {
     const enteredAmount = Number(values.amount);
@@ -86,7 +92,7 @@ export default function AddPayment({
         if (response) {
           //setHtmlContent(response);
           const printWindow = window.open("", "_blank");
-          printWindow.document.write(response);
+          printWindow.document.write(addAdminPrintLogo(response));
           printWindow.document.close();
           printWindow.focus();
           printWindow.print();
@@ -119,7 +125,13 @@ export default function AddPayment({
                 <label>
                   Amount <span style={{ color: "red" }}>*</span>
                 </label>
-                <Field type="number" name="amount" className="form-control" />
+                <Field
+                  type="text"
+                  inputMode="decimal"
+                  name="amount"
+                  className="form-control"
+                  placeholder="Enter amount"
+                />
                 <ErrorMessage
                   name="amount"
                   component="div"
@@ -218,7 +230,7 @@ export default function AddPayment({
                   >
                     Print
                   </Button>
-                  <Button variant="secondary" onClick={onClose}>
+                  <Button variant="secondary" onClick={onCloseFun}>
                     Close
                   </Button>
                 </>

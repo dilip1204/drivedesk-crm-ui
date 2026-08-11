@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
@@ -22,9 +23,11 @@ import AddEnquiries from "./addEnquiries";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProfileModal from "../../components/ProfileModal";
+import Pagination from "../Students/Pagenation";
 
 const Enquiries = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [enquiriesData, setEnquiriesData] = useState([]);
@@ -35,15 +38,16 @@ const Enquiries = () => {
   const [selectedEnquiries, setSelectedEnquiries] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileData, setProfileData] = useState([]);
-  const enquiriesDataList = useSelector(
-    (state) => state.enquiriesInfo.enquiriesList
-  );
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filters, setFilters] = useState({
     month: "",
     year: "",
     status: "All",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const startIndex = (currentPage - 1) * pageSize;
 
   const FilterValidationSchema = Yup.object().shape({
     month: Yup.number()
@@ -63,28 +67,61 @@ const Enquiries = () => {
     const fields = [
       { label: "Name", value: data.name },
       { label: "Mobile Number", value: data.mobile_number },
-      { label: "DOB", value: data.dob },
       { label: "Referred By", value: data.referred_by },
-      { label: "Email", value: data.email },
       { label: "Course Interest", value: data.course_interest },
       { label: "Enquiry Date", value: data.enquiry_date },
-      { label: "Remarks", value: data.remarks },
       { label: "Follow Up Status", value: data.follow_up_status },
-      // add more if needed
+      { label: "Follow Up Date", value: data.follow_up_date || null },
+      { label: "Remarks", value: data.remarks },
     ];
     setProfileData(fields);
     setShowProfileModal(true);
   };
 
-  const getEnquiriesList = () => {
-    const data = {};
+  const parseEnquiriesResponse = (res, fallbackPageSize = 10) => {
+    const response = res?.response;
+
+    if (Array.isArray(response)) {
+      return {
+        list: response,
+        total: response.length,
+        skip: 0,
+        limit: fallbackPageSize,
+      };
+    }
+
+    const list = Array.isArray(response?.enquiries) ? response.enquiries : [];
+    const limit = Number(response?.limit);
+    const skip = Number(response?.skip);
+    const total = Number(response?.total);
+
+    return {
+      list,
+      total: Number.isFinite(total) ? total : list.length,
+      skip: Number.isFinite(skip) ? skip : 0,
+      limit: Number.isFinite(limit) && limit > 0 ? limit : fallbackPageSize,
+    };
+  };
+
+  const getEnquiriesList = (page = currentPage, limit = pageSize) => {
+    const safePage = Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
+    const safeLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
+    const data = { skip: (safePage - 1) * safeLimit, limit: safeLimit };
+    setLoading(true);
+
     dispatch(
       getEnquiriesListInformation(data, (res) => {
-        const enquiresList = res?.response || [];
-        if (Array.isArray(enquiresList) && enquiresList.length > 0) {
-          setEnquiriesData(enquiresList);
+        const parsed = parseEnquiriesResponse(res, safeLimit);
+        if (parsed.list.length > 0) {
+          setEnquiriesData(parsed.list);
+          setTotalCount(parsed.total);
+          setPageSize(parsed.limit);
+          setCurrentPage(Math.floor(parsed.skip / parsed.limit) + 1);
+          setError(null);
         } else {
           setEnquiriesData([]);
+          setTotalCount(0);
+          setCurrentPage(1);
           setError("No enquiries found.");
         }
         setLoading(false);
@@ -93,19 +130,8 @@ const Enquiries = () => {
   };
 
   useEffect(() => {
-    if (enquiriesDataList?.response?.length > 0) {
-      setEnquiriesData(enquiriesDataList.response);
-      setError(null);
-    } else {
-      setEnquiriesData([]);
-      setError("No enquiries found.");
-    }
-    setLoading(false);
-  }, [enquiriesDataList]);
-
-  useEffect(() => {
-    getEnquiriesList();
-  }, [dispatch]);
+    getEnquiriesList(currentPage, pageSize);
+  }, [dispatch, currentPage, pageSize]);
 
   const handleDeleteCloseModel = () => {
     setShowDeleteModal(false);
@@ -151,16 +177,55 @@ const Enquiries = () => {
     setSelectedEnquiries(null); // clear after closing
   };
 
-  const onEnquiriesData = (res, isEdit) => {
+  const onEnquiriesData = (res, isEdit, meta = {}) => {
     if (!res.isError) {
       getEnquiriesList();
-      toast.success(
-        isEdit
-          ? "Enquiries updated successfully!"
-          : "Enquiries added successfully!"
-      );
+      if (meta?.enrolledFlow) {
+        if (meta?.studentCreated) {
+          toast.success(
+            isEdit
+              ? "Enquiry updated and student added successfully!"
+              : "Enquiry and student added successfully!"
+          );
+          navigate("/students");
+        } else {
+          const studentError = meta?.studentResponse || {};
+          const studentDetailMessage = Array.isArray(studentError?.detail)
+            ? studentError.detail
+                .map((d) => d?.msg || d?.message)
+                .filter(Boolean)
+                .join(", ")
+            : "";
+          const studentMsg =
+            studentDetailMessage ||
+            (typeof studentError?.response === "string" && studentError.response) ||
+            studentError?.message ||
+            studentError?.response?.message ||
+            "Failed to add student from enrolled enquiry.";
+          toast.error(
+            `${
+              isEdit ? "Enquiry updated" : "Enquiry saved"
+            }, but student add failed: ${studentMsg}`
+          );
+        }
+      } else {
+        toast.success(
+          isEdit
+            ? "Enquiries updated successfully!"
+            : "Enquiries added successfully!"
+        );
+      }
     } else {
-      toast.error("Failed....!");
+      const detailMessage = Array.isArray(res?.detail)
+        ? res.detail.map((d) => d?.msg || d?.message).filter(Boolean).join(", ")
+        : "";
+      const msg =
+        detailMessage ||
+        (typeof res?.response === "string" && res.response) ||
+        res?.message ||
+        res?.response?.message ||
+        "Failed....!";
+      toast.error(msg);
     }
   };
   return (
@@ -262,12 +327,17 @@ const Enquiries = () => {
           return;
         }
 
-        const enquiriesList = response || [];
-        if (Array.isArray(enquiriesList) && enquiriesList.length > 0) {
-          setEnquiriesData(enquiriesList);
+        const parsed = parseEnquiriesResponse(res, pageSize);
+        if (parsed.list.length > 0) {
+          setEnquiriesData(parsed.list);
+          setTotalCount(parsed.total);
+          setCurrentPage(Math.floor(parsed.skip / parsed.limit) + 1);
+          setPageSize(parsed.limit);
           setError(null);
         } else {
           setEnquiriesData([]);
+          setTotalCount(0);
+          setCurrentPage(1);
           setError("No enquiries found.");
         }
         setLoading(false);
@@ -367,7 +437,14 @@ const Enquiries = () => {
                         <tbody>
                           {enquiriesData.map((enquiries, index) => (
                             <tr key={index}>
-                              <td>{index+1}</td>
+                              {(() => {
+                                const isEnrolled =
+                                  String(enquiries?.follow_up_status || "")
+                                    .trim()
+                                    .toLowerCase() === "enrolled";
+                                return (
+                                  <>
+                              <td>{startIndex + index + 1}</td>
                               <td>{enquiries.name || "Name"}</td>
                               <td>{enquiries.mobile_number || "N/A"}</td>
                               <td>{enquiries.email || "N/A"}</td>
@@ -376,6 +453,7 @@ const Enquiries = () => {
                                 <button
                                 className="btn btn-sm btn-warning"
                                 title="Edit Enquiries"
+                                disabled={isEnrolled}
                                 onClick={() => handleEditEnquiries(enquiries)}
                               >
                                 {/* <i className="bi bi-pencil"></i> */}
@@ -383,17 +461,40 @@ const Enquiries = () => {
                               </button>{" "}
                                <Link
                                   to="#"
-                                  onClick={() => openEnquriesProfile(enquiries)}
-                                  className="btn btn-primary btn-sm"
+                                  onClick={(e) => {
+                                    if (isEnrolled) {
+                                      e.preventDefault();
+                                      return;
+                                    }
+                                    openEnquriesProfile(enquiries);
+                                  }}
+                                  className={`btn btn-primary btn-sm${
+                                    isEnrolled ? " disabled" : ""
+                                  }`}
+                                  aria-disabled={isEnrolled}
+                                  tabIndex={isEnrolled ? -1 : 0}
                                 >
                                   View
                                 </Link>
                               </td>
+                                  </>
+                                );
+                              })()}
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
+                    <Pagination
+                      currentPage={currentPage}
+                      totalCount={totalCount}
+                      pageSize={pageSize}
+                      onPageChange={(p) => setCurrentPage(p)}
+                      onPageSizeChange={(s) => {
+                        setPageSize(s);
+                        setCurrentPage(1);
+                      }}
+                    />
                     {/* <div className="row g-4">
                       {enquiriesData.map((enquiries, index) => (
                         <div

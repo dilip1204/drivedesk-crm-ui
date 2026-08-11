@@ -28,6 +28,9 @@ import * as Yup from "yup";
 import AddPayment from "./addPayment";
 import { addStudentPayment } from "../../store/addStudentPayment/actions";
 import Pagination from "./Pagenation";
+import { formatDateDDMMYYYY } from "../../utils/dateFormat";
+import schoolPrintLogo from "../../assets/logo/school_print_logo.png";
+import { getAdminPrintLogoSource, isDriveDeskAdmin } from "../../utils/printBranding";
 
 const Students = () => {
   const dispatch = useDispatch();
@@ -125,35 +128,28 @@ const Students = () => {
     return { students: Array.isArray(students) ? students : [], total, isError };
   };
 
+  const withPagination = (payload = {}, page = currentPage, limit = pageSize) => {
+    const skip = (page - 1) * limit;
+    return {
+      ...payload,
+      skip,
+      limit,
+    };
+  };
+
   const getStudentsList = useCallback(() => {
     const skip = (currentPage - 1) * pageSize;
     setLoading(true);
-    dispatch(
+     dispatch(
       getStudentsListInformation({ skip, limit: pageSize }, (res) => {
         const { students, total } = normalizeStudentsResponse(res);
-        setTotalCount(total ?? (students.length ?? 0));
-        if (students.length > 0) {
-          setStudentsData(students);
-          setError(null);
-        } else {
-          setStudentsData([]);
-          setError("No students found.");
-        }
-        setLoading(false);
+        //console.log("Students from API:", students);
+        setTotalCount(total);
+        setStudentsData(students);
+        setLoading(false); 
       })
     );
   }, [dispatch, currentPage, pageSize]);
-
-  useEffect(() => {
-    if (studentDataLists?.response?.students?.length > 0) {
-      setStudentsData(studentDataLists.response?.students);
-      setError(null);
-    } else {
-      setStudentsData([]);
-      setError("No students found.");
-    }
-    setLoading(false);
-  }, [studentDataLists]);
 
   const getTariffsList = useCallback(() => {
     dispatch(
@@ -178,7 +174,6 @@ const Students = () => {
   useEffect(() => {
     getTariffsList();
     getInstructorsList();
-
     // Ensure loader shows for initial fetch
     setLoading(true);
 
@@ -205,8 +200,10 @@ const Students = () => {
         )
       );
 
+      const paginatedInitial = withPagination(cleanedInitial, currentPage, pageSize);
+
       dispatch(
-        getStudentsFilterListInformation(cleanedInitial, (res) => {
+        getStudentsFilterListInformation(paginatedInitial, (res) => {
           const { students, total } = normalizeStudentsResponse(res);
           if (Array.isArray(students) && students.length > 0) {
             setStudentsData(students);
@@ -248,8 +245,9 @@ const Students = () => {
         // if filters are applied, re-run filter; else load normal list (respects pagination)
         if (filterApplied) {
           setLoading(true);
+          const paginatedFilters = withPagination(filters, currentPage, pageSize);
           dispatch(
-            getStudentsFilterListInformation(filters, (fres) => {
+            getStudentsFilterListInformation(paginatedFilters, (fres) => {
               const { students, total } = normalizeStudentsResponse(fres);
               setStudentsData(Array.isArray(students) ? students : []);
               setTotalCount(total ?? 0);
@@ -298,7 +296,7 @@ const Students = () => {
     const lastPayment = payments.length > 0 ? payments[payments.length - 1] : {};
 
     const initialValues = {
-      appId: studentForPayment?.application_number,
+      appId: studentForPayment?.mobile_number,
       studentPaymentData: {
         payment_id: lastPayment?.payment_id || "",
         receipt_no: lastPayment?.receipt_no || "",
@@ -326,8 +324,13 @@ const Students = () => {
           return;
         }
 
-        if (response?.isError) {
-          toast.error("Payment failed. Please try again.");
+        if (response?.isError || (response?.status >= 400) || (response?.statusCode >= 400)) {
+          const msg =
+            response?.data?.message ||
+            response?.data?.detail ||
+            response?.message ||
+            "Payment failed. Please try again.";
+          toast.error(typeof msg === "string" ? msg : "Payment failed. Please try again.");
         } else {
           setReceiptData(response);
           toast.success("Payment added successfully!");
@@ -411,24 +414,6 @@ const Students = () => {
     performSearch(val, searchType);
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    // If string like 'YYYY-MM-DD' parse manually to avoid timezone shift
-    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
-    if (isoMatch) {
-      const year = Number(isoMatch[1]);
-      const month = Number(isoMatch[2]);
-      const day = Number(isoMatch[3]);
-      return `${String(day).padStart(2, "0")}-${String(month).padStart(2, "0")}-${year}`;
-    }
-    const date = new Date(dateStr);
-    if (isNaN(date)) return "-";
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
-
   const PrintableStudentTable = ({ students }) => {
     if (!students.length) return null;
 
@@ -455,11 +440,11 @@ const Students = () => {
                 <td>{student.application_number || "-"}</td>
                 <td>{student.name || "-"}</td>
                 <td>{student.mobile_number || "-"}</td>
-                <td>{student.dob ? formatDate(student.dob) : "-"}</td>
+                <td>{student.dob ? formatDateDDMMYYYY(student.dob) : "-"}</td>
                 <td>{student.status || "-"}</td>
                 <td>{student.plan || "-"}</td>
                 <td>₹{student.balance || 0}</td>
-                <td>{formatDate(student.test_date)}</td>
+                <td>{formatDateDDMMYYYY(student.test_date)}</td>
               </tr>
             ))}
           </tbody>
@@ -490,10 +475,35 @@ const Students = () => {
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
+  let orgNameForPrint = "Students Test List";
+  let tenantInfoForPrint = {};
+  try {
+    tenantInfoForPrint = JSON.parse(localStorage.getItem("userInfo") || "{}");
+    orgNameForPrint =
+      tenantInfoForPrint?.org_name ||
+      tenantInfoForPrint?.organization_name ||
+      tenantInfoForPrint?.name ||
+      "Students Test List";
+  } catch (e) {
+    orgNameForPrint = "Students Test List";
+  }
+
+  const normalizedOrgName = (orgNameForPrint || "").toLowerCase();
+  const isCustomWatermarkOrg = normalizedOrgName.includes("sri ragavendra");
+  const apiLogo =
+    tenantInfoForPrint?.logo_url ||
+    tenantInfoForPrint?.org_logo ||
+    tenantInfoForPrint?.logo ||
+    null;
+  const driveDeskAdmin = isDriveDeskAdmin();
+  const schoolLogo = driveDeskAdmin
+    ? getAdminPrintLogoSource()
+    : apiLogo || (isCustomWatermarkOrg ? schoolPrintLogo : null);
+
   return (
     <>
       <div
-        className="header-fixed sidebar-fixed sidebar-dark header-light"
+        className="header-fixed sidebar-fixed sidebar-dark header-light students-page"
         id="body"
       >
         <div className="wrapper">
@@ -553,7 +563,7 @@ const Students = () => {
                 <div className="row mb-3" style={{justifyContent: "flex-end"}}>
                   <div className="col-md-2">
                     <select
-                      className="form-control"
+                      className="form-control students-select-arrow"
                       value={searchType}
                       onChange={(e) => {
                         setSearchType(e.target.value);
@@ -632,8 +642,10 @@ const Students = () => {
                         setFilters(cleanedValues);
                         setLoading(true); // show loader while filter fetches
 
+                        const paginatedFilters = withPagination(cleanedValues, 1, pageSize);
+
                         dispatch(
-                          getStudentsFilterListInformation(cleanedValues, (res) => {
+                          getStudentsFilterListInformation(paginatedFilters, (res) => {
                             const { students, total, isError } = normalizeStudentsResponse(res);
 
                             if (isError && Array.isArray(res?.response)) {
@@ -698,7 +710,7 @@ const Students = () => {
                               <Field
                                 as="select"
                                 name="status"
-                                className="form-control"
+                                className="form-control students-select-arrow"
                               >
                                 <option value="All">All</option>
                                 <option value="Process Started">
@@ -726,7 +738,7 @@ const Students = () => {
                               <Field
                                 as="select"
                                 name="instructor_name"
-                                className="form-control"
+                                className="form-control students-select-arrow"
                               >
                                 <option value="">--Select--</option>
                                 {instructorsData.map((instructor, idx) => (
@@ -834,7 +846,7 @@ const Students = () => {
                                     className="btn btn-sm btn-danger"
                                     title="Delete Student"
                                     onClick={() =>
-                                      deleteUser(student.application_number)
+                                      deleteUser(student.mobile_number)
                                     }
                                   >
                                     Delete
@@ -905,11 +917,31 @@ const Students = () => {
         pauseOnHover
       />
 
-      <div className="d-none d-print-block" style={{ marginTop: "120px" }}>
-        <h2 className="text-center" style={{ marginBottom: "70px" }}>
-          Students Test List
-        </h2>
-        <PrintableStudentTable students={studentsData} />
+      <div className="d-none d-print-block print-page-wrapper">
+
+        {/* ── Watermark layers (behind everything) ── */}
+        <div className="print-watermark-layer">
+          {/* Logo watermark – large, centered */}
+          {schoolLogo && (
+            <img src={schoolLogo} alt="" className="print-wm-logo" aria-hidden="true" />
+          )}
+        </div>
+
+        {/* ── Foreground content ── */}
+        <div className="print-foreground">
+          {/* Header */}
+          <div className="print-header-top">
+            <div className="print-title-area">
+              <h2 className="print-org-name">{orgNameForPrint}</h2>
+              <h4 className="print-list-title">Student Test List</h4>
+            </div>
+          </div>
+          <hr className="print-divider" />
+
+          {/* Student table */}
+          <PrintableStudentTable students={studentsData} />
+        </div>
+
       </div>
     </>
   );

@@ -619,6 +619,7 @@ const TrainingSession = () => {
       <th>Date</th>
       <th>Instructor</th>
       <th>Student</th>
+      <th>No. of Classes</th>
       <th>Remarks</th>
       <th>Status</th>
     </tr>
@@ -630,6 +631,7 @@ const TrainingSession = () => {
         <td>{formatDateDDMMYYYY(row?.date)}</td>
         <td>{row?.instructor_name || "-"}</td>
         <td>{row?.student_name || "-"}</td>
+        <td>{row?.num_classes ?? "-"}</td>
         <td>{row?.remarks || "-"}</td>
         <td><span className="badge badge-success">Completed</span></td>
       </tr>

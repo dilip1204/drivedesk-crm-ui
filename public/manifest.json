@@ -1,25 +1,42 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "id": "/trainingsession",
+  "short_name": "DriveDesk",
+  "name": "DriveDesk Driving School Management",
+  "description": "Manage students, instructors, payments, and training sessions with DriveDesk.",
+  "start_url": "/trainingsession",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "theme_color": "#1f4e78",
+  "background_color": "#f5f7fa",
+  "categories": ["business", "education", "productivity"],
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon",
+      "purpose": "any"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "shortcuts": [
+    {
+      "name": "Training Sessions",
+      "short_name": "Sessions",
+      "url": "/trainingsession",
+      "icons": [{ "src": "/pwa-icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Students",
+      "short_name": "Students",
+      "url": "/students",
+      "icons": [{ "src": "/pwa-icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
 }

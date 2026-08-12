@@ -1,5 +1,5 @@
-const CACHE_VERSION = "drivedesk-pwa-v1";
-const APP_SHELL = ["/", "/index.html", "/manifest.json", "/pwa-icon.svg", "/favicon.ico"];
+const CACHE_VERSION = "drivedesk-pwa-v2";
+const APP_SHELL = ["/", "/index.html", "/manifest.json", "/pwa-icon-192.png", "/pwa-icon-512.png", "/favicon.ico"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_VERSION).then((cache) => cache.addAll(APP_SHELL)));

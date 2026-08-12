@@ -23,17 +23,28 @@ export default function PWAInstallButton() {
     };
   }, []);
 
-  if (isInstalled || !installPrompt) return null;
+  if (isInstalled) return null;
 
   const installApp = async () => {
-    await installPrompt.prompt();
-    const choice = await installPrompt.userChoice;
-    if (choice.outcome === "accepted") setInstallPrompt(null);
+    if (installPrompt) {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice.outcome === "accepted") setInstallPrompt(null);
+      return;
+    }
+
+    const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+    window.alert(
+      isIOS
+        ? "To install DriveDesk, tap Share and then Add to Home Screen."
+        : "DriveDesk is preparing for installation. Refresh once, then use Install App again or choose Install DriveDesk from your browser menu."
+    );
   };
 
   return (
     <button type="button" className="btn btn-outline-primary mb-1 mr-2" onClick={installApp}>
-      <i className="mdi mdi-monitor-arrow-down mr-1" aria-hidden="true" /> Install App
+      <i className="mdi mdi-monitor-arrow-down mr-1" aria-hidden="true" />
+      {installPrompt ? "Install App" : "Get DriveDesk App"}
     </button>
   );
 }

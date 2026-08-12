@@ -7,6 +7,7 @@ import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
 
 import "./../Students/Students.css";
+import "./TrainingSession.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
@@ -329,14 +330,14 @@ const TrainingSession = () => {
 
   return (
     <>
-      <div className="header-fixed sidebar-fixed sidebar-dark header-light" id="body">
+      <div className="header-fixed sidebar-fixed sidebar-dark header-light training-session-page" id="body">
         <div className="wrapper">
           <Sidebar />
           <div className="page-wrapper">
             <Header />
             <div className="content-wrapper">
               <div className="content">
-                <div className="row">
+                <div className="row training-session-heading">
                   <div className="breadcrumb-wrapper col-xl-6">
                     <h1>Training Session</h1>
                     <nav aria-label="breadcrumb">
@@ -351,7 +352,7 @@ const TrainingSession = () => {
                       </ol>
                     </nav>
                   </div>
-                  <div className="col-xl-6 text-right">
+                  <div className="col-xl-6 text-right training-session-toolbar">
                     <PWAInstallButton />
                     <button
                       type="button"
@@ -367,7 +368,7 @@ const TrainingSession = () => {
                 </div>
 
                 {filtersVisible && (
-                  <div className="card p-3 mb-4">
+                  <div className="card p-3 mb-4 training-filter-card">
                     <Formik
                       initialValues={filters}
                       validationSchema={FilterValidationSchema}
@@ -396,8 +397,8 @@ const TrainingSession = () => {
                     >
                       {({ errors, touched }) => (
                         <Form>
-                          <div className="row align-items-end">
-                            <div className="col-md-3">
+                          <div className="row align-items-end training-filter-grid">
+                            <div className="col-lg-3 col-md-6">
                               <label>Instructor</label>
                               <Field
                                 as="select"
@@ -416,19 +417,19 @@ const TrainingSession = () => {
                               </div>
                             </div>
 
-                            <div className="col-md-2">
+                            <div className="col-lg-2 col-md-6">
                               <label>Start Date</label>
                               <Field type="date" name="start_date" className="form-control" />
                               <div style={{ minHeight: "22px" }}></div>
                             </div>
 
-                            <div className="col-md-2">
+                            <div className="col-lg-2 col-md-6">
                               <label>End Date</label>
                               <Field type="date" name="end_date" className="form-control" />
                               <div style={{ minHeight: "22px" }}></div>
                             </div>
 
-                            <div className="col-md-2">
+                            <div className="col-lg-2 col-md-6">
                               <label>Status</label>
                               <Field as="select" name="status" className="form-control">
                                 <option value="All">All</option>
@@ -439,7 +440,7 @@ const TrainingSession = () => {
                               <div style={{ minHeight: "22px" }}></div>
                             </div>
 
-                            <div className="col-md-2 align-items-end">
+                            <div className="col-lg-2 col-md-6 align-items-end">
                               <button type="submit" className="btn btn-primary w-100">Apply</button>
                               <div style={{ minHeight: "22px" }}></div>
                             </div>
@@ -451,28 +452,28 @@ const TrainingSession = () => {
                 )}
 
                 {/* Training session List */}
-                <div>
-                   <button
-                                  className="btn btn-sm btn-warning"
-                                  title="Reschedule Session"
-                                 
-                                >
-                                  <i className="bi bi-clock-history"></i>
-                                </button> - <span>Reschedule Session</span> {"  "} &nbsp;
-                                <button
-                                  className="btn btn-sm btn-success"
-                                  title="Show Student Completed Sessions"
-                                 
-                                >
-                                  <i className="bi bi-clipboard-check"></i>
-                                </button> - <span>Show Student Completed Sessions</span>
+                <div className="training-session-list">
+                  <div className="training-action-legend">
+                    <div className="training-legend-item">
+                      <span className="training-legend-icon is-warning" aria-hidden="true">
+                        <i className="bi bi-clock-history" />
+                      </span>
+                      <span>Reschedule session</span>
+                    </div>
+                    <div className="training-legend-item">
+                      <span className="training-legend-icon is-success" aria-hidden="true">
+                        <i className="bi bi-clipboard-check" />
+                      </span>
+                      <span>View completed sessions</span>
+                    </div>
+                  </div>
                   {loading ? (
                     <p className="text-center my-5">Loading training session...</p>
                   ) : error ? (
                     <p className="text-center text-danger my-5">{error}</p>
                   ) : (
-                    <div className="table-responsive" style={{display: "block"}}>
-                      <table className="table custom-table text-center align-middle">
+                    <div className="table-responsive training-session-table-wrap">
+                      <table className="table custom-table text-center align-middle training-session-table">
                         <thead className="table-light">
                           <tr>
                             <th>S.NO</th>
@@ -487,48 +488,23 @@ const TrainingSession = () => {
                         <tbody>
                           {trainingSessionData.map((tsession, index) => (
                             <tr key={index}>
-                              <td>{index + 1}</td>
-                              <td>{tsession.student_name || "Student Name"}</td>
-                              <td>{tsession.instructor_name || "Instructor Name"}</td>
-                              <td>{tsession.date || "N/A"}</td>
-                              <td>{tsession.actual_progress || "N/A"}</td>
-                              <td className="status">
-                                <i className="bi bi-check-circle"></i>{" "} {tsession.status}
+                              <td data-label="S.No">{index + 1}</td>
+                              <td data-label="Student">{tsession.student_name || "Student Name"}</td>
+                              <td data-label="Instructor">{tsession.instructor_name || "Instructor Name"}</td>
+                              <td data-label="Date">{formatDateDDMMYYYY(tsession.date)}</td>
+                              <td data-label="Progress">{tsession.actual_progress || "N/A"}</td>
+                              <td data-label="Status" className="status">
+                                <span className="training-session-status">
+                                  <i className="bi bi-check-circle"></i> {tsession.status}
+                                </span>
                               </td>
-                              <td>
-                                <button
-                                  className="btn btn-primary btn-sm action-btn"
-                                  onClick={() => openSessionModal(tsession)}
-                                >
-                                  View
-                                </button>
-
-                                <button
-                                  className="btn btn-sm btn-warning action-btn"
-                                  title="Edit Training Session"
-                                  onClick={() => handleEditStudent(tsession)}
-                                >
-                                  {/* <i className="bi bi-pencil"></i> */}
-                                  Edit
-                                </button>
-
-                                <button
-                                  className="btn btn-sm btn-warning"
-                                  title="Reschedule Session"
-                                  onClick={() => handleRescheduleSession(tsession)}
-                                >
-                                  <i className="bi bi-clock-history"></i>
-                                </button>
-
-                                {/* NEW: Completed Sessions */}
-                                {"  "}
-                                <button
-                                  className="btn btn-sm btn-success"
-                                  title="Show Student Completed Sessions"
-                                  onClick={() => openCompletedModal(tsession)}
-                                >
-                                  <i className="bi bi-clipboard-check"></i>
-                                </button>
+                              <td data-label="Actions" className="training-session-actions">
+                                <div className="training-session-action-buttons">
+                                  <button className="btn btn-primary btn-sm action-btn" onClick={() => openSessionModal(tsession)}>View</button>
+                                  <button className="btn btn-sm btn-warning action-btn" title="Edit Training Session" onClick={() => handleEditStudent(tsession)}>Edit</button>
+                                  <button className="btn btn-sm btn-warning" title="Reschedule Session" aria-label="Reschedule Session" onClick={() => handleRescheduleSession(tsession)}><i className="bi bi-clock-history"></i></button>
+                                  <button className="btn btn-sm btn-success" title="Show Student Completed Sessions" aria-label="Show Student Completed Sessions" onClick={() => openCompletedModal(tsession)}><i className="bi bi-clipboard-check"></i></button>
+                                </div>
                               </td>
                             </tr>
                           ))}

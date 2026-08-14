@@ -33,7 +33,6 @@ import {
   getAdminPrintWatermark,
   isSriRagavendraOrganization,
 } from "../../utils/printBranding";
-import PWAInstallButton from "../../components/PWAInstallButton";
 
 const TrainingSession = () => {
   const dispatch = useDispatch();
@@ -353,7 +352,6 @@ const TrainingSession = () => {
                     </nav>
                   </div>
                   <div className="col-xl-6 text-right training-session-toolbar">
-                    <PWAInstallButton />
                     <button
                       type="button"
                       className="mb-1 btn btn-secondary mr-2"

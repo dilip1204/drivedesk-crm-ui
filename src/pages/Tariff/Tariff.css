@@ -1,0 +1,197 @@
+.tariff-page .content {
+  width: 100%;
+  max-width: 1480px;
+}
+
+.tariff-page-heading {
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.tariff-page-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tariff-table-wrap {
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-surface, #fff);
+  box-shadow: var(--shadow-card, 0 3px 12px rgba(16, 24, 40, .07));
+}
+
+.tariff-table {
+  min-width: 720px;
+  margin-bottom: 0;
+}
+
+.tariff-table thead th {
+  position: sticky;
+  top: 74px;
+  z-index: 2;
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--color-border, #d9e0e8) !important;
+  background: #f8fafc !important;
+  color: var(--color-text, #172033);
+  white-space: nowrap;
+}
+
+.tariff-table tbody td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+.tariff-table tbody tr:hover td {
+  background: #f8fbff;
+}
+
+.tariff-plan-name {
+  color: var(--color-text, #172033);
+  font-weight: 600;
+}
+
+.tariff-amount {
+  font-variant-numeric: tabular-nums;
+  text-align: right !important;
+}
+
+.tariff-row-actions {
+  min-width: 160px;
+  white-space: nowrap;
+}
+
+.tariff-action-icon {
+  position: relative;
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  margin: 2px;
+  font-size: 15px;
+  place-items: center;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tariff-action-icon::after {
+    position: absolute;
+    right: 50%;
+    bottom: calc(100% + 8px);
+    z-index: 20;
+    width: max-content;
+    max-width: 150px;
+    padding: 5px 8px;
+    border-radius: 5px;
+    background: #172033;
+    color: #fff;
+    content: attr(data-tooltip);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(50%, 4px);
+    transition: opacity .15s ease, transform .15s ease;
+  }
+
+  .tariff-action-icon:hover::after,
+  .tariff-action-icon:focus-visible::after {
+    opacity: 1;
+    transform: translate(50%, 0);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .tariff-page .content {
+    padding: 18px 10px;
+  }
+
+  .tariff-page-heading h1 {
+    font-size: 24px;
+  }
+
+  .tariff-page-actions {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+    margin-top: 10px;
+  }
+
+  .tariff-page-actions .btn {
+    width: 100%;
+  }
+
+  .tariff-table-wrap {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .tariff-table {
+    display: block;
+    min-width: 0;
+    background: transparent;
+  }
+
+  .tariff-table thead {
+    display: none;
+  }
+
+  .tariff-table tbody,
+  .tariff-table tr,
+  .tariff-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .tariff-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .tariff-table tbody tr {
+    overflow: hidden;
+    border: 1px solid var(--color-border, #d9e0e8);
+    border-radius: var(--radius-md, 10px);
+    background: var(--color-surface, #fff);
+    box-shadow: var(--shadow-card, 0 3px 12px rgba(16, 24, 40, .07));
+  }
+
+  .tariff-table tbody td {
+    display: grid;
+    grid-template-columns: minmax(112px, 40%) minmax(0, 1fr);
+    gap: 10px;
+    min-width: 0;
+    padding: 11px 13px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #edf0f4 !important;
+    text-align: right !important;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .tariff-table tbody td::before {
+    color: var(--color-muted, #667085);
+    content: attr(data-label);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .tariff-table tbody td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .tariff-row-actions {
+    display: block !important;
+    text-align: right !important;
+  }
+
+  .tariff-row-actions::before {
+    display: block;
+    margin-bottom: 4px;
+  }
+}

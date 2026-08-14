@@ -12,15 +12,7 @@ export default function Footer() {
           <span className="dd-footer__brand">Asteriq Systech</span>
           <span className="dd-footer__muted">. All rights reserved.</span>
         </p>
-
-        <p className="dd-footer__text mb-0">
-          <span className="dd-footer__muted">Built with</span>{" "}
-          <span className="dd-footer__heart">&hearts;</span>{" "}
-          <span className="dd-footer__muted">by</span>{" "}
-          <span className="dd-footer__brand">Asteriq Systech</span>
-        </p>
       </div>
     </footer>
   );
 }
-

@@ -1,10 +1,24 @@
 import React, { useEffect, useState } from "react";
 
+const getMobilePlatform = () => {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const isIOS =
+    /iphone|ipad|ipod/.test(userAgent) ||
+    (window.navigator.platform === "MacIntel" && window.navigator.maxTouchPoints > 1);
+
+  if (isIOS) return "ios";
+  if (/android/.test(userAgent)) return "android";
+  return null;
+};
+
+const isRunningAsInstalledApp = () =>
+  window.matchMedia?.("(display-mode: standalone)")?.matches ||
+  window.navigator.standalone === true;
+
 export default function PWAInstallButton() {
   const [installPrompt, setInstallPrompt] = useState(null);
-  const [isInstalled, setIsInstalled] = useState(
-    window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true
-  );
+  const [mobilePlatform] = useState(getMobilePlatform);
+  const [isInstalled, setIsInstalled] = useState(isRunningAsInstalledApp);
 
   useEffect(() => {
     const handleInstallPrompt = (event) => {
@@ -23,7 +37,7 @@ export default function PWAInstallButton() {
     };
   }, []);
 
-  if (isInstalled) return null;
+  if (isInstalled || !mobilePlatform) return null;
 
   const installApp = async () => {
     if (installPrompt) {
@@ -33,18 +47,17 @@ export default function PWAInstallButton() {
       return;
     }
 
-    const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
     window.alert(
-      isIOS
+      mobilePlatform === "ios"
         ? "To install DriveDesk, tap Share and then Add to Home Screen."
-        : "DriveDesk is preparing for installation. Refresh once, then use Install App again or choose Install DriveDesk from your browser menu."
+        : "To install DriveDesk, open your browser menu and tap Install app or Add to Home screen."
     );
   };
 
   return (
     <button type="button" className="btn btn-outline-primary mb-1 mr-2" onClick={installApp}>
       <i className="mdi mdi-monitor-arrow-down mr-1" aria-hidden="true" />
-      {installPrompt ? "Install App" : "Get DriveDesk App"}
+      Install App
     </button>
   );
 }

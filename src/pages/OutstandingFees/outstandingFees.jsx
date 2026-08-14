@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
@@ -25,6 +25,8 @@ import { useAuth } from "../../hooks/useAuth";
 
 const OutstandingFees = () => {
   const { role } = useAuth();
+  const isAdmin = String(role || "").toLowerCase() === "admin";
+  const outstandingTableRef = useRef(null);
 
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
@@ -43,6 +45,34 @@ const OutstandingFees = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
+
+  const printOutstandingFees = () => {
+    const content = outstandingTableRef.current?.outerHTML || "<p>No data</p>";
+    const printWindow = window.open("", "", "width=1100,height=800");
+    if (!printWindow) return;
+
+    printWindow.document.write(`<!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Outstanding Fees Report</title>
+          <style>
+            body{font-family:Arial,Helvetica,sans-serif;margin:24px;color:#212529;}
+            h2{text-align:center;margin:0 0 16px;}
+            table{width:100%;border-collapse:collapse;font-size:12px;}
+            th,td{border:1px solid #333;padding:7px;text-align:center;}
+            thead th{background:#f2f2f2;}
+            .no-print{display:none;}
+          </style>
+        </head>
+        <body>
+          <h2>Outstanding Fees Report</h2>
+          ${content}
+          <script>window.onload=function(){window.print();window.close();}</script>
+        </body>
+      </html>`);
+    printWindow.document.close();
+  };
 
   const getKey = (s) => s?.mobile_number;
 
@@ -150,7 +180,14 @@ const OutstandingFees = () => {
                   </div>
 
                   <div className="col-xl-6 text-right">
-                    
+                    <div className="d-flex justify-content-end gap-2">
+                      {isAdmin && (
+                        <button type="button" className="btn btn-outline-primary" onClick={printOutstandingFees} disabled={loading || !!error || currentRecords.length === 0}>
+                          <i className="bi bi-printer"></i> Print
+                        </button>
+                      )}
+                      <Link to="/dashboard" className="btn btn-secondary">Back to Dashboard</Link>
+                    </div>
                   </div>
                 </div>
 
@@ -173,10 +210,10 @@ const OutstandingFees = () => {
                       </div>
                     )}
                     <div className="table-responsive">
-                      <table className="table custom-table text-center align-middle">
+                      <table ref={outstandingTableRef} className="table custom-table text-center align-middle">
                         <thead className="table-light">
                           <tr>
-                            <th>
+                            <th className="no-print">
                               <input
                                 type="checkbox"
                                 onChange={handleSelectAll}
@@ -200,7 +237,7 @@ const OutstandingFees = () => {
                         <tbody>
                           {currentRecords.map((outstandingFees, index) => (
                             <tr key={index}>
-                              <td>
+                              <td className="no-print">
                                 <input
                                   type="checkbox"
                                   checked={selectedIds.some(

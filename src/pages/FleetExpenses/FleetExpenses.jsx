@@ -30,6 +30,11 @@ const getExpenseType = (expense) =>
   expense.type ||
   "Other";
 
+const truncateText = (value, maxLength = 15) => {
+  const text = (value || "-").toString();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
+};
+
 const FleetExpenses = () => {
   const dispatch = useDispatch();
 
@@ -513,6 +518,18 @@ const FleetExpenses = () => {
                                   <button className="btn btn-sm btn-warning fleet-expense-action-icon" onClick={() => handleEditExpenses(r)} title="Edit Expense" data-tooltip="Edit Expense" aria-label="Edit Expense"><i className="bi bi-pencil-square" aria-hidden="true" /></button>
                                   <button className="btn btn-sm btn-primary fleet-expense-action-icon" onClick={() => handleViewExpenses(r)} title="View Expense" data-tooltip="View Expense" aria-label="View Expense"><i className="bi bi-eye" aria-hidden="true" /></button>
                                   <button className="btn btn-sm btn-danger fleet-expense-action-icon" onClick={() => handleDelete(r.id)} title="Delete Expense" data-tooltip="Delete Expense" aria-label="Delete Expense"><i className="bi bi-trash" aria-hidden="true" /></button>
+                                <td>{formatDateDDMMYYYY(r.date)}</td>
+                                <td>{getExpenseType(r)}</td>
+                                <td>{r.category || "-"}</td>
+                                <td>₹{Number(r.amount || 0).toLocaleString("en-IN")}</td>
+                                <td>{r.notes || "-"}</td>
+                                <td title={r.created_by || r.createdBy || "-"}>
+                                  {truncateText(r.created_by || r.createdBy)}
+                                </td>
+                                <td className="text-end">
+                                  <button className="btn btn-sm btn-warning me-2" onClick={() => handleEditExpenses(r)} title="Edit Expense">Edit</button>
+                                  <button className="btn btn-sm btn-primary me-2" onClick={() => handleViewExpenses(r)} title="View Expense">View</button>
+                                  <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r.id)} title="Delete Expense">Delete</button>
                                 </td>
                               </tr>
                             ))

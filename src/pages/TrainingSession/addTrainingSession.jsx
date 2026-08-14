@@ -6,6 +6,29 @@ import * as Yup from "yup";
 import { IoClose } from "react-icons/io5";
 import { updateTrainingSession } from "../../store/trainingSession/actions";
 
+const REMARK_OPTIONS = [
+  "STREET ROAD PRACTICE",
+  "SIMULATOR SESSION",
+  'TRACK PRACTICE - "8"',
+  'TRACK PRACTICE - "BOX"',
+  'TRACK PRACTICE - "GRADIENT"',
+  'TRACK PRACTICE - "H"',
+  "HIGHWAY PRACTICE",
+  "VILLAGE ROAD PRACTICE",
+  "TRAFFIC SESSION",
+  "REVERSE PRACTICE",
+  "NIGHT DRIVE SESSION",
+  "HILL DRIVE PRACTICE",
+  "THEORY SESSION",
+  "VEHICLE MAINTENANCE",
+  "ROAD SAFETY",
+  "CLUTCH AND BRAKE CONTROL PRACTICE",
+  "STEERING CONTROL PRACTICE",
+  "MSM PSL PRACTICE",
+  "IPDE PRACTICE",
+  "OVERTAKING & U - TURN PRACTICE",
+];
+
 
 export default function AddTrainingSession({
   showModal,
@@ -120,14 +143,20 @@ export default function AddTrainingSession({
                   </label>
 
                   {field === "remarks" ? (
-                    <textarea
+                    <select
                       name={field}
                       className={`form-control ${formik.touched[field] && formik.errors[field] ? "is-invalid" : ""}`}
-                      rows={2}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                       value={formik.values[field]}
-                    />
+                    >
+                      <option value="">Select Remarks</option>
+                      {REMARK_OPTIONS.map((remark) => (
+                        <option key={remark} value={remark}>
+                          {remark}
+                        </option>
+                      ))}
+                    </select>
                   ) : field === "status" ? (
                     <select
                       name={field}

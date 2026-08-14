@@ -6,6 +6,7 @@ import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
 import "../Students/Students.css";
+import "./FleetExpenses.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
@@ -395,7 +396,7 @@ const FleetExpenses = () => {
 
   return (
     <>
-      <div className="header-fixed sidebar-fixed sidebar-dark header-light" id="body">
+      <div className="header-fixed sidebar-fixed sidebar-dark header-light fleet-expenses-page" id="body">
         <div className="wrapper">
           <Sidebar />
           <div className="page-wrapper">
@@ -403,7 +404,7 @@ const FleetExpenses = () => {
 
             <div className="content-wrapper">
               <div className="content">
-                <div className="row">
+                <div className="row fleet-expenses-heading">
                   <div className="breadcrumb-wrapper col-xl-6">
                     <h1>Expenses</h1>
                     <nav aria-label="breadcrumb">
@@ -415,29 +416,29 @@ const FleetExpenses = () => {
                     </nav>
                   </div>
 
-                  <div className="col-xl-6 text-right">
+                  <div className="col-xl-6 text-right fleet-expenses-actions">
                     <button className="mb-1 btn btn-primary mr-2" onClick={() => { setIsEdit(false); setSelectedExpenses(null); setShowModal(true); }}>
                       <i className="bi bi-plus-lg" /> Add Expense
                     </button>
                   </div>
                 </div>
 
-                <div style={styles.pageCard}>
+                <div className="fleet-expenses-dashboard" style={styles.pageCard}>
                   {/* Filters */}
-                  <div className="row align-items-center mb-3 g-2">
-                    <div className="col-auto">
+                  <div className="row align-items-center mb-3 g-2 fleet-expenses-filters">
+                    <div className="col-auto fleet-expenses-filter-field">
                       <select className="form-select" value={selectedMonth} onChange={(e) => { const v = e.target.value; setSelectedMonth(v); }}>
                         {monthOptions.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
                       </select>
                     </div>
 
-                    <div className="col-auto">
+                    <div className="col-auto fleet-expenses-filter-field">
                       <select className="form-select" value={selectedExpenseType} onChange={(e) => setSelectedExpenseType(e.target.value)}>
                         {expenseTypes.map((type) => <option key={type} value={type}>{type === "All" ? "All expense types" : type}</option>)}
                       </select>
                     </div>
 
-                    <div className="col">
+                    <div className="col fleet-expenses-search">
                       <input className="form-control" placeholder="Search" value={searchText} onChange={(e) => setSearchText(e.target.value)} />
                     </div>
                   </div>
@@ -445,21 +446,21 @@ const FleetExpenses = () => {
                   {/* Equal-width row: Expense Type Share | Total Spend | Month */}
                   <div className="row g-3 mb-3">
                     <div className="col-12 col-md-4 d-flex">
-                      <div style={{ ...styles.pieBox, width: "100%" }}>
+                      <div className="fleet-chart-card" style={{ ...styles.pieBox, width: "100%" }}>
                         <div style={{ fontWeight: 600, marginBottom: 10 }}>Expense Type Share</div>
                         <canvas ref={pieRef} style={{ width: "100%", height: 180 }} />
                       </div>
                     </div>
 
                     <div className="col-12 col-md-4 d-flex">
-                      <div style={{ ...styles.kpiCard, width: "100%" }}>
+                      <div className="fleet-kpi-card" style={{ ...styles.kpiCard, width: "100%" }}>
                         <div style={{ color: "#6c757d", fontSize: 14 }}>Total Spend</div>
                         <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>{`₹${totalSpend.toLocaleString("en-IN")}`}</div>
                       </div>
                     </div>
 
                     <div className="col-12 col-md-4 d-flex">
-                      <div style={{ ...styles.kpiCard, width: "100%" }}>
+                      <div className="fleet-kpi-card" style={{ ...styles.kpiCard, width: "100%" }}>
                         <div style={{ color: "#6c757d", fontSize: 14 }}>{selectedMonth ? `Month (${selectedMonth})` : "This Month"}</div>
                         <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>{`₹${perMonth.toLocaleString("en-IN")}`}</div>
                       </div>
@@ -469,14 +470,14 @@ const FleetExpenses = () => {
                   {/* Charts */}
                   <div className="row g-3 mb-3">
                     <div className="col-12 col-md-6">
-                      <div style={styles.chartTall}>
+                      <div className="fleet-chart-card" style={styles.chartTall}>
                         <div style={{ fontWeight: 600, marginBottom: 10 }}>Monthly Spend</div>
                         <canvas ref={monthlyRef} style={{ width: "100%", height: "100%" }} />
                       </div>
                     </div>
 
                     <div className="col-12 col-md-6">
-                      <div style={styles.chartTall}>
+                      <div className="fleet-chart-card" style={styles.chartTall}>
                         <div style={{ fontWeight: 600, marginBottom: 10 }}>Expense Type Breakdown</div>
                         <canvas ref={expenseTypeRef} style={{ width: "100%", height: "100%" }} />
                       </div>
@@ -484,13 +485,13 @@ const FleetExpenses = () => {
                   </div>
 
                   {/* Table */}
-                  <div style={{ borderRadius: 12, border: "1px solid #eef2f6", overflow: "hidden" }}>
-                    <div style={{ padding: 16, borderBottom: "1px solid #f1f5f9" }}>
+                  <div className="fleet-expenses-list-card">
+                    <div className="fleet-expenses-list-title" style={{ padding: 16, borderBottom: "1px solid #f1f5f9" }}>
                       <div style={{ fontWeight: 600 }}>Recent Expenses</div>
                     </div>
 
-                    <div className="table-responsive">
-                      <table className="table custom-table text-center align-middle" style={{ minWidth: 900 }}>
+                    <div className="table-responsive fleet-expenses-table-wrap">
+                      <table className="table custom-table text-center align-middle fleet-expenses-table">
                         <thead className="table-light">
                           <tr>
                             <th>Date</th>
@@ -507,6 +508,16 @@ const FleetExpenses = () => {
                           {filteredRecords.length > 0 ? (
                             filteredRecords.map((r) => (
                               <tr key={r.id}>
+                                <td data-label="Date">{formatDateDDMMYYYY(r.date)}</td>
+                                <td data-label="Expense Type">{getExpenseType(r)}</td>
+                                <td data-label="Category">{r.category || "-"}</td>
+                                <td data-label="Amount" className="fleet-expense-amount">₹{Number(r.amount || 0).toLocaleString("en-IN")}</td>
+                                <td data-label="Notes">{r.notes || "-"}</td>
+                                <td data-label="Created By">{r.created_by || r.createdBy || "-"}</td>
+                                <td data-label="Actions" className="text-end fleet-expense-row-actions">
+                                  <button className="btn btn-sm btn-warning fleet-expense-action-icon" onClick={() => handleEditExpenses(r)} title="Edit Expense" data-tooltip="Edit Expense" aria-label="Edit Expense"><i className="bi bi-pencil-square" aria-hidden="true" /></button>
+                                  <button className="btn btn-sm btn-primary fleet-expense-action-icon" onClick={() => handleViewExpenses(r)} title="View Expense" data-tooltip="View Expense" aria-label="View Expense"><i className="bi bi-eye" aria-hidden="true" /></button>
+                                  <button className="btn btn-sm btn-danger fleet-expense-action-icon" onClick={() => handleDelete(r.id)} title="Delete Expense" data-tooltip="Delete Expense" aria-label="Delete Expense"><i className="bi bi-trash" aria-hidden="true" /></button>
                                 <td>{formatDateDDMMYYYY(r.date)}</td>
                                 <td>{getExpenseType(r)}</td>
                                 <td>{r.category || "-"}</td>
@@ -523,7 +534,7 @@ const FleetExpenses = () => {
                               </tr>
                             ))
                           ) : (
-                            <tr>
+                            <tr className="fleet-empty-row">
                               <td colSpan="7" className="text-center text-muted">{error || "No expenses found."}</td>
                             </tr>
                           )}

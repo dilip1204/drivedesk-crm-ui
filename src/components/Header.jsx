@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import avatar from "../assets/img/avatar.png";
+import PWAInstallButton from "./PWAInstallButton";
 import "./Header.css";
 
 export default function Header() {
   const [displayName, setDisplayName] = useState("Guest User");
   const [displayRole, setDisplayRole] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const formatRoleLabel = (role) => {
     if (!role) return "";
@@ -35,6 +37,32 @@ export default function Header() {
     setDisplayRole(formatRoleLabel(roleInfo?.role || role));
   }, []);
 
+  useEffect(() => {
+    const body = document.getElementById("body");
+    if (!body) return undefined;
+
+    const unlockPageScroll = () => {
+      body.classList.remove("sidebar-mobile-in");
+      document.body.style.removeProperty("overflow");
+    };
+
+    // A route change closes the mobile drawer and must never leave the page locked.
+    unlockPageScroll();
+
+    const handleResize = () => {
+      if (window.innerWidth >= 768) unlockPageScroll();
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+      unlockPageScroll();
+    };
+  }, [location.pathname]);
+
   const handleSidebarToggle = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -54,7 +82,7 @@ export default function Header() {
       if (body.classList.contains("sidebar-mobile-in")) {
         document.body.style.overflow = "hidden";
       } else {
-        document.body.style.overflow = "auto";
+        document.body.style.removeProperty("overflow");
         body.classList.add("sidebar-mobile-out");
       }
       return;
@@ -124,6 +152,10 @@ export default function Header() {
                 <i className="mdi mdi-bell-outline"></i>
               </button>
             </li> */}
+
+            <li className="pwa-install-nav-item">
+              <PWAInstallButton />
+            </li>
 
             <li className="dropdown user-menu">
               <button

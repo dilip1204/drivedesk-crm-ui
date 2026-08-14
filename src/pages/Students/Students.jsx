@@ -512,7 +512,7 @@ const Students = () => {
             <Header />
             <div className="content-wrapper">
               <div className="content">
-                <div className="row">
+                <div className="row students-page-heading">
                   <div className="breadcrumb-wrapper col-xl-6">
                     <h1>Students</h1>
                     <nav aria-label="breadcrumb">
@@ -529,7 +529,7 @@ const Students = () => {
                       </ol>
                     </nav>
                   </div>
-                  <div className="col-xl-6 text-right">
+                  <div className="col-xl-6 text-right students-page-actions">
                     <button
                       type="button"
                       className="mb-1 btn btn-secondary mr-2"
@@ -560,8 +560,8 @@ const Students = () => {
                 </div>
 
                 {/* ---------- NEW: Search box (above table) ---------- */}
-                <div className="row mb-3" style={{justifyContent: "flex-end"}}>
-                  <div className="col-md-2">
+                <div className="row mb-3 students-search-toolbar">
+                  <div className="col-md-3 students-search-type">
                     <select
                       className="form-control students-select-arrow"
                       value={searchType}
@@ -579,7 +579,7 @@ const Students = () => {
                     </select>
                   </div>
 
-                  <div className="col-md-3">
+                  <div className="col-md-5 students-search-input">
                     <input
                       type={searchType === "month" ? "number" : "text"}
                       min={searchType === "month" ? 1 : undefined}
@@ -597,7 +597,7 @@ const Students = () => {
                     />
                   </div>
 
-                  <div className="col-md-2" style={{justifyContent: "flex-end", maxWidth: "13%"}}>
+                  <div className="col-md-2 students-search-clear">
                     <button
                       className="btn btn-outline-secondary"
                       onClick={() => {
@@ -614,7 +614,7 @@ const Students = () => {
                 </div>
 
                 {filtersVisible && (
-                  <div className="card p-3 mb-4">
+                  <div className="card p-3 mb-4 students-filter-card">
                     <Formik
                       initialValues={{
                         month: filters.month ?? "",
@@ -674,7 +674,7 @@ const Students = () => {
                     >
                       {({ handleSubmit }) => (
                         <Form onSubmit={handleSubmit}>
-                          <div className="row">
+                          <div className="row students-filter-grid">
                             <div className="col-md-2">
                               <label>Month</label>
                               <Field
@@ -792,8 +792,8 @@ const Students = () => {
                     <p className="text-center text-danger my-5">{error}</p>
                   ) : (
                     <>
-                      <div className="table-responsive">
-                        <table className="table custom-table text-center align-middle">
+                      <div className="table-responsive students-table-wrap">
+                        <table className="table custom-table text-center align-middle students-table">
                           <thead className="table-light">
                             <tr>
                               <th>S.NO</th>
@@ -806,24 +806,38 @@ const Students = () => {
                           <tbody>
                             {studentsData.map((student, index) => (
                               <tr key={student.application_number || index}>
-                                <td>{startIndex + index + 1}</td>
-                                <td>{student.name || "Student Name"}</td>
-                                <td>{student.mobile_number || "N/A"}</td>
-                                <td className="status">
-                                  <i className="bi bi-check-circle"></i>{" "}
-                                  {student.plan}
+                                <td data-label="S.No">{startIndex + index + 1}</td>
+                                <td data-label="Student Name">{student.name || "Student Name"}</td>
+                                <td data-label="Mobile Number">{student.mobile_number || "N/A"}</td>
+                                <td data-label="Plan" className="status">
+                                  <span className="students-plan-value">
+                                    <i className="bi bi-check-circle" aria-hidden="true"></i>
+                                    <span>{student.plan || "No plan"}</span>
+                                  </span>
                                 </td>
-                                <td>
+                                <td data-label="Actions" className="students-row-actions">
                                   <button
-                                    className="btn btn-sm btn-warning"
+                                    className="btn btn-sm btn-warning students-action-icon"
                                     title="Edit Student"
+                                    data-tooltip="Edit Student"
+                                    aria-label="Edit Student"
                                     onClick={() => handleEditStudent(student)}
                                   >
-                                    Edit
+                                    <i className="bi bi-pencil-square" aria-hidden="true"></i>
                                   </button>{" "}
                                   <button
-                                    className="btn btn-sm btn-success"
+                                    className="btn btn-sm btn-success students-action-icon"
                                     title={
+                                      Number(student.balance) <= 0
+                                        ? "No balance due"
+                                        : "Add Payment"
+                                    }
+                                    data-tooltip={
+                                      Number(student.balance) <= 0
+                                        ? "No balance due"
+                                        : "Add Payment"
+                                    }
+                                    aria-label={
                                       Number(student.balance) <= 0
                                         ? "No balance due"
                                         : "Add Payment"
@@ -833,23 +847,28 @@ const Students = () => {
                                     }
                                     disabled={Number(student.balance) <= 0}
                                   >
-                                    Fee
+                                    <i className="bi bi-cash-coin" aria-hidden="true"></i>
                                   </button>{" "}
                                   <button
                                     type="button"
                                     onClick={() => openProfileModal(student)}
-                                    className="btn btn-primary btn-sm"
+                                    className="btn btn-primary btn-sm students-action-icon"
+                                    title="View Student"
+                                    data-tooltip="View Student"
+                                    aria-label="View Student"
                                   >
-                                    View
+                                    <i className="bi bi-eye" aria-hidden="true"></i>
                                   </button>{" "}
                                   <button
-                                    className="btn btn-sm btn-danger"
+                                    className="btn btn-sm btn-danger students-action-icon"
                                     title="Delete Student"
+                                    data-tooltip="Delete Student"
+                                    aria-label="Delete Student"
                                     onClick={() =>
                                       deleteUser(student.mobile_number)
                                     }
                                   >
-                                    Delete
+                                    <i className="bi bi-trash" aria-hidden="true"></i>
                                   </button>
                                 </td>
                               </tr>

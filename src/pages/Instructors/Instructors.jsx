@@ -7,6 +7,7 @@ import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
 
 import "../Students/Students.css";
+import "./Instructors.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
@@ -173,7 +174,7 @@ const formatTo12Hour = (timeStr) => {
   return (
     <>
       <div
-        className="header-fixed sidebar-fixed sidebar-dark header-light"
+        className="header-fixed sidebar-fixed sidebar-dark header-light instructors-page"
         id="body"
       >
         <div className="wrapper">
@@ -184,7 +185,7 @@ const formatTo12Hour = (timeStr) => {
             <div className="content-wrapper">
               <div className="content">
                 {/* Breadcrumb */}
-                <div className="row">
+                <div className="row instructors-page-heading">
                   <div className="breadcrumb-wrapper col-xl-6">
                     <h1>Instructors</h1>
                     <nav aria-label="breadcrumb">
@@ -202,7 +203,7 @@ const formatTo12Hour = (timeStr) => {
                     </nav>
                   </div>
 
-                  <div className="col-xl-6 text-right">
+                  <div className="col-xl-6 text-right instructors-page-actions">
                     {role === "admin" ? (
          <button
                       type="button"
@@ -226,8 +227,8 @@ const formatTo12Hour = (timeStr) => {
                     <p className="text-center text-danger my-5">{error}</p>
                   ) : (
                     <>
-                    <div className="table-responsive">
-                      <table className="table custom-table text-center align-middle">
+                    <div className="table-responsive instructors-table-wrap">
+                      <table className="table custom-table text-center align-middle instructors-table">
                         <thead className="table-light">
                           <tr>
                             <th>S.NO</th>
@@ -240,38 +241,46 @@ const formatTo12Hour = (timeStr) => {
                         <tbody>
                           {instructorsData.map((ins, index) => (
                             <tr key={index}>
-                              <td>{index+1}</td>
-                              <td>{ins.name || "Instructor Name"}</td>
-                              <td>{ins.mobile_number || "N/A"}</td>
-                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {formatTo12Hour(ins.available_from)} to {formatTo12Hour(ins.available_to)}</td>
-                              <td>
+                              <td data-label="S.No">{index+1}</td>
+                              <td data-label="Instructor Name">{ins.name || "Instructor Name"}</td>
+                              <td data-label="Mobile Number">{ins.mobile_number || "N/A"}</td>
+                              <td data-label="Availability" className="status">
+                                <span className="instructor-availability-value">
+                                  <i className="bi bi-check-circle" aria-hidden="true"></i>
+                                  <span>{formatTo12Hour(ins.available_from)} to {formatTo12Hour(ins.available_to)}</span>
+                                </span>
+                              </td>
+                              <td data-label="Actions" className="instructors-row-actions">
                                {role === "admin" ? (
         <>
          <button
-                                className="btn btn-sm btn-warning"
+                                className="btn btn-sm btn-warning instructor-action-icon"
                                 title="Edit Instructor"
+                                data-tooltip="Edit Instructor"
+                                aria-label="Edit Instructor"
                                 onClick={() => handleEditInstructor(ins)}
                               >
-                                {/* <i className="bi bi-pencil"></i> */}
-                                Edit
+                                <i className="bi bi-pencil-square" aria-hidden="true"></i>
                               </button>
                               {" "}
                               <button
-                                className="btn btn-sm btn-danger"
-                                title="Delete Isntructor"
+                                className="btn btn-sm btn-danger instructor-action-icon"
+                                title="Delete Instructor"
+                                data-tooltip="Delete Instructor"
+                                aria-label="Delete Instructor"
                                 onClick={() => deleteUser(ins.mobile_number)}
                               >
-                                {/* <i className="bi bi-trash"></i> */}
-                                Delete
+                                <i className="bi bi-trash" aria-hidden="true"></i>
                               </button>
                               {" "}
                               <button
-                                className="btn btn-sm btn-warning"
+                                className="btn btn-sm btn-primary instructor-action-icon"
                                 title="Instructor Schedule"
+                                data-tooltip="Instructor Schedule"
+                                aria-label="Instructor Schedule"
                                 onClick={() => handleInstructor(ins)}
                               >
-                                {/* <i className="bi bi-person-check"></i> */}
-                                Schedule
+                                <i className="bi bi-calendar-check" aria-hidden="true"></i>
                               </button>
         </>
       ) : (

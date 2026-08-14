@@ -10,6 +10,7 @@ import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
 
 import "../Students/Students.css";
+import "./enquiries.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
@@ -231,7 +232,7 @@ const Enquiries = () => {
   return (
     <>
       <div
-        className="header-fixed sidebar-fixed sidebar-dark header-light"
+        className="header-fixed sidebar-fixed sidebar-dark header-light enquiries-page"
         id="body"
       >
         <div className="wrapper">
@@ -271,7 +272,7 @@ const Enquiries = () => {
                   </div>
                 </div> */}
 
-                <div className="row">
+                <div className="row enquiries-page-heading">
                   <div className=" breadcrumb-wrapper col-xl-6">
                     <h1>Enquiries</h1>
                     <nav aria-label="breadcrumb">
@@ -288,7 +289,7 @@ const Enquiries = () => {
                       </ol>
                     </nav>
                   </div>
-                  <div className="col-xl-6 text-right">
+                  <div className="col-xl-6 text-right enquiries-page-actions">
                     <button
                       type="button"
                       className="mb-1 btn btn-secondary mr-2"
@@ -307,7 +308,7 @@ const Enquiries = () => {
                 </div>
 
                 {filtersVisible && (
-                  <div className="card p-3 mb-4">
+                  <div className="card p-3 mb-4 enquiries-filter-card">
                     <Formik
   initialValues={filters}
   validationSchema={FilterValidationSchema}
@@ -348,7 +349,7 @@ const Enquiries = () => {
 
                       {({ handleSubmit }) => (
                         <Form onSubmit={handleSubmit}>
-                          <div className="row">
+                          <div className="row enquiries-filter-grid">
                             <div className="col-md-2">
                               <label>Month</label>
                               <Field
@@ -422,8 +423,8 @@ const Enquiries = () => {
                     <p className="text-center text-danger my-5">{error}</p>
                   ) : (
                     <>
-                    <div className="table-responsive">
-                      <table className="table custom-table text-center align-middle">
+                    <div className="table-responsive enquiries-table-wrap">
+                      <table className="table custom-table text-center align-middle enquiries-table">
                         <thead className="table-light">
                           <tr>
                             <th>S.NO</th>
@@ -444,20 +445,26 @@ const Enquiries = () => {
                                     .toLowerCase() === "enrolled";
                                 return (
                                   <>
-                              <td>{startIndex + index + 1}</td>
-                              <td>{enquiries.name || "Name"}</td>
-                              <td>{enquiries.mobile_number || "N/A"}</td>
-                              <td>{enquiries.email || "N/A"}</td>
-                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {enquiries.follow_up_status}</td>
-                              <td>
+                              <td data-label="S.No">{startIndex + index + 1}</td>
+                              <td data-label="Student Name">{enquiries.name || "Name"}</td>
+                              <td data-label="Mobile Number">{enquiries.mobile_number || "N/A"}</td>
+                              <td data-label="Email">{enquiries.email || "N/A"}</td>
+                              <td data-label="Status" className="status">
+                                <span className="enquiry-status-value">
+                                  <i className="bi bi-check-circle" aria-hidden="true"></i>
+                                  <span>{enquiries.follow_up_status || "Pending"}</span>
+                                </span>
+                              </td>
+                              <td data-label="Actions" className="enquiries-row-actions">
                                 <button
-                                className="btn btn-sm btn-warning"
+                                className="btn btn-sm btn-warning enquiry-action-icon"
                                 title="Edit Enquiries"
+                                data-tooltip="Edit Enquiry"
+                                aria-label="Edit Enquiry"
                                 disabled={isEnrolled}
                                 onClick={() => handleEditEnquiries(enquiries)}
                               >
-                                {/* <i className="bi bi-pencil"></i> */}
-                                 Edit
+                                <i className="bi bi-pencil-square" aria-hidden="true"></i>
                               </button>{" "}
                                <Link
                                   to="#"
@@ -468,13 +475,16 @@ const Enquiries = () => {
                                     }
                                     openEnquriesProfile(enquiries);
                                   }}
-                                  className={`btn btn-primary btn-sm${
+                                  className={`btn btn-primary btn-sm enquiry-action-icon${
                                     isEnrolled ? " disabled" : ""
                                   }`}
+                                  title="View Enquiry"
+                                  data-tooltip="View Enquiry"
+                                  aria-label="View Enquiry"
                                   aria-disabled={isEnrolled}
                                   tabIndex={isEnrolled ? -1 : 0}
                                 >
-                                  View
+                                  <i className="bi bi-eye" aria-hidden="true"></i>
                                 </Link>
                               </td>
                                   </>

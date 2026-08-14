@@ -15,6 +15,47 @@
   width: 320px;
 }
 
+.main-header .pwa-install-nav-item {
+  display: contents;
+}
+
+.main-header .pwa-install-button {
+  position: fixed;
+  right: 16px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: 1040;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--color-primary, #1f4e78);
+  border-color: var(--color-primary, #1f4e78);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.22);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.main-header .pwa-install-button:hover,
+.main-header .pwa-install-button:focus,
+.main-header .pwa-install-button:active {
+  background: var(--color-primary, #1f4e78) !important;
+  border-color: var(--color-primary, #1f4e78) !important;
+  color: #fff !important;
+}
+
+@media (max-width: 420px) {
+  .main-header .pwa-install-button {
+    right: 12px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    min-height: 44px;
+    padding: 9px 14px;
+    font-size: 13px;
+  }
+}
+
 .main-header .header-user-dropdown-name {
   max-width: calc(100% - 64px);
   white-space: normal;

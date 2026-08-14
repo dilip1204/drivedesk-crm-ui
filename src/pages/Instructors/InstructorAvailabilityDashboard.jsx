@@ -359,10 +359,10 @@ export function InstructorAvailabilityDashboard({ data }) {
 
   return (
     <>
-      <div>
+      <div className="availability-dashboard">
         {/* Header section */}
-        <section className="mb-4">
-          <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-md-between">
+        <section className="mb-4 availability-profile-card">
+          <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-md-between availability-profile-layout">
             <div className="d-flex align-items-center gap-3">
               {/* <div
                           className="rounded-circle bg-light d-grid place-items-center"
@@ -374,7 +374,7 @@ export function InstructorAvailabilityDashboard({ data }) {
                         </div> */}
               <div>
                 <h1 className="h4 m-0">{instructor?.name}</h1>
-                <div className="small text-secondary mt-1 d-flex flex-wrap gap-3">
+                <div className="small text-secondary mt-1 d-flex flex-wrap gap-3 availability-contact-details">
                   <span>📞 {instructor?.mobile_number}</span>
                   <span>✉️ {instructor?.email}</span>
                   <span>
@@ -383,7 +383,7 @@ export function InstructorAvailabilityDashboard({ data }) {
                 </div>
               </div>
             </div>
-            <div className="d-flex align-items-center gap-2">
+            <div className="d-flex align-items-center gap-2 availability-status-legend">
               <span
                 className={clsx(
                   "badge rounded-pill px-3 py-2",
@@ -413,7 +413,7 @@ export function InstructorAvailabilityDashboard({ data }) {
         </section>
 
         {/* Summary cards */}
-        <section className="row g-3 mb-4">
+        <section className="row g-3 mb-4 availability-summary-grid">
           <div className="col-12 col-sm-6 col-lg-2">
             <div className="card h-100">
               <div className="card-body">
@@ -469,7 +469,7 @@ export function InstructorAvailabilityDashboard({ data }) {
         </section>
 
         {/* Availability donut + status counts */}
-        <section className="row g-4">
+        <section className="row g-4 availability-overview-section">
           <div className="col-12">
             <div className="card h-100">
               <div className="card-body">
@@ -521,7 +521,7 @@ export function InstructorAvailabilityDashboard({ data }) {
         </section>
 
         {/* Calendar grid */}
-        <section className="row g-4">
+        <section className="row g-4 availability-calendar-section">
           <div className="col-12">
             <div className="card">
               <div className="card-body">
@@ -668,7 +668,7 @@ export default function InstructorAvailability() {
 
   return (
     <div
-      className="header-fixed sidebar-fixed sidebar-dark header-light"
+      className="header-fixed sidebar-fixed sidebar-dark header-light instructor-availability-page"
       id="body"
     >
       <div className="wrapper">
@@ -678,7 +678,7 @@ export default function InstructorAvailability() {
 
           <div className="content-wrapper">
             <div className="content">
-              <div className="row">
+              <div className="row availability-page-heading">
                 <div className="breadcrumb-wrapper col-xl-6">
                   <h1>Instructor</h1>
                   <nav aria-label="breadcrumb">
@@ -695,14 +695,14 @@ export default function InstructorAvailability() {
                     </ol>
                   </nav>
                 </div>
-                <div className="col-xl-6 text-end">
+                <div className="col-xl-6 text-end availability-month-column">
                   {/* NEW: Month selector UI */}
-                  <div className="d-flex align-items-center justify-content-end mb-3">
+                  <div className="d-flex align-items-center justify-content-end mb-3 availability-month-control">
                     <label className="me-2 text-secondary small mb-0">
                       Month
                     </label>
                     <select
-                      className="form-select form-select-sm"
+                      className="form-select form-select-sm availability-month-select"
                       style={{ maxWidth: 240 }}
                       value={selectedMonth}
                       onChange={(e) => {

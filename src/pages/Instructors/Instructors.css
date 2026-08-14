@@ -104,4 +104,270 @@
 .modal { z-index: 1055; }       /* Bootstrap default layering */
 .modal-backdrop { z-index: 1050; }
 
+/* Instructor availability dashboard */
+.instructor-availability-page .content {
+  width: 100%;
+  max-width: 1480px;
+}
 
+.availability-page-heading { align-items: flex-start; margin-bottom: 12px; }
+.availability-profile-card,
+.availability-dashboard .card {
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: var(--radius-md, 10px);
+  box-shadow: var(--shadow-card, 0 3px 12px rgba(16, 24, 40, .07));
+}
+
+.availability-profile-card {
+  padding: 18px;
+  background: var(--color-surface, #fff);
+}
+
+.availability-dashboard .card-body { padding: 18px; }
+.availability-summary-grid .display-6 { color: var(--color-primary, #1f4e78); font-size: 2rem; }
+.availability-calendar-section .card-body { overflow: hidden; }
+.availability-month-select { width: 100%; }
+
+.availability-calendar-section .calendar {
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.availability-calendar-section .calendar__head,
+.availability-calendar-section .calendar__body { min-width: 760px; }
+
+@media (max-width: 767.98px) {
+  .instructor-availability-page .content { padding: 18px 10px; }
+  .availability-page-heading h1 { font-size: 24px; }
+  .availability-month-column { width: 100%; max-width: 100%; flex: 0 0 100%; }
+  .availability-month-control { align-items: stretch !important; flex-direction: column; gap: 6px; }
+  .availability-month-select { max-width: none !important; min-height: 42px; }
+
+  .availability-profile-card { padding: 14px; }
+  .availability-profile-layout { align-items: stretch !important; }
+  .availability-contact-details { flex-direction: column; gap: 7px !important; overflow-wrap: anywhere; }
+  .availability-status-legend { align-items: flex-start !important; flex-direction: column; }
+
+  .availability-summary-grid { margin-right: -5px; margin-left: -5px; }
+  .availability-summary-grid > [class*="col-"] {
+    width: 50%;
+    max-width: 50%;
+    flex: 0 0 50%;
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+
+  .availability-summary-grid > [class*="col-"]:last-child {
+    width: 100%;
+    max-width: 100%;
+    flex-basis: 100%;
+  }
+
+  .availability-summary-grid .card-body { min-height: 108px; padding: 13px; }
+  .availability-summary-grid .display-6 { font-size: 1.65rem; }
+  .availability-overview-section .row-cols-3 { --bs-gutter-x: .4rem; }
+  .availability-overview-section .row-cols-3 .p-2 { padding: 8px 4px !important; font-size: 13px; }
+  .availability-overview-section .row-cols-3 .small { font-size: 10px; }
+
+  .availability-calendar-section .card-body { padding: 13px; }
+  .availability-calendar-section .calendar__head,
+  .availability-calendar-section .calendar__body { min-width: 680px; }
+  .availability-calendar-section .calendar__cell,
+  .availability-calendar-section .calendar__cell--empty { min-height: 104px; }
+
+  .modal-dialog-slideout {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .modal-dialog-slideout .modal-content {
+    height: 100dvh;
+    overflow-y: auto;
+  }
+
+  .modal-dialog-slideout .modal-header,
+  .modal-dialog-slideout .modal-body,
+  .modal-dialog-slideout .modal-footer { padding: 14px; }
+}
+
+@media (max-width: 380px) {
+  .availability-summary-grid > [class*="col-"] {
+    width: 100%;
+    max-width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+/* Instructors list */
+.instructors-page .content {
+  width: 100%;
+  max-width: 1480px;
+}
+
+.instructors-page-heading {
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.instructors-page-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.instructors-table-wrap {
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-surface, #fff);
+  box-shadow: var(--shadow-card, 0 3px 12px rgba(16, 24, 40, .07));
+}
+
+.instructors-table {
+  min-width: 780px;
+  margin-bottom: 0;
+}
+
+.instructors-table thead th {
+  position: sticky;
+  top: 74px;
+  z-index: 2;
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--color-border, #d9e0e8) !important;
+  background: #f8fafc !important;
+  color: var(--color-text, #172033);
+  white-space: nowrap;
+}
+
+.instructors-table tbody td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+.instructors-table tbody tr:hover td {
+  background: #f8fbff;
+}
+
+.instructor-availability-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.instructors-row-actions {
+  min-width: 160px;
+  white-space: nowrap;
+}
+
+.instructor-action-icon {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  margin: 2px;
+  font-size: 15px;
+  place-items: center;
+}
+
+@media (max-width: 767.98px) {
+  .instructors-page .content {
+    padding: 18px 10px;
+  }
+
+  .instructors-page-heading h1 {
+    font-size: 24px;
+  }
+
+  .instructors-page-actions {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+    margin-top: 10px;
+  }
+
+  .instructors-page-actions .btn {
+    width: 100%;
+  }
+
+  .instructors-table-wrap {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .instructors-table {
+    display: block;
+    min-width: 0;
+    background: transparent;
+  }
+
+  .instructors-table thead {
+    display: none;
+  }
+
+  .instructors-table tbody,
+  .instructors-table tr,
+  .instructors-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .instructors-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .instructors-table tbody tr {
+    overflow: hidden;
+    border: 1px solid var(--color-border, #d9e0e8);
+    border-radius: var(--radius-md, 10px);
+    background: var(--color-surface, #fff);
+    box-shadow: var(--shadow-card, 0 3px 12px rgba(16, 24, 40, .07));
+  }
+
+  .instructors-table tbody td {
+    display: grid;
+    grid-template-columns: minmax(112px, 40%) minmax(0, 1fr);
+    gap: 10px;
+    min-width: 0;
+    padding: 11px 13px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #edf0f4 !important;
+    text-align: right !important;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .instructors-table tbody td::before {
+    color: var(--color-muted, #667085);
+    content: attr(data-label);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .instructors-table tbody td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .instructor-availability-value {
+    justify-self: end;
+    text-align: right;
+  }
+
+  .instructors-row-actions {
+    display: block !important;
+    text-align: right !important;
+  }
+
+  .instructors-row-actions::before {
+    display: block;
+    margin-bottom: 4px;
+  }
+}

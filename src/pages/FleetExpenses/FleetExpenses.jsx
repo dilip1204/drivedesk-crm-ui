@@ -518,6 +518,7 @@ const FleetExpenses = () => {
                                   <button className="btn btn-sm btn-warning fleet-expense-action-icon" onClick={() => handleEditExpenses(r)} title="Edit Expense" data-tooltip="Edit Expense" aria-label="Edit Expense"><i className="bi bi-pencil-square" aria-hidden="true" /></button>
                                   <button className="btn btn-sm btn-primary fleet-expense-action-icon" onClick={() => handleViewExpenses(r)} title="View Expense" data-tooltip="View Expense" aria-label="View Expense"><i className="bi bi-eye" aria-hidden="true" /></button>
                                   <button className="btn btn-sm btn-danger fleet-expense-action-icon" onClick={() => handleDelete(r.id)} title="Delete Expense" data-tooltip="Delete Expense" aria-label="Delete Expense"><i className="bi bi-trash" aria-hidden="true" /></button>
+                                </td>
                                 <td>{formatDateDDMMYYYY(r.date)}</td>
                                 <td>{getExpenseType(r)}</td>
                                 <td>{r.category || "-"}</td>

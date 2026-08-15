@@ -396,7 +396,11 @@
 
 .students-page-heading {
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+}
+
+.students-page-heading .breadcrumb-wrapper {
+  margin-bottom: 0;
 }
 
 .students-page-actions {
@@ -449,7 +453,7 @@
   position: sticky;
   top: 74px;
   z-index: 2;
-  padding: 13px 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--color-border, #d9e0e8) !important;
   background: #f8fafc !important;
   color: var(--color-text, #172033);
@@ -457,7 +461,7 @@
 }
 
 .students-table tbody td {
-  padding: 14px 12px;
+  padding: 4px 10px;
   vertical-align: middle;
 }
 
@@ -466,18 +470,18 @@
 }
 
 .students-row-actions {
-  min-width: 190px;
+  min-width: 150px;
   white-space: nowrap;
 }
 
 .students-row-actions .students-action-icon {
   display: inline-grid;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
   padding: 0;
-  margin: 2px;
-  font-size: 15px;
+  margin: 1px;
+  font-size: 13px;
   place-items: center;
 }
 
@@ -661,6 +665,8 @@
 
   .students-row-actions .students-action-icon {
     width: 36px;
+    height: 36px;
+    min-width: 36px;
     min-height: 36px;
     margin: 2px;
   }

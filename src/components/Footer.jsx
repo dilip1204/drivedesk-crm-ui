@@ -19,7 +19,10 @@ export default function Footer() {
         </div>
 
         <p className="dd-footer__copyright">
-          &copy; {year} <strong>Asteriq Systech</strong>. All rights reserved.
+          &copy; {year}{" "}
+          <a href="https://asteriqsystech.com/" target="_blank" rel="noopener noreferrer">
+            Asteriq Systech
+          </a>. All rights reserved.
         </p>
 
         <div className="dd-footer__meta" aria-label="Application status">

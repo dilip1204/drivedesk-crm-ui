@@ -86,7 +86,12 @@ export function PublicFooter() {
       </div>
       <div className="public-container public-footer-bottom">
         <span>© {new Date().getFullYear()} DriveDesk. All rights reserved.</span>
-        <span>Built for modern driving schools.</span>
+        <span>
+          DriveDesk is a product of{" "}
+          <a href="https://asteriqsystech.com/" target="_blank" rel="noopener noreferrer">
+            Asteriq Systech
+          </a>.
+        </span>
       </div>
     </footer>
   );

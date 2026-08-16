@@ -81,9 +81,19 @@
   white-space: nowrap;
 }
 
-.dd-footer__copyright strong {
+.dd-footer__copyright strong,
+.dd-footer__copyright a {
   color: #344054;
   font-weight: 600;
+}
+
+.dd-footer__copyright a {
+  text-decoration: none;
+}
+
+.dd-footer__copyright a:hover,
+.dd-footer__copyright a:focus-visible {
+  text-decoration: underline;
 }
 
 .dd-footer__meta {

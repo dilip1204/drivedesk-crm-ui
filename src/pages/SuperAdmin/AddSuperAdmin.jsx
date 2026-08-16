@@ -88,16 +88,18 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
         },
     });
 
-    const field = (label, name, type = "text", required = false) => (
-        <div className="col-md-6 mb-3">
-            <label className="form-label" style={{ fontSize: "13px", fontWeight: 500 }}>
+    const field = (label, name, type = "text", required = false, placeholder = "") => (
+        <div className="col-md-6 superadmin-form-field">
+            <label className="form-label" htmlFor={`tenant-${name}`}>
                 {label} {required && <span className="text-danger">*</span>}
             </label>
             <input
+                id={`tenant-${name}`}
                 type={type}
-                className={`form-control form-control-sm ${formik.touched[name] && formik.errors[name] ? "is-invalid" : ""}`}
+                className={`form-control ${formik.touched[name] && formik.errors[name] ? "is-invalid" : ""}`}
                 name={name}
                 value={formik.values[name]}
+                placeholder={placeholder}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
             />
@@ -108,33 +110,53 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
     );
 
     return (
-        <Modal show={showModal} onHide={hideModal} size="lg" centered>
-            <Modal.Header style={{ padding: "14px 20px" }}>
-                <Modal.Title style={{ fontSize: "16px", fontWeight: 600 }}>
-                    {isEdit ? "Edit Tenant" : "Add Tenant"}
+        <Modal
+            show={showModal}
+            onHide={hideModal}
+            size="lg"
+            centered
+            dialogClassName="superadmin-modal superadmin-form-modal"
+        >
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    <span className={`superadmin-modal-title-icon mdi ${isEdit ? "mdi-pencil" : "mdi-plus-box"}`} aria-hidden="true"></span>
+                    <span>
+                        {isEdit ? "Edit tenant" : "Add tenant"}
+                        <small>{isEdit ? "Update organisation account information" : "Create a new organisation account"}</small>
+                    </span>
                 </Modal.Title>
             </Modal.Header>
-            <Modal.Body style={{ padding: "20px" }}>
-                <form onSubmit={formik.handleSubmit}>
-                    <div className="row">
-                        {field("Organisation Name", "org_name", "text", true)}
-                        {!isEdit && field("Proprietor", "proprietor", "text", true)}
-                        {field("Address", "address")}
-                        {field("Pincode", "pincode")}
-                        {field("Primary Mobile", "mobile_number_primary", "text", true)}
-                        {field("Secondary Mobile", "mobile_number_secondary")}
-                        {field("Email", "email", "email", true)}
-                        {!isEdit && field("Password", "password", "password", true)}
-                        {field("Google Review Link", "google_review_link")}
-
-                        {/* WhatsApp Section */}
-                        <div className="col-12 mb-2 mt-1">
-                            <hr style={{ margin: "4px 0 10px" }} />
-                            <p style={{ fontSize: "13px", fontWeight: 600, marginBottom: 10 }}>WhatsApp Settings</p>
+            <Modal.Body>
+                <form id="superadmin-tenant-form" onSubmit={formik.handleSubmit}>
+                    <div className="superadmin-form-section">
+                        <div className="superadmin-form-section-heading">
+                            <span className="mdi mdi-domain" aria-hidden="true"></span>
+                            <div>
+                                <h3>Organisation details</h3>
+                                <p>Basic identity and contact information.</p>
+                            </div>
                         </div>
+                        <div className="row">
+                            {field("Organisation Name", "org_name", "text", true, "Enter organisation name")}
+                            {!isEdit && field("Proprietor", "proprietor", "text", true, "Enter proprietor name")}
+                            {field("Address", "address", "text", false, "Enter business address")}
+                            {field("Pincode", "pincode", "text", false, "Enter pincode")}
+                            {field("Primary Mobile", "mobile_number_primary", "text", true, "Enter primary mobile")}
+                            {field("Secondary Mobile", "mobile_number_secondary", "text", false, "Enter secondary mobile")}
+                            {field("Email", "email", "email", true, "Enter email address")}
+                            {!isEdit && field("Password", "password", "password", true, "Minimum 6 characters")}
+                            {field("Google Review Link", "google_review_link", "url", false, "https://...")}
+                        </div>
+                    </div>
 
-                        <div className="col-12 mb-3">
-                            <div className="form-check form-switch">
+                    <div className="superadmin-form-section">
+                        <div className="superadmin-form-section-heading superadmin-whatsapp-heading">
+                            <span className="mdi mdi-whatsapp" aria-hidden="true"></span>
+                            <div>
+                                <h3>WhatsApp integration</h3>
+                                <p>Enable and configure messaging for this tenant.</p>
+                            </div>
+                            <div className="form-check form-switch superadmin-whatsapp-switch">
                                 <input
                                     className="form-check-input"
                                     type="checkbox"
@@ -143,43 +165,42 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
                                     checked={formik.values.whatsapp_enabled}
                                     onChange={formik.handleChange}
                                 />
-                                <label className="form-check-label" htmlFor="whatsapp_enabled" style={{ fontSize: "13px" }}>
-                                    WhatsApp Enabled
+                                <label className="form-check-label" htmlFor="whatsapp_enabled">
+                                    {formik.values.whatsapp_enabled ? "Enabled" : "Disabled"}
                                 </label>
                             </div>
                         </div>
 
                         {formik.values.whatsapp_enabled && (
-                            <>
-                                {field("Phone Number ID", "whatsapp_phone_number_id")}
-                                {field("Access Token", "whatsapp_access_token")}
-                                {field("Business Account ID", "whatsapp_business_account_id")}
-                                {field("Registered Number", "whatsapp_registered_number")}
-                            </>
+                            <div className="row superadmin-whatsapp-fields">
+                                {field("Phone Number ID", "whatsapp_phone_number_id", "text", false, "Enter phone number ID")}
+                                {field("Access Token", "whatsapp_access_token", "text", false, "Enter access token")}
+                                {field("Business Account ID", "whatsapp_business_account_id", "text", false, "Enter business account ID")}
+                                {field("Registered Number", "whatsapp_registered_number", "text", false, "Enter registered number")}
+                            </div>
                         )}
-                    </div>
-
-                    <div className="d-flex justify-content-end gap-2 mt-2">
-                        <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={hideModal}
-                            disabled={formik.isSubmitting}
-                            style={{ fontSize: "13px", padding: "6px 18px" }}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn btn-primary btn-sm"
-                            disabled={formik.isSubmitting}
-                            style={{ fontSize: "13px", padding: "6px 18px" }}
-                        >
-                            {formik.isSubmitting ? "Saving..." : isEdit ? "Update" : "Add"}
-                        </button>
                     </div>
                 </form>
             </Modal.Body>
+            <Modal.Footer>
+                <button
+                    type="button"
+                    className="btn btn-secondary btn-sm superadmin-modal-button"
+                    onClick={hideModal}
+                    disabled={formik.isSubmitting}
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    form="superadmin-tenant-form"
+                    className="btn btn-primary btn-sm superadmin-modal-button"
+                    disabled={formik.isSubmitting}
+                >
+                    {formik.isSubmitting && <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>}
+                    {formik.isSubmitting ? "Saving..." : isEdit ? "Update tenant" : "Add tenant"}
+                </button>
+            </Modal.Footer>
         </Modal>
     );
 }

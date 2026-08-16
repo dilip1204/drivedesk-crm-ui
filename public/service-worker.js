@@ -1,4 +1,4 @@
-const CACHE_VERSION = "drivedesk-pwa-v2";
+const CACHE_VERSION = "drivedesk-pwa-v3";
 const APP_SHELL = ["/", "/index.html", "/manifest.json", "/pwa-icon-192.png", "/pwa-icon-512.png", "/favicon.ico"];
 
 self.addEventListener("install", (event) => {
@@ -39,7 +39,22 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (["script", "style", "image", "font"].includes(request.destination)) {
+  if (["script", "style"].includes(request.destination)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  if (["image", "font"].includes(request.destination)) {
     event.respondWith(
       caches.match(request).then((cached) => {
         const network = fetch(request).then((response) => {

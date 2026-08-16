@@ -17,6 +17,8 @@ import AddSuperAdmin from "./AddSuperAdmin";
 
 import { getSuperAdminList } from "../../store/superAdmin/actions";
 
+const EMPTY_VALUE = "—";
+
 const SuperAdmin = () => {
     const dispatch = useDispatch();
 
@@ -81,6 +83,8 @@ const SuperAdmin = () => {
     };
 
     const startIndex = (currentPage - 1) * pageSize;
+    const whatsappEnabledCount = tenants.filter((tenant) => tenant.whatsapp_enabled).length;
+    const whatsappPendingCount = tenants.length - whatsappEnabledCount;
 
     return (
         <>
@@ -91,88 +95,148 @@ const SuperAdmin = () => {
                         <Header />
                         <div className="content-wrapper">
                             <div className="content superadmin-content">
-                                <div className="superadmin-card superadmin-hero mb-4">
+                                <div className="superadmin-hero">
                                     <div className="superadmin-hero__text">
-                                        <h1 className="superadmin-title mb-1">Super Admin</h1>
+                                        <h1 className="superadmin-title">Tenant Management</h1>
                                         <nav aria-label="breadcrumb">
                                             <ol className="breadcrumb p-0 mb-0 superadmin-breadcrumb">
                                                 <li className="breadcrumb-item">
-                                                    <a href="#"><span className="mdi mdi-home"></span></a>
+                                                    <span className="mdi mdi-home" aria-hidden="true"></span>
                                                 </li>
                                                 <li className="breadcrumb-item">Super Admin</li>
-                                                <li className="breadcrumb-item" aria-current="page">Tenant List</li>
+                                                <li className="breadcrumb-item active" aria-current="page">Tenants</li>
                                             </ol>
                                         </nav>
                                     </div>
                                     <div className="superadmin-hero__actions">
-                                        <button className="btn btn-primary btn-sm superadmin-add-btn" onClick={handleAdd}>
-                                            <i className="mdi mdi-plus me-1"></i> Add Tenant
+                                        <button type="button" className="btn btn-primary btn-sm superadmin-add-btn" onClick={handleAdd}>
+                                            <i className="mdi mdi-plus" aria-hidden="true"></i>
+                                            <span>Add Tenant</span>
                                         </button>
                                     </div>
                                 </div>
 
-                                {/* Table */}
+                                <div className="superadmin-summary" aria-label="Tenant summary">
+                                    <div className="superadmin-summary-card is-primary">
+                                        <span className="superadmin-summary-icon mdi mdi-domain" aria-hidden="true"></span>
+                                        <div>
+                                            <span className="superadmin-summary-label">Total tenants</span>
+                                            <strong>{totalCount}</strong>
+                                        </div>
+                                    </div>
+                                    <div className="superadmin-summary-card is-success">
+                                        <span className="superadmin-summary-icon mdi mdi-whatsapp" aria-hidden="true"></span>
+                                        <div>
+                                            <span className="superadmin-summary-label">WhatsApp active</span>
+                                            <strong>{whatsappEnabledCount}</strong>
+                                            <small>On this page</small>
+                                        </div>
+                                    </div>
+                                    <div className="superadmin-summary-card is-muted">
+                                        <span className="superadmin-summary-icon mdi mdi-alert-circle-outline" aria-hidden="true"></span>
+                                        <div>
+                                            <span className="superadmin-summary-label">Needs setup</span>
+                                            <strong>{whatsappPendingCount}</strong>
+                                            <small>On this page</small>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="superadmin-card superadmin-table-card">
+                                    <div className="superadmin-table-heading">
+                                        <div>
+                                            <h2>Tenant directory</h2>
+                                            <p>Manage organisations and their communication settings.</p>
+                                        </div>
+                                        {!loading && !error && (
+                                            <span className="superadmin-result-count">
+                                                Showing {startIndex + 1}–{Math.min(startIndex + tenants.length, totalCount)} of {totalCount}
+                                            </span>
+                                        )}
+                                    </div>
+
                                     {loading ? (
-                                        <p className="text-center my-5">Loading...</p>
+                                        <div className="superadmin-state" role="status">
+                                            <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                                            <span>Loading tenants...</span>
+                                        </div>
                                     ) : error ? (
-                                        <p className="text-center text-danger my-5">{error}</p>
+                                        <div className="superadmin-state superadmin-empty-state">
+                                            <span className="mdi mdi-office-building superadmin-state-icon" aria-hidden="true"></span>
+                                            <strong>No tenants found</strong>
+                                            <span>{error}</span>
+                                            <button type="button" className="btn btn-primary btn-sm" onClick={handleAdd}>
+                                                Add your first tenant
+                                            </button>
+                                        </div>
                                     ) : (
                                         <>
-                                            <div className="table-responsive">
+                                            <div className="table-responsive superadmin-table-wrap">
                                                 <table className="table custom-table align-middle superadmin-table">
-                                                    <thead className="table-light">
+                                                    <thead>
                                                         <tr>
-                                                            <th>S.No</th>
-                                                            <th>Org Name</th>
-                                                            <th>Address</th>
-                                                            <th>Pincode</th>
-                                                            <th>Primary Mobile</th>
-                                                            <th>Secondary Mobile</th>
-                                                            <th>Email</th>
-                                                            <th>WhatsApp</th>
-                                                            <th>Actions</th>
+                                                            <th className="superadmin-col-sn">S.No</th>
+                                                            <th className="superadmin-col-org">Organisation</th>
+                                                            <th className="superadmin-col-address">Address</th>
+                                                            <th className="superadmin-col-pincode">Pincode</th>
+                                                            <th className="superadmin-col-mobile">Primary Mobile</th>
+                                                            <th className="superadmin-col-secondary-mobile">Secondary Mobile</th>
+                                                            <th className="superadmin-col-email">Email</th>
+                                                            <th className="superadmin-col-status">WhatsApp</th>
+                                                            <th className="superadmin-actions">Actions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {tenants.map((tenant, index) => (
                                                             <tr key={tenant.tenant_id || index}>
-                                                                <td className="superadmin-col-sn">{startIndex + index + 1}</td>
-                                                                <td className="superadmin-cell-wrap superadmin-col-org">
-                                                                    {tenant.org_name || "—"}
+                                                                <td data-label="S.No" className="superadmin-col-sn">{startIndex + index + 1}</td>
+                                                                <td data-label="Organisation" className="superadmin-cell-wrap superadmin-col-org">
+                                                                    <span className="superadmin-org-mark" aria-hidden="true">
+                                                                        {(tenant.org_name || "T").charAt(0).toUpperCase()}
+                                                                    </span>
+                                                                    <span>{tenant.org_name || EMPTY_VALUE}</span>
                                                                 </td>
-                                                                <td className="superadmin-cell-wrap superadmin-col-address">
-                                                                    {tenant.address || "—"}
+                                                                <td data-label="Address" className="superadmin-cell-wrap superadmin-col-address">
+                                                                    {tenant.address || EMPTY_VALUE}
                                                                 </td>
-                                                                <td className="superadmin-col-pincode">{tenant.pincode || "—"}</td>
-                                                                <td className="superadmin-col-mobile">{tenant.mobile_number_primary || "—"}</td>
-                                                                <td className="superadmin-col-mobile">{tenant.mobile_number_secondary || "—"}</td>
-                                                                <td className="superadmin-cell-wrap superadmin-col-email">{tenant.email || "—"}</td>
-                                                                <td className="superadmin-col-status">
+                                                                <td data-label="Pincode" className="superadmin-col-pincode">{tenant.pincode || EMPTY_VALUE}</td>
+                                                                <td data-label="Primary Mobile" className="superadmin-col-mobile">{tenant.mobile_number_primary || EMPTY_VALUE}</td>
+                                                                <td data-label="Secondary Mobile" className="superadmin-col-mobile superadmin-col-secondary-mobile">{tenant.mobile_number_secondary || EMPTY_VALUE}</td>
+                                                                <td data-label="Email" className="superadmin-cell-wrap superadmin-col-email">{tenant.email || EMPTY_VALUE}</td>
+                                                                <td data-label="WhatsApp" className="superadmin-col-status">
                                                                     <span className={`badge superadmin-status-badge ${tenant.whatsapp_enabled ? "is-enabled" : "is-disabled"}`}>
+                                                                        <i className={`mdi ${tenant.whatsapp_enabled ? "mdi-check-circle" : "mdi-minus-circle"}`} aria-hidden="true"></i>
                                                                         {tenant.whatsapp_enabled ? "Enabled" : "Disabled"}
                                                                     </span>
                                                                 </td>
-                                                                <td className="superadmin-actions">
+                                                                <td data-label="Actions" className="superadmin-actions">
                                                                     <button
-                                                                        className="btn btn-sm btn-outline-info superadmin-icon-btn"
-                                                                        title="View"
+                                                                        type="button"
+                                                                        className="btn btn-sm superadmin-action-btn is-view"
+                                                                        title="View tenant"
+                                                                        aria-label={`View ${tenant.org_name || "tenant"}`}
                                                                         onClick={() => handleView(tenant)}
                                                                     >
-                                                                        <i className="mdi mdi-eye"></i>
+                                                                        <i className="mdi mdi-eye" aria-hidden="true"></i>
+                                                                        <span>View</span>
                                                                     </button>
                                                                     <button
-                                                                        className="btn btn-sm btn-outline-primary superadmin-icon-btn"
-                                                                        title="Edit"
+                                                                        type="button"
+                                                                        className="btn btn-sm superadmin-action-btn is-edit"
+                                                                        title="Edit tenant"
+                                                                        aria-label={`Edit ${tenant.org_name || "tenant"}`}
                                                                         onClick={() => handleEdit(tenant)}
                                                                     >
-                                                                        <i className="mdi mdi-pencil"></i>
+                                                                        <i className="mdi mdi-pencil" aria-hidden="true"></i>
+                                                                        <span>Edit</span>
                                                                     </button>
                                                                 </td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
                                                 </table>
+                                            </div>
+                                            <div className="superadmin-pagination">
                                                 <Pagination
                                                     currentPage={currentPage}
                                                     totalCount={totalCount}
@@ -199,45 +263,69 @@ const SuperAdmin = () => {
                 onSuccess={handleSuccess}
             />
 
-            <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg" centered>
-                <Modal.Header style={{ padding: "14px 20px" }} closeButton>
-                    <Modal.Title style={{ fontSize: "16px", fontWeight: 600 }}>
-                        Tenant Details
+            <Modal
+                show={showViewModal}
+                onHide={() => setShowViewModal(false)}
+                size="lg"
+                centered
+                dialogClassName="superadmin-modal"
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>
+                        <span className="superadmin-modal-title-icon mdi mdi-domain" aria-hidden="true"></span>
+                        <span>
+                            Tenant details
+                            <small>Organisation account and integration information</small>
+                        </span>
                     </Modal.Title>
                 </Modal.Header>
-                <Modal.Body style={{ padding: "20px" }}>
+                <Modal.Body>
                     {viewTenant ? (
-                        <div className="row g-3 superadmin-detail-grid">
-                            {[
-                                ["Tenant ID", viewTenant.tenant_id || "—"],
-                                ["Organisation Name", viewTenant.org_name || "—"],
-                                ["Proprietor", viewTenant.proprietor || "—"],
-                                ["Address", viewTenant.address || "—"],
-                                ["Pincode", viewTenant.pincode || "—"],
-                                ["Primary Mobile", viewTenant.mobile_number_primary || "—"],
-                                ["Secondary Mobile", viewTenant.mobile_number_secondary || "—"],
-                                ["Email", viewTenant.email || "—"],
-                                ["WhatsApp Enabled", viewTenant.whatsapp_enabled ? "Enabled" : "Disabled"],
-                                ["WhatsApp Phone Number ID", viewTenant.whatsapp_phone_number_id || "—"],
-                                ["WhatsApp Access Token", viewTenant.whatsapp_access_token ? "••••••••••" : "—"],
-                                ["WhatsApp Business Account ID", viewTenant.whatsapp_business_account_id || "—"],
-                                ["WhatsApp Registered Number", viewTenant.whatsapp_registered_number || "—"],
-                                ["Google Review Link", viewTenant.google_review_link || "—"],
-                            ].map(([label, value]) => (
-                                <div className="col-md-6" key={label}>
-                                    <div className="superadmin-detail-item h-100">
-                                        <div className="text-muted small mb-1 superadmin-detail-label">{label}</div>
-                                        <div className="superadmin-detail-value">
-                                            {value}
+                        <>
+                            <div className="superadmin-tenant-profile">
+                                <span className="superadmin-tenant-avatar" aria-hidden="true">
+                                    {(viewTenant.org_name || "T").charAt(0).toUpperCase()}
+                                </span>
+                                <div>
+                                    <h3>{viewTenant.org_name || "Unnamed tenant"}</h3>
+                                    <p>{viewTenant.email || "No email provided"}</p>
+                                </div>
+                                <span className={`badge superadmin-status-badge ${viewTenant.whatsapp_enabled ? "is-enabled" : "is-disabled"}`}>
+                                    <i className={`mdi ${viewTenant.whatsapp_enabled ? "mdi-check-circle" : "mdi-minus-circle"}`} aria-hidden="true"></i>
+                                    WhatsApp {viewTenant.whatsapp_enabled ? "enabled" : "disabled"}
+                                </span>
+                            </div>
+
+                            <div className="superadmin-detail-section-title">Account information</div>
+                            <div className="row g-3 superadmin-detail-grid">
+                                {[
+                                    ["Tenant ID", viewTenant.tenant_id || EMPTY_VALUE, "mdi-pound-box"],
+                                    ["Proprietor", viewTenant.proprietor || EMPTY_VALUE, "mdi-account-outline"],
+                                    ["Address", viewTenant.address || EMPTY_VALUE, "mdi-map-marker-outline"],
+                                    ["Pincode", viewTenant.pincode || EMPTY_VALUE, "mdi-map-marker-radius"],
+                                    ["Primary Mobile", viewTenant.mobile_number_primary || EMPTY_VALUE, "mdi-phone-outline"],
+                                    ["Secondary Mobile", viewTenant.mobile_number_secondary || EMPTY_VALUE, "mdi-phone-plus"],
+                                    ["Email", viewTenant.email || EMPTY_VALUE, "mdi-email-outline"],
+                                    ["WhatsApp Phone Number ID", viewTenant.whatsapp_phone_number_id || EMPTY_VALUE, "mdi-whatsapp"],
+                                    ["WhatsApp Access Token", viewTenant.whatsapp_access_token ? "••••••••••" : EMPTY_VALUE, "mdi-key"],
+                                    ["WhatsApp Business Account ID", viewTenant.whatsapp_business_account_id || EMPTY_VALUE, "mdi-briefcase-outline"],
+                                    ["WhatsApp Registered Number", viewTenant.whatsapp_registered_number || EMPTY_VALUE, "mdi-cellphone"],
+                                    ["Google Review Link", viewTenant.google_review_link || EMPTY_VALUE, "mdi-star-outline"],
+                                ].map(([label, value, icon]) => (
+                                    <div className="col-md-6" key={label}>
+                                        <div className="superadmin-detail-item h-100">
+                                            <span className={`superadmin-detail-icon mdi ${icon}`} aria-hidden="true"></span>
+                                            <div className="text-muted small mb-1 superadmin-detail-label">{label}</div>
+                                            <div className="superadmin-detail-value">{value}</div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        </>
                     ) : null}
                 </Modal.Body>
-                <Modal.Footer style={{ padding: "14px 20px" }}>
-                    <button className="btn btn-secondary btn-sm" onClick={() => setShowViewModal(false)}>
+                <Modal.Footer>
+                    <button className="btn btn-secondary btn-sm superadmin-modal-button" onClick={() => setShowViewModal(false)}>
                         Close
                     </button>
                 </Modal.Footer>

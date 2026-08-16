@@ -7,6 +7,7 @@ import { addEnquiries, updateEnquiries } from "../../store/Enquiries/actions"; /
 import { addStudent } from "../../store/addStudent/actions";
 import { getTariffsListInformation } from "../../store/tariff/actions";
 import { IoClose } from "react-icons/io5";
+import "./addEnquiries.css";
 
 export default function AddEnquiries({
   showModal,
@@ -314,8 +315,9 @@ export default function AddEnquiries({
       keyboard={false}
       size="lg"
       centered
+      dialogClassName="enquiry-form-dialog"
     >
-      <Modal.Header>
+      <Modal.Header className="enquiry-form-header">
         <Modal.Title>{isEdit ? "Update Enquiry" : "Add Enquiry"}</Modal.Title>
         <IoClose
           onClick={() => {
@@ -331,9 +333,9 @@ export default function AddEnquiries({
           title="Close"
         />
       </Modal.Header>
-      <Modal.Body>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="row">
+      <Modal.Body className="enquiry-form-body">
+        <form onSubmit={formik.handleSubmit} className="enquiry-form">
+          <div className="row enquiry-form-row">
             {[
               ["name", "text"],
               ["mobile_number", "text"],
@@ -342,7 +344,7 @@ export default function AddEnquiries({
               ["remarks", "text"],
             ].map(([field, type]) => (
               <div className="col-md-6" key={field}>
-                <div className="form-group">
+                <div className="form-group enquiry-form-group">
                   <label>
                     {field
                       .replace(/_/g, " ")
@@ -373,7 +375,7 @@ export default function AddEnquiries({
             ))}
 
             <div className="col-md-6">
-              <div className="form-group">
+              <div className="form-group enquiry-form-group">
                 <label>
                   Course Interest <span style={{ color: "red" }}>*</span>
                 </label>
@@ -402,7 +404,7 @@ export default function AddEnquiries({
             </div>
 
             <div className="col-md-6">
-              <div className="form-group">
+              <div className="form-group enquiry-form-group">
                 <label>
                   Follow Up Status <span style={{ color: "red" }}>*</span>
                 </label>
@@ -429,7 +431,7 @@ export default function AddEnquiries({
 
             {!isEnrolledStatus(formik.values.follow_up_status) && (
               <div className="col-md-6">
-                <div className="form-group">
+                <div className="form-group enquiry-form-group">
                   <label>Follow Up Date</label>
                   <input
                     type="date"
@@ -445,7 +447,7 @@ export default function AddEnquiries({
 
             {isEnrolledStatus(formik.values.follow_up_status) && (
               <div className="col-md-6">
-                <div className="form-group">
+                <div className="form-group enquiry-form-group">
                   <label>
                     Total Amount <span style={{ color: "red" }}>*</span>
                   </label>
@@ -465,7 +467,7 @@ export default function AddEnquiries({
 
             {isEnrolledStatus(formik.values.follow_up_status) && (
               <div className="col-md-6">
-                <div className="form-group">
+                <div className="form-group enquiry-form-group">
                   <label>
                     Paid Amount <span style={{ color: "red" }}>*</span>
                   </label>
@@ -492,7 +494,7 @@ export default function AddEnquiries({
             )}
           </div>
 
-          <Modal.Footer>
+          <Modal.Footer className="enquiry-form-footer">
             <Button
               variant="secondary"
               onClick={() => {

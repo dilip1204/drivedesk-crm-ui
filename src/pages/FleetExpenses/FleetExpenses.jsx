@@ -346,10 +346,10 @@ const FleetExpenses = () => {
   }, [expenseTypeAgg, monthlyAgg]);
 
   const styles = {
-    pageCard: { borderRadius: 18, background: "#fff", padding: 24, boxShadow: "0 6px 20px rgba(29,39,61,0.06)", marginTop: 16 },
-    chartTall: { height: 260, borderRadius: 12, border: "1px solid #eef2f6", padding: 16, position: "relative" },
-    pieBox: { width: "100%", height: 260, borderRadius: 12, border: "1px solid #eef2f6", padding: 16, position: "relative" },
-    kpiCard: { borderRadius: 12, padding: 18, border: "1px solid #eef2f6", textAlign: "center", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" },
+    pageCard: { borderRadius: 10, background: "#fff", padding: 14, boxShadow: "0 3px 12px rgba(16,24,40,0.07)", marginTop: 8 },
+    chartTall: { height: 220, borderRadius: 8, border: "1px solid #e5eaf0", padding: 12, position: "relative" },
+    pieBox: { width: "100%", height: 220, borderRadius: 8, border: "1px solid #e5eaf0", padding: 12, position: "relative" },
+    kpiCard: { borderRadius: 8, padding: 14, border: "1px solid #e5eaf0", textAlign: "center", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" },
   };
 
   const handleDeleteCloseModel = () => {
@@ -404,7 +404,13 @@ const FleetExpenses = () => {
                     <h1>Expenses</h1>
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
-                        <li className="breadcrumb-item"><a href="#"><span className="mdi mdi-home" /></a></li>
+                        <li className="breadcrumb-item">
+                          <a href="#" className="fleet-expenses-breadcrumb-home" aria-label="Expenses home">
+                            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                              <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                            </svg>
+                          </a>
+                        </li>
                         <li className="breadcrumb-item">Expenses</li>
                         <li className="breadcrumb-item" aria-current="page">Expenses Dashboard</li>
                       </ol>
@@ -442,22 +448,22 @@ const FleetExpenses = () => {
                   <div className="row g-3 mb-3">
                     <div className="col-12 col-md-4 d-flex">
                       <div className="fleet-chart-card" style={{ ...styles.pieBox, width: "100%" }}>
-                        <div style={{ fontWeight: 600, marginBottom: 10 }}>Expense Type Share</div>
+                        <div className="fleet-chart-title">Expense Type Share</div>
                         <canvas ref={pieRef} style={{ width: "100%", height: 180 }} />
                       </div>
                     </div>
 
                     <div className="col-12 col-md-4 d-flex">
                       <div className="fleet-kpi-card" style={{ ...styles.kpiCard, width: "100%" }}>
-                        <div style={{ color: "#6c757d", fontSize: 14 }}>Total Spend</div>
-                        <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>{`₹${totalSpend.toLocaleString("en-IN")}`}</div>
+                        <div className="fleet-kpi-label">Total Spend</div>
+                        <div className="fleet-kpi-value">{`₹${totalSpend.toLocaleString("en-IN")}`}</div>
                       </div>
                     </div>
 
                     <div className="col-12 col-md-4 d-flex">
                       <div className="fleet-kpi-card" style={{ ...styles.kpiCard, width: "100%" }}>
-                        <div style={{ color: "#6c757d", fontSize: 14 }}>{selectedMonth ? `Month (${selectedMonth})` : "This Month"}</div>
-                        <div style={{ fontSize: 28, fontWeight: 700, marginTop: 8 }}>{`₹${perMonth.toLocaleString("en-IN")}`}</div>
+                        <div className="fleet-kpi-label">{selectedMonth ? `Month (${selectedMonth})` : "This Month"}</div>
+                        <div className="fleet-kpi-value">{`₹${perMonth.toLocaleString("en-IN")}`}</div>
                       </div>
                     </div>
                   </div>
@@ -466,14 +472,14 @@ const FleetExpenses = () => {
                   <div className="row g-3 mb-3">
                     <div className="col-12 col-md-6">
                       <div className="fleet-chart-card" style={styles.chartTall}>
-                        <div style={{ fontWeight: 600, marginBottom: 10 }}>Monthly Spend</div>
+                        <div className="fleet-chart-title">Monthly Spend</div>
                         <canvas ref={monthlyRef} style={{ width: "100%", height: "100%" }} />
                       </div>
                     </div>
 
                     <div className="col-12 col-md-6">
                       <div className="fleet-chart-card" style={styles.chartTall}>
-                        <div style={{ fontWeight: 600, marginBottom: 10 }}>Expense Type Breakdown</div>
+                        <div className="fleet-chart-title">Expense Type Breakdown</div>
                         <canvas ref={expenseTypeRef} style={{ width: "100%", height: "100%" }} />
                       </div>
                     </div>
@@ -481,7 +487,7 @@ const FleetExpenses = () => {
 
                   {/* Table */}
                   <div className="fleet-expenses-list-card">
-                    <div className="fleet-expenses-list-title" style={{ padding: 16, borderBottom: "1px solid #f1f5f9" }}>
+                    <div className="fleet-expenses-list-title">
                       <div style={{ fontWeight: 600 }}>Recent Expenses</div>
                     </div>
 
@@ -510,9 +516,9 @@ const FleetExpenses = () => {
                                 <td data-label="Notes">{r.notes || "-"}</td>
                                 <td data-label="Created By">{r.created_by || r.createdBy || "-"}</td>
                                 <td data-label="Actions" className="text-end fleet-expense-row-actions">
-                                  <button className="btn btn-sm btn-warning fleet-expense-action-icon" onClick={() => handleEditExpenses(r)} title="Edit Expense" data-tooltip="Edit Expense" aria-label="Edit Expense"><i className="bi bi-pencil-square" aria-hidden="true" /></button>
-                                  <button className="btn btn-sm btn-primary fleet-expense-action-icon" onClick={() => handleViewExpenses(r)} title="View Expense" data-tooltip="View Expense" aria-label="View Expense"><i className="bi bi-eye" aria-hidden="true" /></button>
-                                  <button className="btn btn-sm btn-danger fleet-expense-action-icon" onClick={() => handleDelete(r.id)} title="Delete Expense" data-tooltip="Delete Expense" aria-label="Delete Expense"><i className="bi bi-trash" aria-hidden="true" /></button>
+                                  <button className="btn btn-sm btn-warning fleet-expense-action-icon" onClick={() => handleEditExpenses(r)} title="Edit Expense" data-tooltip="Edit Expense" aria-label="Edit Expense"><i className="bi bi-pencil-square" aria-hidden="true" /><span className="fleet-expense-action-label">Edit</span></button>
+                                  <button className="btn btn-sm btn-primary fleet-expense-action-icon" onClick={() => handleViewExpenses(r)} title="View Expense" data-tooltip="View Expense" aria-label="View Expense"><i className="bi bi-eye" aria-hidden="true" /><span className="fleet-expense-action-label">View</span></button>
+                                  <button className="btn btn-sm btn-danger fleet-expense-action-icon" onClick={() => handleDelete(r.id)} title="Delete Expense" data-tooltip="Delete Expense" aria-label="Delete Expense"><i className="bi bi-trash" aria-hidden="true" /><span className="fleet-expense-action-label">Delete</span></button>
                                 </td>
                               </tr>
                             ))

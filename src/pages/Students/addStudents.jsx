@@ -8,6 +8,7 @@ import { IoClose } from "react-icons/io5";
 import { getStudentReceiptInfo } from "../../store/students/actions";
 import { getInstructorAvailInformation } from "../../store/instructors/actions";
 import { addAdminPrintLogo } from "../../utils/printBranding";
+import "./addStudents.css";
 
 export default function AddStudents({
   showModal,
@@ -572,8 +573,8 @@ export default function AddStudents({
   };
 
   return (
-    <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered>
-      <Modal.Header>
+    <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered dialogClassName="student-form-dialog">
+      <Modal.Header className="student-form-header">
         <Modal.Title>{isEdit ? "Update Student" : "Add Student"}</Modal.Title>
         <IoClose
           onClick={() => {
@@ -589,8 +590,8 @@ export default function AddStudents({
           title="Close"
         />
       </Modal.Header>
-      <Modal.Body>
-        <form onSubmit={formik.handleSubmit}>
+      <Modal.Body className="student-form-body">
+        <form onSubmit={formik.handleSubmit} className="student-form">
           {showBalanceWarning && (
             <Alert variant="warning">
               Warning: Balance is negative. Please verify paid and total amounts.
@@ -598,10 +599,10 @@ export default function AddStudents({
           )}
 
           {fieldPairs.map((pair, rowIndex) => (
-            <div className="row" key={rowIndex}>
+            <div className="row student-form-row" key={rowIndex}>
               {pair.map((field) => (
                 <div className="col-md-6" key={field}>
-                  <div className="form-group">
+                  <div className="form-group student-form-group">
                     <label>
                       {field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       {[
@@ -730,9 +731,9 @@ export default function AddStudents({
             </div>
           ))}
 
-          <div className="row">
+          <div className="row student-form-row">
             <div className="col-md-6">
-              <div className="form-group">
+              <div className="form-group student-form-group">
                 <label>
                   Test Date
                 </label>
@@ -755,13 +756,13 @@ export default function AddStudents({
 
           {(formik.values.instructor_name &&
             (formik.values.training_start_date || formik.values.test_date)) && (
-            <div className="row">
+            <div className="row student-form-row">
               <div className="col-12">
                 <div
-                  className="p-3 mb-3"
+                  className="p-3 mb-3 student-availability-panel"
                   style={{ border: "1px solid #e9ecef", borderRadius: 8 }}
                 >
-                  <div className="d-flex justify-content-between align-items-center mb-2">
+                  <div className="d-flex justify-content-between align-items-center mb-2 student-availability-header">
                     <h6 className="mb-0">Instructor Availability</h6>
                     <a
                       href={`/instructors/${formik.values.instructor_mobile || formik.values.instructor_id}/availability`}
@@ -862,7 +863,7 @@ export default function AddStudents({
             </div>
           )}
 
-          <Modal.Footer>
+          <Modal.Footer className="student-form-footer">
             {!isPrintEnabled ? (
               <>
                 <Button

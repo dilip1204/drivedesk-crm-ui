@@ -205,17 +205,94 @@
 .instructors-page .content {
   width: 100%;
   max-width: 1480px;
+  padding: 16px 24px 20px;
 }
 
 .instructors-page-heading {
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 6px;
+}
+
+.instructors-page-heading .breadcrumb-wrapper {
+  margin-bottom: 0 !important;
+}
+
+.instructors-page-heading h1 {
+  margin: 0 0 2px;
+  font-size: 20px !important;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.instructors-page-heading .breadcrumb {
+  align-items: center;
+  margin-bottom: 0;
+  line-height: 1.25;
+}
+
+.instructors-page-heading .breadcrumb,
+.instructors-page-heading .breadcrumb-item,
+.instructors-page-heading .breadcrumb-item a {
+  font-size: 11px !important;
+}
+
+.instructors-page-heading .breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  min-height: 14px;
+  color: var(--color-muted, #667085);
+  line-height: 1;
+}
+
+.instructors-page-heading .breadcrumb-item + .breadcrumb-item::before {
+  position: static;
+  top: auto;
+  display: block;
+  flex: 0 0 4px;
+  width: 4px;
+  height: 4px;
+  margin-right: 8px;
+  padding: 0;
+  float: none;
+  content: "";
+  background: #98a2b3;
+  transform: rotate(45deg);
+}
+
+.instructors-page-heading .instructors-breadcrumb-home {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  color: var(--color-muted, #667085);
+  line-height: 1;
+  place-items: center;
+}
+
+.instructors-page-heading .instructors-breadcrumb-home svg {
+  display: block;
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
+
+.instructors-page-heading .breadcrumb-item[aria-current="page"] {
+  color: var(--color-text, #172033);
+  font-weight: 500;
 }
 
 .instructors-page-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.instructors-page-actions .btn {
+  height: 30px;
+  min-height: 30px;
+  padding: 4px 10px;
+  margin-right: 0 !important;
+  font-size: 11px;
 }
 
 .instructors-table-wrap {
@@ -228,21 +305,24 @@
 .instructors-table {
   min-width: 780px;
   margin-bottom: 0;
+  font-size: 12px;
 }
 
 .instructors-table thead th {
   position: sticky;
-  top: 74px;
+  top: 0;
   z-index: 2;
-  padding: 13px 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--color-border, #d9e0e8) !important;
   background: #f8fafc !important;
   color: var(--color-text, #172033);
+  font-size: 11px;
+  letter-spacing: .15px;
   white-space: nowrap;
 }
 
 .instructors-table tbody td {
-  padding: 14px 12px;
+  padding: 5px 10px;
   vertical-align: middle;
 }
 
@@ -254,42 +334,79 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  color: #344054;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-weight: 400 !important;
+  text-rendering: auto;
 }
 
 .instructors-row-actions {
-  min-width: 160px;
+  min-width: 235px;
+  text-align: right;
   white-space: nowrap;
 }
 
+@media (min-width: 768px) {
+  .instructors-table thead th:last-child,
+  .instructors-table tbody td.instructors-row-actions {
+    width: 235px;
+    min-width: 235px;
+    padding-right: 12px;
+    text-align: right;
+  }
+}
+
 .instructor-action-icon {
-  display: inline-grid;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  padding: 0;
-  margin: 2px;
-  font-size: 15px;
-  place-items: center;
+  display: inline-flex;
+  width: auto;
+  height: 30px;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+  padding: 0 7px;
+  margin: 1px;
+  font-size: 13px;
+}
+
+.instructor-action-label {
+  margin-left: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  text-rendering: optimizeLegibility;
+  white-space: nowrap;
+}
+
+.instructor-action-icon > i {
+  display: inline-block;
+  flex: 0 0 auto;
+  font-size: 13px;
+  line-height: 1;
 }
 
 @media (max-width: 767.98px) {
   .instructors-page .content {
-    padding: 18px 10px;
+    padding: 12px 10px 16px;
   }
 
   .instructors-page-heading h1 {
-    font-size: 24px;
+    font-size: 20px !important;
   }
 
   .instructors-page-actions {
     width: 100%;
     max-width: 100%;
     flex: 0 0 100%;
-    margin-top: 10px;
+    margin-top: 8px;
   }
 
   .instructors-page-actions .btn {
     width: 100%;
+    height: 40px;
+    min-height: 40px;
+    padding: 7px 10px;
+    font-size: 13px;
   }
 
   .instructors-table-wrap {
@@ -369,5 +486,23 @@
   .instructors-row-actions::before {
     display: block;
     margin-bottom: 4px;
+  }
+
+  .instructor-action-icon {
+    display: inline-grid;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    padding: 0;
+    margin: 1px;
+    place-items: center;
+  }
+
+  .instructor-action-label {
+    display: none;
+  }
+
+  .instructor-action-icon > i {
+    font-size: 14px;
   }
 }

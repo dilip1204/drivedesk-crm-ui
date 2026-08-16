@@ -1,0 +1,187 @@
+/* Shared typography for application data grids. */
+:is(
+  .students-table,
+  .instructors-table,
+  .enquiries-table,
+  .tariff-table,
+  .training-session-table,
+  .completed-sessions-table,
+  .fleet-expenses-table,
+  .outstanding-fees-table,
+  .superadmin-table,
+  .student-payment-history-table
+) {
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  font-synthesis: none;
+  text-rendering: auto;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+:is(
+  .students-table,
+  .instructors-table,
+  .enquiries-table,
+  .tariff-table,
+  .training-session-table,
+  .completed-sessions-table,
+  .fleet-expenses-table,
+  .outstanding-fees-table,
+  .superadmin-table,
+  .student-payment-history-table
+) thead th {
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  font-weight: 600 !important;
+  text-rendering: auto !important;
+  text-shadow: none !important;
+}
+
+:is(
+  .students-table,
+  .instructors-table,
+  .enquiries-table,
+  .tariff-table,
+  .training-session-table,
+  .completed-sessions-table,
+  .fleet-expenses-table,
+  .outstanding-fees-table,
+  .superadmin-table,
+  .student-payment-history-table
+) tbody td {
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  font-weight: 400 !important;
+  font-variant-numeric: tabular-nums;
+  text-rendering: auto !important;
+  text-shadow: none !important;
+}
+
+:is(
+  .students-action-label,
+  .instructor-action-label,
+  .enquiry-action-label,
+  .tariff-action-label,
+  .training-session-action-label,
+  .fleet-expense-action-label,
+  .superadmin-action-btn
+) {
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  font-weight: 500 !important;
+  text-rendering: auto !important;
+  text-shadow: none !important;
+}
+
+.instructors-table tbody td.status,
+.instructors-table .instructor-availability-value,
+.instructors-table .instructor-availability-value > span {
+  color: #344054 !important;
+  font-weight: 400 !important;
+  text-rendering: auto !important;
+  text-shadow: none !important;
+}
+
+/* Preserve intentional emphasis inside otherwise normal-weight rows. */
+:is(
+  .students-table,
+  .instructors-table,
+  .enquiries-table,
+  .tariff-table,
+  .training-session-table,
+  .fleet-expenses-table,
+  .outstanding-fees-table,
+  .superadmin-table
+) :is(.badge, .students-plan-value, [class*="status"], strong) {
+  font-synthesis: none;
+  text-shadow: none !important;
+}
+
+@media (max-width: 767.98px) {
+  html,
+  body,
+  #root,
+  .page-wrapper,
+  .content-wrapper {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
+  }
+
+  :is(
+    .students-table,
+    .instructors-table,
+    .enquiries-table,
+    .tariff-table,
+    .training-session-table,
+    .completed-sessions-table,
+    .fleet-expenses-table,
+    .outstanding-fees-table,
+    .superadmin-table,
+    .student-payment-history-table
+  ) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  :is(
+    .students-table,
+    .instructors-table,
+    .enquiries-table,
+    .tariff-table,
+    .training-session-table,
+    .fleet-expenses-table,
+    .outstanding-fees-table,
+    .superadmin-table
+  ) tbody td {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-wrap: anywhere;
+  }
+
+  :is(
+    .students-row-actions,
+    .instructors-row-actions,
+    .enquiries-row-actions,
+    .tariff-row-actions,
+    .training-session-actions,
+    .fleet-expense-row-actions,
+    .superadmin-actions
+  ) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding-right: 13px !important;
+  }
+
+  :is(
+    .students-table-wrap,
+    .instructors-table-wrap,
+    .enquiries-table-wrap,
+    .tariff-table-wrap,
+    .training-session-table-wrap,
+    .fleet-expenses-table-wrap,
+    .superadmin-table-wrap,
+    .custom-pagination
+  ) {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  :is(
+    .students-action-icon,
+    .instructor-action-icon,
+    .enquiry-action-icon,
+    .tariff-action-icon,
+    .training-session-action-button,
+    .fleet-expense-action-icon,
+    .superadmin-action-btn,
+    .page-link
+  ) {
+    touch-action: manipulation;
+  }
+}

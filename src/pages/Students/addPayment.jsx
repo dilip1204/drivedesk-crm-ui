@@ -6,6 +6,13 @@ import { useDispatch } from "react-redux";
 import { getStudentReceiptInfo } from "../../store/students/actions";
 import { ToastContainer, toast } from "react-toastify";
 import { addAdminPrintLogo } from "../../utils/printBranding";
+import "./studentPayments.css";
+
+const getLocalDateTimeInputValue = (date = new Date()) => {
+  const pad = (value) => String(value).padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
 
 export default function AddPayment({
   show,
@@ -22,7 +29,7 @@ export default function AddPayment({
   const [isPrintEnabled, setIsPrintEnabled] = useState(false);
   const initialValues = {
     amount: "",
-    date: new Date().toISOString().slice(0, 16), // default now
+    date: getLocalDateTimeInputValue(),
     payment_method: "",
     payment_status: "",
     remarks: "",
@@ -104,24 +111,29 @@ export default function AddPayment({
   };
 
   return (
-    <Modal show={show} onHide={onClose} backdrop="static" centered>
-      <Modal.Header closeButton>
+    <Modal show={show} onHide={onClose} backdrop="static" centered dialogClassName="student-payment-dialog">
+      <Modal.Header closeButton className="student-payment-header">
+        <div className="student-payment-title-icon" aria-hidden="true">
+          <i className="bi bi-cash-coin" />
+        </div>
         <Modal.Title>Add Payment</Modal.Title>
       </Modal.Header>
       <Formik
+        key={`payment-${show ? "open" : "closed"}-${student?.mobile_number || "student"}`}
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleFormSubmit}
       >
-        {({ handleChange, handleBlur, values }) => (
-          <Form>
-            <Modal.Body>
+        {() => (
+          <Form className="student-payment-form">
+            <Modal.Body className="student-payment-body">
               {student?.balance !== undefined && (
-                <div className="mb-3 alert alert-info p-2">
-                  Current Balance: ₹{student.balance}
+                <div className="student-payment-balance">
+                  <span>Current balance</span>
+                  <strong>₹{Number(student.balance || 0).toLocaleString("en-IN")}</strong>
                 </div>
               )}
-              <div className="form-group">
+              <div className="form-group student-payment-field">
                 <label>
                   Amount <span style={{ color: "red" }}>*</span>
                 </label>
@@ -139,12 +151,13 @@ export default function AddPayment({
                 />
               </div>
 
-              <div className="form-group">
+              <div className="form-group student-payment-field">
                 <label>
                   Date <span style={{ color: "red" }}>*</span>
                 </label>
                 <Field
                   type="datetime-local"
+                  step="60"
                   name="date"
                   className="form-control"
                 />
@@ -155,7 +168,7 @@ export default function AddPayment({
                 />
               </div>
 
-              <div className="form-group">
+              <div className="form-group student-payment-field">
                 <label>
                   Payment Method <span style={{ color: "red" }}>*</span>
                 </label>
@@ -175,7 +188,7 @@ export default function AddPayment({
                 />
               </div>
 
-              <div className="form-group">
+              <div className="form-group student-payment-field">
                 <label>
                   Payment Status <span style={{ color: "red" }}>*</span>
                 </label>
@@ -196,7 +209,7 @@ export default function AddPayment({
                 />
               </div>
 
-              <div className="form-group">
+              <div className="form-group student-payment-field">
                 <label>Remarks</label>
                 <Field
                   as="textarea"
@@ -211,14 +224,14 @@ export default function AddPayment({
                 />
               </div>
             </Modal.Body>
-            <Modal.Footer>
+            <Modal.Footer className="student-payment-footer">
               {!isPrintEnabled ? (
                 <>
                   <Button variant="secondary" onClick={onClose}>
                     Cancel
                   </Button>
                   <Button type="submit" variant="primary">
-                    Submit
+                    <i className="bi bi-check-lg" aria-hidden="true" /> Submit
                   </Button>
                 </>
               ) : (
@@ -228,7 +241,7 @@ export default function AddPayment({
                     onClick={handlePrint}
                     disabled={!isPrintEnabled}
                   >
-                    Print
+                    <i className="bi bi-printer" aria-hidden="true" /> Print
                   </Button>
                   <Button variant="secondary" onClick={onCloseFun}>
                     Close

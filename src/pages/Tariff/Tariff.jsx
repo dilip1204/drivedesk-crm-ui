@@ -164,13 +164,15 @@ const Tariff = () => {
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
-                          <a href="#">
-                            <span className="mdi mdi-home"></span>
+                          <a href="#" className="tariff-breadcrumb-home" aria-label="Tariffs home">
+                            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                              <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                            </svg>
                           </a>
                         </li>
                         <li className="breadcrumb-item">Tariffs</li>
                         <li className="breadcrumb-item" aria-current="page">
-                          TariffList
+                          Tariff List
                         </li>
                       </ol>
                     </nav>
@@ -230,6 +232,7 @@ const Tariff = () => {
                                     onClick={() => handleEditTariff(tariff)}
                                   >
                                     <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                                    <span className="tariff-action-label">Edit</span>
                                   </button>{" "}
                                   <button
                                     className="btn btn-sm btn-danger tariff-action-icon"
@@ -241,6 +244,7 @@ const Tariff = () => {
                                     }
                                   >
                                     <i className="bi bi-trash" aria-hidden="true"></i>
+                                    <span className="tariff-action-label">Delete</span>
                                   </button>
                                 </>
                               ) : (
@@ -255,6 +259,7 @@ const Tariff = () => {
                                   aria-label="View Tariff"
                                 >
                                   <i className="bi bi-eye" aria-hidden="true"></i>
+                                  <span className="tariff-action-label">View</span>
                                 </Link>
                               </td>
                             </tr>

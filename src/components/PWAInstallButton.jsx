@@ -59,10 +59,23 @@ export default function PWAInstallButton() {
     };
 
     window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
+    document.body.classList.add("pwa-guide-open");
+
+    return () => {
+      window.removeEventListener("keydown", handleEscape);
+      document.body.classList.remove("pwa-guide-open");
+    };
   }, [showIOSInstructions]);
 
-  if (isInstalled || !mobilePlatform) return null;
+  const showInstallButton = !isInstalled && Boolean(mobilePlatform);
+
+  useEffect(() => {
+    document.body.classList.toggle("pwa-install-visible", showInstallButton);
+
+    return () => document.body.classList.remove("pwa-install-visible");
+  }, [showInstallButton]);
+
+  if (!showInstallButton) return null;
 
   const installApp = async () => {
     if (mobilePlatform === "ios") {

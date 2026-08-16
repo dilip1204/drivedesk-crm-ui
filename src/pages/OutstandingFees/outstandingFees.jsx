@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -10,6 +9,7 @@ import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
 
 
 import "../Students/Students.css";
+import "./outstandingFees.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
@@ -18,20 +18,14 @@ import Footer from "../../components/Footer";
 import { getOutstandingFees, historicalPaymentAdjustment } from "../../store/dashboardSummary/actions";
 
 
-import avatar from "../../assets/img/avatar.png";
 import Pagination from "../Students/Pagenation";
 
-import { useAuth } from "../../hooks/useAuth";
-
 const OutstandingFees = () => {
-  const { role } = useAuth();
-
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [outstandingFeesData, setOutstandingFeesData] = useState([]);
 
-  const outstandingFeesLists = useSelector((state) => state.outstandingFeesInfo.outstandingFees);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -43,6 +37,21 @@ const OutstandingFees = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
+
+  const formatBalance = (value) => {
+    const amount = Number(value);
+    return value !== "" && value !== null && value !== undefined && Number.isFinite(amount)
+      ? `₹${amount.toLocaleString("en-IN")}`
+      : "N/A";
+  };
+
+  const getStatusClass = (value) => {
+    const status = String(value || "").toLowerCase();
+    if (status.includes("complete") || status.includes("paid") || status.includes("active")) return "is-success";
+    if (status.includes("pending") || status.includes("partial")) return "is-warning";
+    if (status.includes("fail") || status.includes("cancel") || status.includes("inactive")) return "is-danger";
+    return "is-neutral";
+  };
 
   const getKey = (s) => s?.mobile_number;
 
@@ -120,7 +129,7 @@ const OutstandingFees = () => {
   return (
     <>
       <div
-        className="header-fixed sidebar-fixed sidebar-dark header-light"
+        className="header-fixed sidebar-fixed sidebar-dark header-light students-page outstanding-fees-page"
         id="body"
       >
         <div className="wrapper">
@@ -131,14 +140,16 @@ const OutstandingFees = () => {
             <div className="content-wrapper">
               <div className="content">
                 {/* Breadcrumb */}
-                <div className="row">
+                <div className="row students-page-heading outstanding-fees-heading">
                   <div className="breadcrumb-wrapper col-xl-6">
                     <h1>Outstanding Fees</h1>
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
-                          <a href="#">
-                            <span className="mdi mdi-home"></span>
+                          <a href="#" className="students-breadcrumb-home" aria-label="Outstanding fees home">
+                            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                              <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                            </svg>
                           </a>
                         </li>
                         <li className="breadcrumb-item">Outstanding Fees</li>
@@ -148,37 +159,43 @@ const OutstandingFees = () => {
                       </ol>
                     </nav>
                   </div>
-
-                  <div className="col-xl-6 text-right">
-                    
-                  </div>
                 </div>
 
                 {/* outstanding-fees List */}
-                <div>
+                <div className="outstanding-fees-content">
                   {loading ? (
-                    <p className="text-center my-5">Loading outstanding fees...</p>
+                    <div className="outstanding-fees-state">
+                      <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
+                      <span>Loading outstanding fees...</span>
+                    </div>
                   ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
+                    <div className="outstanding-fees-state is-empty">
+                      <i className="bi bi-wallet2" aria-hidden="true" />
+                      <strong>No outstanding fees</strong>
+                      <span>{error}</span>
+                    </div>
                   ) : (
                     <>
                     {selectedIds.length > 0 && (
-                      <div className="mb-3">
+                      <div className="outstanding-selection-toolbar">
+                        <span><strong>{selectedIds.length}</strong> selected</span>
                         <button
                           className="btn btn-warning"
                           onClick={() => setShowModal(true)}
                         >
-                          Historical Payment Adjustment ({selectedIds.length})
+                          <i className="bi bi-arrow-repeat" aria-hidden="true" />
+                          Historical Payment Adjustment
                         </button>
                       </div>
                     )}
-                    <div className="table-responsive">
-                      <table className="table custom-table text-center align-middle">
+                    <div className="table-responsive students-table-wrap outstanding-fees-table-wrap">
+                      <table className="table custom-table text-center align-middle students-table outstanding-fees-table">
                         <thead className="table-light">
                           <tr>
                             <th>
                               <input
                                 type="checkbox"
+                                aria-label="Select all students on this page"
                                 onChange={handleSelectAll}
                                 checked={
                                   currentRecords.length > 0 &&
@@ -200,22 +217,31 @@ const OutstandingFees = () => {
                         <tbody>
                           {currentRecords.map((outstandingFees, index) => (
                             <tr key={index}>
-                              <td>
+                              <td data-label="Select" className="outstanding-select-cell">
                                 <input
                                   type="checkbox"
+                                  aria-label={`Select ${outstandingFees?.name || "student"}`}
                                   checked={selectedIds.some(
                                     (sel) => getKey(sel) === getKey(outstandingFees)
                                   )}
                                   onChange={() => handleCheckbox(outstandingFees)}
                                 />
                               </td>
-                              <td>{startIndex + index + 1}</td>
-                              <td>{outstandingFees?.name || "Name"}</td>
-                              <td>{outstandingFees?.mobile_number || 0}</td>
-                              <td>{outstandingFees?.balance || "N/A"}</td>
-                              <td>{outstandingFees?.registered_date || "N/A"}</td>
-                              <td>{outstandingFees?.status || "N/A"}</td>
-                              <td>{outstandingFees?.full_payment_status || "N/A"}</td>
+                              <td data-label="S.No">{startIndex + index + 1}</td>
+                              <td data-label="Name" className="outstanding-student-name">{outstandingFees?.name || "Name"}</td>
+                              <td data-label="Mobile Number">{outstandingFees?.mobile_number || 0}</td>
+                              <td data-label="Balance" className="outstanding-balance">{formatBalance(outstandingFees?.balance)}</td>
+                              <td data-label="Registered Date">{outstandingFees?.registered_date || "N/A"}</td>
+                              <td data-label="Status">
+                                <span className={`outstanding-status ${getStatusClass(outstandingFees?.status)}`}>
+                                  {outstandingFees?.status || "N/A"}
+                                </span>
+                              </td>
+                              <td data-label="Full Payment Status">
+                                <span className={`outstanding-status ${getStatusClass(outstandingFees?.full_payment_status)}`}>
+                                  {outstandingFees?.full_payment_status || "N/A"}
+                                </span>
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -246,26 +272,30 @@ const OutstandingFees = () => {
       {/* Historical Payment Adjustment Modal */}
       {showModal && (
         <div
-          className="modal fade show"
-          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+          className="modal fade show outstanding-adjustment-modal"
           tabIndex="-1"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="outstanding-adjustment-title"
         >
-          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: "420px" }}>
-            <div className="modal-content" style={{ borderRadius: "8px" }}>
-              <div className="modal-header" style={{ borderBottom: "1px solid #dee2e6", padding: "16px 20px" }}>
-                <h5 className="modal-title" style={{ fontSize: "16px", fontWeight: 600, margin: 0 }}>
+          <div className="modal-dialog modal-dialog-centered outstanding-adjustment-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <div className="outstanding-adjustment-icon" aria-hidden="true">
+                  <i className="bi bi-arrow-repeat" />
+                </div>
+                <h5 className="modal-title" id="outstanding-adjustment-title">
                   Historical Payment Adjustment
                 </h5>
               </div>
-              <div className="modal-body" style={{ padding: "20px", fontSize: "14px", lineHeight: "1.6", color: "#333" }}>
+              <div className="modal-body">
                 Are you sure you want to apply Historical Payment Adjustment for{" "}
                 <strong>{selectedIds.length}</strong> selected student
                 {selectedIds.length > 1 ? "s" : ""}?
               </div>
-              <div className="modal-footer" style={{ borderTop: "1px solid #dee2e6", padding: "12px 20px", gap: "8px" }}>
+              <div className="modal-footer">
                 <button
                   className="btn btn-secondary"
-                  style={{ fontSize: "14px", padding: "6px 20px" }}
                   onClick={() => setShowModal(false)}
                   disabled={modalLoading}
                 >
@@ -273,7 +303,6 @@ const OutstandingFees = () => {
                 </button>
                 <button
                   className="btn btn-primary"
-                  style={{ fontSize: "14px", padding: "6px 20px" }}
                   onClick={handleConfirm}
                   disabled={modalLoading}
                 >

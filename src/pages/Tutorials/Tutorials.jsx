@@ -37,12 +37,26 @@ export default function Tutorials() {
 
           <div className="content-wrapper">
             <div className="content tutorials-page">
-              <div className="tutorials-heading">
-                <div>
+              <div className="row tutorials-heading">
+                <div className="breadcrumb-wrapper col-xl-6">
                   <h1>Tutorials</h1>
-                  <p>Watch short guides for common DriveDesk workflows.</p>
+                  <nav aria-label="breadcrumb">
+                    <ol className="breadcrumb p-0">
+                      <li className="breadcrumb-item">
+                        <a href="#" className="tutorials-breadcrumb-home" aria-label="Tutorials home">
+                          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                            <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                          </svg>
+                        </a>
+                      </li>
+                      <li className="breadcrumb-item">Tutorials</li>
+                      <li className="breadcrumb-item" aria-current="page">Video Guides</li>
+                    </ol>
+                  </nav>
                 </div>
               </div>
+
+              <p className="tutorials-subtitle">Watch short guides for common DriveDesk workflows.</p>
 
               <div className="tutorials-grid">
                 {TUTORIALS.map((tutorial) => (
@@ -82,8 +96,8 @@ export default function Tutorials() {
         </div>
       </div>
 
-      <Modal show={Boolean(selectedTutorial)} onHide={closeVideo} centered size="lg">
-        <Modal.Header closeButton>
+      <Modal show={Boolean(selectedTutorial)} onHide={closeVideo} centered size="lg" dialogClassName="tutorial-modal-dialog">
+        <Modal.Header closeButton className="tutorial-modal-header">
           <Modal.Title>{selectedTutorial?.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body className="tutorial-modal-body">

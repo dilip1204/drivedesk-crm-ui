@@ -120,6 +120,9 @@ export function AboutPage() {
           <span>About DriveDesk</span>
           <h1>Built around the way driving schools actually work.</h1>
           <p>DriveDesk replaces disconnected registers and repetitive administration with one organised, practical workspace.</p>
+          <p className="public-ownership-statement">
+            DriveDesk is a driving school management and CRM software product developed and operated by Asteriq Systech.
+          </p>
         </div>
       </section>
 

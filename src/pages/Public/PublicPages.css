@@ -273,6 +273,20 @@
 .public-page-hero h1 { margin: 0; color: #101828; font-size: clamp(32px, 4.2vw, 48px); font-weight: 710; letter-spacing: -1.8px; line-height: 1.08; }
 .public-page-hero p { max-width: 650px; margin: 16px auto 0; color: #667085; font-size: 13px; line-height: 1.7; }
 
+.public-page-hero .public-ownership-statement {
+  max-width: 720px;
+  margin-top: 24px;
+  padding: 16px 20px;
+  color: #fff;
+  background: #175cd3;
+  border: 1px solid #1570ef;
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(23, 92, 211, .18);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
 .public-story-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr); align-items: center; gap: 70px; }
 .public-story-grid .public-section-heading { margin-bottom: 15px; }
 .public-story-copy { margin: 0; color: #667085; font-size: 12px; line-height: 1.75; }

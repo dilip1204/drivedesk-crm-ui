@@ -190,6 +190,11 @@
   text-decoration: underline;
 }
 
+.public-footer-bottom > span:last-child {
+  color: #e4e7ec;
+  font-size: 11px;
+}
+
 @media (max-width: 767.98px) {
   .public-container { width: min(100% - 24px, 1160px); }
   .public-header-inner { min-height: 60px; }

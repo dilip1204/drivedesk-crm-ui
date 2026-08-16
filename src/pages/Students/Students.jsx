@@ -518,13 +518,15 @@ const Students = () => {
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
-                          <a href="#">
-                            <span className="mdi mdi-home"></span>
+                          <a href="#" className="students-breadcrumb-home" aria-label="Students home">
+                            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                              <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                            </svg>
                           </a>
                         </li>
                         <li className="breadcrumb-item">Students</li>
                         <li className="breadcrumb-item" aria-current="page">
-                          StudentList
+                          Student List
                         </li>
                       </ol>
                     </nav>
@@ -824,6 +826,7 @@ const Students = () => {
                                     onClick={() => handleEditStudent(student)}
                                   >
                                     <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                                    <span className="students-action-label">Edit</span>
                                   </button>{" "}
                                   <button
                                     className="btn btn-sm btn-success students-action-icon"
@@ -848,6 +851,7 @@ const Students = () => {
                                     disabled={Number(student.balance) <= 0}
                                   >
                                     <i className="bi bi-cash-coin" aria-hidden="true"></i>
+                                    <span className="students-action-label">Fee</span>
                                   </button>{" "}
                                   <button
                                     type="button"
@@ -858,6 +862,7 @@ const Students = () => {
                                     aria-label="View Student"
                                   >
                                     <i className="bi bi-eye" aria-hidden="true"></i>
+                                    <span className="students-action-label">View</span>
                                   </button>{" "}
                                   <button
                                     className="btn btn-sm btn-danger students-action-icon"
@@ -869,6 +874,7 @@ const Students = () => {
                                     }
                                   >
                                     <i className="bi bi-trash" aria-hidden="true"></i>
+                                    <span className="students-action-label">Delete</span>
                                   </button>
                                 </td>
                               </tr>

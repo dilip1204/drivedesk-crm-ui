@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 
 import { addExpenses, updateExpenses } from "../../store/expenses/actions";
 import { getInstructorsListInformation } from "../../store/instructors/actions";
+import "./addFleetExpenses.css";
 
 // Vehicle types (includes Stationery & Salary)
 const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike", "Rent", "Other", "Food & Snacks", "Stationery", "Salary", "Trailer", "RTO Payment"];
@@ -357,12 +358,13 @@ export default function AddFleetExpenses({
       keyboard={false}
       size="lg"
       centered
+      dialogClassName="fleet-expense-form-dialog"
     >
-      <Modal.Header closeButton>
+      <Modal.Header closeButton className="fleet-expense-form-header">
         <Modal.Title>{viewOnly ? "View Expense" : isEdit ? "Update Expense" : "Add Expense"}</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
+      <Modal.Body className="fleet-expense-form-body">
         {viewOnly ? (
           <div style={{ padding: "0" }}>
             <div style={{ marginBottom: "20px", paddingBottom: "16px", borderBottom: "1px solid #e0e0e0" }}>
@@ -426,7 +428,7 @@ export default function AddFleetExpenses({
             </div>
           </div>
         ) : (
-          <form noValidate onSubmit={(e) => { e.preventDefault(); explicitSubmit(); }}>
+          <form className="fleet-expense-form" noValidate onSubmit={(e) => { e.preventDefault(); explicitSubmit(); }}>
             {/* Primary expense fields wrap into available columns. */}
             <div className="row">
               <div className="col-md-6 mb-3">
@@ -512,7 +514,7 @@ export default function AddFleetExpenses({
             </div>
           </div>
 
-          <div className="d-flex justify-content-end mt-3">
+          <div className="d-flex justify-content-end mt-3 fleet-expense-form-actions">
             <button type="button" className="btn btn-secondary me-2" onClick={() => { formik.resetForm(); hideModal(); }}>
               Cancel
             </button>

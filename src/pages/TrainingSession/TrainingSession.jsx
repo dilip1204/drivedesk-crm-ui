@@ -327,6 +327,11 @@ const TrainingSession = () => {
     );
   };
 
+  const completedReportStudent = completedSessions[0]?.student_name || "-";
+  const completedReportInstructors = [
+    ...new Set(completedSessions.map((session) => session?.instructor_name).filter(Boolean)),
+  ].join(", ") || "-";
+
   return (
     <>
       <div className="header-fixed sidebar-fixed sidebar-dark header-light training-session-page" id="body">
@@ -342,7 +347,11 @@ const TrainingSession = () => {
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
-                          <a href="#"><span className="mdi mdi-home"></span></a>
+                          <a href="#" className="training-breadcrumb-home" aria-label="Training sessions home">
+                            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                              <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                            </svg>
+                          </a>
                         </li>
                         <li className="breadcrumb-item">Training Session</li>
                         <li className="breadcrumb-item" aria-current="page">
@@ -498,10 +507,10 @@ const TrainingSession = () => {
                               </td>
                               <td data-label="Actions" className="training-session-actions">
                                 <div className="training-session-action-buttons">
-                                  <button className="btn btn-primary btn-sm action-btn" onClick={() => openSessionModal(tsession)}>View</button>
-                                  <button className="btn btn-sm btn-warning action-btn" title="Edit Training Session" onClick={() => handleEditStudent(tsession)}>Edit</button>
-                                  <button className="btn btn-sm btn-warning" title="Reschedule Session" aria-label="Reschedule Session" onClick={() => handleRescheduleSession(tsession)}><i className="bi bi-clock-history"></i></button>
-                                  <button className="btn btn-sm btn-success" title="Show Student Completed Sessions" aria-label="Show Student Completed Sessions" onClick={() => openCompletedModal(tsession)}><i className="bi bi-clipboard-check"></i></button>
+                                  <button className="btn btn-primary btn-sm training-session-action-button" title="View Training Session" aria-label="View Training Session" onClick={() => openSessionModal(tsession)}><i className="bi bi-eye" aria-hidden="true"></i><span className="training-session-action-label">View</span></button>
+                                  <button className="btn btn-sm btn-warning training-session-action-button" title="Edit Training Session" aria-label="Edit Training Session" onClick={() => handleEditStudent(tsession)}><i className="bi bi-pencil-square" aria-hidden="true"></i><span className="training-session-action-label">Edit</span></button>
+                                  <button className="btn btn-sm btn-warning training-session-action-button" title="Reschedule Session" aria-label="Reschedule Session" onClick={() => handleRescheduleSession(tsession)}><i className="bi bi-clock-history" aria-hidden="true"></i><span className="training-session-action-label">Reschedule</span></button>
+                                  <button className="btn btn-sm btn-success training-session-action-button" title="Show Student Completed Sessions" aria-label="Show Student Completed Sessions" onClick={() => openCompletedModal(tsession)}><i className="bi bi-clipboard-check" aria-hidden="true"></i><span className="training-session-action-label">Completed</span></button>
                                 </div>
                               </td>
                             </tr>
@@ -538,89 +547,128 @@ const TrainingSession = () => {
               session={sessionStudentData}
             />
 
-            {/* NEW: Completed Sessions Modal */}
+            {/* Completed Sessions Modal */}
             <div
-              className={`modal fade ${showCompletedModal ? "show d-block" : ""}`}
+              className={`modal fade completed-sessions-modal ${showCompletedModal ? "show d-block" : ""}`}
               tabIndex="-1"
               role="dialog"
               aria-hidden={!showCompletedModal}
-              style={{ background: showCompletedModal ? "rgba(0,0,0,0.5)" : "transparent" }}
+              aria-modal={showCompletedModal ? "true" : undefined}
+              aria-labelledby="completed-sessions-title"
+              style={{ background: showCompletedModal ? "rgba(16,24,40,0.58)" : "transparent" }}
             >
-              <div className="modal-dialog modal-lg" role="document">
-                <div className="modal-content">
-                 
-
-                  <div className="modal-header align-items-start">
-  <div className="flex-grow-1 text-center">
-    {orgNameForReport && (
-      <div className="mb-1" style={{ fontSize: "1rem", fontWeight: 700, color: "#1b223c" }}>
-        {orgNameForReport}
-      </div>
-    )}
-    <h5 className="modal-title mb-0" style={{ fontSize: "1.05rem" }}>Progress Report</h5>
-  </div>
-  <div className="d-flex gap-2">
-    <button
-      type="button"
-      className="btn btn-outline-primary"
-      onClick={printCompletedTable}
-      disabled={completedLoading || !!completedError || completedSessions.length === 0}
-      title="Print completed sessions"
-    >
-      <i className="bi bi-printer"></i> Print
-    </button>
-    <button
-      type="button"
-      className="close btn"
-      aria-label="Close"
-      onClick={() => setShowCompletedModal(false)}
-    >
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-</div>
-
-
-                  <div className="modal-body" style={{overflowX: "auto",whiteSpace: "nowrap"}}>
-                    {completedLoading ? (
-                      <p className="text-center my-4">Loading completed sessions...</p>
-                    ) : completedError ? (
-                      <p className="text-center text-danger my-4">{completedError}</p>
-                    ) : (
-                      <div className="table-responsive">
-                        <table ref={completedTableRef} className="table table-bordered align-middle text-center">
-  <thead className="table-light">
-    <tr>
-      <th>#</th>
-      <th>Date</th>
-      <th>Instructor</th>
-      <th>Student</th>
-      <th>No. of Classes</th>
-      <th>Remarks</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    {completedSessions.map((row, idx) => (
-      <tr key={idx}>
-        <td>{idx + 1}</td>
-        <td>{formatDateDDMMYYYY(row?.date)}</td>
-        <td>{row?.instructor_name || "-"}</td>
-        <td>{row?.student_name || "-"}</td>
-        <td>{row?.num_classes ?? "-"}</td>
-        <td>{row?.remarks || "-"}</td>
-        <td><span className="badge badge-success">Completed</span></td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-
+              <div className="modal-dialog modal-lg completed-sessions-dialog" role="document">
+                <div className="modal-content completed-sessions-content">
+                  <div className="modal-header completed-sessions-header">
+                    <div className="completed-report-identity">
+                      <span className="completed-report-icon" aria-hidden="true">
+                        <i className="bi bi-clipboard2-check" />
+                      </span>
+                      <div>
+                        {orgNameForReport && (
+                          <div className="completed-report-org">{orgNameForReport}</div>
+                        )}
+                        <h5 className="modal-title" id="completed-sessions-title">
+                          Student - Progress Report
+                        </h5>
+                        <p>Completed practical training sessions</p>
                       </div>
+                    </div>
+
+                    <div className="completed-report-actions">
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary completed-print-button"
+                        onClick={printCompletedTable}
+                        disabled={completedLoading || !!completedError || completedSessions.length === 0}
+                        title="Print completed sessions"
+                      >
+                        <i className="bi bi-printer" aria-hidden="true" />
+                        <span>Print Report</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn completed-report-close"
+                        aria-label="Close progress report"
+                        onClick={() => setShowCompletedModal(false)}
+                      >
+                        <i className="bi bi-x-lg" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="modal-body completed-sessions-body">
+                    {completedLoading ? (
+                      <div className="completed-report-state">
+                        <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
+                        <span>Loading completed sessions...</span>
+                      </div>
+                    ) : completedError ? (
+                      <div className="completed-report-state is-error">
+                        <i className="bi bi-exclamation-circle" aria-hidden="true" />
+                        <span>{completedError}</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="completed-report-summary">
+                          <div className="completed-summary-item">
+                            <span>Student</span>
+                            <strong>{completedReportStudent}</strong>
+                          </div>
+                          <div className="completed-summary-item">
+                            <span>Instructor</span>
+                            <strong>{completedReportInstructors}</strong>
+                          </div>
+                          <div className="completed-summary-item">
+                            <span>Completed Sessions</span>
+                            <strong>{completedSessions.length}</strong>
+                          </div>
+                        </div>
+
+                        <div className="table-responsive completed-sessions-table-wrap">
+                          <table ref={completedTableRef} className="table align-middle completed-sessions-table">
+                            <thead>
+                              <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Instructor</th>
+                                <th>Student</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {completedSessions.map((row, idx) => (
+                                <tr key={idx}>
+                                  <td data-label="#">{idx + 1}</td>
+                                  <td data-label="Date">{formatDateDDMMYYYY(row?.date)}</td>
+                                  <td data-label="Instructor">{row?.instructor_name || "-"}</td>
+                                  <td data-label="Student">{row?.student_name || "-"}</td>
+                                  <td data-label="Remarks">{row?.remarks || "-"}</td>
+                                  <td data-label="Status">
+                                    <span className="completed-session-status badge badge-success">
+                                      <i className="bi bi-check-circle-fill" aria-hidden="true" />
+                                      Completed
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
                     )}
                   </div>
 
-                  <div className="modal-footer">
-                    <button className="btn btn-secondary" onClick={() => setShowCompletedModal(false)}>
+                  <div className="modal-footer completed-sessions-footer">
+                    <span>
+                      {completedSessions.length} completed {completedSessions.length === 1 ? "session" : "sessions"}
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setShowCompletedModal(false)}
+                    >
                       Close
                     </button>
                   </div>

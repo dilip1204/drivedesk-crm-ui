@@ -1,14 +1,150 @@
-.fleet-expenses-page .content { width: 100%; max-width: 1480px; }
-.fleet-expenses-heading { align-items: flex-start; margin-bottom: 16px; }
-.fleet-expenses-actions { display: flex; justify-content: flex-end; }
+.fleet-expenses-page .content {
+  width: 100%;
+  max-width: 1480px;
+  padding: 16px 24px 20px;
+}
+
+.fleet-expenses-heading {
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.fleet-expenses-heading .breadcrumb-wrapper {
+  margin-bottom: 0 !important;
+}
+
+.fleet-expenses-heading h1 {
+  margin: 0 0 2px;
+  font-size: 20px !important;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.fleet-expenses-heading .breadcrumb {
+  align-items: center;
+  margin-bottom: 0;
+  line-height: 1.25;
+}
+
+.fleet-expenses-heading .breadcrumb,
+.fleet-expenses-heading .breadcrumb-item,
+.fleet-expenses-heading .breadcrumb-item a {
+  font-size: 11px !important;
+}
+
+.fleet-expenses-heading .breadcrumb-item {
+  display: inline-flex;
+  min-height: 14px;
+  align-items: center;
+  color: var(--color-muted, #667085);
+  line-height: 1;
+}
+
+.fleet-expenses-heading .breadcrumb-item + .breadcrumb-item::before {
+  position: static;
+  top: auto;
+  display: block;
+  flex: 0 0 4px;
+  width: 4px;
+  height: 4px;
+  margin-right: 8px;
+  padding: 0;
+  float: none;
+  content: "";
+  background: #98a2b3;
+  transform: rotate(45deg);
+}
+
+.fleet-expenses-heading .fleet-expenses-breadcrumb-home {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  color: var(--color-muted, #667085);
+  line-height: 1;
+  place-items: center;
+}
+
+.fleet-expenses-heading .fleet-expenses-breadcrumb-home svg {
+  display: block;
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
+
+.fleet-expenses-heading .breadcrumb-item[aria-current="page"] {
+  color: var(--color-text, #172033);
+  font-weight: 500;
+}
+
+.fleet-expenses-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.fleet-expenses-actions .btn {
+  height: 30px;
+  min-height: 30px;
+  padding: 4px 10px;
+  margin-right: 0 !important;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .fleet-expenses-page .content {
+    font-size: 12px;
+  }
+
+  .fleet-expenses-page .content .form-control,
+  .fleet-expenses-page .content .form-select {
+    height: 32px;
+    min-height: 32px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+}
 
 .fleet-expenses-dashboard {
   border: 1px solid var(--color-border, #d9e0e8);
   box-shadow: var(--shadow-card, 0 3px 12px rgba(16, 24, 40, .07)) !important;
 }
 
+.fleet-expenses-filters {
+  margin-bottom: 12px !important;
+  row-gap: 8px;
+}
+
+.fleet-expenses-filter-field {
+  min-width: 190px;
+}
+
 .fleet-expenses-filter-field .form-select,
-.fleet-expenses-search .form-control { min-height: 40px; }
+.fleet-expenses-search .form-control {
+  min-height: 32px;
+  font-size: 12px;
+}
+
+.fleet-chart-title {
+  margin-bottom: 8px;
+  color: var(--color-text, #172033);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.fleet-kpi-label {
+  color: var(--color-muted, #667085);
+  font-size: 12px;
+}
+
+.fleet-kpi-value {
+  margin-top: 5px;
+  color: var(--color-text, #172033);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+}
 
 .fleet-chart-card,
 .fleet-kpi-card,
@@ -19,35 +155,75 @@
 }
 
 .fleet-expenses-list-card { overflow: hidden; border: 1px solid var(--color-border, #d9e0e8); }
-.fleet-expenses-list-title { color: var(--color-text, #172033); }
+.fleet-expenses-list-title {
+  padding: 10px 12px;
+  border-bottom: 1px solid #edf0f4;
+  color: var(--color-text, #172033);
+  font-size: 12px;
+}
 .fleet-expenses-table { min-width: 900px; margin-bottom: 0; }
 
 .fleet-expenses-table thead th {
   position: sticky;
-  top: 74px;
+  top: 0;
   z-index: 2;
-  padding: 13px 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--color-border, #d9e0e8) !important;
   background: #f8fafc !important;
   color: var(--color-text, #172033);
+  font-size: 11px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
-.fleet-expenses-table tbody td { padding: 14px 12px; vertical-align: middle; }
+.fleet-expenses-table tbody td {
+  padding: 7px 10px;
+  font-size: 12px;
+  vertical-align: middle;
+}
 .fleet-expenses-table tbody tr:hover td { background: #f8fbff; }
 .fleet-expense-amount { font-variant-numeric: tabular-nums; text-align: right !important; }
-.fleet-expense-row-actions { min-width: 160px; white-space: nowrap; }
+.fleet-expense-row-actions { min-width: 210px; padding-right: 12px !important; text-align: right; white-space: nowrap; }
+
+@media (min-width: 768px) {
+  .fleet-expenses-table thead th:last-child,
+  .fleet-expenses-table tbody td.fleet-expense-row-actions {
+    width: 210px;
+    min-width: 210px;
+    padding-right: 12px;
+    text-align: right;
+  }
+}
 
 .fleet-expense-action-icon {
   position: relative;
-  display: inline-grid;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  padding: 0;
-  margin: 2px;
-  font-size: 15px;
+  display: inline-flex;
+  width: auto;
+  height: 30px;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+  padding: 0 8px;
+  margin: 1px;
+  border-radius: 5px;
+  font-size: 13px;
   place-items: center;
+}
+
+.fleet-expense-action-label {
+  margin-left: 2px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  text-rendering: optimizeLegibility;
+  white-space: nowrap;
+}
+
+.fleet-expense-action-icon > i {
+  flex: 0 0 auto;
+  font-size: 12px;
+  line-height: 1;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -74,19 +250,31 @@
 }
 
 @media (max-width: 767.98px) {
-  .fleet-expenses-page .content { padding: 18px 10px; }
-  .fleet-expenses-heading h1 { font-size: 24px; }
-  .fleet-expenses-actions { width: 100%; max-width: 100%; flex: 0 0 100%; margin-top: 10px; }
-  .fleet-expenses-actions .btn { width: 100%; margin-right: 0 !important; }
-  .fleet-expenses-dashboard { padding: 12px !important; border-radius: 12px !important; }
+  .fleet-expenses-page .content { padding: 12px 10px 16px; }
+  .fleet-expenses-heading h1 { font-size: 20px !important; }
+  .fleet-expenses-actions { width: 100%; max-width: 100%; flex: 0 0 100%; margin-top: 8px; }
+  .fleet-expenses-actions .btn {
+    flex: 1 1 0;
+    height: 40px;
+    min-height: 40px;
+    padding: 7px 10px;
+    margin-right: 0 !important;
+    font-size: 13px;
+  }
+  .fleet-expenses-dashboard { padding: 10px !important; border-radius: 10px !important; }
 
   .fleet-expenses-filter-field,
   .fleet-expenses-search { width: 100%; max-width: 100%; flex: 0 0 100%; }
   .fleet-expenses-filter-field .form-select,
-  .fleet-expenses-search .form-control { width: 100%; }
+  .fleet-expenses-search .form-control {
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    font-size: 13px;
+  }
 
-  .fleet-chart-card { height: 230px !important; padding: 12px !important; }
-  .fleet-kpi-card { min-height: 130px; padding: 14px !important; }
+  .fleet-chart-card { height: 220px !important; padding: 12px !important; }
+  .fleet-kpi-card { min-height: 104px; padding: 12px !important; }
   .fleet-expenses-list-card { overflow: visible; border: 0; background: transparent; }
   .fleet-expenses-list-title { margin-bottom: 10px; border: 1px solid var(--color-border, #d9e0e8); border-radius: 10px; background: #fff; }
   .fleet-expenses-table-wrap { overflow: visible; }
@@ -115,6 +303,7 @@
     border-bottom: 1px solid #edf0f4 !important;
     text-align: right !important;
     overflow-wrap: anywhere;
+    font-size: 13px;
     white-space: normal;
   }
 
@@ -131,6 +320,8 @@
   .fleet-expenses-table tbody td:last-child { border-bottom: 0 !important; }
   .fleet-expense-row-actions { display: block !important; text-align: right !important; }
   .fleet-expense-row-actions::before { display: block; margin-bottom: 4px; }
+  .fleet-expense-action-icon { width: 36px; height: 36px; min-width: 36px; padding: 0; }
+  .fleet-expense-action-label { display: none; }
   .fleet-empty-row td { display: block !important; text-align: center !important; }
   .fleet-empty-row td::before { display: none; }
 }

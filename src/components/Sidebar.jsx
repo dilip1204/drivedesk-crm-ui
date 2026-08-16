@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import logoIcon from "./../assets/logo/logo_icon_white.png";
+import "./Sidebar.css";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -10,8 +11,8 @@ export default function Sidebar() {
   const isActive = (path) => location.pathname.startsWith(path);
 
   return (
-    <aside className="left-sidebar bg-sidebar">
-      <div id="sidebar" className="sidebar sidebar-with-footer">
+    <aside className="left-sidebar bg-sidebar drivedesk-sidebar" aria-label="Primary navigation">
+      <div id="sidebar" className="sidebar">
         <div className="app-brand app-logo">
           <Link to={role === "super_admin" ? "/superadmin" : "/dashboard"} title="Dashboard">
             <img src={logoIcon} alt="drivedesk logo" className="brand-icon" />
@@ -19,15 +20,15 @@ export default function Sidebar() {
           </Link>
         </div>
 
-        <div data-simplebar style={{ height: "100%" }}>
-          <ul className="nav sidebar-inner" id="sidebar-menu">
+        <div className="sidebar-scroll-area" data-simplebar>
+          <ul className="nav sidebar-inner" id="sidebar-menu" aria-label="DriveDesk pages">
 
             {role !== "super_admin" && (
               <>
 
             {/* Accessible by both admin and instructor */}
             <li className={`has-sub ${isActive("/dashboard") ? "active expand" : ""}`}>
-              <Link className="sidenav-item-link" to="/dashboard">
+              <Link className="sidenav-item-link" to="/dashboard" title="Dashboard">
                 <i className="mdi mdi-view-dashboard-outline"></i>
                 <span className="nav-text">Dashboard</span>
               </Link>
@@ -37,21 +38,21 @@ export default function Sidebar() {
 
             {/* Shared routes */}
             <li className={`has-sub ${isActive("/students") ? "active expand" : ""}`}>
-              <Link className="sidenav-item-link" to="/students">
+              <Link className="sidenav-item-link" to="/students" title="Students">
                 <i className="mdi mdi-account-convert"></i>
                 <span className="nav-text">Students</span>
               </Link>
             </li>
 
             <li className={`has-sub ${isActive("/instructors") ? "active expand" : ""}`}>
-              <Link className="sidenav-item-link" to="/instructors">
+              <Link className="sidenav-item-link" to="/instructors" title="Instructors">
                 <i className="mdi mdi-account-multiple"></i>
                 <span className="nav-text">Instructors</span>
               </Link>
             </li>
 
              <li className={`has-sub ${isActive("/enquiries") ? "active expand" : ""}`}>
-                  <Link className="sidenav-item-link" to="/enquiries">
+                  <Link className="sidenav-item-link" to="/enquiries" title="Enquiries">
                     <i className="mdi mdi-account-question"></i>
                     <span className="nav-text">Enquiries</span>
                   </Link>
@@ -59,7 +60,7 @@ export default function Sidebar() {
 
             {role === "admin" && (
               <li className={`has-sub ${isActive("/tariff") ? "active expand" : ""}`}>
-                <Link className="sidenav-item-link" to="/tariff">
+                <Link className="sidenav-item-link" to="/tariff" title="Tariff">
                   <i className="mdi mdi-currency-inr"></i>
                   <span className="nav-text">Tariff</span>
                 </Link>
@@ -67,21 +68,21 @@ export default function Sidebar() {
             )}
             
               <li className={`has-sub ${isActive("/trainingsession") ? "active expand" : ""}`}>
-                <Link className="sidenav-item-link" to="/trainingsession">
+                <Link className="sidenav-item-link" to="/trainingsession" title="Training Session">
                   <i className="mdi mdi-school"></i>
                   <span className="nav-text">Training Session</span>
                 </Link>
               </li>
 
               <li className={`has-sub ${isActive("/fleetexpenses") ? "active expand" : ""}`}>
-                <Link className="sidenav-item-link" to="/fleetexpenses">
+                <Link className="sidenav-item-link" to="/fleetexpenses" title="Expenses">
                 <i className="mdi mdi-cash-multiple"></i>
                   <span className="nav-text">Expenses</span>
                 </Link>
               </li>
 
               <li className={`has-sub ${isActive("/tutorials") ? "active expand" : ""}`}>
-                <Link className="sidenav-item-link" to="/tutorials">
+                <Link className="sidenav-item-link" to="/tutorials" title="Tutorials">
                   <i className="mdi mdi-play-circle-outline"></i>
                   <span className="nav-text">Tutorials</span>
                 </Link>
@@ -91,7 +92,7 @@ export default function Sidebar() {
 
             {role === "super_admin" && (
               <li className={`has-sub ${isActive("/superadmin") ? "active expand" : ""}`}>
-                <Link className="sidenav-item-link" to="/superadmin">
+                <Link className="sidenav-item-link" to="/superadmin" title="Super Admin">
                   <i className="mdi mdi-shield-account"></i>
                   <span className="nav-text">Super Admin</span>
                 </Link>

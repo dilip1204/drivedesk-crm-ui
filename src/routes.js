@@ -1,6 +1,8 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login/Login";
+import PublicLayout from "./components/PublicLayout";
+import { HomePage, AboutPage, DemoPage, ContactPage } from "./pages/Public/PublicPages";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Instructors from "./pages/Instructors/Instructors";
 import Students from "./pages/Students/Students";
@@ -19,7 +21,12 @@ import IncomeReport from "./pages/IncomeReport/IncomeReport";
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/demo" element={<DemoPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+      </Route>
       <Route path="/login" element={<Login />} />
 
       <Route

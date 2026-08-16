@@ -191,13 +191,15 @@ const formatTo12Hour = (timeStr) => {
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
-                          <a href="#">
-                            <span className="mdi mdi-home"></span>
+                          <a href="#" className="instructors-breadcrumb-home" aria-label="Instructors home">
+                            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                              <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                            </svg>
                           </a>
                         </li>
                         <li className="breadcrumb-item">Instructors</li>
                         <li className="breadcrumb-item" aria-current="page">
-                          InstructorsList
+                          Instructor List
                         </li>
                       </ol>
                     </nav>
@@ -261,6 +263,7 @@ const formatTo12Hour = (timeStr) => {
                                 onClick={() => handleEditInstructor(ins)}
                               >
                                 <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                                <span className="instructor-action-label">Edit</span>
                               </button>
                               {" "}
                               <button
@@ -271,6 +274,7 @@ const formatTo12Hour = (timeStr) => {
                                 onClick={() => deleteUser(ins.mobile_number)}
                               >
                                 <i className="bi bi-trash" aria-hidden="true"></i>
+                                <span className="instructor-action-label">Delete</span>
                               </button>
                               {" "}
                               <button
@@ -281,6 +285,7 @@ const formatTo12Hour = (timeStr) => {
                                 onClick={() => handleInstructor(ins)}
                               >
                                 <i className="bi bi-calendar-check" aria-hidden="true"></i>
+                                <span className="instructor-action-label">Schedule</span>
                               </button>
         </>
       ) : (

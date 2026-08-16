@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { IoClose } from "react-icons/io5";
 import { updateTrainingSession } from "../../store/trainingSession/actions";
+import "./TrainingSessionModals.css";
 
 const REMARK_OPTIONS = [
   "STREET ROAD PRACTICE",
@@ -114,8 +115,9 @@ export default function AddTrainingSession({
       keyboard={false}
       size="lg"
       centered
+      dialogClassName="session-form-dialog"
     >
-      <Modal.Header>
+      <Modal.Header className="session-form-header">
         <Modal.Title>{isEdit ? "Update Session" : "Add Session"}</Modal.Title>
         <IoClose
           onClick={() => {
@@ -131,12 +133,12 @@ export default function AddTrainingSession({
           title="Close"
         />
       </Modal.Header>
-      <Modal.Body>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="row">
+      <Modal.Body className="session-form-body">
+        <form onSubmit={formik.handleSubmit} className="session-form">
+          <div className="row session-form-row">
             {fields.map((field) => (
               <div className="col-md-6" key={field}>
-                <div className="form-group">
+                <div className="form-group session-form-group">
                   <label>
                     {field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                     <span style={{ color: "red" }}>*</span>
@@ -190,7 +192,7 @@ export default function AddTrainingSession({
             ))}
           </div>
 
-          <Modal.Footer>
+          <Modal.Footer className="session-form-footer">
             <Button variant="secondary" onClick={hideModal}>
               Cancel
             </Button>

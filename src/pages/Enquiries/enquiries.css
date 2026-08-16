@@ -1,11 +1,80 @@
 .enquiries-page .content {
   width: 100%;
   max-width: 1480px;
+  padding: 16px 24px 20px;
+  font-size: 12px;
 }
 
 .enquiries-page-heading {
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 6px;
+}
+
+.enquiries-page-heading .breadcrumb-wrapper {
+  margin-bottom: 0 !important;
+}
+
+.enquiries-page-heading h1 {
+  margin: 0 0 2px;
+  font-size: 20px !important;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.enquiries-page-heading .breadcrumb {
+  align-items: center;
+  margin-bottom: 0;
+  line-height: 1.25;
+}
+
+.enquiries-page-heading .breadcrumb,
+.enquiries-page-heading .breadcrumb-item,
+.enquiries-page-heading .breadcrumb-item a {
+  font-size: 11px !important;
+}
+
+.enquiries-page-heading .breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  min-height: 14px;
+  color: var(--color-muted, #667085);
+  line-height: 1;
+}
+
+.enquiries-page-heading .breadcrumb-item + .breadcrumb-item::before {
+  position: static;
+  top: auto;
+  display: block;
+  flex: 0 0 4px;
+  width: 4px;
+  height: 4px;
+  margin-right: 8px;
+  padding: 0;
+  float: none;
+  content: "";
+  background: #98a2b3;
+  transform: rotate(45deg);
+}
+
+.enquiries-page-heading .enquiries-breadcrumb-home {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  color: var(--color-muted, #667085);
+  line-height: 1;
+  place-items: center;
+}
+
+.enquiries-page-heading .enquiries-breadcrumb-home svg {
+  display: block;
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
+
+.enquiries-page-heading .breadcrumb-item[aria-current="page"] {
+  color: var(--color-text, #172033);
+  font-weight: 500;
 }
 
 .enquiries-page-actions {
@@ -16,7 +85,43 @@
 }
 
 .enquiries-page-actions .btn {
+  height: 30px;
+  min-height: 30px;
+  padding: 4px 10px;
   margin-right: 0 !important;
+  font-size: 11px;
+}
+
+.enquiries-page .form-control,
+.enquiries-page .form-select {
+  height: 32px;
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.enquiries-filter-card {
+  padding: 12px !important;
+  margin-bottom: 10px !important;
+}
+
+.enquiries-filter-card .btn {
+  height: 32px;
+  min-height: 32px;
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.enquiries-filter-grid {
+  align-items: flex-end;
+  row-gap: 8px;
+}
+
+.enquiries-filter-grid > div,
+.enquiries-filter-grid .form-group {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .enquiries-filter-card,
@@ -37,21 +142,24 @@
 .enquiries-table {
   min-width: 860px;
   margin-bottom: 0;
+  font-size: 12px;
 }
 
 .enquiries-table thead th {
   position: sticky;
-  top: 74px;
+  top: 0;
   z-index: 2;
-  padding: 13px 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--color-border, #d9e0e8) !important;
   background: #f8fafc !important;
   color: var(--color-text, #172033);
+  font-size: 11px;
+  letter-spacing: .15px;
   white-space: nowrap;
 }
 
 .enquiries-table tbody td {
-  padding: 14px 12px;
+  padding: 5px 10px;
   vertical-align: middle;
 }
 
@@ -66,19 +174,85 @@
 }
 
 .enquiries-row-actions {
-  min-width: 110px;
+  min-width: 135px;
+  text-align: right;
   white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .enquiries-table thead th:last-child,
+  .enquiries-table tbody td.enquiries-row-actions {
+    width: 145px;
+    min-width: 145px;
+    padding-right: 12px;
+    text-align: right;
+  }
 }
 
 .enquiry-action-icon {
   position: relative;
-  display: inline-grid;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  padding: 0;
-  margin: 2px;
-  font-size: 15px;
+  display: inline-flex;
+  width: auto;
+  height: 30px;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+  padding: 0 7px;
+  margin: 1px;
+  font-size: 13px;
+}
+
+.enquiry-action-label {
+  margin-left: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  text-rendering: optimizeLegibility;
+  white-space: nowrap;
+}
+
+.enquiry-action-icon > i {
+  display: inline-block;
+  flex: 0 0 auto;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.enquiries-page .students-pagination-bar {
+  gap: 8px !important;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  font-size: 12px;
+}
+
+.enquiries-page .students-pagination-summary {
+  gap: 12px !important;
+}
+
+.enquiries-page .students-page-size-select {
+  width: 68px;
+  height: 28px !important;
+  min-height: 28px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.enquiries-page .custom-pagination .pagination {
+  gap: 3px;
+}
+
+.enquiries-page .custom-pagination .page-link,
+.enquiries-page .custom-pagination .page-item:first-child .page-link,
+.enquiries-page .custom-pagination .page-item:last-child .page-link {
+  display: grid;
+  min-width: 28px;
+  height: 28px !important;
+  padding: 0 7px;
+  border-radius: 6px;
+  box-shadow: none;
+  font-size: 11px;
+  line-height: 1;
   place-items: center;
 }
 
@@ -113,22 +287,33 @@
 
 @media (max-width: 767.98px) {
   .enquiries-page .content {
-    padding: 18px 10px;
+    padding: 12px 10px 16px;
+  }
+
+  .enquiries-page .form-control,
+  .enquiries-page .form-select {
+    height: 40px;
+    min-height: 40px;
+    font-size: 13px;
   }
 
   .enquiries-page-heading h1 {
-    font-size: 24px;
+    font-size: 20px !important;
   }
 
   .enquiries-page-actions {
     width: 100%;
     max-width: 100%;
     flex: 0 0 100%;
-    margin-top: 10px;
+    margin-top: 8px;
   }
 
   .enquiries-page-actions .btn {
     flex: 1 1 0;
+    height: 40px;
+    min-height: 40px;
+    padding: 7px 10px;
+    font-size: 13px;
   }
 
   .enquiries-filter-card {
@@ -225,8 +410,34 @@
     margin-bottom: 4px;
   }
 
+  .enquiry-action-icon {
+    display: inline-grid;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    padding: 0;
+    margin: 1px;
+    place-items: center;
+  }
+
+  .enquiry-action-label {
+    display: none;
+  }
+
+  .enquiry-action-icon > i {
+    font-size: 14px;
+  }
+
   .enquiries-page .custom-pagination {
     overflow-x: auto;
     padding-bottom: 4px;
+  }
+
+  .enquiries-page .students-page-size-select,
+  .enquiries-page .custom-pagination .page-link,
+  .enquiries-page .custom-pagination .page-item:first-child .page-link,
+  .enquiries-page .custom-pagination .page-item:last-child .page-link {
+    min-width: 36px;
+    height: 36px !important;
   }
 }

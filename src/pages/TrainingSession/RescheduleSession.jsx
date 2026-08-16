@@ -3,8 +3,8 @@ import { Modal, Button } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { IoClose } from "react-icons/io5";
 import { RescheduleTrainingSession } from "../../store/trainingSession/actions";
+import "./TrainingSessionModals.css";
 
 // Helper to get local YYYY-MM-DD (avoids timezone issues)
 const toLocalISODate = (d) => {
@@ -94,8 +94,9 @@ export default function RescheduleSession({
       keyboard={false}
       size="lg"
       centered
+      dialogClassName="session-form-dialog session-reschedule-dialog"
     >
-      <Modal.Header closeButton>
+      <Modal.Header closeButton className="session-form-header">
         <Modal.Title>{isEdit ? "Reschedule Session" : "Add Session"}</Modal.Title>
         {/* <IoClose
           onClick={() => {
@@ -106,11 +107,11 @@ export default function RescheduleSession({
           title="Close"
         /> */}
       </Modal.Header>
-      <Modal.Body>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="row">
+      <Modal.Body className="session-form-body">
+        <form onSubmit={formik.handleSubmit} className="session-form">
+          <div className="row session-form-row">
             <div className="col-md-6">
-              <div className="form-group">
+              <div className="form-group session-form-group">
                 <label>
                   New Date <span style={{ color: "red" }}>*</span>
                 </label>
@@ -130,7 +131,7 @@ export default function RescheduleSession({
             </div>
           </div>
 
-          <Modal.Footer>
+          <Modal.Footer className="session-form-footer">
             <Button variant="secondary" onClick={hideModal}>
               Cancel
             </Button>

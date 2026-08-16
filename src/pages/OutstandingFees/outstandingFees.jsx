@@ -192,7 +192,7 @@ const OutstandingFees = () => {
                       <table className="table custom-table text-center align-middle students-table outstanding-fees-table">
                         <thead className="table-light">
                           <tr>
-                            <th>
+                            <th className="no-print">
                               <input
                                 type="checkbox"
                                 aria-label="Select all students on this page"

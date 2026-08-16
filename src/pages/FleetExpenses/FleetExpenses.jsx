@@ -30,6 +30,11 @@ const getExpenseType = (expense) =>
   expense.type ||
   "Other";
 
+const truncateText = (value, maxLength = 15) => {
+  const text = (value || "-").toString();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
+};
+
 const FleetExpenses = () => {
   const dispatch = useDispatch();
 

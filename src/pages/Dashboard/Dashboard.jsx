@@ -64,7 +64,6 @@ const Dashboard = () => {
 
   const formatValue = (value) => (typeof value === "number" ? value : 0);
   const registrationCount = formatValue(summary?.response?.registration_count);
-  const processCompletedCount = formatValue(summary?.response?.process_completed_count);
   const processFailedCount = formatValue(summary?.response?.process_failed_count);
   const paymentPendingCount = formatValue(summary?.response?.payment_pending_count);
   const paymentCompletedCount = formatValue(summary?.response?.payment_completed_count);
@@ -74,7 +73,6 @@ const Dashboard = () => {
   const totalExpense = formatValue(summary?.response?.total_expense);
   const netIncome = formatValue(summary?.response?.net_income);
   const paymentTotalCount = paymentPendingCount + paymentCompletedCount + paymentFailedCount;
-  const processSuccessRate = registrationCount ? Math.round((processCompletedCount / registrationCount) * 100) : 0;
   const paymentSuccessRate = paymentTotalCount ? Math.round((paymentCompletedCount / paymentTotalCount) * 100) : 0;
   const formatCurrency = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
   const clampPercentage = (value) => Math.min(100, Math.max(0, value));

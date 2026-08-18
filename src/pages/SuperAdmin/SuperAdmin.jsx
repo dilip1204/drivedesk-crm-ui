@@ -101,7 +101,11 @@ const SuperAdmin = () => {
                                         <nav aria-label="breadcrumb">
                                             <ol className="breadcrumb p-0 mb-0 superadmin-breadcrumb">
                                                 <li className="breadcrumb-item">
-                                                    <span className="mdi mdi-home" aria-hidden="true"></span>
+                                                    <span className="superadmin-breadcrumb-home" aria-hidden="true">
+                                                        <svg viewBox="0 0 16 16" focusable="false">
+                                                            <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                                                        </svg>
+                                                    </span>
                                                 </li>
                                                 <li className="breadcrumb-item">Super Admin</li>
                                                 <li className="breadcrumb-item active" aria-current="page">Tenants</li>
@@ -306,9 +310,7 @@ const SuperAdmin = () => {
                                     ["Primary Mobile", viewTenant.mobile_number_primary || EMPTY_VALUE, "mdi-phone-outline"],
                                     ["Secondary Mobile", viewTenant.mobile_number_secondary || EMPTY_VALUE, "mdi-phone-plus"],
                                     ["Email", viewTenant.email || EMPTY_VALUE, "mdi-email-outline"],
-                                    ["WhatsApp Phone Number ID", viewTenant.whatsapp_phone_number_id || EMPTY_VALUE, "mdi-whatsapp"],
-                                    ["WhatsApp Access Token", viewTenant.whatsapp_access_token ? "••••••••••" : EMPTY_VALUE, "mdi-key"],
-                                    ["WhatsApp Business Account ID", viewTenant.whatsapp_business_account_id || EMPTY_VALUE, "mdi-briefcase-outline"],
+                                    ["Test Location", viewTenant.test_location || EMPTY_VALUE, "mdi-map-marker-check-outline"],
                                     ["WhatsApp Registered Number", viewTenant.whatsapp_registered_number || EMPTY_VALUE, "mdi-cellphone"],
                                     ["Google Review Link", viewTenant.google_review_link || EMPTY_VALUE, "mdi-star-outline"],
                                 ].map(([label, value, icon]) => (

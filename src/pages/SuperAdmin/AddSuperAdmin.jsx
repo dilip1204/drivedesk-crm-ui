@@ -16,10 +16,8 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
             mobile_number_primary: selected?.mobile_number_primary || "",
             mobile_number_secondary: selected?.mobile_number_secondary || "",
             email: selected?.email || "",
+            test_location: selected?.test_location || "",
             whatsapp_enabled: selected?.whatsapp_enabled || false,
-            whatsapp_phone_number_id: selected?.whatsapp_phone_number_id || "",
-            whatsapp_access_token: selected?.whatsapp_access_token || "",
-            whatsapp_business_account_id: selected?.whatsapp_business_account_id || "",
             whatsapp_registered_number: selected?.whatsapp_registered_number || "",
             google_review_link: selected?.google_review_link || "",
         }
@@ -32,10 +30,8 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
             mobile_number_secondary: "",
             email: "",
             password: "",
+            test_location: "",
             whatsapp_enabled: false,
-            whatsapp_phone_number_id: "",
-            whatsapp_access_token: "",
-            whatsapp_business_account_id: "",
             whatsapp_registered_number: "",
             google_review_link: "",
         };
@@ -145,6 +141,7 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
                             {field("Secondary Mobile", "mobile_number_secondary", "text", false, "Enter secondary mobile")}
                             {field("Email", "email", "email", true, "Enter email address")}
                             {!isEdit && field("Password", "password", "password", true, "Minimum 6 characters")}
+                            {field("Test Location", "test_location", "text", false, "Enter test location")}
                             {field("Google Review Link", "google_review_link", "url", false, "https://...")}
                         </div>
                     </div>
@@ -154,7 +151,7 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
                             <span className="mdi mdi-whatsapp" aria-hidden="true"></span>
                             <div>
                                 <h3>WhatsApp integration</h3>
-                                <p>Enable and configure messaging for this tenant.</p>
+                                <p>Enable messaging for this tenant.</p>
                             </div>
                             <div className="form-check form-switch superadmin-whatsapp-switch">
                                 <input
@@ -173,9 +170,6 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
 
                         {formik.values.whatsapp_enabled && (
                             <div className="row superadmin-whatsapp-fields">
-                                {field("Phone Number ID", "whatsapp_phone_number_id", "text", false, "Enter phone number ID")}
-                                {field("Access Token", "whatsapp_access_token", "text", false, "Enter access token")}
-                                {field("Business Account ID", "whatsapp_business_account_id", "text", false, "Enter business account ID")}
                                 {field("Registered Number", "whatsapp_registered_number", "text", false, "Enter registered number")}
                             </div>
                         )}

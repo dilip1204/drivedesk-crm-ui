@@ -34,6 +34,11 @@ import {
   isSriRagavendraOrganization,
 } from "../../utils/printBranding";
 
+const isCompletedSession = (session) =>
+  String(session?.status || session?.session_status || "")
+    .trim()
+    .toLowerCase() === "completed";
+
 const TrainingSession = () => {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
@@ -280,12 +285,14 @@ const TrainingSession = () => {
   };
 
   const handleEditStudent = (student) => {
+    if (isCompletedSession(student)) return;
     setSelectedStudent(student);
     setIsEdit(true);
     setShowModal(true);
   };
 
   const handleRescheduleSession = (student) => {
+    if (isCompletedSession(student)) return;
     setSelectedStudent(student);
     setIsEdit(true);
     setShowRModal(true);
@@ -557,8 +564,26 @@ const TrainingSession = () => {
                               <td data-label="Actions" className="training-session-actions">
                                 <div className="training-session-action-buttons">
                                   <button className="btn btn-primary btn-sm training-session-action-button" title="View Training Session" aria-label="View Training Session" onClick={() => openSessionModal(tsession)}><i className="bi bi-eye" aria-hidden="true"></i><span className="training-session-action-label">View</span></button>
-                                  <button className="btn btn-sm btn-warning training-session-action-button" title="Edit Training Session" aria-label="Edit Training Session" onClick={() => handleEditStudent(tsession)}><i className="bi bi-pencil-square" aria-hidden="true"></i><span className="training-session-action-label">Edit</span></button>
-                                  <button className="btn btn-sm btn-warning training-session-action-button" title="Reschedule Session" aria-label="Reschedule Session" onClick={() => handleRescheduleSession(tsession)}><i className="bi bi-clock-history" aria-hidden="true"></i><span className="training-session-action-label">Reschedule</span></button>
+                                  <button
+                                    className="btn btn-sm btn-warning training-session-action-button"
+                                    title={isCompletedSession(tsession) ? "Completed sessions cannot be edited" : "Edit Training Session"}
+                                    aria-label={isCompletedSession(tsession) ? "Edit disabled: session completed" : "Edit Training Session"}
+                                    disabled={isCompletedSession(tsession)}
+                                    onClick={() => handleEditStudent(tsession)}
+                                  >
+                                    <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                                    <span className="training-session-action-label">Edit</span>
+                                  </button>
+                                  <button
+                                    className="btn btn-sm btn-warning training-session-action-button"
+                                    title={isCompletedSession(tsession) ? "Completed sessions cannot be rescheduled" : "Reschedule Session"}
+                                    aria-label={isCompletedSession(tsession) ? "Reschedule disabled: session completed" : "Reschedule Session"}
+                                    disabled={isCompletedSession(tsession)}
+                                    onClick={() => handleRescheduleSession(tsession)}
+                                  >
+                                    <i className="bi bi-clock-history" aria-hidden="true"></i>
+                                    <span className="training-session-action-label">Reschedule</span>
+                                  </button>
                                   <button className="btn btn-sm btn-success training-session-action-button" title="Show Student Completed Sessions" aria-label="Show Student Completed Sessions" onClick={() => openCompletedModal(tsession)}><i className="bi bi-clipboard-check" aria-hidden="true"></i><span className="training-session-action-label">Completed</span></button>
                                 </div>
                               </td>

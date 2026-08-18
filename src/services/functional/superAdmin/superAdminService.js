@@ -21,3 +21,11 @@ export const updateSuperAdmin = (param) => {
         body
     );
 };
+
+export const getWhatsAppUsage = (period) => {
+    const query = new URLSearchParams({ period }).toString();
+    return request(
+        METHOD_TYPES.GET,
+        `${ENDPOINTS.getWhatsAppUsage}?${query}`
+    );
+};

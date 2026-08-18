@@ -98,12 +98,20 @@ export default function Sidebar() {
             )}
 
             {role === "super_admin" && (
-              <li className={`has-sub ${isActive("/superadmin") ? "active expand" : ""}`}>
-                <Link className="sidenav-item-link" to="/superadmin" title="Super Admin">
-                  <i className="mdi mdi-shield-account"></i>
-                  <span className="nav-text">Super Admin</span>
-                </Link>
-              </li>
+              <>
+                <li className={`has-sub ${location.pathname === "/superadmin" ? "active expand" : ""}`}>
+                  <Link className="sidenav-item-link" to="/superadmin" title="Tenant Management">
+                    <i className="mdi mdi-shield-account"></i>
+                    <span className="nav-text">Tenants</span>
+                  </Link>
+                </li>
+                <li className={`has-sub ${isActive("/superadmin/whatsapp-usage") ? "active expand" : ""}`}>
+                  <Link className="sidenav-item-link" to="/superadmin/whatsapp-usage" title="WhatsApp Usage">
+                    <i className="mdi mdi-whatsapp"></i>
+                    <span className="nav-text">WhatsApp Usage</span>
+                  </Link>
+                </li>
+              </>
             )}
             
 

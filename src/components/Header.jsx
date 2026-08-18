@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import avatar from "../assets/img/avatar.png";
@@ -17,6 +17,7 @@ const SEARCHABLE_PAGES = [
   { label: "Expenses", path: "/fleetexpenses", icon: "mdi-cash-multiple", roles: ["admin", "instructor"] },
   { label: "Tutorials", path: "/tutorials", icon: "mdi-play-circle-outline", roles: ["admin", "instructor"] },
   { label: "Super Admin", path: "/superadmin", icon: "mdi-shield-account", roles: ["super_admin"] },
+  { label: "WhatsApp Usage", path: "/superadmin/whatsapp-usage", icon: "mdi-whatsapp", roles: ["super_admin"] },
 ];
 
 export default function Header() {
@@ -25,6 +26,8 @@ export default function Header() {
   const [currentRole, setCurrentRole] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -79,6 +82,7 @@ export default function Header() {
     unlockPageScroll();
     setSearchQuery("");
     setSearchOpen(false);
+    setProfileMenuOpen(false);
 
     const handleResize = () => {
       if (window.innerWidth >= 768) unlockPageScroll();
@@ -93,6 +97,32 @@ export default function Header() {
       unlockPageScroll();
     };
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!profileMenuOpen) return undefined;
+
+    const closeOnOutsideInteraction = (event) => {
+      if (!profileMenuRef.current?.contains(event.target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", closeOnOutsideInteraction);
+    document.addEventListener("touchstart", closeOnOutsideInteraction, { passive: true });
+    document.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", closeOnOutsideInteraction);
+      document.removeEventListener("touchstart", closeOnOutsideInteraction);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [profileMenuOpen]);
 
   const handleSidebarToggle = (e) => {
     e.preventDefault();
@@ -223,12 +253,17 @@ export default function Header() {
               <PWAInstallButton />
             </li>
 
-            <li className="dropdown user-menu">
+            <li
+              ref={profileMenuRef}
+              className={`dropdown user-menu${profileMenuOpen ? " show" : ""}`}
+            >
               <button
                 type="button"
                 className="dropdown-toggle nav-link"
-                data-toggle="dropdown"
+                onClick={() => setProfileMenuOpen((isOpen) => !isOpen)}
                 aria-label={`Open ${displayName} account menu`}
+                aria-haspopup="menu"
+                aria-expanded={profileMenuOpen}
               >
                 <span className="header-avatar-wrap">
                   <img src={avatar} className="user-image" alt="" />
@@ -240,7 +275,10 @@ export default function Header() {
                 </span>
                 <i className="mdi mdi-chevron-down header-user-chevron" aria-hidden="true" />
               </button>
-              <ul className="dropdown-menu dropdown-menu-right header-user-menu">
+              <ul
+                className={`dropdown-menu dropdown-menu-right header-user-menu${profileMenuOpen ? " show" : ""}`}
+                role="menu"
+              >
                 <li className="dropdown-header">
                   <img src={avatar} className="img-circle" alt={displayName} />
                   <div className="d-inline-block header-user-dropdown-name" title={displayName}>
@@ -257,6 +295,7 @@ export default function Header() {
                     to="#"
                     onClick={(e) => {
                       e.preventDefault();
+                      setProfileMenuOpen(false);
                       localStorage.clear();
                       navigate("/login");
                     }}

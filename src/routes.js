@@ -14,6 +14,7 @@ import InstructorAvailabilityDashboard from "./pages/Instructors/InstructorAvail
 import FleetExpenses from "./pages/FleetExpenses/FleetExpenses";
 import OutstandingFees from "./pages/OutstandingFees/outstandingFees";
 import SuperAdmin from "./pages/SuperAdmin/SuperAdmin";
+import WhatsAppUsage from "./pages/SuperAdmin/WhatsAppUsage";
 import Tutorials from "./pages/Tutorials/Tutorials";
 import ExpenseReport from "./pages/FleetExpenses/ExpenseReport";
 import IncomeReport from "./pages/IncomeReport/IncomeReport";
@@ -143,6 +144,15 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["super_admin"]}>
             <SuperAdmin />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin/whatsapp-usage"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <WhatsAppUsage />
           </ProtectedRoute>
         }
       />

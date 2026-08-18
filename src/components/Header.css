@@ -1,4 +1,6 @@
 .drivedesk-header {
+  z-index: 1050;
+  overflow: visible;
   background: rgba(255, 255, 255, .98);
   box-shadow: 0 1px 0 rgba(16, 24, 40, .08), 0 3px 12px rgba(16, 24, 40, .035);
   font-family: "Segoe UI", Arial, sans-serif;
@@ -204,6 +206,7 @@
 }
 
 .drivedesk-header .navbar .navbar-right .navbar-nav .user-menu {
+  position: relative;
   display: flex;
   min-width: 0;
   align-items: center;
@@ -309,13 +312,21 @@
 .drivedesk-header .navbar .header-user-menu {
   top: calc(100% - 6px);
   right: 0 !important;
+  left: auto !important;
+  z-index: 1300;
   width: 290px;
+  margin: 0;
+  transform: none !important;
   overflow: hidden;
   padding: 5px;
   border: 1px solid var(--color-border, #d9e0e8);
   border-radius: 10px;
   background: #fff;
   box-shadow: 0 16px 42px rgba(16, 24, 40, .17);
+}
+
+.drivedesk-header .navbar .header-user-menu.show {
+  display: block;
 }
 
 .drivedesk-header .navbar .header-user-menu li.dropdown-header {

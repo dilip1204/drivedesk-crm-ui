@@ -31,7 +31,7 @@ export default function StudentTrainingSessionModal({ show, onClose, session }) 
               label="Instructor Name"
               value={session?.instructor_name || "Instructor Name"}
             />
-            <ProfileItem label="No of Class" value={session?.num_classes || "N/A"} />
+            <ProfileItem label="No of Class" value={session?.attended_days ?? "N/A"} />
             <ProfileItem label="Remarks" value={session?.remarks || "N/A"} />
           </div>
         </div>
@@ -57,6 +57,8 @@ export default function StudentTrainingSessionModal({ show, onClose, session }) 
 const ProfileItem = ({ label, value }) => (
   <div className="student-session-item">
     <span className="student-session-label">{label}</span>
-    <span className="student-session-value">{value || "N/A"}</span>
+    <span className="student-session-value">
+      {value === null || value === undefined || value === "" ? "N/A" : value}
+    </span>
   </div>
 );

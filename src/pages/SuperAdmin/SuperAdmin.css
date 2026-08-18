@@ -22,53 +22,74 @@
 
 .superadmin-hero {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
-  margin-bottom: 16px;
+  margin-bottom: 6px;
 }
 
 .superadmin-title {
-  margin: 0 0 4px;
+  margin: 0 0 2px;
   color: var(--color-text, #172033);
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -0.015em;
+  font-size: 20px !important;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
 }
 
 .superadmin-breadcrumb {
   display: flex;
   align-items: center;
-  min-height: 20px;
+  min-height: 14px;
+  margin: 0;
   color: var(--color-muted, #667085);
-  font-size: 12px;
-  line-height: 20px;
+  font-size: 11px !important;
+  line-height: 1.25;
 }
 
-.superadmin-breadcrumb .breadcrumb-item {
+.superadmin-breadcrumb .breadcrumb-item,
+.superadmin-breadcrumb .breadcrumb-item a {
   display: inline-flex;
+  min-height: 14px;
   align-items: center;
-  line-height: 20px;
-}
-
-.superadmin-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
-  align-self: center;
-  color: #98a2b3;
-  line-height: 20px;
-}
-
-.superadmin-breadcrumb .mdi-home {
-  display: inline-flex;
-  align-items: center;
-  color: #8793a6;
-  font-size: 14px;
+  font-size: 11px !important;
   line-height: 1;
 }
 
+.superadmin-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+  position: static;
+  top: auto;
+  display: block;
+  flex: 0 0 4px;
+  width: 4px;
+  height: 4px;
+  align-self: center;
+  margin-right: 8px;
+  padding: 0;
+  float: none;
+  content: "";
+  background: #98a2b3;
+  transform: rotate(45deg);
+}
+
+.superadmin-breadcrumb-home {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  color: var(--color-muted, #667085);
+  place-items: center;
+}
+
+.superadmin-breadcrumb-home svg {
+  display: block;
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
+
 .superadmin-breadcrumb .active {
-  color: #344054;
-  font-weight: 600;
+  color: var(--color-text, #172033);
+  font-weight: 500;
 }
 
 .superadmin-hero__actions {
@@ -942,11 +963,16 @@
   }
 
   .superadmin-title {
-    font-size: 19px;
+    font-size: 19px !important;
   }
 
   .superadmin-breadcrumb {
-    font-size: 10px;
+    font-size: 10px !important;
+  }
+
+  .superadmin-breadcrumb .breadcrumb-item,
+  .superadmin-breadcrumb .breadcrumb-item a {
+    font-size: 10px !important;
   }
 
   .superadmin-add-btn {

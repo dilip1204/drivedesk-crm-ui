@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,31 @@ import "react-toastify/dist/ReactToastify.css";
 import ProfileModal from "../../components/ProfileModal";
 import Pagination from "../Students/Pagenation";
 
+const parseEnquiriesResponse = (res, fallbackPageSize = 10) => {
+  const response = res?.response;
+
+  if (Array.isArray(response)) {
+    return {
+      list: response,
+      total: response.length,
+      skip: 0,
+      limit: fallbackPageSize,
+    };
+  }
+
+  const list = Array.isArray(response?.enquiries) ? response.enquiries : [];
+  const limit = Number(response?.limit);
+  const skip = Number(response?.skip);
+  const total = Number(response?.total);
+
+  return {
+    list,
+    total: Number.isFinite(total) ? total : list.length,
+    skip: Number.isFinite(skip) ? skip : 0,
+    limit: Number.isFinite(limit) && limit > 0 ? limit : fallbackPageSize,
+  };
+};
+
 const Enquiries = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -41,6 +66,9 @@ const Enquiries = () => {
   const [profileData, setProfileData] = useState([]);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [enquirySearch, setEnquirySearch] = useState("");
+  const [debouncedEnquirySearch, setDebouncedEnquirySearch] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const requestIdRef = useRef(0);
   const [filters, setFilters] = useState({
     month: "",
     year: "",
@@ -80,39 +108,29 @@ const Enquiries = () => {
     setShowProfileModal(true);
   };
 
-  const parseEnquiriesResponse = (res, fallbackPageSize = 10) => {
-    const response = res?.response;
-
-    if (Array.isArray(response)) {
-      return {
-        list: response,
-        total: response.length,
-        skip: 0,
-        limit: fallbackPageSize,
-      };
-    }
-
-    const list = Array.isArray(response?.enquiries) ? response.enquiries : [];
-    const limit = Number(response?.limit);
-    const skip = Number(response?.skip);
-    const total = Number(response?.total);
-
-    return {
-      list,
-      total: Number.isFinite(total) ? total : list.length,
-      skip: Number.isFinite(skip) ? skip : 0,
-      limit: Number.isFinite(limit) && limit > 0 ? limit : fallbackPageSize,
-    };
-  };
-
-  const getEnquiriesList = (page = currentPage, limit = pageSize) => {
+  const getEnquiriesList = useCallback((
+    page = currentPage,
+    limit = pageSize,
+    searchTerm = debouncedEnquirySearch
+  ) => {
     const safePage = Number.isFinite(Number(page)) && Number(page) > 0 ? Number(page) : 1;
     const safeLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 10;
-    const data = { skip: (safePage - 1) * safeLimit, limit: safeLimit };
-    setLoading(true);
+    const normalizedSearch = String(searchTerm || "").trim();
+    const mobileDigits = normalizedSearch.replace(/\D/g, "");
+    const isMobileSearch = Boolean(mobileDigits) && /^[+\d\s()-]+$/.test(normalizedSearch);
+    const data = {
+      skip: (safePage - 1) * safeLimit,
+      limit: safeLimit,
+      ...(normalizedSearch && !isMobileSearch ? { name: normalizedSearch } : {}),
+      ...(normalizedSearch && isMobileSearch ? { mobile_number: mobileDigits } : {}),
+    };
+    const requestId = ++requestIdRef.current;
+    setIsSearching(Boolean(normalizedSearch));
 
     dispatch(
       getEnquiriesListInformation(data, (res) => {
+        if (requestId !== requestIdRef.current) return;
+
         const parsed = parseEnquiriesResponse(res, safeLimit);
         if (parsed.list.length > 0) {
           setEnquiriesData(parsed.list);
@@ -124,16 +142,25 @@ const Enquiries = () => {
           setEnquiriesData([]);
           setTotalCount(0);
           setCurrentPage(1);
-          setError("No enquiries found.");
+          setError(normalizedSearch ? null : "No enquiries found.");
         }
+        setIsSearching(false);
         setLoading(false);
       })
     );
-  };
+  }, [currentPage, debouncedEnquirySearch, dispatch, pageSize]);
 
   useEffect(() => {
-    getEnquiriesList(currentPage, pageSize);
-  }, [dispatch, currentPage, pageSize]);
+    const debounceTimer = window.setTimeout(() => {
+      setDebouncedEnquirySearch(enquirySearch.trim());
+    }, 350);
+
+    return () => window.clearTimeout(debounceTimer);
+  }, [enquirySearch]);
+
+  useEffect(() => {
+    getEnquiriesList(currentPage, pageSize, debouncedEnquirySearch);
+  }, [getEnquiriesList, currentPage, pageSize, debouncedEnquirySearch]);
 
   const handleDeleteCloseModel = () => {
     setShowDeleteModal(false);
@@ -231,28 +258,15 @@ const Enquiries = () => {
     }
   };
 
-  const normalizedEnquirySearch = enquirySearch.trim().toLowerCase();
-  const searchedEnquiries = useMemo(() => {
-    if (!normalizedEnquirySearch) return enquiriesData;
+  const normalizedEnquirySearch = enquirySearch.trim();
+  const searchedEnquiries = enquiriesData;
 
-    const searchDigits = normalizedEnquirySearch.replace(/\D/g, "");
-
-    return enquiriesData.filter((enquiry) => {
-      const studentName = String(
-        enquiry?.name || enquiry?.student_name || ""
-      ).toLowerCase();
-      const mobileNumber = String(
-        enquiry?.mobile_number || enquiry?.mobile || ""
-      );
-      const mobileDigits = mobileNumber.replace(/\D/g, "");
-
-      return (
-        studentName.includes(normalizedEnquirySearch) ||
-        mobileNumber.toLowerCase().includes(normalizedEnquirySearch) ||
-        Boolean(searchDigits && mobileDigits.includes(searchDigits))
-      );
-    });
-  }, [enquiriesData, normalizedEnquirySearch]);
+  const clearEnquirySearch = () => {
+    setEnquirySearch("");
+    setDebouncedEnquirySearch("");
+    setIsSearching(false);
+    setCurrentPage(1);
+  };
 
   return (
     <>
@@ -458,9 +472,14 @@ const Enquiries = () => {
                           type="text"
                           className="form-control"
                           value={enquirySearch}
-                          onChange={(event) => setEnquirySearch(event.target.value)}
+                          onChange={(event) => {
+                            const nextSearch = event.target.value;
+                            setEnquirySearch(nextSearch);
+                            setIsSearching(Boolean(nextSearch.trim()));
+                            setCurrentPage(1);
+                          }}
                           onKeyDown={(event) => {
-                            if (event.key === "Escape") setEnquirySearch("");
+                            if (event.key === "Escape") clearEnquirySearch();
                           }}
                           placeholder="Search student name or mobile number..."
                           aria-label="Search enquiries by student name or mobile number"
@@ -471,7 +490,7 @@ const Enquiries = () => {
                           <button
                             type="button"
                             className="enquiries-search-clear"
-                            onClick={() => setEnquirySearch("")}
+                            onClick={clearEnquirySearch}
                             aria-label="Clear enquiry search"
                           >
                             <i className="bi bi-x-lg" aria-hidden="true" />
@@ -479,10 +498,11 @@ const Enquiries = () => {
                         )}
                       </div>
                       <span className="enquiries-search-count" aria-live="polite">
-                        {normalizedEnquirySearch
-                          ? `${searchedEnquiries.length} of ${enquiriesData.length}`
-                          : enquiriesData.length}{" "}
-                        on this page
+                        {isSearching
+                          ? "Searching..."
+                          : normalizedEnquirySearch
+                          ? `${searchedEnquiries.length} of ${totalCount} results`
+                          : `${enquiriesData.length} on this page`}
                       </span>
                     </div>
                     <div className="table-responsive enquiries-table-wrap">
@@ -508,7 +528,7 @@ const Enquiries = () => {
                                 return (
                                   <>
                               <td data-label="S.No">
-                                {startIndex + enquiriesData.indexOf(enquiries) + 1}
+                                {startIndex + index + 1}
                               </td>
                               <td data-label="Student Name">{enquiries.name || "Name"}</td>
                               <td data-label="Mobile Number">{enquiries.mobile_number || "N/A"}</td>
@@ -569,7 +589,7 @@ const Enquiries = () => {
                                   <button
                                     type="button"
                                     className="btn btn-outline-primary btn-sm"
-                                    onClick={() => setEnquirySearch("")}
+                                    onClick={clearEnquirySearch}
                                   >
                                     Clear search
                                   </button>
@@ -581,7 +601,7 @@ const Enquiries = () => {
                       </table>
                     </div>
                     </div>
-                    {!normalizedEnquirySearch && (
+                    {totalCount > 0 && (
                       <Pagination
                         currentPage={currentPage}
                         totalCount={totalCount}

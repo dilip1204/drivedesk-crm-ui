@@ -119,6 +119,17 @@ body.pwa-guide-open {
     padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px));
   }
 
+  body.pwa-install-visible .dd-footer__inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+    padding-right: 118px;
+  }
+
+  body.pwa-install-visible .dd-footer__copyright {
+    justify-self: start;
+    text-align: left;
+  }
+
   .pwa-install-button,
   .pwa-ios-guide button {
     touch-action: manipulation;

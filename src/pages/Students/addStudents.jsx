@@ -795,8 +795,8 @@ export default function AddStudents({
                         <span>
                           Booked: <strong>{availabilityDay.booked_slots?.length || 0}</strong>
                         </span>
-                        {availabilityDay.is_sunday && (
-                          <span className="text-warning"><strong>Sunday (off day)</strong></span>
+                        {availabilityDay.is_working_day === false && (
+                          <span className="text-warning"><strong>Non-working day</strong></span>
                         )}
                       </div>
 

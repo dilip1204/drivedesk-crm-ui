@@ -54,6 +54,8 @@ const OutstandingFees = () => {
   };
 
   const getKey = (s) => s?.mobile_number;
+  const getAdjustmentId = (student) =>
+    student?._id || student?.id || student?.student_id;
 
   const handleCheckbox = (student) => {
     const key = getKey(student);
@@ -69,13 +71,34 @@ const OutstandingFees = () => {
   };
 
   const handleConfirm = () => {
+    const ids = selectedIds.map(getAdjustmentId).filter(Boolean);
+
+    if (ids.length !== selectedIds.length || ids.length === 0) {
+      toast.error("Unable to identify one or more selected students. Please refresh and try again.");
+      return;
+    }
+
     setModalLoading(true);
-    const ids = selectedIds.map((s) => s._id || s.id || s.student_id);
-    console.log("Selected student keys:", selectedIds[0] ? Object.keys(selectedIds[0]) : []);
-    console.log("Sending IDs:", ids);
     dispatch(
       historicalPaymentAdjustment({ id: ids }, (res) => {
         setModalLoading(false);
+
+        const requestFailed =
+          res?.isError ||
+          res?.isAxiosError ||
+          res instanceof Error ||
+          Number(res?.response?.status) >= 400;
+
+        if (requestFailed) {
+          const message =
+            res?.response?.data?.detail ||
+            res?.response?.data?.message ||
+            res?.message ||
+            "Historical payment adjustment failed. Please try again.";
+          toast.error(message);
+          return;
+        }
+
         setShowModal(false);
         setSelectedIds([]);
         toast.success("Historical payment adjustment applied successfully.");
@@ -180,6 +203,7 @@ const OutstandingFees = () => {
                       <div className="outstanding-selection-toolbar">
                         <span><strong>{selectedIds.length}</strong> selected</span>
                         <button
+                          type="button"
                           className="btn btn-warning"
                           onClick={() => setShowModal(true)}
                         >
@@ -272,7 +296,8 @@ const OutstandingFees = () => {
       {/* Historical Payment Adjustment Modal */}
       {showModal && (
         <div
-          className="modal fade show outstanding-adjustment-modal"
+          className="modal fade show d-block outstanding-adjustment-modal"
+          style={{ display: "block" }}
           tabIndex="-1"
           role="dialog"
           aria-modal="true"
@@ -295,6 +320,7 @@ const OutstandingFees = () => {
               </div>
               <div className="modal-footer">
                 <button
+                  type="button"
                   className="btn btn-secondary"
                   onClick={() => setShowModal(false)}
                   disabled={modalLoading}
@@ -302,6 +328,7 @@ const OutstandingFees = () => {
                   Cancel
                 </button>
                 <button
+                  type="button"
                   className="btn btn-primary"
                   onClick={handleConfirm}
                   disabled={modalLoading}

@@ -27,6 +27,8 @@ export const ENDPOINTS = {
     rescheduleTrainingsession: 'training-sessions/',
     getInstructorAvail: 'instructors/by-mobile/',
     getStudentCompletedList: 'training-sessions/student/',
+    getAttendance: 'attendance',
+    saveAttendance: 'attendance/bulk',
     addExpenses: 'expenses',
     editExpenses: 'expenses/',
     deleteExpenses: 'expenses/',

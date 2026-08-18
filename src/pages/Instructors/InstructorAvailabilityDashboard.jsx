@@ -46,6 +46,19 @@ function toISODate(d) {
   const day = `${d.getDate()}`.padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
+const DAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+function isInstructorWorkingDay(day, date, workingDaySet) {
+  if (typeof day?.is_working_day === "boolean") {
+    return day.is_working_day;
+  }
+
+  if (workingDaySet.size > 0) {
+    return workingDaySet.has(DAY_CODES[date.getDay()]);
+  }
+
+  return Boolean(day);
+}
 function badgeColorByStatus(status) {
   switch ((status || "").toLowerCase()) {
     case "completed":
@@ -103,7 +116,12 @@ function Donut({
 /********************
  * CalendarGrid (aligned 7-column grid)
  ********************/
-function CalendarGrid({ weeks, dayMap, onSelect }) {
+function CalendarGrid({ weeks, dayMap, workingDays, onSelect }) {
+  const workingDaySet = useMemo(
+    () => new Set((workingDays || []).map((day) => String(day).toUpperCase())),
+    [workingDays]
+  );
+
   return (
     <div className="calendar">
       <div className="calendar__head">
@@ -128,7 +146,11 @@ function CalendarGrid({ weeks, dayMap, onSelect }) {
 
             const iso = toISODate(cell);
             const d = dayMap.get(iso);
-            const isSunday = cell.getDay() === 0;
+            const isWorkingDay = isInstructorWorkingDay(
+              d,
+              cell,
+              workingDaySet
+            );
 
             const totalCount =
               (d?.available_slots?.length || 0) +
@@ -137,7 +159,7 @@ function CalendarGrid({ weeks, dayMap, onSelect }) {
 
             // tint by utilization (Bootstrap-only colors)
             let tint = "";
-            if (!isSunday) {
+            if (isWorkingDay) {
               const pct = totalCount ? bookedCount / totalCount : 0;
               if (pct === 0) tint = "bg-success-subtle";
               else if (pct < 0.33) tint = "bg-success-subtle";
@@ -153,16 +175,16 @@ function CalendarGrid({ weeks, dayMap, onSelect }) {
                 className={clsx(
                   "calendar__cell",
                   tint,
-                  isSunday && "calendar__cell--sunday"
+                  !isWorkingDay && "calendar__cell--sunday"
                 )}
-                onClick={() => !isSunday && onSelect?.(iso)}
-                disabled={isSunday}
-                aria-label={iso}
+                onClick={() => isWorkingDay && onSelect?.(iso)}
+                disabled={!isWorkingDay}
+                aria-label={`${iso}${isWorkingDay ? "" : " - non-working day"}`}
               >
                 <div className="calendar__celltop">
                   <div className="calendar__date">{cell.getDate()}</div>
-                  {d?.is_sunday && (
-                    <span className="calendar__sunday">Sunday</span>
+                  {!isWorkingDay && (
+                    <span className="calendar__sunday">Off</span>
                   )}
                 </div>
 
@@ -533,6 +555,7 @@ export function InstructorAvailabilityDashboard({ data }) {
                 <CalendarGrid
                   weeks={weeks}
                   dayMap={dayMap}
+                  workingDays={instructor.working_days}
                   onSelect={(iso) => setSelectedISO(iso)}
                 />
               </div>

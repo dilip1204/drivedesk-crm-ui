@@ -221,11 +221,11 @@ export default function StudentProfileModal({ show, onClose, student }) {
 
           {/* Right Column */}
           <div className="col-md-6">
+            <ProfileItem label="Total Amount" value={student.total_amount} />
             <ProfileItem label="Paid Amount" value={student.paid_amount} />
             {student.discount > 0 && (
               <ProfileItem label="Discount" value={student.discount} />
             )}
-            <ProfileItem label="Total Amount" value={student.total_amount} />
             <ProfileItem label="Balance" value={student.balance} />
             <ProfileItem
               label="Full Payment Status"

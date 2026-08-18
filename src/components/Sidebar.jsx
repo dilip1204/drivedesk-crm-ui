@@ -74,6 +74,13 @@ export default function Sidebar() {
                 </Link>
               </li>
 
+              <li className={`has-sub ${isActive("/attendance") ? "active expand" : ""}`}>
+                <Link className="sidenav-item-link" to="/attendance" title="Attendance">
+                  <i className="mdi mdi-calendar-check-outline"></i>
+                  <span className="nav-text">Attendance</span>
+                </Link>
+              </li>
+
               <li className={`has-sub ${isActive("/fleetexpenses") ? "active expand" : ""}`}>
                 <Link className="sidenav-item-link" to="/fleetexpenses" title="Expenses">
                 <i className="mdi mdi-cash-multiple"></i>

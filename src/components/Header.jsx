@@ -12,6 +12,7 @@ const SEARCHABLE_PAGES = [
   { label: "Enquiries", path: "/enquiries", icon: "mdi-account-question", roles: ["admin", "instructor"] },
   { label: "Tariff", path: "/tariff", icon: "mdi-currency-inr", roles: ["admin"] },
   { label: "Training Session", path: "/trainingsession", icon: "mdi-school", roles: ["admin", "instructor"] },
+  { label: "Attendance", path: "/attendance", icon: "mdi-calendar-check-outline", roles: ["admin", "instructor"] },
   { label: "Outstanding Fees", path: "/outstandingfees", icon: "mdi-cash-clock", roles: ["admin", "instructor"] },
   { label: "Expenses", path: "/fleetexpenses", icon: "mdi-cash-multiple", roles: ["admin", "instructor"] },
   { label: "Tutorials", path: "/tutorials", icon: "mdi-play-circle-outline", roles: ["admin", "instructor"] },
@@ -177,7 +178,6 @@ export default function Header() {
               placeholder="Go to a page..."
               autoComplete="off"
               aria-label="Search application pages"
-              aria-expanded={searchOpen}
             />
             {searchQuery && (
               <button
@@ -242,7 +242,7 @@ export default function Header() {
               </button>
               <ul className="dropdown-menu dropdown-menu-right header-user-menu">
                 <li className="dropdown-header">
-                  <img src={avatar} className="img-circle" alt="User Image" />
+                  <img src={avatar} className="img-circle" alt={displayName} />
                   <div className="d-inline-block header-user-dropdown-name" title={displayName}>
                     <div>{displayName}</div>
                     {displayRole && <small className="text-muted">{displayRole}</small>}

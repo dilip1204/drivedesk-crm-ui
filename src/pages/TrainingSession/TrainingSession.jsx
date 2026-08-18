@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 
@@ -48,6 +48,7 @@ const TrainingSession = () => {
   const [sessionStudentData, setSessionStudentData] = useState(null);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filterApplied, setFilterApplied] = useState(false);
+  const [studentSearch, setStudentSearch] = useState("");
   const completedTableRef = useRef(null);
 
   // NEW: completed sessions modal state
@@ -332,6 +333,16 @@ const TrainingSession = () => {
     ...new Set(completedSessions.map((session) => session?.instructor_name).filter(Boolean)),
   ].join(", ") || "-";
 
+  const normalizedStudentSearch = studentSearch.trim();
+  const searchedTrainingSessions = useMemo(() => {
+    const query = normalizedStudentSearch.toLowerCase();
+    if (!query) return trainingSessionData;
+
+    return trainingSessionData.filter((session) =>
+      String(session?.student_name || "").toLowerCase().includes(query)
+    );
+  }, [normalizedStudentSearch, trainingSessionData]);
+
   return (
     <>
       <div className="header-fixed sidebar-fixed sidebar-dark header-light training-session-page" id="body">
@@ -473,6 +484,43 @@ const TrainingSession = () => {
                       </span>
                       <span>View completed sessions</span>
                     </div>
+                    <div className="training-student-search" role="search">
+                      <div className="training-student-search-control">
+                        <div className="training-student-search-field">
+                          <i className="bi bi-search" aria-hidden="true" />
+                          <input
+                            id="training-student-search-input"
+                            type="text"
+                            className="form-control"
+                            value={studentSearch}
+                            onChange={(event) => setStudentSearch(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Escape") setStudentSearch("");
+                            }}
+                            placeholder="Type a student name..."
+                            aria-label="Search by student name"
+                            autoComplete="off"
+                            spellCheck="false"
+                          />
+                          {studentSearch && (
+                            <button
+                              type="button"
+                              className="training-student-search-clear"
+                              onClick={() => setStudentSearch("")}
+                              aria-label="Clear student search"
+                            >
+                              <i className="bi bi-x-lg" aria-hidden="true" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <span className="training-student-search-count" aria-live="polite">
+                        {normalizedStudentSearch
+                          ? `${searchedTrainingSessions.length} of ${trainingSessionData.length}`
+                          : trainingSessionData.length}{" "}
+                        session{trainingSessionData.length === 1 ? "" : "s"}
+                      </span>
+                    </div>
                   </div>
                   {loading ? (
                     <p className="text-center my-5">Loading training session...</p>
@@ -493,8 +541,9 @@ const TrainingSession = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {trainingSessionData.map((tsession, index) => (
-                            <tr key={index}>
+                          {searchedTrainingSessions.length > 0 ? (
+                            searchedTrainingSessions.map((tsession, index) => (
+                            <tr key={tsession.id || tsession._id || `${tsession.student_name}-${tsession.date}-${index}`}>
                               <td data-label="S.No">{index + 1}</td>
                               <td data-label="Student">{tsession.student_name || "Student Name"}</td>
                               <td data-label="Instructor">{tsession.instructor_name || "Instructor Name"}</td>
@@ -514,7 +563,27 @@ const TrainingSession = () => {
                                 </div>
                               </td>
                             </tr>
-                          ))}
+                            ))
+                          ) : (
+                            <tr className="training-search-empty-row">
+                              <td colSpan="7">
+                                <div className="training-search-empty-content">
+                                  <i className="bi bi-person-x" aria-hidden="true" />
+                                  <strong>No matching student</strong>
+                                  <span>
+                                    No training sessions found for “{normalizedStudentSearch}”.
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="btn btn-outline-primary btn-sm"
+                                    onClick={() => setStudentSearch("")}
+                                  >
+                                    Clear search
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>

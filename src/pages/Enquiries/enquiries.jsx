@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -40,6 +40,7 @@ const Enquiries = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileData, setProfileData] = useState([]);
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [enquirySearch, setEnquirySearch] = useState("");
   const [filters, setFilters] = useState({
     month: "",
     year: "",
@@ -229,6 +230,30 @@ const Enquiries = () => {
       toast.error(msg);
     }
   };
+
+  const normalizedEnquirySearch = enquirySearch.trim().toLowerCase();
+  const searchedEnquiries = useMemo(() => {
+    if (!normalizedEnquirySearch) return enquiriesData;
+
+    const searchDigits = normalizedEnquirySearch.replace(/\D/g, "");
+
+    return enquiriesData.filter((enquiry) => {
+      const studentName = String(
+        enquiry?.name || enquiry?.student_name || ""
+      ).toLowerCase();
+      const mobileNumber = String(
+        enquiry?.mobile_number || enquiry?.mobile || ""
+      );
+      const mobileDigits = mobileNumber.replace(/\D/g, "");
+
+      return (
+        studentName.includes(normalizedEnquirySearch) ||
+        mobileNumber.toLowerCase().includes(normalizedEnquirySearch) ||
+        Boolean(searchDigits && mobileDigits.includes(searchDigits))
+      );
+    });
+  }, [enquiriesData, normalizedEnquirySearch]);
+
   return (
     <>
       <div
@@ -425,6 +450,41 @@ const Enquiries = () => {
                     <p className="text-center text-danger my-5">{error}</p>
                   ) : (
                     <>
+                    <div className="enquiries-list-card">
+                    <div className="enquiries-search-toolbar" role="search">
+                      <div className="enquiries-search-field">
+                        <i className="bi bi-search" aria-hidden="true" />
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={enquirySearch}
+                          onChange={(event) => setEnquirySearch(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Escape") setEnquirySearch("");
+                          }}
+                          placeholder="Search student name or mobile number..."
+                          aria-label="Search enquiries by student name or mobile number"
+                          autoComplete="off"
+                          spellCheck="false"
+                        />
+                        {enquirySearch && (
+                          <button
+                            type="button"
+                            className="enquiries-search-clear"
+                            onClick={() => setEnquirySearch("")}
+                            aria-label="Clear enquiry search"
+                          >
+                            <i className="bi bi-x-lg" aria-hidden="true" />
+                          </button>
+                        )}
+                      </div>
+                      <span className="enquiries-search-count" aria-live="polite">
+                        {normalizedEnquirySearch
+                          ? `${searchedEnquiries.length} of ${enquiriesData.length}`
+                          : enquiriesData.length}{" "}
+                        on this page
+                      </span>
+                    </div>
                     <div className="table-responsive enquiries-table-wrap">
                       <table className="table custom-table text-center align-middle enquiries-table">
                         <thead className="table-light">
@@ -438,8 +498,8 @@ const Enquiries = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {enquiriesData.map((enquiries, index) => (
-                            <tr key={index}>
+                          {searchedEnquiries.length > 0 ? searchedEnquiries.map((enquiries, index) => (
+                            <tr key={enquiries?.id || enquiries?.mobile_number || index}>
                               {(() => {
                                 const isEnrolled =
                                   String(enquiries?.follow_up_status || "")
@@ -447,7 +507,9 @@ const Enquiries = () => {
                                     .toLowerCase() === "enrolled";
                                 return (
                                   <>
-                              <td data-label="S.No">{startIndex + index + 1}</td>
+                              <td data-label="S.No">
+                                {startIndex + enquiriesData.indexOf(enquiries) + 1}
+                              </td>
                               <td data-label="Student Name">{enquiries.name || "Name"}</td>
                               <td data-label="Mobile Number">{enquiries.mobile_number || "N/A"}</td>
                               <td data-label="Email">{enquiries.email || "N/A"}</td>
@@ -495,20 +557,42 @@ const Enquiries = () => {
                                 );
                               })()}
                             </tr>
-                          ))}
+                          )) : (
+                            <tr className="enquiries-search-empty-row">
+                              <td colSpan="6">
+                                <div className="enquiries-search-empty-content">
+                                  <i className="bi bi-person-x" aria-hidden="true" />
+                                  <strong>No matching enquiry</strong>
+                                  <span>
+                                    No student name or mobile number matches "{enquirySearch.trim()}".
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="btn btn-outline-primary btn-sm"
+                                    onClick={() => setEnquirySearch("")}
+                                  >
+                                    Clear search
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
-                    <Pagination
-                      currentPage={currentPage}
-                      totalCount={totalCount}
-                      pageSize={pageSize}
-                      onPageChange={(p) => setCurrentPage(p)}
-                      onPageSizeChange={(s) => {
-                        setPageSize(s);
-                        setCurrentPage(1);
-                      }}
-                    />
+                    </div>
+                    {!normalizedEnquirySearch && (
+                      <Pagination
+                        currentPage={currentPage}
+                        totalCount={totalCount}
+                        pageSize={pageSize}
+                        onPageChange={(p) => setCurrentPage(p)}
+                        onPageSizeChange={(s) => {
+                          setPageSize(s);
+                          setCurrentPage(1);
+                        }}
+                      />
+                    )}
                     {/* <div className="row g-4">
                       {enquiriesData.map((enquiries, index) => (
                         <div

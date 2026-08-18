@@ -121,7 +121,7 @@ const IncomeReport = () => {
           <Header />
           <div className="content-wrapper">
             <div className="content">
-              <div className="row mb-4">
+              <div className="row mb-4 report-page-heading">
                 <div className="breadcrumb-wrapper col-xl-6">
                   <h1>Income Report</h1>
                   <nav aria-label="breadcrumb">
@@ -131,7 +131,7 @@ const IncomeReport = () => {
                     </ol>
                   </nav>
                 </div>
-                <div className="col-xl-6 text-right">
+                <div className="col-xl-6 text-right report-page-actions">
                   <div className="d-flex justify-content-end gap-2">
                   <button type="button" className="btn btn-outline-primary" onClick={printReport} disabled={loading || !!error || students.length === 0}>
                     <i className="bi bi-printer"></i> Print

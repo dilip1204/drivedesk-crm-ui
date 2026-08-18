@@ -176,7 +176,7 @@ const ExpenseReport = () => {
           <Header />
           <div className="content-wrapper">
             <div className="content">
-              <div className="row mb-4">
+              <div className="row mb-4 report-page-heading">
                 <div className="breadcrumb-wrapper col-xl-6">
                   <h1>Expense Report</h1>
                   <nav aria-label="breadcrumb">
@@ -186,7 +186,7 @@ const ExpenseReport = () => {
                     </ol>
                   </nav>
                 </div>
-                <div className="col-xl-6 text-right">
+                <div className="col-xl-6 text-right report-page-actions">
                   <div className="d-flex justify-content-end gap-2">
                   {isAdmin && (
                     <button type="button" className="btn btn-outline-primary" onClick={printReport} disabled={loading || !!error || rows.length === 0}>

@@ -93,16 +93,6 @@ const Dashboard = () => {
       to: `/students?month=${month}&year=${year}`,
     },
     {
-      key: "process-completed",
-      label: "Process completed",
-      value: processCompletedCount,
-      icon: "mdi-check-circle-outline",
-      tone: "success",
-      status: `${processSuccessRate}% completion rate`,
-      detail: "View students",
-      to: "/students",
-    },
-    {
       key: "pending-students",
       label: "Pending students",
       value: paymentPendingCount,
@@ -322,6 +312,7 @@ const Dashboard = () => {
                     <div className="dashboard-quick-links">
                       <Link to="/students"><i className="mdi mdi-account-convert" /><span>Students</span><i className="mdi mdi-chevron-right" /></Link>
                       <Link to="/trainingsession"><i className="mdi mdi-school" /><span>Training sessions</span><i className="mdi mdi-chevron-right" /></Link>
+                      <Link to="/attendance"><i className="mdi mdi-calendar-check-outline" /><span>Attendance</span><i className="mdi mdi-chevron-right" /></Link>
                       <Link to="/enquiries"><i className="mdi mdi-account-question" /><span>Enquiries</span><i className="mdi mdi-chevron-right" /></Link>
                       <Link to="/fleetexpenses"><i className="mdi mdi-cash-multiple" /><span>Expenses</span><i className="mdi mdi-chevron-right" /></Link>
                     </div>

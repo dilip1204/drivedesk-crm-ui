@@ -306,11 +306,13 @@ const SuperAdmin = () => {
                                     ["Tenant ID", viewTenant.tenant_id || EMPTY_VALUE, "mdi-pound-box"],
                                     ["Proprietor", viewTenant.proprietor || EMPTY_VALUE, "mdi-account-outline"],
                                     ["Address", viewTenant.address || EMPTY_VALUE, "mdi-map-marker-outline"],
+                                    ["Office Location", viewTenant.office_location || EMPTY_VALUE, "mdi-domain"],
                                     ["Pincode", viewTenant.pincode || EMPTY_VALUE, "mdi-map-marker-radius"],
                                     ["Primary Mobile", viewTenant.mobile_number_primary || EMPTY_VALUE, "mdi-phone-outline"],
                                     ["Secondary Mobile", viewTenant.mobile_number_secondary || EMPTY_VALUE, "mdi-phone-plus"],
                                     ["Email", viewTenant.email || EMPTY_VALUE, "mdi-email-outline"],
                                     ["Test Location", viewTenant.test_location || EMPTY_VALUE, "mdi-map-marker-check-outline"],
+                                    ["Website URL", viewTenant.website_url || EMPTY_VALUE, "mdi-web"],
                                     ["WhatsApp Registered Number", viewTenant.whatsapp_registered_number || EMPTY_VALUE, "mdi-cellphone"],
                                     ["Google Review Link", viewTenant.google_review_link || EMPTY_VALUE, "mdi-star-outline"],
                                 ].map(([label, value, icon]) => (

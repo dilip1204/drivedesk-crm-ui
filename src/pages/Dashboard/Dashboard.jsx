@@ -132,6 +132,7 @@ const Dashboard = () => {
             tone: "primary",
             status: "For selected period",
             detail: "Income summary",
+            to: `/income-report?month=${month}&year=${year}`,
           },
           {
             key: "expense",
@@ -141,7 +142,7 @@ const Dashboard = () => {
             tone: "danger",
             status: "For selected period",
             detail: "View expenses",
-            to: "/fleetexpenses",
+            to: `/expense-report?month=${month}&year=${year}`,
           },
           {
             key: "net-income",

@@ -8,6 +8,7 @@ import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
 import "../Students/Students.css";
+import "../../assets/css/reportPages.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
@@ -169,58 +170,98 @@ const ExpenseReport = () => {
   };
 
   return (
-    <div className="header-fixed sidebar-fixed sidebar-dark header-light" id="body">
+    <div className="header-fixed sidebar-fixed sidebar-dark header-light students-page report-page expense-report-page" id="body">
       <div className="wrapper">
         <Sidebar />
         <div className="page-wrapper">
           <Header />
           <div className="content-wrapper">
             <div className="content">
-              <div className="row mb-4 report-page-heading">
+              <div className="row students-page-heading report-page-heading">
                 <div className="breadcrumb-wrapper col-xl-6">
                   <h1>Expense Report</h1>
                   <nav aria-label="breadcrumb">
                     <ol className="breadcrumb p-0">
-                      <li className="breadcrumb-item"><Link to="/dashboard">Dashboard</Link></li>
+                      <li className="breadcrumb-item">
+                        <Link to="/dashboard" className="students-breadcrumb-home" aria-label="Dashboard">
+                          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                            <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                          </svg>
+                        </Link>
+                      </li>
+                      <li className="breadcrumb-item">Dashboard</li>
                       <li className="breadcrumb-item" aria-current="page">Expense Report</li>
                     </ol>
                   </nav>
                 </div>
-                <div className="col-xl-6 text-right report-page-actions">
-                  <div className="d-flex justify-content-end gap-2">
+                <div className="col-xl-6 text-right students-page-actions report-page-actions">
                   {isAdmin && (
                     <button type="button" className="btn btn-outline-primary" onClick={printReport} disabled={loading || !!error || rows.length === 0}>
-                      <i className="bi bi-printer"></i> Print
+                      <i className="bi bi-printer" aria-hidden="true" /> Print Report
                     </button>
                   )}
-                  <Link to="/dashboard" className="btn btn-secondary">Back to Dashboard</Link>
+                  <Link to="/dashboard" className="btn btn-secondary">
+                    <i className="bi bi-arrow-left" aria-hidden="true" /> Dashboard
+                  </Link>
+                </div>
+              </div>
+
+              <section className="report-filter-card" aria-label="Expense report filters">
+                <div className="report-filter-copy">
+                  <strong>Report period</strong>
+                  <span>Select a month to view expense records.</span>
+                </div>
+                <form className="report-filter-form" onSubmit={applyFilters}>
+                  <div className="report-filter-field">
+                    <label htmlFor="expense-report-month">Month</label>
+                    <input id="expense-report-month" type="month" className="form-control" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} required />
                   </div>
-                </div>
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    <i className="bi bi-funnel" aria-hidden="true" /> View Report
+                  </button>
+                </form>
+              </section>
+
+              <div className="report-summary-grid">
+                <article className="report-summary-card is-money">
+                  <span className="report-summary-icon" aria-hidden="true"><i className="bi bi-currency-rupee" /></span>
+                  <div className="report-summary-content">
+                    <span>Current page expenses</span>
+                    <strong>{"\u20B9"}{totalAmount.toLocaleString("en-IN")}</strong>
+                  </div>
+                </article>
+                <article className="report-summary-card">
+                  <span className="report-summary-icon" aria-hidden="true"><i className="bi bi-receipt" /></span>
+                  <div className="report-summary-content">
+                    <span>Total expense records</span>
+                    <strong>{totalCount}</strong>
+                  </div>
+                </article>
               </div>
 
-              <div className="card mb-4">
-                <div className="card-body">
-                  <form className="row align-items-end" onSubmit={applyFilters}>
-                    <div className="col-md-6 mb-3">
-                      <label htmlFor="expense-report-month">Month</label>
-                      <input id="expense-report-month" type="month" className="form-control" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} required />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <button type="submit" className="btn btn-primary" disabled={loading}>View Report</button>
-                    </div>
-                  </form>
+              <section className="report-list-card">
+                <div className="report-list-header">
+                  <div className="report-list-heading">
+                    <strong>Expense records</strong>
+                    <span>Expenses for {appliedMonth.split("-").reverse().join("/")}</span>
+                  </div>
+                  <span className="report-result-badge">{totalCount} record{totalCount === 1 ? "" : "s"}</span>
                 </div>
-              </div>
-
-              <div className="card">
-                <div className="card-body">
-                  {loading ? (
-                    <p className="text-center my-5">Loading expense report...</p>
-                  ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
-                  ) : (
-                    <div className="table-responsive">
-                      <table ref={reportTableRef} className="table custom-table text-center align-middle">
+                {loading ? (
+                  <div className="report-state">
+                    <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
+                    <span>Loading expense report...</span>
+                  </div>
+                ) : error ? (
+                  <div className="report-state">
+                    <i className="bi bi-receipt" aria-hidden="true" />
+                    <strong>No expense records</strong>
+                    <span>{error}</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="table-responsive students-table-wrap report-table-wrap">
+                      <table ref={reportTableRef} className="table custom-table align-middle students-table report-table">
                         <thead className="table-light">
                           <tr>
                             <th>S.NO</th><th>Date</th><th>Expense Type</th><th>Category</th>
@@ -230,22 +271,24 @@ const ExpenseReport = () => {
                         <tbody>
                           {rows.map((row, index) => (
                             <tr key={row?.id || index}>
-                              <td>{(currentPage - 1) * pageSize + index + 1}</td>
-                              <td>{formatDateDDMMYYYY(row?.date)}</td>
-                              <td>{row?.type || "-"}</td>
-                              <td>{row?.category || "-"}</td>
-                              <td>₹{Number(row?.amount || 0).toLocaleString("en-IN")}</td>
-                              <td>{row?.notes || "-"}</td>
-                              <td title={row?.created_by || "-"}>{truncateText(row?.created_by)}</td>
-                              <td className="no-print text-nowrap">
-                                <button className="btn btn-sm btn-warning me-2" onClick={() => openExpenseModal(row, false)}>Edit</button>
-                                <button className="btn btn-sm btn-primary me-2" onClick={() => openExpenseModal(row, true)}>View</button>
-                                <button className="btn btn-sm btn-danger" onClick={() => { setSelectedExpenseId(row.id); setShowDeleteModal(true); }}>Delete</button>
+                              <td data-label="S.No">{(currentPage - 1) * pageSize + index + 1}</td>
+                              <td data-label="Date">{formatDateDDMMYYYY(row?.date)}</td>
+                              <td data-label="Expense Type">{row?.type || "-"}</td>
+                              <td data-label="Category">{row?.category || "-"}</td>
+                              <td data-label="Amount" className="report-amount">{"\u20B9"}{Number(row?.amount || 0).toLocaleString("en-IN")}</td>
+                              <td data-label="Notes">{row?.notes || "-"}</td>
+                              <td data-label="Created By" title={row?.created_by || "-"}>{truncateText(row?.created_by)}</td>
+                              <td data-label="Actions" className="no-print students-row-actions report-row-actions">
+                                <button type="button" className="btn btn-sm btn-warning students-action-icon" onClick={() => openExpenseModal(row, false)} title="Edit Expense" data-tooltip="Edit Expense" aria-label="Edit Expense"><i className="bi bi-pencil-square" aria-hidden="true" /><span className="students-action-label">Edit</span></button>
+                                <button type="button" className="btn btn-sm btn-primary students-action-icon" onClick={() => openExpenseModal(row, true)} title="View Expense" data-tooltip="View Expense" aria-label="View Expense"><i className="bi bi-eye" aria-hidden="true" /><span className="students-action-label">View</span></button>
+                                <button type="button" className="btn btn-sm btn-danger students-action-icon" onClick={() => { setSelectedExpenseId(row.id); setShowDeleteModal(true); }} title="Delete Expense" data-tooltip="Delete Expense" aria-label="Delete Expense"><i className="bi bi-trash" aria-hidden="true" /><span className="students-action-label">Delete</span></button>
                               </td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
+                    </div>
+                    <div className="report-pagination">
                       <Pagination
                         currentPage={currentPage}
                         totalCount={totalCount}
@@ -254,9 +297,9 @@ const ExpenseReport = () => {
                         onPageSizeChange={(size) => { setPageSize(size); setCurrentPage(1); }}
                       />
                     </div>
-                  )}
-                </div>
-              </div>
+                  </>
+                )}
+              </section>
             </div>
           </div>
           <AddFleetExpenses

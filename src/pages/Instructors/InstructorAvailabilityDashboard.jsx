@@ -702,8 +702,14 @@ export default function InstructorAvailability() {
                   <nav aria-label="breadcrumb">
                     <ol className="breadcrumb p-0">
                       <li className="breadcrumb-item">
-                        <a href="#!" aria-label="home">
-                          <span className="mdi mdi-home"></span>
+                        <a
+                          href="#!"
+                          className="availability-breadcrumb-home"
+                          aria-label="Instructor availability home"
+                        >
+                          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                            <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                          </svg>
                         </a>
                       </li>
                       <li className="breadcrumb-item">Instructors</li>

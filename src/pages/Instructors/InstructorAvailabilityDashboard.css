@@ -8,8 +8,8 @@
 }
 
 .availability-page-heading {
-  align-items: center;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  margin-bottom: 6px;
 }
 
 .availability-page-heading .breadcrumb-wrapper {
@@ -17,7 +17,7 @@
 }
 
 .availability-page-heading h1 {
-  margin: 0 0 3px;
+  margin: 0 0 2px;
   color: var(--color-text, #172033);
   font-size: 20px !important;
   font-weight: 600;
@@ -27,7 +27,7 @@
 .availability-page-heading .breadcrumb {
   align-items: center;
   margin: 0;
-  line-height: 1;
+  line-height: 1.25;
 }
 
 .availability-page-heading .breadcrumb,
@@ -38,16 +38,46 @@
 
 .availability-page-heading .breadcrumb-item {
   display: inline-flex;
-  min-height: 14px;
   align-items: center;
+  min-height: 14px;
   color: var(--color-muted, #667085);
+  line-height: 1;
 }
 
-.availability-page-heading .breadcrumb-item .mdi-home {
-  display: inline-flex;
-  align-items: center;
-  font-size: 13px;
+.availability-page-heading .breadcrumb-item + .breadcrumb-item::before {
+  position: static;
+  top: auto;
+  display: block;
+  flex: 0 0 4px;
+  width: 4px;
+  height: 4px;
+  margin-right: 8px;
+  padding: 0;
+  float: none;
+  content: "";
+  background: #98a2b3;
+  transform: rotate(45deg);
+}
+
+.availability-page-heading .availability-breadcrumb-home {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  color: var(--color-muted, #667085);
   line-height: 1;
+  place-items: center;
+}
+
+.availability-page-heading .availability-breadcrumb-home svg {
+  display: block;
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
+
+.availability-page-heading .breadcrumb-item[aria-current="page"] {
+  color: var(--color-text, #172033);
+  font-weight: 500;
 }
 
 .availability-month-control {
@@ -681,10 +711,10 @@
 
   .availability-page-heading {
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
   }
 
-  .availability-page-heading h1 { font-size: 18px !important; }
+  .availability-page-heading h1 { font-size: 19px !important; }
 
   .availability-month-column {
     width: 100%;

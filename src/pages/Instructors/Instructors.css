@@ -141,7 +141,6 @@
 
 @media (max-width: 767.98px) {
   .instructor-availability-page .content { padding: 18px 10px; }
-  .availability-page-heading h1 { font-size: 24px; }
   .availability-month-column { width: 100%; max-width: 100%; flex: 0 0 100%; }
   .availability-month-control { align-items: stretch !important; flex-direction: column; gap: 6px; }
   .availability-month-select { max-width: none !important; min-height: 42px; }

@@ -11,6 +11,7 @@ import "./addFleetExpenses.css";
 // Vehicle types (includes Stationery & Salary)
 const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike", "Rent", "Other", "Food & Snacks", "Stationery", "Salary", "Trailer", "RTO Payment"];
 const VEHICLE_EXPENSE_TYPES = ["Car", "Bus", "Truck", "Bike", "Trailer"];
+const VEHICLE_EMI_CATEGORIES = VEHICLE_EXPENSE_TYPES.map((type) => `${type} EMI`);
 const VEHICLE_CATEGORIES = [
   "Fuel",
   "Service",
@@ -22,7 +23,16 @@ const VEHICLE_CATEGORIES = [
   "Accessories",
   "Other",
 ];
-const RTO_CATEGORIES = ["LLR", "Slot Booking", "FC Payment"];
+const RTO_CATEGORIES = [
+  "LLR",
+  "Slot Booking",
+  "FC Payment",
+  "Permit",
+  "Renewal",
+  "Fine",
+  "Dispatch Payment",
+  "Challan Payment",
+];
 const OTHER_CATEGORIES = [
   "Other",
   "Daily Wages",
@@ -33,6 +43,8 @@ const OTHER_CATEGORIES = [
   "Track Maintenance",
   "Painting",
   "Flower",
+  "Pooja Expenses",
+  "EB Bill",
   "Mobile Recharge",
 ];
 const FOOD_AND_SNACK_CATEGORIES = [
@@ -44,6 +56,7 @@ const FOOD_AND_SNACK_CATEGORIES = [
 ];
 const CATEGORIES = [
   ...VEHICLE_CATEGORIES,
+  ...VEHICLE_EMI_CATEGORIES,
   "Stationaries",
   ...OTHER_CATEGORIES,
   ...FOOD_AND_SNACK_CATEGORIES,
@@ -59,6 +72,12 @@ const getCategoryOptions = (expenseType) => {
   if (normalizedType === "stationery") return ["Stationaries"];
   if (normalizedType === "other") return OTHER_CATEGORIES;
   if (normalizedType === "food & snacks") return FOOD_AND_SNACK_CATEGORIES;
+  const matchingVehicleType = VEHICLE_EXPENSE_TYPES.find(
+    (type) => type.toLowerCase() === normalizedType
+  );
+  if (matchingVehicleType) {
+    return [`${matchingVehicleType} EMI`, ...VEHICLE_CATEGORIES];
+  }
   return VEHICLE_CATEGORIES;
 };
 

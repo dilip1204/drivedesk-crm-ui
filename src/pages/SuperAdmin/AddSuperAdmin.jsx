@@ -12,11 +12,13 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
         ? {
             org_name: selected?.org_name || "",
             address: selected?.address || "",
+            office_location: selected?.office_location || "",
             pincode: selected?.pincode || "",
             mobile_number_primary: selected?.mobile_number_primary || "",
             mobile_number_secondary: selected?.mobile_number_secondary || "",
             email: selected?.email || "",
             test_location: selected?.test_location || "",
+            website_url: selected?.website_url || "",
             whatsapp_enabled: selected?.whatsapp_enabled || false,
             whatsapp_registered_number: selected?.whatsapp_registered_number || "",
             google_review_link: selected?.google_review_link || "",
@@ -25,12 +27,14 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
             org_name: "",
             proprietor: "",
             address: "",
+            office_location: "",
             pincode: "",
             mobile_number_primary: "",
             mobile_number_secondary: "",
             email: "",
             password: "",
             test_location: "",
+            website_url: "",
             whatsapp_enabled: false,
             whatsapp_registered_number: "",
             google_review_link: "",
@@ -136,12 +140,14 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
                             {field("Organisation Name", "org_name", "text", true, "Enter organisation name")}
                             {!isEdit && field("Proprietor", "proprietor", "text", true, "Enter proprietor name")}
                             {field("Address", "address", "text", false, "Enter business address")}
+                            {field("Office Location", "office_location", "text", false, "Enter office location")}
                             {field("Pincode", "pincode", "text", false, "Enter pincode")}
                             {field("Primary Mobile", "mobile_number_primary", "text", true, "Enter primary mobile")}
                             {field("Secondary Mobile", "mobile_number_secondary", "text", false, "Enter secondary mobile")}
                             {field("Email", "email", "email", true, "Enter email address")}
                             {!isEdit && field("Password", "password", "password", true, "Minimum 6 characters")}
                             {field("Test Location", "test_location", "text", false, "Enter test location")}
+                            {field("Website URL", "website_url", "url", false, "https://example.com")}
                             {field("Google Review Link", "google_review_link", "url", false, "https://...")}
                         </div>
                     </div>

@@ -19,8 +19,30 @@ import { getOutstandingFees, historicalPaymentAdjustment } from "../../store/das
 
 
 import Pagination from "../Students/Pagenation";
+import { useAuth } from "../../hooks/useAuth";
+import { formatDateDDMMYYYY } from "../../utils/dateFormat";
+import { getAdminPrintWatermark } from "../../utils/printBranding";
+
+const escapeHtml = (value) =>
+  String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+const normalizeOutstandingResponse = (response) => {
+  const students = Array.isArray(response?.response)
+    ? response.response
+    : response?.students || response?.response?.students || [];
+  const total = response?.total ?? response?.response?.total ?? students.length ?? 0;
+
+  return { students, total };
+};
 
 const OutstandingFees = () => {
+  const { role } = useAuth();
+  const isAdmin = String(role || "").toLowerCase() === "admin";
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,6 +59,7 @@ const OutstandingFees = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
+  const [printing, setPrinting] = useState(false);
 
   const formatBalance = (value) => {
     const amount = Number(value);
@@ -51,6 +74,88 @@ const OutstandingFees = () => {
     if (status.includes("pending") || status.includes("partial")) return "is-warning";
     if (status.includes("fail") || status.includes("cancel") || status.includes("inactive")) return "is-danger";
     return "is-neutral";
+  };
+
+  const printOutstandingFees = () => {
+    const printWindow = window.open("", "_blank", "width=1100,height=800");
+    if (!printWindow) {
+      toast.error("Please allow pop-ups to print the outstanding fees report.");
+      return;
+    }
+
+    setPrinting(true);
+    dispatch(
+      getOutstandingFees(
+        { skip: 0, limit: Math.max(totalCount, pageSize, 1) },
+        (response) => {
+          setPrinting(false);
+          const { students } = normalizeOutstandingResponse(response);
+
+          if (!students.length) {
+            printWindow.close();
+            toast.error("No outstanding fee records are available to print.");
+            return;
+          }
+
+          const rows = students
+            .map((student, index) => {
+              const amount = Number(student?.balance);
+              const balance = Number.isFinite(amount)
+                ? `&#8377;${amount.toLocaleString("en-IN")}`
+                : "N/A";
+
+              return `<tr>
+                <td>${index + 1}</td>
+                <td>${escapeHtml(student?.name || "N/A")}</td>
+                <td>${escapeHtml(student?.mobile_number || "N/A")}</td>
+                <td class="amount">${balance}</td>
+                <td>${escapeHtml(formatDateDDMMYYYY(student?.registered_date) || "N/A")}</td>
+                <td>${escapeHtml(student?.status || "N/A")}</td>
+                <td>${escapeHtml(student?.full_payment_status || "N/A")}</td>
+              </tr>`;
+            })
+            .join("");
+
+          printWindow.document.write(`<!doctype html>
+            <html>
+              <head>
+                <meta charset="utf-8" />
+                <title>Outstanding Fees Report</title>
+                <style>
+                  @page { size: A4 landscape; margin: 12mm; }
+                  * { box-sizing: border-box; }
+                  body { margin: 0; color: #172033; font-family: Arial, Helvetica, sans-serif; }
+                  .report { position: relative; z-index: 1; }
+                  h1 { margin: 0 0 5px; text-align: center; font-size: 20px; }
+                  .summary { margin: 0 0 14px; color: #667085; text-align: center; font-size: 11px; }
+                  table { width: 100%; border-collapse: collapse; font-size: 10px; }
+                  th, td { padding: 7px 8px; border: 1px solid #b8c2ce; text-align: left; }
+                  th { background: #eef3f8; color: #172033; font-weight: 700; }
+                  .amount { text-align: right; }
+                  @media print {
+                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    thead { display: table-header-group; }
+                    tr { break-inside: avoid; }
+                  }
+                </style>
+              </head>
+              <body>
+                ${getAdminPrintWatermark()}
+                <main class="report">
+                  <h1>Outstanding Fees Report</h1>
+                  <p class="summary">${students.length} outstanding record${students.length === 1 ? "" : "s"}</p>
+                  <table>
+                    <thead><tr><th>S.No</th><th>Name</th><th>Mobile Number</th><th>Balance</th><th>Registered Date</th><th>Status</th><th>Full Payment Status</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                  </table>
+                </main>
+                <script>window.onload=function(){window.print();window.close();}</script>
+              </body>
+            </html>`);
+          printWindow.document.close();
+        }
+      )
+    );
   };
 
   const getKey = (s) => s?.mobile_number;
@@ -116,10 +221,7 @@ const OutstandingFees = () => {
 
   dispatch(
     getOutstandingFees(data, (res) => {
-      const students = Array.isArray(res?.response)
-        ? res.response
-        : res?.students || res?.response?.students || [];
-      const count = res?.total ?? res?.response?.total ?? students.length ?? 0;
+      const { students, total: count } = normalizeOutstandingResponse(res);
 
       setTotalCount(count);
 
@@ -182,6 +284,19 @@ const OutstandingFees = () => {
                       </ol>
                     </nav>
                   </div>
+                  {isAdmin && (
+                    <div className="col-xl-6 text-right students-page-actions outstanding-fees-actions">
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary"
+                        onClick={printOutstandingFees}
+                        disabled={loading || printing || !!error || currentRecords.length === 0}
+                      >
+                        <i className="bi bi-printer" aria-hidden="true" />
+                        {printing ? "Preparing..." : "Print Report"}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* outstanding-fees List */}

@@ -12,6 +12,8 @@ import "./SuperAdmin.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import Pagination from "../Students/Pagenation";
 import AddSuperAdmin from "./AddSuperAdmin";
 
@@ -160,19 +162,15 @@ const SuperAdmin = () => {
                                     </div>
 
                                     {loading ? (
-                                        <div className="superadmin-state" role="status">
-                                            <span className="spinner-border spinner-border-sm" aria-hidden="true"></span>
-                                            <span>Loading tenants...</span>
-                                        </div>
+                                        <LoadingState label="Loading tenants" />
                                     ) : error ? (
-                                        <div className="superadmin-state superadmin-empty-state">
-                                            <span className="mdi mdi-office-building superadmin-state-icon" aria-hidden="true"></span>
-                                            <strong>No tenants found</strong>
-                                            <span>{error}</span>
-                                            <button type="button" className="btn btn-primary btn-sm" onClick={handleAdd}>
-                                                Add your first tenant
-                                            </button>
-                                        </div>
+                                        <EmptyState
+                                            icon="bi bi-building"
+                                            title="No tenants found"
+                                            description={error}
+                                            actionLabel="Add first tenant"
+                                            onAction={handleAdd}
+                                        />
                                     ) : (
                                         <>
                                             <div className="table-responsive superadmin-table-wrap">

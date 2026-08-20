@@ -12,6 +12,8 @@ import "./Instructors.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import { getInstructorsListInformation } from "../../store/instructors/actions";
 
@@ -224,9 +226,13 @@ const formatTo12Hour = (timeStr) => {
                 {/* Instructors List */}
                 <div>
                   {loading ? (
-                    <p className="text-center my-5">Loading instructors...</p>
+                    <LoadingState label="Loading instructors" />
                   ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
+                    <EmptyState
+                      icon="bi bi-person-badge"
+                      title="No instructors found"
+                      description="Instructors will appear here after they are added."
+                    />
                   ) : (
                     <>
                     <div className="table-responsive instructors-table-wrap">

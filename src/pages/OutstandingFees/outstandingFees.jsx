@@ -14,6 +14,8 @@ import "./outstandingFees.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 
 import { getOutstandingFees, historicalPaymentAdjustment } from "../../store/dashboardSummary/actions";
 
@@ -302,16 +304,13 @@ const OutstandingFees = () => {
                 {/* outstanding-fees List */}
                 <div className="outstanding-fees-content">
                   {loading ? (
-                    <div className="outstanding-fees-state">
-                      <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
-                      <span>Loading outstanding fees...</span>
-                    </div>
+                    <LoadingState label="Loading outstanding fees" />
                   ) : error ? (
-                    <div className="outstanding-fees-state is-empty">
-                      <i className="bi bi-wallet2" aria-hidden="true" />
-                      <strong>No outstanding fees</strong>
-                      <span>{error}</span>
-                    </div>
+                    <EmptyState
+                      icon="bi bi-wallet2"
+                      title="No outstanding fees"
+                      description="All student fee balances are currently settled."
+                    />
                   ) : (
                     <>
                     {selectedIds.length > 0 && (

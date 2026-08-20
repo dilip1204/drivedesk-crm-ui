@@ -11,6 +11,8 @@ import "./Students.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import AddStudents from "./addStudents";
 import {
@@ -789,9 +791,13 @@ const Students = () => {
                 {/* Student List */}
                 <div>
                   {loading ? (
-                    <p className="text-center my-5">Loading students...</p>
+                    <LoadingState label="Loading students" />
                   ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
+                    <EmptyState
+                      icon="bi bi-people"
+                      title="No students found"
+                      description="Students will appear here after they are added or when they match the selected filters."
+                    />
                   ) : (
                     <>
                       <div className="table-responsive students-table-wrap">

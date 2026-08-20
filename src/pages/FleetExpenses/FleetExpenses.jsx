@@ -11,6 +11,8 @@ import "./FleetExpenses.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import AddFleetExpenses from "./addFleetExpenses";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -387,11 +389,7 @@ const FleetExpenses = () => {
   };
 
   if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: "60vh" }}>
-        <div className="spinner-border text-primary" role="status" />
-      </div>
-    );
+    return <LoadingState label="Loading expenses" variant="page" />;
   }
 
   return (
@@ -529,7 +527,16 @@ const FleetExpenses = () => {
                             ))
                           ) : (
                             <tr className="fleet-empty-row">
-                              <td colSpan="7" className="text-center text-muted">{error || "No expenses found."}</td>
+                              <td colSpan="7">
+                                <EmptyState
+                                  icon="bi bi-receipt"
+                                  title="No expenses found"
+                                  description={error
+                                    ? "No expenses match the current filters."
+                                    : "Expenses will appear here after they are added."}
+                                  variant="compact"
+                                />
+                              </td>
                             </tr>
                           )}
                         </tbody>

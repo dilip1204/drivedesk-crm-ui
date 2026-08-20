@@ -15,6 +15,8 @@ import "./enquiries.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import { getEnquiriesListInformation, getEnquiriesFilterListInformation } from "../../store/Enquiries/actions";
 import { deleteStudent } from "../../store/deleteStudent/actions";
@@ -459,9 +461,13 @@ const Enquiries = () => {
                 {/* Student List */}
                 <div>
                   {loading ? (
-                    <p className="text-center my-5">Loading enquiries...</p>
+                    <LoadingState label="Loading enquiries" />
                   ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
+                    <EmptyState
+                      icon="bi bi-person-lines-fill"
+                      title="No enquiries found"
+                      description="New enquiries will appear here after they are added."
+                    />
                   ) : (
                     <>
                     <div className="enquiries-list-card">
@@ -580,20 +586,14 @@ const Enquiries = () => {
                           )) : (
                             <tr className="enquiries-search-empty-row">
                               <td colSpan="6">
-                                <div className="enquiries-search-empty-content">
-                                  <i className="bi bi-person-x" aria-hidden="true" />
-                                  <strong>No matching enquiry</strong>
-                                  <span>
-                                    No student name or mobile number matches "{enquirySearch.trim()}".
-                                  </span>
-                                  <button
-                                    type="button"
-                                    className="btn btn-outline-primary btn-sm"
-                                    onClick={clearEnquirySearch}
-                                  >
-                                    Clear search
-                                  </button>
-                                </div>
+                                <EmptyState
+                                  icon="bi bi-person-x"
+                                  title="No matching enquiry"
+                                  description={`No student name or mobile number matches “${enquirySearch.trim()}”.`}
+                                  actionLabel="Clear search"
+                                  onAction={clearEnquirySearch}
+                                  variant="compact"
+                                />
                               </td>
                             </tr>
                           )}

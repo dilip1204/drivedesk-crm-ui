@@ -5,6 +5,8 @@ import "react-toastify/dist/ReactToastify.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import Pagination from "../Students/Pagenation";
 import { getAllStudents } from "../../services/functional/students/getStudentsListService";
 import { getAllInstructors } from "../../services/functional/instructors/getInstructorsListService";
@@ -442,11 +444,15 @@ export default function Attendance() {
                 </div>
 
                 {isLoading ? (
-                  <div className="attendance-state"><span className="spinner-border spinner-border-sm text-primary" /><span>Loading attendance register...</span></div>
+                  <LoadingState label="Loading attendance register" />
                 ) : error ? (
                   <div className="attendance-state is-error"><i className="bi bi-exclamation-circle" /><span>{error}</span><button type="button" className="btn btn-sm btn-outline-primary" onClick={loadRosters}>Retry</button></div>
                 ) : !filteredPeople.length ? (
-                  <div className="attendance-state is-empty"><i className="mdi mdi-account-search-outline" /><strong>No records found</strong><span>Adjust the search or add {personType === "student" ? "students" : "instructors"} first.</span></div>
+                  <EmptyState
+                    icon="bi bi-person-x"
+                    title={`No ${personType === "student" ? "students" : "instructors"} found`}
+                    description={`Adjust the search or add ${personType === "student" ? "students" : "instructors"} first.`}
+                  />
                 ) : (
                   <>
                     <div className="table-responsive attendance-table-wrap">

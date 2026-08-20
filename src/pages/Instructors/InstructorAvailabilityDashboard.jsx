@@ -9,6 +9,8 @@ import { getInstructorAvailInformation } from "../../store/instructors/actions";
 import Sidebar from "../../components/Sidebar"; // <-- adjust path
 import Header from "../../components/Header"; // <-- adjust path
 import Footer from "../../components/Footer"; // <-- adjust path
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 
 /********************
@@ -772,8 +774,7 @@ export default function InstructorAvailability() {
               {loading ? (
                 <div className="card availability-state-card">
                   <div className="card-body">
-                    <span className="spinner-border spinner-border-sm" aria-hidden="true" />
-                    <span>Loading instructor availability…</span>
+                    <LoadingState label="Loading instructor availability" />
                   </div>
                 </div>
               ) : instructorsData ? (
@@ -781,8 +782,12 @@ export default function InstructorAvailability() {
               ) : (
                 <div className="card availability-state-card">
                   <div className="card-body">
-                    <i className="bi bi-calendar-x" aria-hidden="true" />
-                    <span>{error || "No availability data found for this month."}</span>
+                    <EmptyState
+                      icon={error ? "bi bi-exclamation-circle" : "bi bi-calendar-x"}
+                      title={error ? "Unable to load availability" : "No availability found"}
+                      description={error || "No instructor availability is configured for this month."}
+                      variant={error ? "error" : "default"}
+                    />
                   </div>
                 </div>
               )}

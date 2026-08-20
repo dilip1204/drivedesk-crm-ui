@@ -13,6 +13,8 @@ import "../../assets/css/reportPages.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import Pagination from "../Students/Pagenation";
 import { getExpenseSummaryService } from "../../services/functional";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
@@ -248,16 +250,14 @@ const ExpenseReport = () => {
                   <span className="report-result-badge">{totalCount} record{totalCount === 1 ? "" : "s"}</span>
                 </div>
                 {loading ? (
-                  <div className="report-state">
-                    <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
-                    <span>Loading expense report...</span>
-                  </div>
+                  <LoadingState label="Loading expense report" />
                 ) : error ? (
-                  <div className="report-state">
-                    <i className="bi bi-receipt" aria-hidden="true" />
-                    <strong>No expense records</strong>
-                    <span>{error}</span>
-                  </div>
+                  <EmptyState
+                    icon={error.startsWith("Unable") ? "bi bi-exclamation-circle" : "bi bi-receipt"}
+                    title={error.startsWith("Unable") ? "Unable to load expense report" : "No expense records found"}
+                    description={error}
+                    variant={error.startsWith("Unable") ? "error" : "default"}
+                  />
                 ) : (
                   <>
                     <div className="table-responsive students-table-wrap report-table-wrap">

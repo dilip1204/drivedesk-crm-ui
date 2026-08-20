@@ -10,6 +10,8 @@ import "./WhatsAppUsage.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import { getWhatsAppUsage } from "../../services/functional/superAdmin/superAdminService";
 
 const numberFormatter = new Intl.NumberFormat("en-IN");
@@ -147,10 +149,11 @@ const WhatsAppUsage = () => {
               </div>
 
               {loading ? (
-                <div className="superadmin-card wati-usage-state" role="status">
-                  <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
-                  <strong>Loading WhatsApp usage...</strong>
-                  <span>Retrieving tenant activity for {formatPeriod(selectedPeriod)}.</span>
+                <div className="superadmin-card">
+                  <LoadingState
+                    label="Loading WhatsApp usage"
+                    description={`Retrieving tenant activity for ${formatPeriod(selectedPeriod)}.`}
+                  />
                 </div>
               ) : error ? (
                 <div className="superadmin-card wati-usage-state wati-usage-error" role="alert">
@@ -312,11 +315,12 @@ const WhatsAppUsage = () => {
                         </table>
                       </div>
                     ) : (
-                      <div className="wati-usage-empty-state">
-                        <span className="mdi mdi-message-off-outline" aria-hidden="true" />
-                        <strong>No tenant usage found</strong>
-                        <p>No WATI API calls were recorded for {formatPeriod(selectedPeriod)}.</p>
-                      </div>
+                      <EmptyState
+                        icon="bi bi-chat-square-dots"
+                        title="No tenant usage found"
+                        description={`No WhatsApp API calls were recorded for ${formatPeriod(selectedPeriod)}.`}
+                        variant="compact"
+                      />
                     )}
                   </section>
                 </>

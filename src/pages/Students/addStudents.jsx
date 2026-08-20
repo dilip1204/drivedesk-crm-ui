@@ -8,6 +8,8 @@ import { IoClose } from "react-icons/io5";
 import { getStudentReceiptInfo } from "../../store/students/actions";
 import { getInstructorAvailInformation } from "../../store/instructors/actions";
 import { addAdminPrintLogo } from "../../utils/printBranding";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import "./addStudents.css";
 
 export default function AddStudents({
@@ -779,7 +781,7 @@ export default function AddStudents({
                   </div>
 
                   {availabilityLoading && (
-                    <div className="text-secondary small">Loading availability...</div>
+                    <LoadingState label="Loading availability" variant="compact" />
                   )}
 
                   {!availabilityLoading && availabilityError && (
@@ -854,9 +856,12 @@ export default function AddStudents({
                   )}
 
                   {!availabilityLoading && !availabilityError && !availabilityDay && (
-                    <div className="text-muted small">
-                      No availability data found for the selected date.
-                    </div>
+                    <EmptyState
+                      icon="bi bi-calendar2-x"
+                      title="No availability found"
+                      description="No instructor availability is configured for the selected date."
+                      variant="compact"
+                    />
                   )}
                 </div>
               </div>

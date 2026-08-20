@@ -71,7 +71,7 @@ export default function RescheduleSession({
               });
               setErrors(errorMap);
             } else {
-              alert("Reschedule failed. Please check your input.");
+              alert("Unable to change the session date. Please check your input.");
             }
           } else {
             if (typeof onStudentAdded === "function") {
@@ -97,7 +97,7 @@ export default function RescheduleSession({
       dialogClassName="session-form-dialog session-reschedule-dialog"
     >
       <Modal.Header closeButton className="session-form-header">
-        <Modal.Title>{isEdit ? "Reschedule Session" : "Add Session"}</Modal.Title>
+        <Modal.Title>{isEdit ? "Change Session Date" : "Add Session"}</Modal.Title>
         {/* <IoClose
           onClick={() => {
             formik.resetForm();
@@ -136,7 +136,7 @@ export default function RescheduleSession({
               Cancel
             </Button>
             <Button type="submit" variant="primary" disabled={formik.isSubmitting}>
-              {isEdit ? "Reschedule" : "Submit"}
+              {isEdit ? "Change Date" : "Submit"}
             </Button>
           </Modal.Footer>
         </form>

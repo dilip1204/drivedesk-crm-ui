@@ -241,6 +241,10 @@ export default function StudentProfileModal({ show, onClose, student }) {
             />
             <ProfileItem label="Courses Enrolled" value={student.plan} />
             <ProfileItem
+              label="No. of Training Days"
+              value={student.training_days}
+            />
+            <ProfileItem
               label="Classes Completed"
               value={student.classesCompleted}
             />

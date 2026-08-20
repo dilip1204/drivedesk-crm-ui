@@ -15,6 +15,8 @@ import "./Tariff.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import { getTariffsListInformation } from "../../store/tariff/actions";
 import { deleteTariff } from "../../store/tariff/actions";
@@ -196,9 +198,13 @@ const Tariff = () => {
                 {/* Student List */}
                 <div>
                   {loading ? (
-                    <p className="text-center my-5">Loading tariffs...</p>
+                    <LoadingState label="Loading tariffs" />
                   ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
+                    <EmptyState
+                      icon="bi bi-card-list"
+                      title="No tariff plans found"
+                      description="Tariff plans will appear here after they are created."
+                    />
                   ) : (
                     <>
                     <div className="table-responsive tariff-table-wrap">

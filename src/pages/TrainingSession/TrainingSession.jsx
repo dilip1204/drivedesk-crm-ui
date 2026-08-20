@@ -12,6 +12,8 @@ import "./TrainingSession.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import AddTrainingSession from "./addTrainingSession";
 import RescheduleSession from "./RescheduleSession";
 
@@ -483,7 +485,7 @@ const TrainingSession = () => {
                       <span className="training-legend-icon is-warning" aria-hidden="true">
                         <i className="bi bi-clock-history" />
                       </span>
-                      <span>Reschedule session</span>
+                      <span>Change session date</span>
                     </div>
                     <div className="training-legend-item">
                       <span className="training-legend-icon is-success" aria-hidden="true">
@@ -530,9 +532,13 @@ const TrainingSession = () => {
                     </div>
                   </div>
                   {loading ? (
-                    <p className="text-center my-5">Loading training session...</p>
+                    <LoadingState label="Loading training sessions" />
                   ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
+                    <EmptyState
+                      icon="bi bi-calendar2-x"
+                      title="No training sessions found"
+                      description="Training sessions will appear here after they are scheduled or when they match the selected filters."
+                    />
                   ) : (
                     <div className="table-responsive training-session-table-wrap">
                       <table className="table custom-table text-center align-middle training-session-table">
@@ -576,13 +582,13 @@ const TrainingSession = () => {
                                   </button>
                                   <button
                                     className="btn btn-sm btn-warning training-session-action-button"
-                                    title={isCompletedSession(tsession) ? "Completed sessions cannot be rescheduled" : "Reschedule Session"}
-                                    aria-label={isCompletedSession(tsession) ? "Reschedule disabled: session completed" : "Reschedule Session"}
+                                    title={isCompletedSession(tsession) ? "The date of a completed session cannot be changed" : "Change session date"}
+                                    aria-label={isCompletedSession(tsession) ? "Change date disabled: session completed" : "Change session date"}
                                     disabled={isCompletedSession(tsession)}
                                     onClick={() => handleRescheduleSession(tsession)}
                                   >
                                     <i className="bi bi-clock-history" aria-hidden="true"></i>
-                                    <span className="training-session-action-label">Reschedule</span>
+                                    <span className="training-session-action-label">Change Date</span>
                                   </button>
                                   <button className="btn btn-sm btn-success training-session-action-button" title="Show Student Completed Sessions" aria-label="Show Student Completed Sessions" onClick={() => openCompletedModal(tsession)}><i className="bi bi-clipboard-check" aria-hidden="true"></i><span className="training-session-action-label">Completed</span></button>
                                 </div>
@@ -592,20 +598,14 @@ const TrainingSession = () => {
                           ) : (
                             <tr className="training-search-empty-row">
                               <td colSpan="7">
-                                <div className="training-search-empty-content">
-                                  <i className="bi bi-person-x" aria-hidden="true" />
-                                  <strong>No matching student</strong>
-                                  <span>
-                                    No training sessions found for “{normalizedStudentSearch}”.
-                                  </span>
-                                  <button
-                                    type="button"
-                                    className="btn btn-outline-primary btn-sm"
-                                    onClick={() => setStudentSearch("")}
-                                  >
-                                    Clear search
-                                  </button>
-                                </div>
+                                <EmptyState
+                                  icon="bi bi-person-x"
+                                  title="No matching student"
+                                  description={`No training sessions match “${normalizedStudentSearch}”.`}
+                                  actionLabel="Clear search"
+                                  onAction={() => setStudentSearch("")}
+                                  variant="compact"
+                                />
                               </td>
                             </tr>
                           )}
@@ -693,15 +693,14 @@ const TrainingSession = () => {
 
                   <div className="modal-body completed-sessions-body">
                     {completedLoading ? (
-                      <div className="completed-report-state">
-                        <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
-                        <span>Loading completed sessions...</span>
-                      </div>
+                      <LoadingState label="Loading completed sessions" />
                     ) : completedError ? (
-                      <div className="completed-report-state is-error">
-                        <i className="bi bi-exclamation-circle" aria-hidden="true" />
-                        <span>{completedError}</span>
-                      </div>
+                      <EmptyState
+                        icon="bi bi-calendar2-x"
+                        title="No completed sessions found"
+                        description={completedError}
+                        variant="compact"
+                      />
                     ) : (
                       <>
                         <div className="completed-report-summary">

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import avatar from "../assets/img/avatar.png";
+import logoIcon from "../assets/logo/logo_icon_white.png";
 import PWAInstallButton from "./PWAInstallButton";
 import "./Header.css";
 
@@ -192,6 +193,17 @@ export default function Header() {
         >
           <span className="sr-only">Toggle navigation</span>
         </button>
+
+        <Link
+          to={currentRole === "super_admin" ? "/superadmin" : "/dashboard"}
+          className="header-mobile-brand"
+          aria-label="Go to DriveDesk home"
+        >
+          <span className="header-mobile-brand-icon" aria-hidden="true">
+            <img src={logoIcon} alt="" />
+          </span>
+          <span>DriveDesk</span>
+        </Link>
 
         <div className="header-search d-none d-md-flex">
           <form onSubmit={handleSearchSubmit} role="search">

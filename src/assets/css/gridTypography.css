@@ -96,6 +96,112 @@
   text-shadow: none !important;
 }
 
+/* Shared pagination footer used by all list and report pages. */
+#root .students-pagination-bar {
+  width: 100%;
+  min-height: 52px;
+  gap: 16px !important;
+  margin: 0 !important;
+  padding: 10px 12px;
+  color: var(--color-muted, #667085);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+#root .students-pagination-summary {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 16px !important;
+}
+
+#root .students-results-count,
+#root .students-page-size-control label {
+  margin: 0;
+  color: var(--color-muted, #667085);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 32px;
+  white-space: nowrap;
+}
+
+#root .students-results-count strong {
+  color: var(--color-text, #172033);
+  font-weight: 600;
+}
+
+#root .students-page-size-control {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+#root .students-page-size-select {
+  width: 66px;
+  height: 32px !important;
+  min-height: 32px;
+  padding: 4px 24px 4px 9px;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: var(--radius-sm, 6px);
+  background-color: var(--color-surface, #fff);
+  color: var(--color-text, #172033);
+  font-size: 12px;
+  line-height: 1.2;
+  box-shadow: none;
+}
+
+#root .students-page-size-select:focus {
+  border-color: #84adff;
+  box-shadow: 0 0 0 2px rgba(79, 128, 255, 0.12);
+}
+
+#root .custom-pagination {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+#root .custom-pagination .pagination {
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+#root .custom-pagination .page-item {
+  margin: 0;
+}
+
+#root .custom-pagination .page-link,
+#root .custom-pagination .page-item:first-child .page-link,
+#root .custom-pagination .page-item:last-child .page-link {
+  display: grid;
+  width: 32px;
+  min-width: 32px;
+  height: 32px !important;
+  padding: 0;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: var(--radius-sm, 6px);
+  box-shadow: none;
+  font-size: 12px;
+  line-height: 1;
+  place-items: center;
+}
+
+#root .custom-pagination .page-item.active .page-link {
+  color: #fff;
+  background: #4f80ff;
+  border-color: #4f80ff;
+}
+
+#root .custom-pagination .page-item.disabled .page-link,
+#root .custom-pagination .page-link:disabled {
+  color: #b8c0cc;
+  background: #f8fafc;
+  border-color: #e4e7ec;
+  opacity: 1;
+}
+
 @media (max-width: 767.98px) {
   html {
     -webkit-text-size-adjust: 100%;
@@ -128,6 +234,55 @@
   body,
   #root {
     overflow-x: hidden;
+  }
+
+  #root .students-pagination-bar {
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 10px 12px 12px;
+  }
+
+  #root .students-pagination-summary {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px !important;
+  }
+
+  #root .students-page-size-control {
+    gap: 6px;
+  }
+
+  #root .students-page-size-select {
+    width: 64px;
+    height: 36px !important;
+    min-height: 36px;
+    font-size: 16px !important;
+  }
+
+  #root .students-results-count,
+  #root .students-page-size-control label {
+    font-size: 11px;
+    line-height: 36px;
+  }
+
+  #root .custom-pagination {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  #root .custom-pagination .pagination {
+    justify-content: center;
+  }
+
+  #root .custom-pagination .page-link,
+  #root .custom-pagination .page-item:first-child .page-link,
+  #root .custom-pagination .page-item:last-child .page-link {
+    width: 36px;
+    min-width: 36px;
+    height: 36px !important;
   }
 
   :is(

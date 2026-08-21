@@ -51,6 +51,10 @@
   line-height: 1;
 }
 
+.header-mobile-brand {
+  display: none;
+}
+
 .header-search {
   display: flex;
   min-width: 0;
@@ -461,15 +465,66 @@
 }
 
 @media (max-width: 767.98px) {
+  #body.header-fixed .page-wrapper {
+    padding-top: 60px !important;
+  }
+
   .drivedesk-header .navbar {
+    min-height: 60px;
     padding-right: 8px !important;
   }
 
   .drivedesk-header #sidebar-toggler-react {
-    flex-basis: 54px;
-    width: 54px;
+    flex-basis: 60px;
+    width: 60px;
+    height: 60px;
     border-right: 0 !important;
-    font-size: 23px;
+    font-size: 22px;
+  }
+
+  .header-mobile-brand {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--color-text, #172033);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+  }
+
+  .header-mobile-brand:hover,
+  .header-mobile-brand:focus {
+    color: var(--color-primary, #1f4e78);
+    text-decoration: none;
+  }
+
+  .header-mobile-brand-icon {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+    border-radius: 8px;
+    background: #356fe8;
+    box-shadow: 0 2px 6px rgba(31, 78, 120, .18);
+    place-items: center;
+  }
+
+  .header-mobile-brand-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .drivedesk-header .navbar .navbar-right .navbar-nav {
+    height: 60px;
   }
 
   .drivedesk-header .navbar .navbar-right .navbar-nav .user-menu .dropdown-toggle {
@@ -498,9 +553,18 @@
   .drivedesk-header .pwa-install-button {
     right: 12px;
     bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
     min-height: 44px;
-    padding: 9px 14px;
-    font-size: 13px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+  }
+
+  .drivedesk-header .pwa-install-button i {
+    margin: 0 !important;
+    font-size: 19px;
   }
 }
 

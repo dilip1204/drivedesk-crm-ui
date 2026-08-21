@@ -99,7 +99,13 @@ export default function PWAInstallButton() {
 
   return (
     <>
-      <button type="button" className="btn btn-outline-primary pwa-install-button" onClick={installApp}>
+      <button
+        type="button"
+        className="btn btn-outline-primary pwa-install-button"
+        onClick={installApp}
+        aria-label="Install DriveDesk App"
+        title="Install DriveDesk App"
+      >
         <i className="mdi mdi-monitor-arrow-down mr-1" aria-hidden="true" />
         Install App
       </button>

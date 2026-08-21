@@ -251,15 +251,15 @@
 .availability-legend-item.is-scheduled::before { background: #356fe8; }
 .availability-legend-item.is-missed::before { background: var(--color-danger, #dc3545); }
 
-.availability-summary-grid,
-.availability-overview-section,
-.availability-calendar-section {
+.instructor-availability-page .availability-dashboard .availability-summary-grid,
+.instructor-availability-page .availability-dashboard .availability-overview-section,
+.instructor-availability-page .availability-dashboard .availability-calendar-section {
   margin: 0 -6px;
 }
 
-.availability-summary-grid > [class*="col-"],
-.availability-overview-section > [class*="col-"],
-.availability-calendar-section > [class*="col-"] {
+.instructor-availability-page .availability-dashboard .availability-summary-grid > [class*="col-"],
+.instructor-availability-page .availability-dashboard .availability-overview-section > [class*="col-"],
+.instructor-availability-page .availability-dashboard .availability-calendar-section > [class*="col-"] {
   padding-right: 6px;
   padding-left: 6px;
 }
@@ -702,6 +702,16 @@
     min-width: 0;
   }
 
+  .instructor-availability-page .availability-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Prevent the scrollable calendar from widening the mobile card grid. */
+  .instructor-availability-page .availability-dashboard > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .instructor-availability-page .content {
     width: 100%;
     max-width: 100%;
@@ -720,10 +730,13 @@
     width: 100%;
     max-width: 100%;
     flex: 0 0 100%;
+    padding-right: 6px !important;
+    padding-left: 6px !important;
   }
 
   .availability-month-control {
     display: flex;
+    width: 100%;
     align-items: stretch;
     flex-direction: column;
     gap: 5px;
@@ -738,7 +751,10 @@
 
   .availability-profile-card { padding: 10px; }
 
-  .availability-profile-layout {
+  .instructor-availability-page .availability-profile-card .availability-profile-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start !important;
     gap: 10px !important;
   }
 
@@ -754,10 +770,11 @@
   .availability-contact-details { gap: 4px 10px; }
   .availability-contact-details span { font-size: 11px; }
 
-  .availability-status-legend {
-    width: 100%;
-    align-items: center !important;
-    justify-content: space-between;
+  .instructor-availability-page .availability-profile-card .availability-status-legend {
+    width: auto;
+    align-items: flex-end !important;
+    justify-content: flex-start;
+    flex-direction: column !important;
     gap: 8px !important;
   }
 
@@ -772,20 +789,38 @@
   .availability-legend-item { font-size: 10px; }
 
   .availability-summary-grid {
-    --bs-gutter-x: 8px;
-    --bs-gutter-y: 8px;
+    display: grid !important;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0 !important;
+    padding: 0 4px;
+  }
+
+  .availability-overview-section,
+  .availability-calendar-section {
+    margin-right: 4px !important;
+    margin-left: 4px !important;
+  }
+
+  .availability-overview-section > [class*="col-"],
+  .availability-calendar-section > [class*="col-"] {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
   }
 
   .availability-summary-grid > [class*="col-"] {
-    width: 50% !important;
-    max-width: 50% !important;
-    flex: 0 0 50% !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0;
+    padding: 0 !important;
+    flex: none !important;
   }
 
   .availability-summary-grid > [class*="col-"]:last-child {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex-basis: 100% !important;
+    width: auto !important;
+    max-width: none !important;
+    grid-column: 1 / -1;
   }
 
   .availability-dashboard .availability-metric-card .card-body {
@@ -846,15 +881,15 @@
 
 @media (max-width: 420px) {
   .availability-summary-grid > [class*="col-"] {
-    width: 50% !important;
-    max-width: 50% !important;
-    flex-basis: 50% !important;
+    width: auto !important;
+    max-width: none !important;
+    flex: none !important;
   }
 
   .availability-summary-grid > [class*="col-"]:last-child {
-    width: 100% !important;
-    max-width: 100% !important;
-    flex-basis: 100% !important;
+    width: auto !important;
+    max-width: none !important;
+    grid-column: 1 / -1;
   }
 
   .availability-contact-details { gap: 4px 8px; }
@@ -876,4 +911,17 @@
 
   .availability-status-card span { font-size: 9px; }
   .availability-status-card strong { font-size: 17px; }
+}
+
+@media (max-width: 350px) {
+  .instructor-availability-page .availability-profile-card .availability-profile-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .instructor-availability-page .availability-profile-card .availability-status-legend {
+    width: 100%;
+    align-items: center !important;
+    justify-content: space-between;
+    flex-direction: row !important;
+  }
 }

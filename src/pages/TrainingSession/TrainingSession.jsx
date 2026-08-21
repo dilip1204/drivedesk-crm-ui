@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
+import { Button, Modal } from "react-bootstrap";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -15,11 +16,11 @@ import Footer from "../../components/Footer";
 import LoadingState from "../../components/LoadingState";
 import EmptyState from "../../components/EmptyState";
 import AddTrainingSession from "./addTrainingSession";
-import RescheduleSession from "./RescheduleSession";
 
 import {
   getTrainingSessionListInformation,
   getTrainingSessionFilterListInformation,
+  RescheduleTrainingSession,
 } from "../../store/trainingSession/actions";
 
 import { getInstructorsListInformation } from "../../store/instructors/actions";
@@ -41,10 +42,61 @@ const isCompletedSession = (session) =>
     .trim()
     .toLowerCase() === "completed";
 
+const DAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const DEFAULT_WORKING_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+const normalizeWorkingDay = (day) => String(day || "").trim().slice(0, 3).toUpperCase();
+
+const parseSessionDate = (value) => {
+  const datePart = String(value || "").slice(0, 10);
+  const [year, month, day] = datePart.split("-").map(Number);
+  if (!year || !month || !day) return null;
+
+  const parsedDate = new Date(year, month - 1, day, 12, 0, 0);
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+
+const toLocalISODate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getNextWorkingDate = (sessionDate, workingDays) => {
+  const currentDate = parseSessionDate(sessionDate);
+  if (!currentDate) return null;
+
+  const normalizedDays = Array.isArray(workingDays)
+    ? workingDays.map(normalizeWorkingDay).filter(Boolean)
+    : [];
+  const workingDaySet = new Set(normalizedDays.length ? normalizedDays : DEFAULT_WORKING_DAYS);
+  const candidate = new Date(currentDate);
+
+  for (let offset = 1; offset <= 7; offset += 1) {
+    candidate.setDate(candidate.getDate() + 1);
+    if (workingDaySet.has(DAY_CODES[candidate.getDay()])) {
+      return toLocalISODate(candidate);
+    }
+  }
+
+  return null;
+};
+
+const formatLeaveDate = (value) => {
+  const date = parseSessionDate(value);
+  if (!date) return value || "-";
+  return date.toLocaleDateString("en-IN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
 const TrainingSession = () => {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
-  const [showRModal, setShowRModal] = useState(false);
   const [trainingSessionData, setTrainingSessionData] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -56,6 +108,8 @@ const TrainingSession = () => {
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filterApplied, setFilterApplied] = useState(false);
   const [studentSearch, setStudentSearch] = useState("");
+  const [leavePlan, setLeavePlan] = useState(null);
+  const [markingLeave, setMarkingLeave] = useState(false);
   const completedTableRef = useRef(null);
 
   // NEW: completed sessions modal state
@@ -279,13 +333,6 @@ const TrainingSession = () => {
     );
   };
 
-  const onReschduleStudentData = (res, isEdit) => {
-    setSelectedStudent(res.response);
-    toast[res.isError ? "error" : "success"](
-      res.isError ? "Failed....!" : isEdit ? res.response.message : "Session added successfully!"
-    );
-  };
-
   const handleEditStudent = (student) => {
     if (isCompletedSession(student)) return;
     setSelectedStudent(student);
@@ -293,16 +340,82 @@ const TrainingSession = () => {
     setShowModal(true);
   };
 
-  const handleRescheduleSession = (student) => {
+  const findSessionInstructor = (session) => {
+    const sessionInstructorId = session?.instructor_id || session?.instructorId;
+    const sessionInstructorMobile =
+      session?.instructor_mobile || session?.instructor_mobile_number || session?.instructorMobile;
+    const sessionInstructorName = String(session?.instructor_name || "").trim().toLowerCase();
+
+    return instructorsData.find((instructor) => {
+      const instructorId = instructor?.id || instructor?._id;
+      const instructorMobile = instructor?.mobile_number || instructor?.mobile;
+      const instructorName = String(instructor?.name || "").trim().toLowerCase();
+
+      return (
+        (sessionInstructorId && String(instructorId) === String(sessionInstructorId)) ||
+        (sessionInstructorMobile && String(instructorMobile) === String(sessionInstructorMobile)) ||
+        (sessionInstructorName && instructorName === sessionInstructorName)
+      );
+    });
+  };
+
+  const handleMarkLeave = (student) => {
     if (isCompletedSession(student)) return;
-    setSelectedStudent(student);
-    setIsEdit(true);
-    setShowRModal(true);
+
+    const sessionId = student?._id || student?.id;
+    if (!sessionId) {
+      toast.error("Session ID was not found.");
+      return;
+    }
+
+    const instructor = findSessionInstructor(student);
+    const newDate = getNextWorkingDate(student?.date, instructor?.working_days);
+    if (!newDate) {
+      toast.error("Unable to determine the instructor's next working day.");
+      return;
+    }
+
+    setLeavePlan({ session: student, sessionId, instructor, newDate });
+  };
+
+  const closeLeaveConfirmation = () => {
+    if (markingLeave) return;
+    setLeavePlan(null);
+  };
+
+  const confirmMarkLeave = () => {
+    if (!leavePlan || markingLeave) return;
+
+    setMarkingLeave(true);
+    dispatch(
+      RescheduleTrainingSession(
+        {
+          session_id: leavePlan.sessionId,
+          action: "postpone",
+          new_date: leavePlan.newDate,
+        },
+        (res) => {
+          setMarkingLeave(false);
+
+          if (res?.isError || !res) {
+            const message =
+              res?.data?.detail ||
+              res?.detail ||
+              "Unable to mark leave and move the session.";
+            toast.error(typeof message === "string" ? message : "Unable to mark leave and move the session.");
+            return;
+          }
+
+          toast.success(`Leave marked. Session moved to ${formatLeaveDate(leavePlan.newDate)}.`);
+          setLeavePlan(null);
+          getTrainingSessionList();
+        }
+      )
+    );
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setShowRModal(false);
     setIsEdit(false);
     setSelectedStudent(null);
   };
@@ -483,9 +596,9 @@ const TrainingSession = () => {
                   <div className="training-action-legend">
                     <div className="training-legend-item">
                       <span className="training-legend-icon is-warning" aria-hidden="true">
-                        <i className="bi bi-clock-history" />
+                        <i className="bi bi-calendar-x" />
                       </span>
-                      <span>Change session date</span>
+                      <span>Mark leave and move to next working day</span>
                     </div>
                     <div className="training-legend-item">
                       <span className="training-legend-icon is-success" aria-hidden="true">
@@ -582,13 +695,13 @@ const TrainingSession = () => {
                                   </button>
                                   <button
                                     className="btn btn-sm btn-warning training-session-action-button"
-                                    title={isCompletedSession(tsession) ? "The date of a completed session cannot be changed" : "Change session date"}
-                                    aria-label={isCompletedSession(tsession) ? "Change date disabled: session completed" : "Change session date"}
-                                    disabled={isCompletedSession(tsession)}
-                                    onClick={() => handleRescheduleSession(tsession)}
+                                    title={isCompletedSession(tsession) ? "Completed sessions cannot be marked as leave" : "Mark leave and move this session"}
+                                    aria-label={isCompletedSession(tsession) ? "Mark leave disabled: session completed" : "Mark leave"}
+                                    disabled={isCompletedSession(tsession) || (markingLeave && leavePlan?.sessionId === (tsession?._id || tsession?.id))}
+                                    onClick={() => handleMarkLeave(tsession)}
                                   >
-                                    <i className="bi bi-clock-history" aria-hidden="true"></i>
-                                    <span className="training-session-action-label">Change Date</span>
+                                    <i className="bi bi-calendar-x" aria-hidden="true"></i>
+                                    <span className="training-session-action-label">Mark Leave</span>
                                   </button>
                                   <button className="btn btn-sm btn-success training-session-action-button" title="Show Student Completed Sessions" aria-label="Show Student Completed Sessions" onClick={() => openCompletedModal(tsession)}><i className="bi bi-clipboard-check" aria-hidden="true"></i><span className="training-session-action-label">Completed</span></button>
                                 </div>
@@ -626,14 +739,57 @@ const TrainingSession = () => {
               isEdit={isEdit}
             />
 
-            <RescheduleSession
-              showModal={showRModal}
-              hideModal={handleCloseModal}
-              onStudentAdded={getTrainingSessionList}
-              studentData={onReschduleStudentData}
-              id={selectedStudent}
-              isEdit={isEdit}
-            />
+            <Modal
+              show={Boolean(leavePlan)}
+              onHide={closeLeaveConfirmation}
+              centered
+              backdrop="static"
+              keyboard={!markingLeave}
+              dialogClassName="mark-leave-dialog"
+            >
+              <Modal.Header closeButton={!markingLeave} className="mark-leave-header">
+                <Modal.Title>Confirm Student Leave</Modal.Title>
+              </Modal.Header>
+              <Modal.Body className="mark-leave-body">
+                <div className="mark-leave-content">
+                  <span className="mark-leave-icon" aria-hidden="true">
+                    <i className="bi bi-calendar-x" />
+                  </span>
+                  <div>
+                    <p>
+                      Mark <strong>{leavePlan?.session?.student_name || "this student"}</strong> as
+                      leave for {formatDateDDMMYYYY(leavePlan?.session?.date)}?
+                    </p>
+                    <div className="mark-leave-date-change">
+                      <span>{formatLeaveDate(leavePlan?.session?.date)}</span>
+                      <i className="bi bi-arrow-right" aria-hidden="true" />
+                      <strong>{formatLeaveDate(leavePlan?.newDate)}</strong>
+                    </div>
+                    <small>
+                      The session will move automatically to the instructor&apos;s next working day.
+                    </small>
+                  </div>
+                </div>
+              </Modal.Body>
+              <Modal.Footer className="mark-leave-footer">
+                <Button variant="secondary" onClick={closeLeaveConfirmation} disabled={markingLeave}>
+                  Cancel
+                </Button>
+                <Button variant="warning" onClick={confirmMarkLeave} disabled={markingLeave}>
+                  {markingLeave ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm mr-1" aria-hidden="true" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-check2 mr-1" aria-hidden="true" />
+                      Mark Leave
+                    </>
+                  )}
+                </Button>
+              </Modal.Footer>
+            </Modal>
 
             <StudentTrainingSessionModal
               show={showSessionModal}

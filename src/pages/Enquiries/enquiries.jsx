@@ -27,6 +27,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProfileModal from "../../components/ProfileModal";
 import Pagination from "../Students/Pagenation";
+import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 
 const parseEnquiriesResponse = (res, fallbackPageSize = 10) => {
   const response = res?.response;
@@ -518,7 +519,9 @@ const Enquiries = () => {
                             <th>S.NO</th>
                             <th>Student Name</th>
                             <th>Mobile Number</th>
-                            <th>Email</th>
+                            <th>Course Interest</th>
+                            <th>Enquiry Date</th>
+                            <th>Follow Up Date</th>
                             <th>Status</th>
                             <th>Actions</th>
                           </tr>
@@ -538,7 +541,13 @@ const Enquiries = () => {
                               </td>
                               <td data-label="Student Name">{enquiries.name || "Name"}</td>
                               <td data-label="Mobile Number">{enquiries.mobile_number || "N/A"}</td>
-                              <td data-label="Email">{enquiries.email || "N/A"}</td>
+                              <td data-label="Course Interest">{enquiries.course_interest || "N/A"}</td>
+                              <td data-label="Enquiry Date">
+                                {formatDateDDMMYYYY(enquiries.enquiry_date || enquiries.created_at)}
+                              </td>
+                              <td data-label="Follow Up Date">
+                                {formatDateDDMMYYYY(enquiries.follow_up_date)}
+                              </td>
                               <td data-label="Status" className="status">
                                 <span className="enquiry-status-value">
                                   <i className="bi bi-check-circle" aria-hidden="true"></i>
@@ -585,7 +594,7 @@ const Enquiries = () => {
                             </tr>
                           )) : (
                             <tr className="enquiries-search-empty-row">
-                              <td colSpan="6">
+                              <td colSpan="8">
                                 <EmptyState
                                   icon="bi bi-person-x"
                                   title="No matching enquiry"

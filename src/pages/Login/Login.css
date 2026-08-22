@@ -146,6 +146,8 @@
   .login-panel { padding: 28px 22px 30px; }
   .login-form-wrap { max-width: none; }
   .login-input-wrap, .login-submit { min-height: 44px; }
+  /* iOS zooms the page when a focused form control uses text below 16px. */
+  .login-input-wrap input { font-size: 16px; }
 }
 
 @media (max-width: 420px) {

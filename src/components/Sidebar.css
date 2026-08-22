@@ -45,6 +45,11 @@
   box-shadow: 0 4px 12px rgba(16, 24, 40, .18);
 }
 
+.drivedesk-sidebar .app-brand .brand-icon.tenant-brand-icon {
+  padding: 2px;
+  object-fit: contain;
+}
+
 .drivedesk-sidebar .app-brand .brand-name {
   margin-left: 10px;
   color: #fff;

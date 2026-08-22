@@ -1,16 +1,18 @@
 import React from "react";
 import "./Footer.css";
 import logoIcon from "../assets/logo/logo_icon_white.png";
+import { useTenantLogo } from "../hooks/useTenantLogo";
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { logoSrc, hasTenantLogo } = useTenantLogo(logoIcon);
 
   return (
     <footer className="footer mt-auto dd-footer" aria-label="Application footer">
       <div className="dd-footer__inner">
         <div className="dd-footer__identity">
-          <span className="dd-footer__logo" aria-hidden="true">
-            <img src={logoIcon} alt="" />
+          <span className={`dd-footer__logo${hasTenantLogo ? " has-tenant-logo" : ""}`} aria-hidden="true">
+            <img src={logoSrc} alt="" />
           </span>
           <span className="dd-footer__product">
             <strong>DriveDesk</strong>

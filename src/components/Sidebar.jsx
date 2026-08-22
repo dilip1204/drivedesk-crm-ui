@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import { useTenantLogo } from "../hooks/useTenantLogo";
 import logoIcon from "./../assets/logo/logo_icon_white.png";
 import "./Sidebar.css";
 
@@ -20,6 +21,7 @@ const closeMobileSidebar = () => {
 
 export default function Sidebar() {
   const location = useLocation();
+  const { logoSrc, hasTenantLogo } = useTenantLogo(logoIcon);
   const { role } = useAuth(); // 👈 Fetch user role
 
   const isActive = (path) => location.pathname.startsWith(path);
@@ -39,7 +41,11 @@ export default function Sidebar() {
       <div id="sidebar" className="sidebar">
         <div className="app-brand app-logo">
           <Link to={role === "super_admin" ? "/superadmin" : "/dashboard"} title="Dashboard">
-            <img src={logoIcon} alt="drivedesk logo" className="brand-icon" />
+            <img
+              src={logoSrc}
+              alt={hasTenantLogo ? "Organisation logo" : "DriveDesk logo"}
+              className={`brand-icon${hasTenantLogo ? " tenant-brand-icon" : ""}`}
+            />
             <span className="brand-name">drivedesk</span>
           </Link>
         </div>

@@ -49,6 +49,12 @@
   object-fit: contain;
 }
 
+.dd-footer__logo.has-tenant-logo {
+  padding: 2px;
+  background: #fff;
+  border: 1px solid var(--color-border, #d9e0e8);
+}
+
 .dd-footer__product {
   display: flex;
   min-width: 0;

@@ -1,5 +1,10 @@
 import { all } from 'redux-saga/effects';
-import { watchLoginUser } from './login/saga';
+import {
+    watchGetTenantLogo,
+    watchLoginUser,
+    watchRequestLoginOtp,
+    watchVerifyLoginOtp,
+} from './login/saga';
 import { watchStudentListInformation, watchStudentFilterListInformation, watchStudentReceiptInformation } from './students/saga';
 import { watchAddStudent, watchEditStudent } from './addStudent/saga';
 import { watchDeleteStudent } from './deleteStudent/saga';
@@ -16,6 +21,9 @@ import { watchAddSuperAdmin, watchUpdateSuperAdmin, watchGetSuperAdminList } fro
 export function* mainSaga() {
     yield all([
         watchLoginUser(),
+        watchRequestLoginOtp(),
+        watchVerifyLoginOtp(),
+        watchGetTenantLogo(),
         watchStudentListInformation(),
         watchAddStudent(),
         watchDeleteStudent(),

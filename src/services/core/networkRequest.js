@@ -12,6 +12,11 @@ const isTokenExpiredDetail = (data) => {
     return typeof detail === 'string' && detail.toLowerCase().includes('token has expired');
 };
 
+const isLoginRequest = (url = '') => {
+    const normalizedUrl = String(url).split('?')[0].replace(/^\/+|\/+$/g, '');
+    return normalizedUrl === 'auth/login' || normalizedUrl.startsWith('auth/login/otp/');
+};
+
 const notifyServerError = (error) => {
     const statusCode = error?.response?.status;
     if (
@@ -83,7 +88,10 @@ instance.interceptors.response.use(
         const statusCode = error?.response?.status;
         const responseData = error?.response?.data;
 
-        if (statusCode === 401 || isTokenExpiredDetail(responseData)) {
+        if (
+            (statusCode === 401 || isTokenExpiredDetail(responseData)) &&
+            !isLoginRequest(error?.config?.url)
+        ) {
             forceLogout();
         }
 

@@ -641,6 +641,12 @@
     object-fit: contain;
   }
 
+  .header-mobile-brand-icon.has-tenant-logo {
+    padding: 2px;
+    background: #fff;
+    border: 1px solid var(--color-border, #d9e0e8);
+  }
+
   .drivedesk-header .navbar .navbar-right .navbar-nav {
     height: 60px;
   }

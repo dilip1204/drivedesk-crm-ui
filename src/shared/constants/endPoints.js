@@ -1,5 +1,7 @@
 export const ENDPOINTS = {
     userLogin: 'auth/login',
+    requestLoginOtp: 'auth/login/otp/request',
+    verifyLoginOtp: 'auth/login/otp/verify',
     getAllStudents: 'getAllStudents',
     addStudent: 'students/',
     deleteStudent: 'students/mobile-number/',

@@ -122,8 +122,8 @@ body.pwa-guide-open {
   }
 
   body.pwa-install-visible .dd-footer__copyright {
-    justify-self: start;
-    text-align: left;
+    justify-self: center;
+    text-align: center;
   }
 
   .pwa-install-button,

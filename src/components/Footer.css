@@ -138,20 +138,30 @@
 
 @media (max-width: 575.98px) {
   .dd-footer {
-    margin-top: 12px !important;
+    width: 100%;
+    margin-top: 10px !important;
+    overflow: hidden;
   }
 
   .dd-footer__inner {
-    min-height: 50px;
-    grid-template-columns: auto 1fr;
-    gap: 9px;
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    padding: 9px 12px calc(9px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .dd-footer__identity {
+    width: 100%;
+    justify-content: center;
+    gap: 7px;
   }
 
   .dd-footer__logo {
-    flex-basis: 26px;
-    width: 26px;
-    height: 26px;
+    flex-basis: 24px;
+    width: 24px;
+    height: 24px;
+    padding: 4px;
+    border-radius: 6px;
   }
 
   .dd-footer__product small {
@@ -159,9 +169,13 @@
   }
 
   .dd-footer__copyright {
-    justify-self: end;
-    font-size: 9px;
+    width: 100%;
+    justify-self: center;
+    font-size: 10px;
+    line-height: 1.4;
+    text-align: center;
     white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
 

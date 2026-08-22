@@ -28,6 +28,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [serverError, setServerError] = useState(null);
   const profileMenuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,10 +72,22 @@ export default function Header() {
   }, [searchQuery, visiblePages]);
 
   useEffect(() => {
+    const handleServerError = (event) => {
+      setServerError(event?.detail || { statusCode: 500 });
+    };
+
+    window.addEventListener("drivedesk:server-error", handleServerError);
+    return () => window.removeEventListener("drivedesk:server-error", handleServerError);
+  }, []);
+
+  useEffect(() => {
     const body = document.getElementById("body");
     if (!body) return undefined;
 
     const unlockPageScroll = () => {
+      document
+        .querySelectorAll(".mobile-sticky-body-overlay")
+        .forEach((overlay) => overlay.remove());
       body.classList.remove("sidebar-mobile-in");
       document.body.style.removeProperty("overflow");
     };
@@ -138,6 +151,9 @@ export default function Header() {
     const isMobile = window.innerWidth < 768;
 
     if (isMobile) {
+      document
+        .querySelectorAll(".mobile-sticky-body-overlay")
+        .forEach((overlay) => overlay.remove());
       body.classList.toggle("sidebar-mobile-in");
       body.classList.remove("sidebar-mobile-out");
 
@@ -180,8 +196,15 @@ export default function Header() {
     setSearchOpen(false);
   };
 
+  const handleSignInAgain = () => {
+    setServerError(null);
+    localStorage.clear();
+    navigate("/login", { replace: true });
+  };
+
   return (
-    <header className="main-header drivedesk-header" id="header">
+    <>
+      <header className="main-header drivedesk-header" id="header">
       <nav className="navbar navbar-static-top navbar-expand-lg" aria-label="Application header">
         <button
           type="button"
@@ -324,6 +347,38 @@ export default function Header() {
           </ul>
         </div>
       </nav>
-    </header>
+      </header>
+      {serverError && (
+        <section className="api-error-banner" role="alert" aria-live="assertive">
+        <span className="api-error-banner__icon" aria-hidden="true">
+          <i className="bi bi-exclamation-triangle" />
+        </span>
+        <div className="api-error-banner__copy">
+          <strong>Unable to load DriveDesk data</strong>
+          <span>
+            The server or your current session did not respond correctly. Try again, or sign in again if the issue continues.
+          </span>
+        </div>
+        <div className="api-error-banner__actions">
+          <button type="button" className="btn btn-light btn-sm" onClick={() => window.location.reload()}>
+            <i className="bi bi-arrow-clockwise" aria-hidden="true" />
+            <span>Retry</span>
+          </button>
+          <button type="button" className="btn btn-danger btn-sm" onClick={handleSignInAgain}>
+            <i className="bi bi-box-arrow-in-right" aria-hidden="true" />
+            <span>Sign in again</span>
+          </button>
+        </div>
+        <button
+          type="button"
+          className="api-error-banner__close"
+          onClick={() => setServerError(null)}
+          aria-label="Dismiss server error"
+        >
+          <i className="bi bi-x-lg" aria-hidden="true" />
+        </button>
+        </section>
+      )}
+    </>
   );
 }

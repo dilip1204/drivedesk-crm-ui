@@ -12,6 +12,27 @@ const isTokenExpiredDetail = (data) => {
     return typeof detail === 'string' && detail.toLowerCase().includes('token has expired');
 };
 
+const notifyServerError = (error) => {
+    const statusCode = error?.response?.status;
+    if (
+        typeof window === 'undefined' ||
+        !Number.isInteger(statusCode) ||
+        statusCode < 500 ||
+        statusCode > 504
+    ) {
+        return;
+    }
+
+    window.dispatchEvent(new CustomEvent('drivedesk:server-error', {
+        detail: {
+            statusCode,
+            method: String(error?.config?.method || 'GET').toUpperCase(),
+            url: error?.config?.url || '',
+            occurredAt: Date.now(),
+        },
+    }));
+};
+
 const forceLogout = () => {
     if (hasHandledAuthError) {
         return;
@@ -28,7 +49,18 @@ const forceLogout = () => {
 
 instance.interceptors.request.use(
     (config) => {
-        config.headers['Content-Type'] = 'application/json';
+        const isMultipartRequest =
+            typeof FormData !== 'undefined' && config.data instanceof FormData;
+
+        if (isMultipartRequest) {
+            if (typeof config.headers?.delete === 'function') {
+                config.headers.delete('Content-Type');
+            } else if (config.headers) {
+                delete config.headers['Content-Type'];
+            }
+        } else {
+            config.headers['Content-Type'] = 'application/json';
+        }
         config.headers['Accept'] = 'application/json';
 
         const token = localStorage.getItem('token');
@@ -55,7 +87,9 @@ instance.interceptors.response.use(
             forceLogout();
         }
 
-    return Promise.reject(error);
+        notifyServerError(error);
+
+        return Promise.reject(error);
     }
 );
 

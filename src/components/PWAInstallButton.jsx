@@ -106,7 +106,7 @@ export default function PWAInstallButton() {
         aria-label="Install DriveDesk App"
         title="Install DriveDesk App"
       >
-        <i className="mdi mdi-monitor-arrow-down mr-1" aria-hidden="true" />
+        <i className="bi bi-download" aria-hidden="true" />
         Install App
       </button>
 

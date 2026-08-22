@@ -3,7 +3,7 @@
   "short_name": "DriveDesk",
   "name": "DriveDesk Driving School Management",
   "description": "Manage students, instructors, payments, and training sessions with DriveDesk.",
-  "start_url": "/trainingsession",
+  "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],

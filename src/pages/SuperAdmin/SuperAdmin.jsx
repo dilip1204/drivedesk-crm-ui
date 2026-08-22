@@ -18,7 +18,7 @@ import Pagination from "../Students/Pagenation";
 import AddSuperAdmin from "./AddSuperAdmin";
 
 import { getSuperAdminList } from "../../store/superAdmin/actions";
-import { getTenantLogo } from "../../services/functional/superAdmin/superAdminService";
+import { getTenantLogo } from "../../store/login/actions";
 
 const EMPTY_VALUE = "—";
 
@@ -72,28 +72,22 @@ const SuperAdmin = () => {
         setViewLogoUrl(viewTenant?.logo_url || viewTenant?.logoUrl || "");
         setViewLogoLoading(false);
 
-        const loadViewLogo = async () => {
+        const loadViewLogo = () => {
             if (!showViewModal || !viewTenant?.tenant_id) return;
 
             setViewLogoLoading(true);
-            try {
-                const response = await getTenantLogo(viewTenant.tenant_id);
-                const logoBlob = response?.data;
-                if (!(logoBlob instanceof Blob) || logoBlob.size === 0) return;
+            dispatch(
+                getTenantLogo(viewTenant.tenant_id, (logoBlob, error) => {
+                    if (!isActive) return;
 
-                const objectUrl = URL.createObjectURL(logoBlob);
-                if (!isActive) {
-                    URL.revokeObjectURL(objectUrl);
-                    return;
-                }
+                    setViewLogoLoading(false);
+                    if (error || !(logoBlob instanceof Blob) || logoBlob.size === 0) return;
 
-                viewLogoObjectUrlRef.current = objectUrl;
-                setViewLogoUrl(objectUrl);
-            } catch (error) {
-                // Not every tenant has a logo; the organisation initial remains visible.
-            } finally {
-                if (isActive) setViewLogoLoading(false);
-            }
+                    const objectUrl = URL.createObjectURL(logoBlob);
+                    viewLogoObjectUrlRef.current = objectUrl;
+                    setViewLogoUrl(objectUrl);
+                })
+            );
         };
 
         loadViewLogo();
@@ -105,7 +99,7 @@ const SuperAdmin = () => {
                 viewLogoObjectUrlRef.current = "";
             }
         };
-    }, [showViewModal, viewTenant?.tenant_id, viewTenant?.logo_url, viewTenant?.logoUrl]);
+    }, [dispatch, showViewModal, viewTenant?.tenant_id, viewTenant?.logo_url, viewTenant?.logoUrl]);
 
     const handleAdd = () => {
         setIsEdit(false);

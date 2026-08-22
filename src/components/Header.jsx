@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import avatar from "../assets/img/avatar.png";
 import logoIcon from "../assets/logo/logo_icon_white.png";
+import { useTenantLogo } from "../hooks/useTenantLogo";
 import PWAInstallButton from "./PWAInstallButton";
 import "./Header.css";
 
@@ -32,6 +33,7 @@ export default function Header() {
   const profileMenuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { logoSrc, hasTenantLogo } = useTenantLogo(logoIcon);
 
   const formatRoleLabel = (role) => {
     if (!role) return "";
@@ -222,8 +224,8 @@ export default function Header() {
           className="header-mobile-brand"
           aria-label="Go to DriveDesk home"
         >
-          <span className="header-mobile-brand-icon" aria-hidden="true">
-            <img src={logoIcon} alt="" />
+          <span className={`header-mobile-brand-icon${hasTenantLogo ? " has-tenant-logo" : ""}`} aria-hidden="true">
+            <img src={logoSrc} alt="" />
           </span>
           <span>DriveDesk</span>
         </Link>

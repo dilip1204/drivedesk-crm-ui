@@ -4,7 +4,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import { addSuperAdmin, updateSuperAdmin } from "../../store/superAdmin/actions";
-import { getTenantLogo } from "../../services/functional/superAdmin/superAdminService";
+import { getTenantLogo } from "../../store/login/actions";
 
 export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, selected = null, onSuccess }) {
     const dispatch = useDispatch();
@@ -45,28 +45,22 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
         setLogoLoading(false);
         if (logoInputRef.current) logoInputRef.current.value = "";
 
-        const loadSavedLogo = async () => {
+        const loadSavedLogo = () => {
             if (!showModal || !isEdit || !selected?.tenant_id) return;
 
             setLogoLoading(true);
-            try {
-                const response = await getTenantLogo(selected.tenant_id);
-                const logoBlob = response?.data;
-                if (!(logoBlob instanceof Blob) || logoBlob.size === 0) return;
+            dispatch(
+                getTenantLogo(selected.tenant_id, (logoBlob, error) => {
+                    if (!isActive) return;
 
-                const fetchedLogoUrl = URL.createObjectURL(logoBlob);
-                if (!isActive) {
-                    URL.revokeObjectURL(fetchedLogoUrl);
-                    return;
-                }
+                    setLogoLoading(false);
+                    if (error || !(logoBlob instanceof Blob) || logoBlob.size === 0) return;
 
-                fetchedLogoObjectUrlRef.current = fetchedLogoUrl;
-                setSavedLogoPreview(fetchedLogoUrl);
-            } catch (error) {
-                // A tenant may not have a saved logo. Keep the initials fallback.
-            } finally {
-                if (isActive) setLogoLoading(false);
-            }
+                    const fetchedLogoUrl = URL.createObjectURL(logoBlob);
+                    fetchedLogoObjectUrlRef.current = fetchedLogoUrl;
+                    setSavedLogoPreview(fetchedLogoUrl);
+                })
+            );
         };
 
         loadSavedLogo();
@@ -76,7 +70,7 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
             revokeUploadObjectUrl();
             revokeFetchedLogoObjectUrl();
         };
-    }, [showModal, isEdit, selected?.tenant_id, existingLogoUrl]);
+    }, [dispatch, showModal, isEdit, selected?.tenant_id, existingLogoUrl]);
 
     const initialValues = isEdit
         ? {

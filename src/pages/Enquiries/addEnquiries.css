@@ -95,6 +95,189 @@
   line-height: 1.25;
 }
 
+.required-mark {
+  color: var(--color-danger, #dc3545);
+}
+
+.enquiry-enrollment-panel {
+  margin-top: 4px;
+  padding: 14px 14px 3px;
+  border: 1px solid #cbdcf5;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.enquiry-enrollment-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dce7f5;
+}
+
+.enquiry-enrollment-icon {
+  display: grid;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #e8f1ff;
+  color: #2563eb;
+  font-size: 15px;
+  place-items: center;
+}
+
+.enquiry-enrollment-heading h3 {
+  margin: 0;
+  color: var(--color-text, #172033);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.enquiry-enrollment-heading p {
+  margin: 2px 0 0;
+  color: var(--color-muted, #667085);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.enquiry-optional-label {
+  margin-left: 4px;
+  color: var(--color-muted, #667085);
+  font-size: 9px;
+  font-weight: 400;
+}
+
+.enquiry-payment-summary {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding: 6px 10px;
+  border: 1px solid #b7e4d1;
+  border-radius: 6px;
+  background: #effaf5;
+  color: #166534;
+}
+
+.enquiry-payment-summary span {
+  font-size: 11px;
+}
+
+.enquiry-payment-summary strong {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.enquiry-availability-panel {
+  margin-bottom: 11px;
+  padding: 12px;
+  border: 1px solid #cbdcf5;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.enquiry-availability-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.enquiry-availability-header h4 {
+  margin: 0;
+  color: var(--color-text, #172033);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.enquiry-availability-header > div > span {
+  color: var(--color-muted, #667085);
+  font-size: 10px;
+}
+
+.enquiry-availability-header .btn {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+}
+
+.enquiry-availability-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.enquiry-availability-summary span {
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #344054;
+  font-size: 10px;
+}
+
+.enquiry-availability-summary .is-non-working {
+  background: #fff4e5;
+  color: #b54708;
+  font-weight: 600;
+}
+
+.enquiry-availability-alert {
+  margin-bottom: 9px;
+  padding: 7px 9px;
+  font-size: 10px;
+}
+
+.enquiry-slot-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.enquiry-slot {
+  min-width: 58px;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid #86d5b1;
+  border-radius: 6px;
+  background: #f0fdf7;
+  color: #087443;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.enquiry-slot:hover,
+.enquiry-slot:focus-visible,
+.enquiry-slot.is-selected {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #fff;
+  outline: none;
+}
+
+.enquiry-slot.is-booked,
+.enquiry-slot.is-booked:disabled {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: #b42318;
+  cursor: not-allowed;
+  opacity: .72;
+}
+
+.enquiry-no-slots {
+  color: var(--color-muted, #667085);
+  font-size: 10px;
+}
+
 .enquiry-form-footer {
   position: static;
   gap: 8px;
@@ -142,6 +325,39 @@
     height: 40px;
     min-height: 40px;
     font-size: 13px !important;
+  }
+
+  .enquiry-enrollment-panel {
+    padding: 12px 10px 2px;
+  }
+
+  .enquiry-payment-summary {
+    min-height: 40px;
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+
+  .enquiry-availability-panel {
+    padding: 10px;
+  }
+
+  .enquiry-availability-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .enquiry-availability-header .btn {
+    width: 100%;
+    min-height: 38px;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  .enquiry-slot {
+    flex: 1 0 64px;
+    min-height: 36px;
+    font-size: 11px;
   }
 
   .enquiry-form-footer {

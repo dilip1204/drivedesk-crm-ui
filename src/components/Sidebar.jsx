@@ -1,8 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import logoIcon from "./../assets/logo/logo_icon_white.png";
 import "./Sidebar.css";
+
+const closeMobileSidebar = () => {
+  if (window.innerWidth >= 768) return;
+
+  const body = document.getElementById("body");
+  if (!body) return;
+
+  document
+    .querySelectorAll(".mobile-sticky-body-overlay")
+    .forEach((overlay) => overlay.remove());
+  body.classList.remove("sidebar-mobile-in");
+  body.classList.add("sidebar-mobile-out");
+  document.body.style.removeProperty("overflow");
+};
 
 export default function Sidebar() {
   const location = useLocation();
@@ -10,8 +24,18 @@ export default function Sidebar() {
 
   const isActive = (path) => location.pathname.startsWith(path);
 
+  useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") closeMobileSidebar();
+    };
+
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, []);
+
   return (
-    <aside className="left-sidebar bg-sidebar drivedesk-sidebar" aria-label="Primary navigation">
+    <>
+      <aside className="left-sidebar bg-sidebar drivedesk-sidebar" aria-label="Primary navigation">
       <div id="sidebar" className="sidebar">
         <div className="app-brand app-logo">
           <Link to={role === "super_admin" ? "/superadmin" : "/dashboard"} title="Dashboard">
@@ -118,6 +142,13 @@ export default function Sidebar() {
           </ul>
         </div>
       </div>
-    </aside>
+      </aside>
+      <button
+        type="button"
+        className="drivedesk-sidebar-backdrop"
+        onClick={closeMobileSidebar}
+        aria-label="Close navigation menu"
+      />
+    </>
   );
 }

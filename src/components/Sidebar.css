@@ -10,6 +10,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.drivedesk-sidebar-backdrop {
+  display: none;
+}
+
 .drivedesk-sidebar .sidebar {
   height: 100vh;
   min-height: 100vh;
@@ -212,6 +216,39 @@
 }
 
 @media (max-width: 767.98px) {
+  /* The React backdrop replaces the old jQuery overlay from sleek.js. */
+  .mobile-sticky-body-overlay {
+    display: none !important;
+  }
+
+  .sidebar-mobile-in .drivedesk-sidebar {
+    z-index: 1060 !important;
+    pointer-events: auto;
+  }
+
+  .drivedesk-sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 250px;
+    z-index: 1055;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: rgba(15, 23, 42, .24);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .2s ease, visibility .2s ease;
+  }
+
+  .sidebar-mobile-in .drivedesk-sidebar-backdrop {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
   .drivedesk-sidebar {
     border-right: 0;
     box-shadow: none !important;

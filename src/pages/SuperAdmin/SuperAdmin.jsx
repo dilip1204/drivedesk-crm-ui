@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
@@ -18,6 +18,7 @@ import Pagination from "../Students/Pagenation";
 import AddSuperAdmin from "./AddSuperAdmin";
 
 import { getSuperAdminList } from "../../store/superAdmin/actions";
+import { getTenantLogo } from "../../services/functional/superAdmin/superAdminService";
 
 const EMPTY_VALUE = "—";
 
@@ -36,6 +37,9 @@ const SuperAdmin = () => {
     const [selected, setSelected] = useState(null);
     const [showViewModal, setShowViewModal] = useState(false);
     const [viewTenant, setViewTenant] = useState(null);
+    const [viewLogoUrl, setViewLogoUrl] = useState("");
+    const [viewLogoLoading, setViewLogoLoading] = useState(false);
+    const viewLogoObjectUrlRef = useRef("");
 
     const fetchList = (page = currentPage, limit = pageSize) => {
         setLoading(true);
@@ -56,6 +60,52 @@ const SuperAdmin = () => {
         fetchList(currentPage, pageSize);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, pageSize]);
+
+    useEffect(() => {
+        let isActive = true;
+
+        if (viewLogoObjectUrlRef.current) {
+            URL.revokeObjectURL(viewLogoObjectUrlRef.current);
+            viewLogoObjectUrlRef.current = "";
+        }
+
+        setViewLogoUrl(viewTenant?.logo_url || viewTenant?.logoUrl || "");
+        setViewLogoLoading(false);
+
+        const loadViewLogo = async () => {
+            if (!showViewModal || !viewTenant?.tenant_id) return;
+
+            setViewLogoLoading(true);
+            try {
+                const response = await getTenantLogo(viewTenant.tenant_id);
+                const logoBlob = response?.data;
+                if (!(logoBlob instanceof Blob) || logoBlob.size === 0) return;
+
+                const objectUrl = URL.createObjectURL(logoBlob);
+                if (!isActive) {
+                    URL.revokeObjectURL(objectUrl);
+                    return;
+                }
+
+                viewLogoObjectUrlRef.current = objectUrl;
+                setViewLogoUrl(objectUrl);
+            } catch (error) {
+                // Not every tenant has a logo; the organisation initial remains visible.
+            } finally {
+                if (isActive) setViewLogoLoading(false);
+            }
+        };
+
+        loadViewLogo();
+
+        return () => {
+            isActive = false;
+            if (viewLogoObjectUrlRef.current) {
+                URL.revokeObjectURL(viewLogoObjectUrlRef.current);
+                viewLogoObjectUrlRef.current = "";
+            }
+        };
+    }, [showViewModal, viewTenant?.tenant_id, viewTenant?.logo_url, viewTenant?.logoUrl]);
 
     const handleAdd = () => {
         setIsEdit(false);
@@ -285,8 +335,14 @@ const SuperAdmin = () => {
                     {viewTenant ? (
                         <>
                             <div className="superadmin-tenant-profile">
-                                <span className="superadmin-tenant-avatar" aria-hidden="true">
-                                    {(viewTenant.org_name || "T").charAt(0).toUpperCase()}
+                                <span className="superadmin-tenant-avatar">
+                                    {viewLogoLoading && !viewLogoUrl ? (
+                                        <span className="spinner-border spinner-border-sm" role="status" aria-label="Loading tenant logo"></span>
+                                    ) : viewLogoUrl ? (
+                                        <img src={viewLogoUrl} alt={`${viewTenant.org_name || "Tenant"} logo`} />
+                                    ) : (
+                                        <span aria-hidden="true">{(viewTenant.org_name || "T").charAt(0).toUpperCase()}</span>
+                                    )}
                                 </span>
                                 <div>
                                     <h3>{viewTenant.org_name || "Unnamed tenant"}</h3>

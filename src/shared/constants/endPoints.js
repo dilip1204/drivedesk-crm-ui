@@ -47,4 +47,6 @@ export const ENDPOINTS = {
     editSuperAdmin: 'auth/tenant/',
     getTenantLogo: 'auth/tenant/logo/',
     getWhatsAppUsage: 'whatsapp/usage',
+    getTenantUsageDashboard: 'usage/dashboard',
+    getTenantUsageList: 'usage',
 } 

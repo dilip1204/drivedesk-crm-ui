@@ -20,6 +20,7 @@ const SEARCHABLE_PAGES = [
   { label: "Finance Dashboard", path: "/finance-dashboard", icon: "mdi-finance", roles: ["super_admin"] },
   { label: "Tutorials", path: "/tutorials", icon: "mdi-play-circle-outline", roles: ["admin", "instructor"] },
   { label: "Super Admin", path: "/superadmin", icon: "mdi-shield-account", roles: ["super_admin"] },
+  { label: "Tenant Usage", path: "/super-admin/usage", icon: "mdi-chart-bar", roles: ["super_admin"] },
   { label: "WhatsApp Usage", path: "/superadmin/whatsapp-usage", icon: "mdi-whatsapp", roles: ["super_admin"] },
 ];
 

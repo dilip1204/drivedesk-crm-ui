@@ -135,6 +135,12 @@ export default function Sidebar() {
                     <span className="nav-text">Tenants</span>
                   </Link>
                 </li>
+                <li className={`has-sub ${isActive("/super-admin/usage") ? "active expand" : ""}`}>
+                  <Link className="sidenav-item-link" to="/super-admin/usage" title="Tenant Usage">
+                    <i className="mdi mdi-chart-bar"></i>
+                    <span className="nav-text">Tenant Usage</span>
+                  </Link>
+                </li>
                 <li className={`has-sub ${isActive("/superadmin/whatsapp-usage") ? "active expand" : ""}`}>
                   <Link className="sidenav-item-link" to="/superadmin/whatsapp-usage" title="WhatsApp Usage">
                     <i className="mdi mdi-whatsapp"></i>

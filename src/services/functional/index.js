@@ -16,6 +16,7 @@ import * as editEnquiriesList from './enquiries/editEnquiriesService';
 import * as getAllEnquiriesService from './enquiries/getEnquiriesListService';
 import * as deleteEnquiriesList from './enquiries/deleteEnquiriesService';
 import * as getDashboardSummaryService from './dashboard/getDashboardSummaryService';
+import * as financeDashboardService from './finance/getFinanceDashboardService';
 import * as addStudentPaymentList from './students/addPaymentService';
 import * as getAllTrainingsessionService from './trainingsession/getTrainingSessionListService';
 import * as editTrainingSession from './trainingsession/editTrainingSessionService';
@@ -46,6 +47,7 @@ export {
     getAllEnquiriesService,
     deleteEnquiriesList,
     getDashboardSummaryService,
+    financeDashboardService,
     addStudentPaymentList,
     getAllTrainingsessionService,
     editTrainingSession,

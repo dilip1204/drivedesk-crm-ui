@@ -141,6 +141,12 @@ export default function Sidebar() {
                     <span className="nav-text">WhatsApp Usage</span>
                   </Link>
                 </li>
+                <li className={`has-sub ${isActive("/finance-dashboard") ? "active expand" : ""}`}>
+                  <Link className="sidenav-item-link" to="/finance-dashboard" title="Finance Dashboard">
+                    <i className="mdi mdi-finance"></i>
+                    <span className="nav-text">Finance</span>
+                  </Link>
+                </li>
               </>
             )}
             

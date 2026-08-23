@@ -16,6 +16,7 @@ import { watchAddStudentPayment } from './addStudentPayment/saga';
 import { watchTrainingSessionListInformation, watchTrainingSessionFilterListInformation, watchEditTrainingSession, watchReschduleTrainingSession, watchStudentCompletedSession } from './trainingSession/saga';
 import { watchAddExpenses, watchEditExpenses, watchDeleteExpenses, watchGetExpenses } from './expenses/saga';
 import { watchAddSuperAdmin, watchUpdateSuperAdmin, watchGetSuperAdminList } from './superAdmin/saga';
+import { watchCreateFinanceTransaction, watchDeleteFinanceTransaction, watchFinanceDashboard, watchFinanceMonthlyReport, watchFinanceTransaction, watchFinanceTransactions, watchFinanceYearlyReport, watchUpdateFinanceTransaction } from './financeDashboard/saga';
 
 
 export function* mainSaga() {
@@ -60,5 +61,13 @@ export function* mainSaga() {
         watchAddSuperAdmin(),
         watchUpdateSuperAdmin(),
         watchGetSuperAdminList(),
+        watchFinanceDashboard(),
+        watchFinanceTransactions(),
+        watchCreateFinanceTransaction(),
+        watchFinanceTransaction(),
+        watchUpdateFinanceTransaction(),
+        watchDeleteFinanceTransaction(),
+        watchFinanceMonthlyReport(),
+        watchFinanceYearlyReport(),
     ])
 }

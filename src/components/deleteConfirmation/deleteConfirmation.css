@@ -88,14 +88,51 @@
 }
 
 .delete-confirmation-footer .btn {
-  min-width: 82px;
-  min-height: 34px;
+  display: inline-flex;
+  min-width: 0;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   margin: 0;
-  padding: 5px 12px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm, 6px);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.2;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.delete-confirmation-footer .btn .mdi {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.delete-confirmation-footer .btn > span {
+  margin-left: 2px;
+  line-height: 1;
+}
+
+.delete-confirmation-footer .delete-confirmation-cancel {
+  color: #475467;
+  background: #f8fafc;
+  border-color: #d0d5dd;
+}
+
+.delete-confirmation-footer .delete-confirmation-delete {
+  color: #b42318;
+  background: #fef3f2;
+  border-color: #fecdca;
+}
+
+.delete-confirmation-footer .btn:hover,
+.delete-confirmation-footer .btn:focus {
+  filter: brightness(.97);
+  box-shadow: 0 0 0 2px rgba(31, 78, 120, .1);
 }
 
 @media (max-width: 575.98px) {
@@ -118,7 +155,7 @@
 
   .delete-confirmation-footer .btn {
     flex: 1 1 0;
-    min-height: 40px;
-    font-size: 13px;
+    min-height: 38px;
+    font-size: 12px;
   }
 }

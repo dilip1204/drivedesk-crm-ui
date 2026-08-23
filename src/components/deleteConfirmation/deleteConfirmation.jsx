@@ -36,11 +36,13 @@ const DeleteConfirmation = ({
                 </div>
             </Modal.Body>
             <Modal.Footer className="delete-confirmation-footer">
-                <Button variant="secondary" onClick={hideDeleteModal}>
-                    Cancel
+                <Button variant="secondary" className="delete-confirmation-cancel" onClick={hideDeleteModal}>
+                    <i className="mdi mdi-close" aria-hidden="true" />
+                    <span>Cancel</span>
                 </Button>
-                <Button variant="danger" onClick={handleConfirmClick}>
-                    Delete
+                <Button variant="danger" className="delete-confirmation-delete" onClick={handleConfirmClick}>
+                    <i className="mdi mdi-delete" aria-hidden="true" />
+                    <span>Delete</span>
                 </Button>
             </Modal.Footer>
         </Modal>

@@ -19,6 +19,7 @@ import Tutorials from "./pages/Tutorials/Tutorials";
 import ExpenseReport from "./pages/FleetExpenses/ExpenseReport";
 import IncomeReport from "./pages/IncomeReport/IncomeReport";
 import Attendance from "./pages/Attendance/Attendance";
+import FinanceDashboard from "./pages/FinanceDashboard/FinanceDashboard";
 
 export default function AppRoutes() {
   return (
@@ -144,6 +145,15 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["super_admin"]}>
             <SuperAdmin />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/finance-dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <FinanceDashboard />
           </ProtectedRoute>
         }
       />

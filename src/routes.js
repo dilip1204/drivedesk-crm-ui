@@ -20,6 +20,7 @@ import ExpenseReport from "./pages/FleetExpenses/ExpenseReport";
 import IncomeReport from "./pages/IncomeReport/IncomeReport";
 import Attendance from "./pages/Attendance/Attendance";
 import FinanceDashboard from "./pages/FinanceDashboard/FinanceDashboard";
+import TenantUsage from "./pages/TenantUsage/TenantUsage";
 
 export default function AppRoutes() {
   return (
@@ -163,6 +164,15 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["super_admin"]}>
             <WhatsAppUsage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/super-admin/usage"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <TenantUsage />
           </ProtectedRoute>
         }
       />

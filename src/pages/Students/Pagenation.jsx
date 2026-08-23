@@ -7,6 +7,7 @@ export default function Pagination({
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [5, 10, 20, 50, 100],
+  disabled = false,
 }) {
   const totalPages = Math.max(1, Math.ceil((totalCount || 0) / (pageSize || 1)));
   const pageSizeId = React.useId();
@@ -32,7 +33,7 @@ export default function Pagination({
   const isLastPage = currentPage === totalPages;
 
   return (
-    <div className="d-flex flex-column flex-md-row align-items-center justify-content-between students-pagination-bar">
+    <div className="d-flex flex-column flex-md-row align-items-center justify-content-between students-pagination-bar" aria-busy={disabled}>
       <div className="d-flex flex-wrap align-items-center students-pagination-summary">
         <div className="students-results-count">
           Showing <strong>{start}–{end}</strong> of <strong>{totalCount || 0}</strong>
@@ -46,6 +47,7 @@ export default function Pagination({
             value={pageSize}
             onChange={(event) => onPageSizeChange(Number(event.target.value))}
             aria-label="Rows per page"
+            disabled={disabled}
           >
             {pageSizeOptions.map((option) => (
               <option key={option} value={option}>{option}</option>
@@ -62,7 +64,7 @@ export default function Pagination({
               className="page-link"
               onClick={() => onPageChange(1)}
               aria-label="First page"
-              disabled={isFirstPage}
+              disabled={disabled || isFirstPage}
             >
               <span className="mdi mdi-page-first" aria-hidden="true"></span>
             </button>
@@ -73,7 +75,7 @@ export default function Pagination({
               className="page-link"
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}
               aria-label="Previous page"
-              disabled={isFirstPage}
+              disabled={disabled || isFirstPage}
             >
               <span className="mdi mdi-chevron-left" aria-hidden="true"></span>
             </button>
@@ -92,6 +94,7 @@ export default function Pagination({
                   onClick={() => onPageChange(page)}
                   aria-current={currentPage === page ? "page" : undefined}
                   aria-label={`Page ${page}`}
+                  disabled={disabled}
                 >
                   {page}
                 </button>
@@ -105,7 +108,7 @@ export default function Pagination({
               className="page-link"
               onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
               aria-label="Next page"
-              disabled={isLastPage}
+              disabled={disabled || isLastPage}
             >
               <span className="mdi mdi-chevron-right" aria-hidden="true"></span>
             </button>
@@ -116,7 +119,7 @@ export default function Pagination({
               className="page-link"
               onClick={() => onPageChange(totalPages)}
               aria-label="Last page"
-              disabled={isLastPage}
+              disabled={disabled || isLastPage}
             >
               <span className="mdi mdi-page-last" aria-hidden="true"></span>
             </button>

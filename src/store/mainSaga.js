@@ -17,6 +17,7 @@ import { watchTrainingSessionListInformation, watchTrainingSessionFilterListInfo
 import { watchAddExpenses, watchEditExpenses, watchDeleteExpenses, watchGetExpenses } from './expenses/saga';
 import { watchAddSuperAdmin, watchUpdateSuperAdmin, watchGetSuperAdminList } from './superAdmin/saga';
 import { watchCreateFinanceTransaction, watchDeleteFinanceTransaction, watchFinanceDashboard, watchFinanceMonthlyReport, watchFinanceTransaction, watchFinanceTransactions, watchFinanceYearlyReport, watchUpdateFinanceTransaction } from './financeDashboard/saga';
+import { watchTenantUsageDashboard, watchTenantUsageList } from './tenantUsage/saga';
 
 
 export function* mainSaga() {
@@ -69,5 +70,7 @@ export function* mainSaga() {
         watchDeleteFinanceTransaction(),
         watchFinanceMonthlyReport(),
         watchFinanceYearlyReport(),
+        watchTenantUsageDashboard(),
+        watchTenantUsageList(),
     ])
 }

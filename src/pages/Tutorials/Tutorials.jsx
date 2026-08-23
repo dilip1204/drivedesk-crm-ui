@@ -21,6 +21,13 @@ const TUTORIALS = [
     duration: "2:26",
     topic: "Expense Tracker",
   },
+  {
+    id: "JzPrG-38mGo",
+    title: "DriveDesk – The Simplest Way to Log In with Mobile OTP",
+    description: "Enter your registered mobile number, receive the OTP on WhatsApp, verify it, and securely access your DriveDesk account.",
+    duration: "1:11",
+    topic: "Mobile OTP Login",
+  },
 ];
 
 export default function Tutorials() {

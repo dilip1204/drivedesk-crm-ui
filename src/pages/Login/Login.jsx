@@ -23,11 +23,6 @@ const normalizeIndianMobile = (value) => {
   return digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : digits;
 };
 
-const isMobileLoginIdentifier = (value) => {
-  const identifier = String(value || "").trim();
-  return /^[+\d\s()-]+$/.test(identifier) && /^[6-9]\d{9}$/.test(normalizeIndianMobile(identifier));
-};
-
 const formatTimer = (seconds) => {
   const safeSeconds = Math.max(0, Number(seconds) || 0);
   return `${String(Math.floor(safeSeconds / 60)).padStart(2, "0")}:${String(safeSeconds % 60).padStart(2, "0")}`;
@@ -76,12 +71,8 @@ const Login = () => {
   const validationSchema = Yup.object({
     email: Yup.string()
       .trim()
-      .required("Please enter your email or mobile number.")
-      .test(
-        "email-or-mobile",
-        "Enter a valid email address or 10-digit mobile number.",
-        (value) => Yup.string().email().isValidSync(value) || isMobileLoginIdentifier(value)
-      ),
+      .email("Enter a valid email address.")
+      .required("Please enter your email address."),
     password: Yup.string().required("Please enter your password."),
   });
 
@@ -111,11 +102,8 @@ const Login = () => {
 
   const onSubmit = (values, { setSubmitting }) => {
     setLoginError("");
-    const loginIdentifier = values.email.trim();
     const data = {
-      username: isMobileLoginIdentifier(loginIdentifier)
-        ? normalizeIndianMobile(loginIdentifier)
-        : loginIdentifier,
+      username: values.email.trim(),
       password: values.password,
     };
 
@@ -448,7 +436,7 @@ const Login = () => {
               <h2>Sign in to DriveDesk</h2>
               <p className="login-intro">
                 {loginMode === "email"
-                  ? "Enter your registered email or mobile number and password."
+                  ? "Enter your registered email address and password."
                   : "Use the registered mobile number to receive a secure WhatsApp OTP."}
               </p>
 
@@ -461,7 +449,7 @@ const Login = () => {
                   onClick={() => switchLoginMode("email")}
                 >
                   <i className="bi bi-key" aria-hidden="true" />
-                  Email / Mobile
+                  Email Login
                 </button>
                 <button
                   type="button"
@@ -487,15 +475,15 @@ const Login = () => {
                 {({ isSubmitting, touched, errors }) => (
                   <Form className="login-form" noValidate>
                     <div className="login-field">
-                      <label htmlFor="login-identifier">Email or mobile number</label>
+                      <label htmlFor="login-identifier">Email address</label>
                       <div className={`login-input-wrap${touched.email && errors.email ? " has-error" : ""}`}>
-                        <i className="bi bi-person" aria-hidden="true" />
+                        <i className="bi bi-envelope" aria-hidden="true" />
                         <Field
-                          type="text"
+                          type="email"
                           name="email"
                           id="login-identifier"
-                          placeholder="Email or 10-digit mobile number"
-                          autoComplete="username"
+                          placeholder="Enter your email address"
+                          autoComplete="email"
                           autoCapitalize="none"
                           spellCheck="false"
                         />

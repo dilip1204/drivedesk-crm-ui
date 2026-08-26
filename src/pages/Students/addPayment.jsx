@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { getStudentReceiptInfo } from "../../store/students/actions";
 import { ToastContainer, toast } from "react-toastify";
 import { addAdminPrintLogo } from "../../utils/printBranding";
+import { ensureTenantLogo } from "../../hooks/useTenantLogo";
 import "./studentPayments.css";
 
 const getLocalDateTimeInputValue = (date = new Date()) => {
@@ -91,19 +92,34 @@ export default function AddPayment({
        setTimeout(() => {
           toast.error("Receipt number not found.");
         }, 100); // delay to allow modal to remain mounted
-     
+      return;
     }
 
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Please allow pop-ups to print the receipt.");
+      return;
+    }
+    const tenantLogoPromise = ensureTenantLogo(dispatch);
+
     dispatch(
-      getStudentReceiptInfo({ receipt_no: receiptNo }, (response) => {
+      getStudentReceiptInfo({ receipt_no: receiptNo }, async (response) => {
         if (response) {
           //setHtmlContent(response);
-          const printWindow = window.open("", "_blank");
-          printWindow.document.write(addAdminPrintLogo(response));
+          const tenantLogo = await tenantLogoPromise;
+          printWindow.document.write(addAdminPrintLogo(response, tenantLogo));
           printWindow.document.close();
-          printWindow.focus();
-          printWindow.print();
+          const printReceipt = () => {
+            printWindow.focus();
+            printWindow.print();
+          };
+          if (printWindow.document.readyState === "complete") {
+            window.setTimeout(printReceipt, 0);
+          } else {
+            printWindow.onload = printReceipt;
+          }
         } else {
+          printWindow.close();
           alert("Failed to fetch receipt info.");
         }
       })

@@ -22,6 +22,11 @@ import { useAuth } from "../../hooks/useAuth";
 import AddFleetExpenses from "./addFleetExpenses";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import { deleteExpenses } from "../../store/expenses/actions";
+import {
+  getAdminPrintHeader,
+  getAdminPrintWatermark,
+} from "../../utils/printBranding";
+import { ensureTenantLogo } from "../../hooks/useTenantLogo";
 
 const pad = (value) => String(value).padStart(2, "0");
 
@@ -101,10 +106,11 @@ const ExpenseReport = () => {
     setAppliedMonth(selectedMonth);
   };
 
-  const printReport = () => {
+  const printReport = async () => {
     const content = reportTableRef.current?.outerHTML || "<p>No data</p>";
     const printWindow = window.open("", "", "width=1200,height=800");
     if (!printWindow) return;
+    const tenantLogo = await ensureTenantLogo(dispatch);
 
     printWindow.document.write(`<!doctype html>
       <html>
@@ -113,6 +119,10 @@ const ExpenseReport = () => {
           <title>Expense Report</title>
           <style>
             body{font-family:Arial,Helvetica,sans-serif;margin:24px;color:#212529;}
+            .report{position:relative;z-index:1;}
+            .report-header{display:grid;grid-template-columns:112px minmax(0,1fr) 112px;min-height:86px;align-items:center;margin-bottom:14px;border-bottom:2px solid #1f4e78;}
+            .report-header-copy{align-self:center;text-align:center;}
+            .report-header-spacer{width:112px;}
             h2,p{text-align:center;margin:0 0 10px;}
             table{width:100%;border-collapse:collapse;font-size:11px;}
             th,td{border:1px solid #333;padding:6px;text-align:center;}
@@ -121,9 +131,18 @@ const ExpenseReport = () => {
           </style>
         </head>
         <body>
-          <h2>Expense Report</h2>
-          <p>${appliedMonth.split("-").reverse().join("/")}</p>
-          ${content}
+          ${getAdminPrintWatermark(tenantLogo)}
+          <main class="report">
+            <header class="report-header">
+              ${getAdminPrintHeader(tenantLogo)}
+              <div class="report-header-copy">
+                <h2>Expense Report</h2>
+                <p>${appliedMonth.split("-").reverse().join("/")}</p>
+              </div>
+              <span class="report-header-spacer" aria-hidden="true"></span>
+            </header>
+            ${content}
+          </main>
           <script>window.onload=function(){window.print();window.close();}</script>
         </body>
       </html>`);

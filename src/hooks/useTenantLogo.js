@@ -13,7 +13,7 @@ const readStoredJson = (key) => {
   }
 };
 
-const getAuthenticatedTenantId = () => {
+export const getAuthenticatedTenantId = () => {
   const tenantInfo = readStoredJson("userInfo");
   const roleInfo = readStoredJson("userRoleInfo");
 
@@ -26,19 +26,38 @@ const getAuthenticatedTenantId = () => {
   );
 };
 
+export const getCachedTenantLogo = (tenantId = getAuthenticatedTenantId()) =>
+  tenantId ? tenantLogoCache.get(tenantId) || "" : "";
+
+const getLogoDataUrl = (logoBlob) => new Promise((resolve) => {
+  if (typeof FileReader === "undefined") {
+    resolve(URL.createObjectURL(logoBlob));
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+  reader.onerror = () => resolve("");
+  reader.readAsDataURL(logoBlob);
+});
+
 const loadTenantLogo = (tenantId, dispatch) => {
   if (tenantLogoCache.has(tenantId)) return Promise.resolve(tenantLogoCache.get(tenantId));
   if (tenantLogoRequests.has(tenantId)) return tenantLogoRequests.get(tenantId);
 
   const logoRequest = new Promise((resolve) => {
     dispatch(
-      getTenantLogo(tenantId, (logoBlob, error) => {
+      getTenantLogo(tenantId, async (logoBlob, error) => {
         if (error || !(logoBlob instanceof Blob) || logoBlob.size === 0) {
           resolve("");
           return;
         }
 
-        const logoUrl = URL.createObjectURL(logoBlob);
+        const logoUrl = await getLogoDataUrl(logoBlob);
+        if (!logoUrl) {
+          resolve("");
+          return;
+        }
         tenantLogoCache.set(tenantId, logoUrl);
         resolve(logoUrl);
       })
@@ -47,6 +66,11 @@ const loadTenantLogo = (tenantId, dispatch) => {
 
   tenantLogoRequests.set(tenantId, logoRequest);
   return logoRequest;
+};
+
+export const ensureTenantLogo = (dispatch, tenantId = getAuthenticatedTenantId()) => {
+  if (!tenantId || typeof dispatch !== "function") return Promise.resolve("");
+  return loadTenantLogo(tenantId, dispatch);
 };
 
 export const useTenantLogo = (fallbackLogo) => {
@@ -63,7 +87,7 @@ export const useTenantLogo = (fallbackLogo) => {
       return undefined;
     }
 
-    loadTenantLogo(tenantId, dispatch).then((logoUrl) => {
+    ensureTenantLogo(dispatch, tenantId).then((logoUrl) => {
       if (isActive) setTenantLogo(logoUrl);
     });
 

@@ -8,6 +8,7 @@ import { IoClose } from "react-icons/io5";
 import { getStudentReceiptInfo } from "../../store/students/actions";
 import { getInstructorAvailInformation } from "../../store/instructors/actions";
 import { addAdminPrintLogo } from "../../utils/printBranding";
+import { ensureTenantLogo } from "../../hooks/useTenantLogo";
 import LoadingState from "../../components/LoadingState";
 import EmptyState from "../../components/EmptyState";
 import "./addStudents.css";
@@ -556,18 +557,31 @@ export default function AddStudents({
       return;
     }
 
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow pop-ups to print the receipt.");
+      return;
+    }
+    const tenantLogoPromise = ensureTenantLogo(dispatch);
+
     dispatch(
-      getStudentReceiptInfo({ receipt_no }, (response) => {
+      getStudentReceiptInfo({ receipt_no }, async (response) => {
         if (response) {
           setHtmlContent(response);
-          setTimeout(() => {
-            const printWindow = window.open("", "_blank");
-            printWindow.document.write(addAdminPrintLogo(response));
-            printWindow.document.close();
+          const tenantLogo = await tenantLogoPromise;
+          printWindow.document.write(addAdminPrintLogo(response, tenantLogo));
+          printWindow.document.close();
+          const printReceipt = () => {
             printWindow.focus();
             printWindow.print();
-          }, 100);
+          };
+          if (printWindow.document.readyState === "complete") {
+            window.setTimeout(printReceipt, 0);
+          } else {
+            printWindow.onload = printReceipt;
+          }
         } else {
+          printWindow.close();
           alert("Failed to fetch receipt info.");
         }
       })

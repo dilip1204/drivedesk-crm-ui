@@ -117,6 +117,13 @@ const TrainingSession = () => {
   const [completedSessions, setCompletedSessions] = useState([]);
   const [completedLoading, setCompletedLoading] = useState(false);
   const [completedError, setCompletedError] = useState(null);
+  const completedClassCount = useMemo(
+    () => completedSessions.reduce(
+      (total, session) => total + (Number(session?.num_classes) || 1),
+      0
+    ),
+    [completedSessions]
+  );
 
   const trainingSessionDataLists = useSelector(
     (state) => state.trainingSessionListInfo.trainingSessionList
@@ -247,7 +254,7 @@ const TrainingSession = () => {
             <div class="meta-item"><span class="meta-label">Generated on:</span><span class="meta-value">${escapeHtml(reportDate)}</span></div>
           </section>
           ${content}
-          <div class="summary">Total completed sessions: <strong>${completedSessions.length}</strong></div>
+          <div class="summary">Total completed sessions: <strong>${completedClassCount}</strong></div>
           <section class="signatures">
             <div class="signature">Instructor Signature<small>${escapeHtml(instructorNames)}</small></div>
             <div class="signature">Authorized Signature<small>Driving School Authority</small></div>
@@ -870,7 +877,7 @@ const TrainingSession = () => {
                           </div>
                           <div className="completed-summary-item">
                             <span>Completed Sessions</span>
-                            <strong>{completedSessions.length}</strong>
+                            <strong>{completedClassCount}</strong>
                           </div>
                         </div>
 
@@ -881,7 +888,7 @@ const TrainingSession = () => {
                                 <th>#</th>
                                 <th>Date</th>
                                 <th>Instructor</th>
-                                <th>Student</th>
+                                <th>No. of Classes</th>
                                 <th>Remarks</th>
                                 <th>Status</th>
                               </tr>
@@ -892,7 +899,7 @@ const TrainingSession = () => {
                                   <td data-label="#">{idx + 1}</td>
                                   <td data-label="Date">{formatDateDDMMYYYY(row?.date)}</td>
                                   <td data-label="Instructor">{row?.instructor_name || "-"}</td>
-                                  <td data-label="Student">{row?.student_name || "-"}</td>
+                                  <td data-label="No. of Classes">{row?.num_classes ?? 1}</td>
                                   <td data-label="Remarks">{row?.remarks || "-"}</td>
                                   <td data-label="Status">
                                     <span className="completed-session-status badge badge-success">
@@ -911,7 +918,7 @@ const TrainingSession = () => {
 
                   <div className="modal-footer completed-sessions-footer">
                     <span>
-                      {completedSessions.length} completed {completedSessions.length === 1 ? "session" : "sessions"}
+                      {completedClassCount} completed {completedClassCount === 1 ? "session" : "sessions"}
                     </span>
                     <button
                       type="button"

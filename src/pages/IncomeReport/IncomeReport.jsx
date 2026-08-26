@@ -16,6 +16,11 @@ import EmptyState from "../../components/EmptyState";
 import Pagination from "../Students/Pagenation";
 import { getStudentsFilterListInformation } from "../../store/students/actions";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
+import {
+  getAdminPrintHeader,
+  getAdminPrintWatermark,
+} from "../../utils/printBranding";
+import { ensureTenantLogo } from "../../hooks/useTenantLogo";
 
 const pad = (value) => String(value).padStart(2, "0");
 
@@ -87,11 +92,12 @@ const IncomeReport = () => {
     setAppliedMonth(selectedMonth);
   };
 
-  const printReport = () => {
+  const printReport = async () => {
     const content = reportTableRef.current?.outerHTML || "<p>No data</p>";
     const printWindow = window.open("", "", "width=1100,height=800");
     if (!printWindow) return;
     const [year, month] = appliedMonth.split("-");
+    const tenantLogo = await ensureTenantLogo(dispatch);
 
     printWindow.document.write(`<!doctype html>
       <html>
@@ -100,6 +106,10 @@ const IncomeReport = () => {
           <title>Income Report</title>
           <style>
             body{font-family:Arial,Helvetica,sans-serif;margin:24px;color:#212529;}
+            .report{position:relative;z-index:1;}
+            .report-header{display:grid;grid-template-columns:112px minmax(0,1fr) 112px;min-height:86px;align-items:center;margin-bottom:14px;border-bottom:2px solid #1f4e78;}
+            .report-header-copy{align-self:center;text-align:center;}
+            .report-header-spacer{width:112px;}
             h2,p{text-align:center;margin:0 0 10px;}
             table{width:100%;border-collapse:collapse;font-size:12px;}
             th,td{border:1px solid #333;padding:7px;text-align:center;}
@@ -107,9 +117,18 @@ const IncomeReport = () => {
           </style>
         </head>
         <body>
-          <h2>Income Report</h2>
-          <p>${month}/${year}</p>
-          ${content}
+          ${getAdminPrintWatermark(tenantLogo)}
+          <main class="report">
+            <header class="report-header">
+              ${getAdminPrintHeader(tenantLogo)}
+              <div class="report-header-copy">
+                <h2>Income Report</h2>
+                <p>${month}/${year}</p>
+              </div>
+              <span class="report-header-spacer" aria-hidden="true"></span>
+            </header>
+            ${content}
+          </main>
           <script>window.onload=function(){window.print();window.close();}</script>
         </body>
       </html>`);

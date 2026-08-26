@@ -33,9 +33,11 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 import {
+  getAdminPrintHeader,
   getAdminPrintWatermark,
   isSriRagavendraOrganization,
 } from "../../utils/printBranding";
+import { ensureTenantLogo } from "../../hooks/useTenantLogo";
 
 const isCompletedSession = (session) =>
   String(session?.status || session?.session_status || "")
@@ -174,7 +176,7 @@ const TrainingSession = () => {
     setSessionStudentData(null);
   };
 
-  const printCompletedTable = () => {
+  const printCompletedTable = async () => {
     const content = completedTableRef.current?.outerHTML || "<p>No data</p>";
     const firstSession = completedSessions[0] || {};
     const studentName = firstSession?.student_name || "-";
@@ -204,6 +206,11 @@ const TrainingSession = () => {
         .replace(/'/g, "&#039;");
 
     const win = window.open("", "", "width=900,height=700");
+    if (!win) {
+      toast.error("Please allow pop-ups to print the progress report.");
+      return;
+    }
+    const tenantLogo = await ensureTenantLogo(dispatch);
     win.document.write(`<!doctype html>
     <html>
       <head>
@@ -215,7 +222,9 @@ const TrainingSession = () => {
           html, body { width: 210mm; min-height: 297mm; margin: 0; padding: 0; }
           body { color: #172033; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
           .report { position: relative; z-index: 1; width: 210mm; min-height: 297mm; padding: 16mm; }
-          .report-header { padding-bottom: 14px; border-bottom: 2px solid #1f4e78; text-align: center; }
+          .report-header { display: grid; grid-template-columns: 112px minmax(0, 1fr) 112px; min-height: 86px; align-items: center; padding-bottom: 14px; border-bottom: 2px solid #1f4e78; }
+          .report-header-copy { align-self: center; text-align: center; }
+          .report-header-spacer { width: 112px; }
           .org-name { margin: 0 0 5px; color: #172033; font-size: 21px; font-weight: 700; text-transform: uppercase; }
           .report-title { margin: 0; color: #1f4e78; font-size: 17px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
           .website { margin: 5px 0 0; color: #1f4e78; font-size: 11px; font-weight: 600; }
@@ -240,12 +249,16 @@ const TrainingSession = () => {
         </style>
       </head>
       <body>
-        ${getAdminPrintWatermark()}
+        ${getAdminPrintWatermark(tenantLogo)}
         <main class="report">
           <header class="report-header">
-            ${orgNameForReport ? `<h1 class="org-name">${escapeHtml(orgNameForReport)}</h1>` : ""}
-            <h2 class="report-title">Student - Progress Report</h2>
-            ${isSriRagavendraOrganization() ? '<p class="website">www.sriragavendradrivingschool.com</p>' : ""}
+            ${getAdminPrintHeader(tenantLogo)}
+            <div class="report-header-copy">
+              ${orgNameForReport ? `<h1 class="org-name">${escapeHtml(orgNameForReport)}</h1>` : ""}
+              <h2 class="report-title">Student - Progress Report</h2>
+              ${isSriRagavendraOrganization() ? '<p class="website">www.sriragavendradrivingschool.com</p>' : ""}
+            </div>
+            <span class="report-header-spacer" aria-hidden="true"></span>
           </header>
           <section class="report-meta">
             <div class="meta-item"><span class="meta-label">Student:</span><span class="meta-value">${escapeHtml(studentName)}</span></div>
@@ -611,7 +624,7 @@ const TrainingSession = () => {
                       <span className="training-legend-icon is-success" aria-hidden="true">
                         <i className="bi bi-clipboard-check" />
                       </span>
-                      <span>View completed sessions</span>
+                      <span>View progress report</span>
                     </div>
                     <div className="training-student-search" role="search">
                       <div className="training-student-search-control">
@@ -710,7 +723,7 @@ const TrainingSession = () => {
                                     <i className="bi bi-calendar-x" aria-hidden="true"></i>
                                     <span className="training-session-action-label">Mark Leave</span>
                                   </button>
-                                  <button className="btn btn-sm btn-success training-session-action-button" title="Show Student Completed Sessions" aria-label="Show Student Completed Sessions" onClick={() => openCompletedModal(tsession)}><i className="bi bi-clipboard-check" aria-hidden="true"></i><span className="training-session-action-label">Completed</span></button>
+                                  <button className="btn btn-sm btn-success training-session-action-button" title="Open Student Progress Report" aria-label="Open Student Progress Report" onClick={() => openCompletedModal(tsession)}><i className="bi bi-clipboard-check" aria-hidden="true"></i><span className="training-session-action-label">Report</span></button>
                                 </div>
                               </td>
                             </tr>

@@ -14,6 +14,7 @@ import Footer from "../../components/Footer";
 import EmptyState from "../../components/EmptyState";
 import LoadingState from "../../components/LoadingState";
 import Pagination from "../Students/Pagenation";
+import { getSuperAdminList } from "../../store/superAdmin/actions";
 import { getTenantUsageDashboard, getTenantUsageList } from "../../store/tenantUsage/actions";
 
 const numberFormatter = new Intl.NumberFormat("en-IN");
@@ -98,6 +99,11 @@ const TenantUsage = () => {
     listLoading,
     listError,
   } = useSelector((state) => state.tenantUsageInfo);
+  const {
+    superAdminList,
+    superAdminListLoading,
+    superAdminListError,
+  } = useSelector((state) => state.superAdminInfo);
   const [draftFilters, setDraftFilters] = useState(emptyFilters);
   const [appliedFilters, setAppliedFilters] = useState(emptyFilters);
   const [filterError, setFilterError] = useState("");
@@ -114,9 +120,14 @@ const TenantUsage = () => {
     dispatch(getTenantUsageList({ ...appliedFilters, page, limit }));
   }, [appliedFilters, dispatch, limit, page]);
 
+  const loadTenants = useCallback(() => {
+    dispatch(getSuperAdminList({ page: 1, limit: 100 }));
+  }, [dispatch]);
+
   const refreshAll = () => {
     loadSummary();
     loadList();
+    loadTenants();
   };
 
   useEffect(() => {
@@ -126,6 +137,10 @@ const TenantUsage = () => {
   useEffect(() => {
     loadList();
   }, [loadList]);
+
+  useEffect(() => {
+    loadTenants();
+  }, [loadTenants]);
 
   useEffect(() => () => {
     if (copyResetTimer.current) window.clearTimeout(copyResetTimer.current);
@@ -140,6 +155,22 @@ const TenantUsage = () => {
   const showInitialLoading = !result && !error;
   const listPayload = listResult?.response || null;
   const tenantRows = Array.isArray(listPayload?.tenants) ? listPayload.tenants : [];
+  const tenantOptions = useMemo(() => {
+    const response = superAdminList?.response ?? superAdminList ?? {};
+    const tenants = Array.isArray(response)
+      ? response
+      : response?.tenants || response?.items || [];
+    const uniqueTenants = new Map();
+
+    tenants.forEach((tenant) => {
+      const tenantId = tenant?.tenant_id || tenant?.id;
+      if (tenantId && !uniqueTenants.has(tenantId)) {
+        uniqueTenants.set(tenantId, tenant);
+      }
+    });
+
+    return Array.from(uniqueTenants.values());
+  }, [superAdminList]);
   const listTotal = toNumber(listPayload?.total);
   const listPage = Math.max(1, toNumber(listPayload?.page) || page);
   const listLimit = Math.max(1, toNumber(listPayload?.limit) || limit);
@@ -415,14 +446,37 @@ const TenantUsage = () => {
                     <form className="tenant-usage-filters" onSubmit={applyFilters}>
                       <div className="tenant-usage-filter tenant-usage-filter--tenant">
                         <label htmlFor="usage-tenant-id">Tenant ID</label>
-                        <input
+                        <select
                           id="usage-tenant-id"
-                          type="text"
-                          className="form-control"
-                          placeholder="Exact tenant ID"
+                          className="form-select"
                           value={draftFilters.tenantId}
                           onChange={(event) => updateDraftFilter("tenantId", event.target.value)}
-                        />
+                          disabled={superAdminListLoading && tenantOptions.length === 0}
+                        >
+                          <option value="">
+                            {superAdminListLoading && tenantOptions.length === 0
+                              ? "Loading tenants..."
+                              : superAdminListError && tenantOptions.length === 0
+                                ? "Unable to load tenants"
+                                : "All tenants"}
+                          </option>
+                          {draftFilters.tenantId && !tenantOptions.some(
+                            (tenant) => (tenant?.tenant_id || tenant?.id) === draftFilters.tenantId
+                          ) && (
+                            <option value={draftFilters.tenantId}>{draftFilters.tenantId}</option>
+                          )}
+                          {tenantOptions.map((tenant) => {
+                            const tenantId = tenant?.tenant_id || tenant?.id;
+                            const tenantName = tenant?.org_name
+                              || tenant?.organisation_name
+                              || tenant?.name;
+                            return (
+                              <option value={tenantId} key={tenantId}>
+                                {tenantName ? `${tenantName} (${tenantId})` : tenantId}
+                              </option>
+                            );
+                          })}
+                        </select>
                       </div>
                       <div className="tenant-usage-filter tenant-usage-filter--mode">
                         <label htmlFor="usage-date-mode">Date filter</label>

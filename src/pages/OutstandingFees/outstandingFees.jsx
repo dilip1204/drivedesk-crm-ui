@@ -23,7 +23,11 @@ import { getOutstandingFees, historicalPaymentAdjustment } from "../../store/das
 import Pagination from "../Students/Pagenation";
 import { useAuth } from "../../hooks/useAuth";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
-import { getAdminPrintWatermark } from "../../utils/printBranding";
+import {
+  getAdminPrintHeader,
+  getAdminPrintWatermark,
+} from "../../utils/printBranding";
+import { ensureTenantLogo } from "../../hooks/useTenantLogo";
 
 const escapeHtml = (value) =>
   String(value ?? "")
@@ -86,10 +90,11 @@ const OutstandingFees = () => {
     }
 
     setPrinting(true);
+    const tenantLogoPromise = ensureTenantLogo(dispatch);
     dispatch(
       getOutstandingFees(
         { skip: 0, limit: Math.max(totalCount, pageSize, 1) },
-        (response) => {
+        async (response) => {
           setPrinting(false);
           const { students } = normalizeOutstandingResponse(response);
 
@@ -117,6 +122,7 @@ const OutstandingFees = () => {
               </tr>`;
             })
             .join("");
+          const tenantLogo = await tenantLogoPromise;
 
           printWindow.document.write(`<!doctype html>
             <html>
@@ -128,8 +134,11 @@ const OutstandingFees = () => {
                   * { box-sizing: border-box; }
                   body { margin: 0; color: #172033; font-family: Arial, Helvetica, sans-serif; }
                   .report { position: relative; z-index: 1; }
+                  .report-header { display: grid; grid-template-columns: 112px minmax(0, 1fr) 112px; min-height: 86px; align-items: center; margin-bottom: 14px; border-bottom: 2px solid #1f4e78; }
+                  .report-header-copy { align-self: center; text-align: center; }
+                  .report-header-spacer { width: 112px; }
                   h1 { margin: 0 0 5px; text-align: center; font-size: 20px; }
-                  .summary { margin: 0 0 14px; color: #667085; text-align: center; font-size: 11px; }
+                  .summary { margin: 0; color: #667085; text-align: center; font-size: 11px; }
                   table { width: 100%; border-collapse: collapse; font-size: 10px; }
                   th, td { padding: 7px 8px; border: 1px solid #b8c2ce; text-align: left; }
                   th { background: #eef3f8; color: #172033; font-weight: 700; }
@@ -142,10 +151,16 @@ const OutstandingFees = () => {
                 </style>
               </head>
               <body>
-                ${getAdminPrintWatermark()}
+                ${getAdminPrintWatermark(tenantLogo)}
                 <main class="report">
-                  <h1>Outstanding Fees Report</h1>
-                  <p class="summary">${students.length} outstanding record${students.length === 1 ? "" : "s"}</p>
+                  <header class="report-header">
+                    ${getAdminPrintHeader(tenantLogo)}
+                    <div class="report-header-copy">
+                      <h1>Outstanding Fees Report</h1>
+                      <p class="summary">${students.length} outstanding record${students.length === 1 ? "" : "s"}</p>
+                    </div>
+                    <span class="report-header-spacer" aria-hidden="true"></span>
+                  </header>
                   <table>
                     <thead><tr><th>S.No</th><th>Name</th><th>Mobile Number</th><th>Balance</th><th>Registered Date</th><th>Status</th><th>Full Payment Status</th></tr></thead>
                     <tbody>${rows}</tbody>

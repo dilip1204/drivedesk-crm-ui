@@ -152,9 +152,9 @@
 
 /* ── Print header ── */
 .print-header-top {
-  display: flex;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 72px;
   align-items: center;
-  gap: 18px;
   margin-bottom: 10px;
 }
 
@@ -187,7 +187,12 @@
   color: #fff;
 }
 
-.print-title-area { flex: 1; }
+.print-title-area {
+  align-self: center;
+  text-align: center;
+}
+
+.print-header-spacer { width: 72px; }
 
 .print-org-name {
   margin: 0 0 3px 0;

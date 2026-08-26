@@ -60,6 +60,7 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
       const payload = {
         ...values,
         working_days: values.working_days || [],
+        ...(isEdit ? { original_mobile_number: id?.mobile_number } : {}),
       };
 
       const action = isEdit ? updateInstructor : addInstructor;

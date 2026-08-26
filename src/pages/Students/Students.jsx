@@ -33,9 +33,11 @@ import Pagination from "./Pagenation";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 import schoolPrintLogo from "../../assets/logo/school_print_logo.png";
 import { getAdminPrintLogoSource, isDriveDeskAdmin } from "../../utils/printBranding";
+import { ensureTenantLogo, useTenantLogo } from "../../hooks/useTenantLogo";
 
 const Students = () => {
   const dispatch = useDispatch();
+  const { logoSrc: tenantLogo, hasTenantLogo } = useTenantLogo(null);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [studentsData, setStudentsData] = useState([]);
@@ -455,11 +457,21 @@ const Students = () => {
     );
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    await ensureTenantLogo(dispatch);
+    await new Promise((resolve) => {
+      window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+    });
+
+    const printImages = Array.from(
+      document.querySelectorAll(".print-page-wrapper img")
+    );
+    await Promise.all(printImages.map((image) => (
+      typeof image.decode === "function" ? image.decode().catch(() => undefined) : Promise.resolve()
+    )));
+
     const originalTitle = document.title;
     document.title = "Filtered Students Report";
-
-    window.print();
 
     // Restore original title after printing (use afterprint if available)
     const restore = () => {
@@ -467,6 +479,7 @@ const Students = () => {
       window.removeEventListener("afterprint", restore);
     };
     window.addEventListener("afterprint", restore);
+    window.print();
 
     // Fallback restore in case afterprint isn't fired
     setTimeout(() => {
@@ -498,9 +511,11 @@ const Students = () => {
     tenantInfoForPrint?.logo ||
     null;
   const driveDeskAdmin = isDriveDeskAdmin();
-  const schoolLogo = driveDeskAdmin
-    ? getAdminPrintLogoSource()
-    : apiLogo || (isCustomWatermarkOrg ? schoolPrintLogo : null);
+  const schoolLogo = hasTenantLogo
+    ? tenantLogo
+    : driveDeskAdmin
+      ? getAdminPrintLogoSource()
+      : apiLogo || (isCustomWatermarkOrg ? schoolPrintLogo : null);
 
   return (
     <>
@@ -962,10 +977,16 @@ const Students = () => {
         <div className="print-foreground">
           {/* Header */}
           <div className="print-header-top">
+            {schoolLogo && (
+              <div className="print-logo-area">
+                <img src={schoolLogo} alt={`${orgNameForPrint} logo`} className="print-school-logo" />
+              </div>
+            )}
             <div className="print-title-area">
               <h2 className="print-org-name">{orgNameForPrint}</h2>
               <h4 className="print-list-title">Student Test List</h4>
             </div>
+            <span className="print-header-spacer" aria-hidden="true" />
           </div>
           <hr className="print-divider" />
 

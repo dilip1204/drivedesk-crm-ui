@@ -50,7 +50,7 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
 
             setLogoLoading(true);
             dispatch(
-                getTenantLogo(selected.tenant_id, (logoBlob, error) => {
+                getTenantLogo(selected.tenant_id, selected?.logo_uploaded_at, (logoBlob, error) => {
                     if (!isActive) return;
 
                     setLogoLoading(false);
@@ -70,7 +70,7 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
             revokeUploadObjectUrl();
             revokeFetchedLogoObjectUrl();
         };
-    }, [dispatch, showModal, isEdit, selected?.tenant_id, existingLogoUrl]);
+    }, [dispatch, showModal, isEdit, selected?.tenant_id, selected?.logo_uploaded_at, existingLogoUrl]);
 
     const initialValues = isEdit
         ? {
@@ -143,7 +143,7 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
                         (res) => {
                             setSubmitting(false);
                             if (res?.isError === false || res?.statusCode === 200) {
-                                onSuccess("updated");
+                                onSuccess("updated", null, res);
                             } else {
                                 onSuccess(null, res);
                             }

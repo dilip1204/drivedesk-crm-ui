@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
@@ -37,9 +37,48 @@ const SuperAdmin = () => {
     const [selected, setSelected] = useState(null);
     const [showViewModal, setShowViewModal] = useState(false);
     const [viewTenant, setViewTenant] = useState(null);
-    const [viewLogoUrl, setViewLogoUrl] = useState("");
-    const [viewLogoLoading, setViewLogoLoading] = useState(false);
-    const viewLogoObjectUrlRef = useRef("");
+    const [tenantLogoUrls, setTenantLogoUrls] = useState({});
+    const [tenantLogoLoading, setTenantLogoLoading] = useState({});
+    const tenantLogoObjectUrlsRef = useRef({});
+    const tenantLogoRequestIdsRef = useRef({});
+
+    const loadTenantLogo = useCallback((tenant, requestedVersion) => {
+        const tenantId = tenant?.tenant_id;
+        if (!tenantId) return;
+
+        const requestId = `${Date.now()}-${Math.random()}`;
+        tenantLogoRequestIdsRef.current[tenantId] = requestId;
+        setTenantLogoLoading((previous) => ({ ...previous, [tenantId]: true }));
+
+        dispatch(getTenantLogo(
+            tenantId,
+            requestedVersion || tenant?.logo_uploaded_at || Date.now(),
+            (logoBlob, logoError) => {
+                if (tenantLogoRequestIdsRef.current[tenantId] !== requestId) return;
+
+                setTenantLogoLoading((previous) => ({ ...previous, [tenantId]: false }));
+                const previousObjectUrl = tenantLogoObjectUrlsRef.current[tenantId];
+
+                if (logoError || !(logoBlob instanceof Blob) || logoBlob.size === 0) {
+                    if (previousObjectUrl) URL.revokeObjectURL(previousObjectUrl);
+                    delete tenantLogoObjectUrlsRef.current[tenantId];
+                    setTenantLogoUrls((previous) => {
+                        const next = { ...previous };
+                        delete next[tenantId];
+                        return next;
+                    });
+                    return;
+                }
+
+                const nextObjectUrl = URL.createObjectURL(logoBlob);
+                if (previousObjectUrl && previousObjectUrl !== nextObjectUrl) {
+                    URL.revokeObjectURL(previousObjectUrl);
+                }
+                tenantLogoObjectUrlsRef.current[tenantId] = nextObjectUrl;
+                setTenantLogoUrls((previous) => ({ ...previous, [tenantId]: nextObjectUrl }));
+            }
+        ));
+    }, [dispatch]);
 
     const fetchList = (page = currentPage, limit = pageSize) => {
         setLoading(true);
@@ -62,44 +101,16 @@ const SuperAdmin = () => {
     }, [currentPage, pageSize]);
 
     useEffect(() => {
-        let isActive = true;
+        tenants.forEach((tenant) => loadTenantLogo(tenant));
+    }, [tenants, loadTenantLogo]);
 
-        if (viewLogoObjectUrlRef.current) {
-            URL.revokeObjectURL(viewLogoObjectUrlRef.current);
-            viewLogoObjectUrlRef.current = "";
-        }
-
-        setViewLogoUrl(viewTenant?.logo_url || viewTenant?.logoUrl || "");
-        setViewLogoLoading(false);
-
-        const loadViewLogo = () => {
-            if (!showViewModal || !viewTenant?.tenant_id) return;
-
-            setViewLogoLoading(true);
-            dispatch(
-                getTenantLogo(viewTenant.tenant_id, (logoBlob, error) => {
-                    if (!isActive) return;
-
-                    setViewLogoLoading(false);
-                    if (error || !(logoBlob instanceof Blob) || logoBlob.size === 0) return;
-
-                    const objectUrl = URL.createObjectURL(logoBlob);
-                    viewLogoObjectUrlRef.current = objectUrl;
-                    setViewLogoUrl(objectUrl);
-                })
-            );
-        };
-
-        loadViewLogo();
-
-        return () => {
-            isActive = false;
-            if (viewLogoObjectUrlRef.current) {
-                URL.revokeObjectURL(viewLogoObjectUrlRef.current);
-                viewLogoObjectUrlRef.current = "";
-            }
-        };
-    }, [dispatch, showViewModal, viewTenant?.tenant_id, viewTenant?.logo_url, viewTenant?.logoUrl]);
+    useEffect(() => () => {
+        Object.values(tenantLogoObjectUrlsRef.current).forEach((objectUrl) => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+        });
+        tenantLogoObjectUrlsRef.current = {};
+        tenantLogoRequestIdsRef.current = {};
+    }, []);
 
     const handleAdd = () => {
         setIsEdit(false);
@@ -109,19 +120,42 @@ const SuperAdmin = () => {
 
     const handleEdit = (tenant) => {
         setIsEdit(true);
-        setSelected(tenant);
+        setSelected({ ...tenant, logoUrl: tenantLogoUrls[tenant.tenant_id] || "" });
         setShowModal(true);
     };
 
     const handleView = (tenant) => {
         setViewTenant(tenant);
         setShowViewModal(true);
+        loadTenantLogo(tenant);
     };
 
-    const handleSuccess = (action, errRes) => {
+    const handleSuccess = (action, errRes, patchResponse) => {
         setShowModal(false);
         if (action) {
             toast.success(`Super admin ${action} successfully.`);
+            const responseData = patchResponse?.response || patchResponse?.data?.response || {};
+            const updatedTenant = responseData?.tenant_info;
+
+            if (updatedTenant?.tenant_id) {
+                setTenants((previous) => previous.map((tenant) =>
+                    tenant.tenant_id === updatedTenant.tenant_id
+                        ? { ...tenant, ...updatedTenant }
+                        : tenant
+                ));
+                setSelected((previous) => previous?.tenant_id === updatedTenant.tenant_id
+                    ? { ...previous, ...updatedTenant }
+                    : previous
+                );
+                setViewTenant((previous) => previous?.tenant_id === updatedTenant.tenant_id
+                    ? { ...previous, ...updatedTenant }
+                    : previous
+                );
+
+                if (responseData?.logo_updated) {
+                    loadTenantLogo(updatedTenant, updatedTenant.logo_uploaded_at || Date.now());
+                }
+            }
             fetchList(currentPage, pageSize);
         } else {
             toast.error(errRes?.data?.message || "Operation failed.");
@@ -238,7 +272,17 @@ const SuperAdmin = () => {
                                                                 <td data-label="S.No" className="superadmin-col-sn">{startIndex + index + 1}</td>
                                                                 <td data-label="Organisation" className="superadmin-cell-wrap superadmin-col-org">
                                                                     <span className="superadmin-org-mark" aria-hidden="true">
-                                                                        {(tenant.org_name || "T").charAt(0).toUpperCase()}
+                                                                        {tenantLogoLoading[tenant.tenant_id] && !tenantLogoUrls[tenant.tenant_id] ? (
+                                                                            <span className="spinner-border spinner-border-sm" role="status" aria-label="Loading tenant logo"></span>
+                                                                        ) : tenantLogoUrls[tenant.tenant_id] ? (
+                                                                            <img
+                                                                                key={tenant.logo_uploaded_at || tenantLogoUrls[tenant.tenant_id]}
+                                                                                src={tenantLogoUrls[tenant.tenant_id]}
+                                                                                alt=""
+                                                                            />
+                                                                        ) : (
+                                                                            (tenant.org_name || "T").charAt(0).toUpperCase()
+                                                                        )}
                                                                     </span>
                                                                     <span>{tenant.org_name || EMPTY_VALUE}</span>
                                                                 </td>
@@ -330,10 +374,14 @@ const SuperAdmin = () => {
                         <>
                             <div className="superadmin-tenant-profile">
                                 <span className="superadmin-tenant-avatar">
-                                    {viewLogoLoading && !viewLogoUrl ? (
+                                    {tenantLogoLoading[viewTenant.tenant_id] && !tenantLogoUrls[viewTenant.tenant_id] ? (
                                         <span className="spinner-border spinner-border-sm" role="status" aria-label="Loading tenant logo"></span>
-                                    ) : viewLogoUrl ? (
-                                        <img src={viewLogoUrl} alt={`${viewTenant.org_name || "Tenant"} logo`} />
+                                    ) : tenantLogoUrls[viewTenant.tenant_id] ? (
+                                        <img
+                                            key={viewTenant.logo_uploaded_at || tenantLogoUrls[viewTenant.tenant_id]}
+                                            src={tenantLogoUrls[viewTenant.tenant_id]}
+                                            alt={`${viewTenant.org_name || "Tenant"} logo`}
+                                        />
                                     ) : (
                                         <span aria-hidden="true">{(viewTenant.org_name || "T").charAt(0).toUpperCase()}</span>
                                     )}

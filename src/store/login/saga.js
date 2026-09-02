@@ -67,13 +67,15 @@ function* verifyOtp({ param, fn }) {
 }
 
 function* loadTenantLogo({ param, fn }) {
+    const tenantId = typeof param === 'object' ? param?.tenantId : param;
+    const version = typeof param === 'object' ? param?.version : undefined;
     try {
-        yield put({ type: GET_TENANT_LOGO_PENDING, tenantId: param });
-        const response = yield call(superAdminService.getTenantLogo, param);
+        yield put({ type: GET_TENANT_LOGO_PENDING, tenantId });
+        const response = yield call(superAdminService.getTenantLogo, tenantId, version);
         const logoBlob = response.data;
         yield put({
             type: GET_TENANT_LOGO_SUCCESS,
-            data: { tenantId: param, hasLogo: Boolean(logoBlob?.size) },
+            data: { tenantId, hasLogo: Boolean(logoBlob?.size) },
         });
         if (typeof fn === 'function') fn(logoBlob);
     } catch (error) {

@@ -21,6 +21,11 @@ import IncomeReport from "./pages/IncomeReport/IncomeReport";
 import Attendance from "./pages/Attendance/Attendance";
 import FinanceDashboard from "./pages/FinanceDashboard/FinanceDashboard";
 import TenantUsage from "./pages/TenantUsage/TenantUsage";
+import ExternalRenewals from "./pages/Renewals/ExternalRenewals";
+import LicenceExpiries from "./pages/Renewals/LicenceExpiries";
+import VehicleDocuments from "./pages/Renewals/VehicleDocuments";
+import VehicleDocumentExpiries from "./pages/Renewals/VehicleDocumentExpiries";
+import RenewalDashboard from "./pages/Renewals/RenewalDashboard";
 
 export default function AppRoutes() {
   return (
@@ -56,6 +61,51 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin", "instructor"]}>
             <Students />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/renewals/external-customers"
+        element={
+          <ProtectedRoute>
+            <ExternalRenewals />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/renewals/licence-expiries"
+        element={
+          <ProtectedRoute>
+            <LicenceExpiries />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/renewals/vehicles"
+        element={
+          <ProtectedRoute>
+            <VehicleDocuments />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/renewals/vehicle-document-expiries"
+        element={
+          <ProtectedRoute>
+            <VehicleDocumentExpiries />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/renewals/dashboard"
+        element={
+          <ProtectedRoute>
+            <RenewalDashboard />
           </ProtectedRoute>
         }
       />

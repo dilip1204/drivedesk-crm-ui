@@ -234,6 +234,132 @@
     print-color-adjust: exact;
   }
   @page { margin: 10mm; }
+
+  .print-page-wrapper {
+    color: #10233f;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .print-header-top {
+    grid-template-columns: 62px minmax(0, 1fr) 62px;
+    min-height: 58px;
+    margin-bottom: 7px;
+  }
+
+  .print-school-logo {
+    width: 58px;
+    height: 58px;
+    padding: 3px;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .print-header-spacer { width: 62px; }
+
+  .print-org-name {
+    margin-bottom: 1px;
+    color: #10233f;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: .2px;
+    text-transform: uppercase;
+  }
+
+  .print-list-title {
+    color: #174c83;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .55px;
+    text-transform: uppercase;
+  }
+
+  .print-divider {
+    margin: 7px 0 12px;
+    border-top: 2px solid #174c83;
+    opacity: 1;
+  }
+
+  .print-report-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px 22px;
+    margin-bottom: 12px;
+    padding: 9px 11px;
+    border: 1px solid #b8c8d9;
+    border-radius: 2px;
+    background: #f3f7fb !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-report-meta > div {
+    display: grid;
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 7px;
+    font-size: 8px;
+  }
+
+  .print-report-meta span { color: #52677e; font-weight: 700; }
+  .print-report-meta strong { color: #10233f; font-weight: 700; }
+
+  .printable-student-table { margin-top: 0 !important; }
+  .printable-student-table table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    color: #10233f;
+    font-size: 8px;
+  }
+
+  .printable-student-table .table th,
+  .printable-student-table .table td {
+    padding: 6px 7px;
+    border: 1px solid #748ba4 !important;
+    vertical-align: middle;
+  }
+
+  .printable-student-table .table th {
+    background: #174c83 !important;
+    color: #fff !important;
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: .25px;
+    text-transform: uppercase;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .printable-student-table .table-striped tbody tr:nth-of-type(odd) td {
+    background: #f7f9fc !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 68px;
+  }
+
+  .print-signatures > div {
+    width: 155px;
+    padding-top: 5px;
+    border-top: 1px solid #10233f;
+    text-align: center;
+  }
+
+  .print-signatures span,
+  .print-signatures small { display: block; }
+  .print-signatures span { font-size: 8px; font-weight: 800; }
+  .print-signatures small { margin-top: 2px; color: #6b7d90; font-size: 6px; }
+
+  .print-wm-logo {
+    top: auto;
+    bottom: 2mm;
+    width: 130px;
+    height: 130px;
+    opacity: .045;
+  }
 }
 
 @media print {

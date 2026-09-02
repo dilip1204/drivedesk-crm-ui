@@ -6,6 +6,10 @@ const instance = axios.create({
 })
 
 let hasHandledAuthError = false;
+let requestBatch = null;
+let requestBatchTimer = null;
+
+const REQUEST_BATCH_SETTLE_DELAY = 150;
 
 const isTokenExpiredDetail = (data) => {
     const detail = data?.detail;
@@ -17,25 +21,68 @@ const isLoginRequest = (url = '') => {
     return normalizedUrl === 'auth/login' || normalizedUrl.startsWith('auth/login/otp/');
 };
 
-const notifyServerError = (error) => {
+const isServerError = (error) => {
     const statusCode = error?.response?.status;
-    if (
-        typeof window === 'undefined' ||
-        !Number.isInteger(statusCode) ||
-        statusCode < 500 ||
-        statusCode > 504
-    ) {
-        return;
+    return Number.isInteger(statusCode) && statusCode >= 500 && statusCode <= 504;
+};
+
+const startTrackedRequest = () => {
+    if (requestBatchTimer) {
+        clearTimeout(requestBatchTimer);
+        requestBatchTimer = null;
     }
 
-    window.dispatchEvent(new CustomEvent('drivedesk:server-error', {
-        detail: {
-            statusCode,
-            method: String(error?.config?.method || 'GET').toUpperCase(),
-            url: error?.config?.url || '',
-            occurredAt: Date.now(),
-        },
-    }));
+    if (!requestBatch) {
+        requestBatch = {
+            pending: 0,
+            total: 0,
+            serverFailures: [],
+            hasSuccessfulResponse: false,
+        };
+    }
+
+    requestBatch.pending += 1;
+    requestBatch.total += 1;
+};
+
+const finishTrackedRequest = (error = null) => {
+    if (!requestBatch) return;
+
+    requestBatch.pending = Math.max(0, requestBatch.pending - 1);
+    if (error) {
+        if (isServerError(error)) requestBatch.serverFailures.push(error);
+    } else {
+        requestBatch.hasSuccessfulResponse = true;
+    }
+
+    if (requestBatch.pending > 0) return;
+
+    // A short quiet period groups the API calls made together while loading a page.
+    requestBatchTimer = setTimeout(() => {
+        const completedBatch = requestBatch;
+        requestBatch = null;
+        requestBatchTimer = null;
+
+        if (typeof window === 'undefined' || !completedBatch) return;
+
+        const allRequestsFailedOnServer =
+            !completedBatch.hasSuccessfulResponse &&
+            completedBatch.serverFailures.length === completedBatch.total;
+
+        if (!allRequestsFailedOnServer) {
+            window.dispatchEvent(new CustomEvent('drivedesk:server-recovered'));
+            return;
+        }
+
+        const lastError = completedBatch.serverFailures.at(-1);
+        window.dispatchEvent(new CustomEvent('drivedesk:server-error', {
+            detail: {
+                statusCode: lastError?.response?.status,
+                requestCount: completedBatch.total,
+                occurredAt: Date.now(),
+            },
+        }));
+    }, REQUEST_BATCH_SETTLE_DELAY);
 };
 
 const forceLogout = () => {
@@ -54,6 +101,8 @@ const forceLogout = () => {
 
 instance.interceptors.request.use(
     (config) => {
+        startTrackedRequest();
+
         const isMultipartRequest =
             typeof FormData !== 'undefined' && config.data instanceof FormData;
 
@@ -82,6 +131,7 @@ instance.interceptors.request.use(
 
 instance.interceptors.response.use(
     (response) => {
+        finishTrackedRequest();
         return response;
     },
     (error) => {
@@ -95,7 +145,7 @@ instance.interceptors.response.use(
             forceLogout();
         }
 
-        notifyServerError(error);
+        finishTrackedRequest(error);
 
         return Promise.reject(error);
     }

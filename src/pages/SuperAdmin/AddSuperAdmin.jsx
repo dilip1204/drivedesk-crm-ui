@@ -370,7 +370,7 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
 
                         {formik.values.whatsapp_enabled && (
                             <div className="row superadmin-whatsapp-fields">
-                                {field("Registered Number", "whatsapp_registered_number", "text", false, "Enter registered number")}
+                                {field("Registered Number", "whatsapp_registered_number", "text",  false, "Enter registered number")}
                             </div>
                         )}
                     </div>

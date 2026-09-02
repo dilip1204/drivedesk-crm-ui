@@ -49,4 +49,5 @@ export const ENDPOINTS = {
     getWhatsAppUsage: 'whatsapp/usage',
     getTenantUsageDashboard: 'usage/dashboard',
     getTenantUsageList: 'usage',
+    renewals: 'renewals',
 } 

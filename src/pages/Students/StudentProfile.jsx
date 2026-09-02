@@ -223,10 +223,10 @@ export default function StudentProfileModal({ show, onClose, student }) {
             <ProfileItem label="Mobile" value={student.mobile_number} />
             <ProfileItem label="Aadhar Number" value={student.aadhar_number} />
             <ProfileItem label="Plan" value={student.plan} />
-            <ProfileItem
+            {/* <ProfileItem
               label="Initial Payment Method"
               value={student.initial_payment_method}
-            />
+            /> */}
             <ProfileItem label="Test Date" value={student.test_date} />
             <ProfileItem
               label="Training Start Date"
@@ -266,6 +266,31 @@ export default function StudentProfileModal({ show, onClose, student }) {
             />
           </div>
         </div>
+        <section className="student-profile-licence" aria-labelledby="student-profile-licence-title">
+          <div className="student-payment-history-header">
+            <h5 id="student-profile-licence-title">
+              <i className="bi bi-card-checklist" aria-hidden="true" /> Test &amp; Licence Details
+            </h5>
+          </div>
+          <div className="row student-profile-details">
+            <div className="col-md-6">
+              <ProfileItem label="Test Status" value={String(student.test_status || "NOT_ATTEMPTED").replace(/_/g, " ")} />
+              <ProfileItem label="Licence Number" value={student.license_details?.license_number} />
+              <ProfileItem
+                label="Licence Classes"
+                value={Array.isArray(student.license_details?.license_classes)
+                  ? student.license_details.license_classes.join(", ")
+                  : student.license_details?.license_classes}
+              />
+              <ProfileItem label="RTO" value={student.license_details?.rto} />
+            </div>
+            <div className="col-md-6">
+              <ProfileItem label="Issue Date" value={formatDateDDMMYYYY(student.license_details?.issue_date)} />
+              <ProfileItem label="Expiry Date" value={formatDateDDMMYYYY(student.license_details?.expiry_date)} />
+              <ProfileItem label="Enrollment Number" value={student.license_details?.enrollment_number} />
+            </div>
+          </div>
+        </section>
         {/* Payments Table */}
         {Array.isArray(student.payments) && student.payments.length > 0 && (
           <div className="student-payment-history">

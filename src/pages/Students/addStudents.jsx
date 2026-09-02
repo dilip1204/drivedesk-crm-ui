@@ -11,6 +11,7 @@ import { addAdminPrintLogo } from "../../utils/printBranding";
 import { ensureTenantLogo } from "../../hooks/useTenantLogo";
 import LoadingState from "../../components/LoadingState";
 import EmptyState from "../../components/EmptyState";
+import { useAuth } from "../../hooks/useAuth";
 import "./addStudents.css";
 
 export default function AddStudents({
@@ -24,12 +25,25 @@ export default function AddStudents({
   instructors = [],
 }) {
   const dispatch = useDispatch();
+  const { role } = useAuth();
+  const canEditLicence = role === "admin";
   const [isPrintEnabled, setIsPrintEnabled] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
   const [htmlContent, setHtmlContent] = useState("");
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState("");
   const [availabilityDay, setAvailabilityDay] = useState(null);
+  const [licenceForm, setLicenceForm] = useState({
+    test_status: "NOT_ATTEMPTED",
+    license_number: "",
+    license_classes: "",
+    issue_date: "",
+    expiry_date: "",
+    rto: "",
+    enrollment_number: "",
+  });
+  const [licenceSaving, setLicenceSaving] = useState(false);
+  const [licenceFeedback, setLicenceFeedback] = useState(null);
   const previousInstructorNameRef = useRef("");
   const getLocalISODate = (date = new Date()) => {
     const y = date.getFullYear();
@@ -71,6 +85,87 @@ export default function AddStudents({
     }
 
     return "";
+  };
+
+  useEffect(() => {
+    const details = id?.license_details || {};
+    setLicenceForm({
+      test_status: id?.test_status || "NOT_ATTEMPTED",
+      license_number: details.license_number || "",
+      license_classes: Array.isArray(details.license_classes)
+        ? details.license_classes.join(", ")
+        : details.license_classes || "",
+      issue_date: normalizeDateForInput(details.issue_date),
+      expiry_date: normalizeDateForInput(details.expiry_date),
+      rto: details.rto || "",
+      enrollment_number: details.enrollment_number || "",
+    });
+    setLicenceFeedback(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, showModal]);
+
+  const handleLicenceChange = (event) => {
+    const { name, value } = event.target;
+    setLicenceForm((current) => ({ ...current, [name]: value }));
+    setLicenceFeedback(null);
+  };
+
+  const saveLicenceDetails = () => {
+    if (!canEditLicence) return;
+    const isPassed = licenceForm.test_status === "PASSED";
+    const licenseClasses = licenceForm.license_classes
+      .split(",")
+      .map((value) => value.trim().toUpperCase())
+      .filter((value, index, values) => value && values.indexOf(value) === index);
+
+    if (isPassed && licenceForm.issue_date && licenceForm.expiry_date &&
+      licenceForm.expiry_date < licenceForm.issue_date) {
+      setLicenceFeedback({ type: "danger", message: "Expiry date cannot be before issue date." });
+      return;
+    }
+
+    const studentDataPayload = { test_status: licenceForm.test_status };
+    if (isPassed) {
+      studentDataPayload.license_details = {
+        license_number: licenceForm.license_number.trim(),
+        license_classes: licenseClasses,
+        issue_date: licenceForm.issue_date || null,
+        expiry_date: licenceForm.expiry_date || null,
+        rto: licenceForm.rto.trim(),
+        enrollment_number: licenceForm.enrollment_number.trim(),
+      };
+    }
+
+    setLicenceSaving(true);
+    setLicenceFeedback(null);
+    dispatch(updateStudent({
+      mobile_number: id?.mobile_number,
+      studentData: studentDataPayload,
+    }, (response) => {
+      const responseData = response?.data || response || {};
+      const hasError =
+        responseData?.isError === true ||
+        Number(responseData?.statusCode) >= 400 ||
+        Number(response?.status) >= 400;
+      const rawMessage =
+        responseData?.response || responseData?.detail || response?.statusText;
+      const message = typeof rawMessage === "string"
+        ? rawMessage
+        : "Unable to save test and licence details.";
+
+      setLicenceSaving(false);
+      if (hasError) {
+        setLicenceFeedback({ type: "danger", message });
+        return;
+      }
+
+      setLicenceForm((current) => ({
+        ...current,
+        license_classes: licenseClasses.join(", "),
+      }));
+      setLicenceFeedback({ type: "success", message: "Test and licence details saved successfully." });
+      if (typeof onStudentAdded === "function") onStudentAdded();
+    }));
   };
 
   // --- helpers for time normalization ---
@@ -769,6 +864,71 @@ export default function AddStudents({
               </div>
             </div>
           </div>
+
+          {isEdit && (
+            <section className="student-licence-section" aria-labelledby="student-licence-title">
+              <div className="student-licence-heading">
+                <div>
+                  <h6 id="student-licence-title">Test &amp; Licence Details</h6>
+                  <p>Licence information is available only after the student has passed the test.</p>
+                </div>
+                <span className={`student-test-status is-${licenceForm.test_status.toLowerCase().replace(/_/g, "-")}`}>
+                  {licenceForm.test_status.replace(/_/g, " ")}
+                </span>
+              </div>
+
+              {licenceFeedback && (
+                <Alert variant={licenceFeedback.type} className="py-2">
+                  {licenceFeedback.message}
+                </Alert>
+              )}
+
+              <div className="row student-form-row">
+                <div className="col-md-6">
+                  <div className="form-group student-form-group">
+                    <label htmlFor="test_status">Test Status</label>
+                    <select id="test_status" name="test_status" className="form-control" value={licenceForm.test_status} onChange={handleLicenceChange} disabled={!canEditLicence}>
+                      <option value="NOT_ATTEMPTED">Not Attempted</option>
+                      <option value="PASSED">Passed</option>
+                      <option value="FAILED">Failed</option>
+                    </select>
+                  </div>
+                </div>
+                {[
+                  ["license_number", "Licence Number", "text"],
+                  ["license_classes", "Licence Classes", "text"],
+                  ["issue_date", "Issue Date", "date"],
+                  ["expiry_date", "Expiry Date", "date"],
+                  ["rto", "RTO", "text"],
+                  ["enrollment_number", "Enrollment Number", "text"],
+                ].map(([name, label, type]) => (
+                  <div className="col-md-6" key={name}>
+                    <div className="form-group student-form-group">
+                      <label htmlFor={name}>{label}</label>
+                      <input
+                        id={name}
+                        name={name}
+                        type={type}
+                        className="form-control"
+                        value={licenceForm[name]}
+                        onChange={handleLicenceChange}
+                        disabled={!canEditLicence || licenceForm.test_status !== "PASSED"}
+                        placeholder={name === "license_classes" ? "Example: MCWG, LMV" : undefined}
+                      />
+                      {name === "license_classes" && licenceForm.test_status === "PASSED" && (
+                        <small className="form-text text-muted">Separate multiple classes with commas.</small>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {canEditLicence && <div className="student-licence-actions">
+                <Button type="button" variant="outline-primary" onClick={saveLicenceDetails} disabled={licenceSaving}>
+                  {licenceSaving ? "Saving..." : "Save Test & Licence Details"}
+                </Button>
+              </div>}
+            </section>
+          )}
 
           {(formik.values.instructor_name &&
             (formik.values.training_start_date || formik.values.test_date)) && (

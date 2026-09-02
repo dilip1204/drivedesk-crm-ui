@@ -53,6 +53,20 @@ export default function Sidebar() {
         <div className="sidebar-scroll-area" data-simplebar>
           <ul className="nav sidebar-inner" id="sidebar-menu" aria-label="DriveDesk pages">
 
+            <li className={`has-sub renewals-nav ${isActive("/renewals") ? "active expand" : ""}`}>
+              <Link className="sidenav-item-link" to="/renewals/dashboard" title="Renewals">
+                <i className="mdi mdi-card-account-details-outline"></i>
+                <span className="nav-text">Renewals</span>
+              </Link>
+              <ul className="renewals-subnav" aria-label="Renewal pages">
+                <li className={location.pathname === "/renewals/dashboard" ? "active" : ""}><Link to="/renewals/dashboard">Dashboard</Link></li>
+                <li className={location.pathname === "/renewals/licence-expiries" ? "active" : ""}><Link to="/renewals/licence-expiries">Licence Expiries</Link></li>
+                <li className={location.pathname === "/renewals/external-customers" ? "active" : ""}><Link to="/renewals/external-customers">External Customers</Link></li>
+                <li className={location.pathname === "/renewals/vehicles" ? "active" : ""}><Link to="/renewals/vehicles">Vehicle Documents</Link></li>
+                <li className={location.pathname === "/renewals/vehicle-document-expiries" ? "active" : ""}><Link to="/renewals/vehicle-document-expiries">Document Expiries</Link></li>
+              </ul>
+            </li>
+
             {role !== "super_admin" && (
               <>
 
@@ -104,12 +118,12 @@ export default function Sidebar() {
                 </Link>
               </li>
 
-              <li className={`has-sub ${isActive("/attendance") ? "active expand" : ""}`}>
+              {/* <li className={`has-sub ${isActive("/attendance") ? "active expand" : ""}`}>
                 <Link className="sidenav-item-link" to="/attendance" title="Attendance">
                   <i className="mdi mdi-calendar-check-outline"></i>
                   <span className="nav-text">Attendance</span>
                 </Link>
-              </li>
+              </li> */}
 
               <li className={`has-sub ${isActive("/fleetexpenses") ? "active expand" : ""}`}>
                 <Link className="sidenav-item-link" to="/fleetexpenses" title="Expenses">

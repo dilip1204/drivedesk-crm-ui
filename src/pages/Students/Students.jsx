@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useSearchParams } from "react-router-dom";
 
@@ -73,6 +73,9 @@ const Students = () => {
   const [searchParams] = useSearchParams();
   const initialMonth = searchParams.get("month") || "";
   const initialYear = searchParams.get("year") || "";
+  const initialMobileNumber = searchParams.get("mobile_number") || "";
+  const initialOpenMode = searchParams.get("mode") || "edit";
+  const hasOpenedLinkedStudent = useRef(false);
 
   const getOneStudentPaymentData = (flag, student) => {
     setShowPaymentModal(flag);
@@ -181,6 +184,33 @@ const Students = () => {
     // Ensure loader shows for initial fetch
     setLoading(true);
 
+    if (initialMobileNumber && hasOpenedLinkedStudent.current) return;
+
+    if (initialMobileNumber) {
+      hasOpenedLinkedStudent.current = true;
+      dispatch(
+        getStudentsFilterListInformation(
+          { mobile_number: initialMobileNumber, skip: 0, limit: 1 },
+          (res) => {
+            const { students, total } = normalizeStudentsResponse(res);
+            const linkedStudent = students[0];
+            setStudentsData(students);
+            setTotalCount(total);
+            setLoading(false);
+            if (!linkedStudent) {
+              setError("No students found.");
+              toast.error("The linked student could not be found.");
+              return;
+            }
+            setError(null);
+            if (initialOpenMode === "view") openProfileModal(linkedStudent);
+            else handleEditStudent(linkedStudent);
+          }
+        )
+      );
+      return;
+    }
+
     // If any initial query param is present (month, year, status, instructor_name, test_date)
     // apply filters; previously code required both month AND year which prevented year-only filters.
     const hasQueryFilters =
@@ -226,7 +256,7 @@ const Students = () => {
     }
     // include the variables that should trigger re-run when they change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, currentPage, pageSize, initialMonth, initialYear]);
+  }, [dispatch, currentPage, pageSize, initialMonth, initialYear, initialMobileNumber, initialOpenMode]);
 
   const onStudentData = (res, isEdit) => {
     setSelectedStudent(res.response);
@@ -427,28 +457,22 @@ const Students = () => {
           <thead>
             <tr>
               <th>#</th>
+              <th>Plan</th>
               <th>Application No</th>
               <th>Name</th>
               <th>Mobile</th>
-              <th>DOB</th>
-              <th>Status</th>
-              <th>Plan</th>
               <th>Balance</th>
-              <th>Test Date</th>
             </tr>
           </thead>
           <tbody>
             {students.map((student, index) => (
               <tr key={student.application_number || index}>
                 <td>{index + 1}</td>
+                <td>{student.plan || "-"}</td>
                 <td>{student.application_number || "-"}</td>
                 <td>{student.name || "-"}</td>
                 <td>{student.mobile_number || "-"}</td>
-                <td>{student.dob ? formatDateDDMMYYYY(student.dob) : "-"}</td>
-                <td>{student.status || "-"}</td>
-                <td>{student.plan || "-"}</td>
                 <td>₹{student.balance || 0}</td>
-                <td>{formatDateDDMMYYYY(student.test_date)}</td>
               </tr>
             ))}
           </tbody>
@@ -984,14 +1008,26 @@ const Students = () => {
             )}
             <div className="print-title-area">
               <h2 className="print-org-name">{orgNameForPrint}</h2>
-              <h4 className="print-list-title">Student Test List</h4>
+              <h4 className="print-list-title">Student Test Date</h4>
             </div>
             <span className="print-header-spacer" aria-hidden="true" />
           </div>
           <hr className="print-divider" />
 
+          <section className="print-report-meta" aria-label="Report information">
+            <div><span>Report</span><strong>Student Test List</strong></div>
+            <div><span>Total records</span><strong>{studentsData.length}</strong></div>
+            <div><span>Report period</span><strong>{initialMonth && initialYear ? `${String(initialMonth).padStart(2, "0")}/${initialYear}` : "All records"}</strong></div>
+            <div><span>Generated on</span><strong>{formatDateDDMMYYYY(new Date().toISOString())}</strong></div>
+          </section>
+
           {/* Student table */}
           <PrintableStudentTable students={studentsData} />
+
+          {/* <section className="print-signatures" aria-label="Report signatures">
+            <div><span>Prepared By</span><small>DriveDesk</small></div>
+            <div><span>Authorized Signature</span><small>{orgNameForPrint}</small></div>
+          </section> */}
         </div>
 
       </div>

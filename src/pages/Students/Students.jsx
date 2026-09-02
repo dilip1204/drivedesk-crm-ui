@@ -1008,7 +1008,7 @@ const Students = () => {
             )}
             <div className="print-title-area">
               <h2 className="print-org-name">{orgNameForPrint}</h2>
-              <h4 className="print-list-title">Student Test Date</h4>
+              <h4 className="print-list-title">Test Date  {filters.test_date && ` : ${formatDateDDMMYYYY(filters.test_date)}`}</h4>
             </div>
             <span className="print-header-spacer" aria-hidden="true" />
           </div>
@@ -1017,7 +1017,7 @@ const Students = () => {
           <section className="print-report-meta" aria-label="Report information">
             <div><span>Report</span><strong>Student Test List</strong></div>
             <div><span>Total records</span><strong>{studentsData.length}</strong></div>
-            <div><span>Report period</span><strong>{initialMonth && initialYear ? `${String(initialMonth).padStart(2, "0")}/${initialYear}` : "All records"}</strong></div>
+            {/* <div><span>Report period</span><strong>{initialMonth && initialYear ? `${String(initialMonth).padStart(2, "0")}/${initialYear}` : "All records"}</strong></div> */}
             <div><span>Generated on</span><strong>{formatDateDDMMYYYY(new Date().toISOString())}</strong></div>
           </section>
 

@@ -6,9 +6,12 @@ import { useDispatch } from "react-redux";
 
 import { addExpenses, updateExpenses } from "../../store/expenses/actions";
 import { getInstructorsListInformation } from "../../store/instructors/actions";
+import "./addFleetExpenses.css";
 
 // Vehicle types (includes Stationery & Salary)
 const VEHICLE_TYPES = ["Car", "Bus", "Truck", "Bike", "Rent", "Other", "Food & Snacks", "Stationery", "Salary", "Trailer", "RTO Payment"];
+const VEHICLE_EXPENSE_TYPES = ["Car", "Bus", "Truck", "Bike", "Trailer"];
+const VEHICLE_EMI_CATEGORIES = VEHICLE_EXPENSE_TYPES.map((type) => `${type} EMI`);
 const VEHICLE_CATEGORIES = [
   "Fuel",
   "Service",
@@ -20,9 +23,46 @@ const VEHICLE_CATEGORIES = [
   "Accessories",
   "Other",
 ];
-const RTO_CATEGORIES = ["LLR", "Slot Booking", "FC Payment"];
-const CATEGORIES = [...VEHICLE_CATEGORIES, "Stationaries", ...RTO_CATEGORIES];
-const ODOMETER_CATEGORIES = ["Fuel", "Service", "Repairs", "Wash", "Parking"];
+const RTO_CATEGORIES = [
+  "LLR",
+  "Slot Booking",
+  "FC Payment",
+  "Permit",
+  "Renewal",
+  "Fine",
+  "Dispatch Payment",
+  "Challan Payment",
+];
+const OTHER_CATEGORIES = [
+  "Other",
+  "Daily Wages",
+  "Designing",
+  "Flex Printing",
+  "Cleaning",
+  "One Time Purchase",
+  "Track Maintenance",
+  "Painting",
+  "Flower",
+  "Pooja Expenses",
+  "EB Bill",
+  "Mobile Recharge",
+];
+const FOOD_AND_SNACK_CATEGORIES = [
+  "Tea/Coffee and Snacks",
+  "Lunch",
+  "Dinner",
+  "Breakfast",
+  "Birthday Sponsor",
+];
+const CATEGORIES = [
+  ...VEHICLE_CATEGORIES,
+  ...VEHICLE_EMI_CATEGORIES,
+  "Stationaries",
+  ...OTHER_CATEGORIES,
+  ...FOOD_AND_SNACK_CATEGORIES,
+  ...RTO_CATEGORIES,
+];
+const ODOMETER_CATEGORIES = ["Fuel", "Service", "Repairs"];
 
 const getCategoryOptions = (expenseType) => {
   const normalizedType = (expenseType || "").toString().trim().toLowerCase();
@@ -30,9 +70,21 @@ const getCategoryOptions = (expenseType) => {
   if (!normalizedType || normalizedType === "salary" || normalizedType === "rent") return [];
   if (normalizedType === "rto payment") return RTO_CATEGORIES;
   if (normalizedType === "stationery") return ["Stationaries"];
-  if (normalizedType === "food & snacks" || normalizedType === "other") return ["Other"];
+  if (normalizedType === "other") return OTHER_CATEGORIES;
+  if (normalizedType === "food & snacks") return FOOD_AND_SNACK_CATEGORIES;
+  const matchingVehicleType = VEHICLE_EXPENSE_TYPES.find(
+    (type) => type.toLowerCase() === normalizedType
+  );
+  if (matchingVehicleType) {
+    return [`${matchingVehicleType} EMI`, ...VEHICLE_CATEGORIES];
+  }
   return VEHICLE_CATEGORIES;
 };
+
+const isVehicleExpenseType = (expenseType) =>
+  VEHICLE_EXPENSE_TYPES.some(
+    (type) => type.toLowerCase() === (expenseType || "").toString().trim().toLowerCase()
+  );
 
 function uid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -77,10 +129,6 @@ export default function AddFleetExpenses({
   const initialValues = useMemo(() => {
     const odometerVal = expense?.odo_meter ?? expense?.odometer ?? "";
     const amountVal = expense?.amount ?? "";
-    const litersVal = expense?.liters ?? "";
-    const pricePerLiterVal = expense?.pricePerLiter ?? "";
-    const fullTankRaw = expense?.full_tank ?? expense?.fullTank ?? "";
-    const fullTankBool = fullTankRaw === true || String(fullTankRaw).toLowerCase() === "yes";
 
     const vehicleTypeVal =
       expense?.vehicleType ?? expense?.vehicle_type ?? expense?.vehicle_type_name ?? expense?.type ?? "";
@@ -92,9 +140,6 @@ export default function AddFleetExpenses({
       vehicleType: vehicleTypeVal || "",
       odometer: odometerVal?.toString() || "",
       category: expense?.category || "",
-      liters: litersVal?.toString() || "",
-      pricePerLiter: pricePerLiterVal?.toString() || "",
-      fullTank: !!fullTankBool,
       amount: amountVal?.toString() || "",
       notes: expense?.notes || "",
       vehicle_id: expense?.vehicle_id || expense?.vehicle || "",
@@ -110,10 +155,8 @@ export default function AddFleetExpenses({
   const validationSchema = Yup.object().shape({
     date: Yup.string().required("Date is required"),
     vehicle: Yup.string().when("vehicleType", (vehicleType, schema) => {
-  const vt = normalize(vehicleType);
-  if (vt === "stationery" || vt === "salary" || vt === "rent" || vt === "other" || vt === "food & snacks" || vt === "rto payment")
-    return schema.notRequired().nullable();
-  return schema.required("Vehicle name/number is required");
+      if (!isVehicleExpenseType(vehicleType)) return schema.notRequired().nullable();
+      return schema.required("Vehicle name/number is required");
 }),
     vehicleType: Yup.string().required("Expense type is required").oneOf(vehicleTypes, "Invalid vehicle type"),
     // instructor required only if vehicleType is Salary
@@ -133,8 +176,6 @@ export default function AddFleetExpenses({
       .oneOf(CATEGORIES, "Invalid category"),
   otherwise: (s) => s.nullable(),
 }),
-    liters: Yup.number().typeError("Liters must be a number").min(0, "Liters cannot be negative").nullable(),
-    pricePerLiter: Yup.number().typeError("Price per liter must be a number").min(0, "Price per liter cannot be negative").nullable(),
     amount: Yup.number().typeError("Amount must be a number").min(0, "Amount cannot be negative").required("Amount is required"),
     notes: Yup.string().max(500, "Notes too long"),
     vehicle_id: Yup.string().nullable(),
@@ -152,13 +193,14 @@ export default function AddFleetExpenses({
 
       const payload = {
         id: values.id || uid(),
-        type: "vehicle",
+        type: values.vehicleType || "",
         category:
   normalize(values.vehicleType) === "rent"
     ? "Rent"
     : values.category || "",
         vehicle_id: values.vehicle_id || values.vehicle || "",
         vehicle: values.vehicle || values.vehicle_id || "",
+        expense_type: values.vehicleType || "",
         vehicleType: values.vehicleType || "",
         vehicle_type: values.vehicleType || "",
         amount: values.amount === "" ? 0 : Number(values.amount),
@@ -166,7 +208,6 @@ export default function AddFleetExpenses({
         notes: values.notes || "",
         odo_meter: values.odometer || "",
         stationary: values.stationary || "",
-        full_tank: values.fullTank ? "Yes" : "No",
         created_by: values.created_by || "system_user",
         created_at: new Date().toISOString(),
         // add instructor info to payload when present
@@ -241,38 +282,17 @@ export default function AddFleetExpenses({
   }, [dispatch]);
   
 
-  // Auto-calc fuel amount
-  useEffect(() => {
-    if (formik.values.category !== "Fuel") return;
-    const litersNum = parseFloat(formik.values.liters);
-    const priceNum = parseFloat(formik.values.pricePerLiter);
-    if (Number.isFinite(litersNum) && Number.isFinite(priceNum)) {
-      const computed = +(litersNum * priceNum).toFixed(2);
-      const current = parseFloat(formik.values.amount);
-      if (isNaN(current) || Math.abs(current - computed) > 0.0001) {
-        formik.setFieldValue("amount", String(computed), false);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values.liters, formik.values.pricePerLiter, formik.values.category]);
-
   // Clear irrelevant fields when type/category change
   useEffect(() => {
     const vt = normalize(formik.values.vehicleType);
     const category = formik.values.category;
     const availableCategories = getCategoryOptions(formik.values.vehicleType);
-    const hideFuelFields = vt === "other" || vt === "stationery" || category !== "Fuel";
     const hideOdometer = vt === "other" || vt === "stationery" || !ODOMETER_CATEGORIES.includes(category);
 
     if (category && !availableCategories.includes(category)) {
       formik.setFieldValue("category", "");
     }
 
-    if (hideFuelFields) {
-      if (formik.values.liters !== "") formik.setFieldValue("liters", "");
-      if (formik.values.pricePerLiter !== "") formik.setFieldValue("pricePerLiter", "");
-      if (formik.values.fullTank) formik.setFieldValue("fullTank", false);
-    }
     if (hideOdometer) {
       if (formik.values.odometer !== "") formik.setFieldValue("odometer", "");
     }
@@ -287,19 +307,20 @@ export default function AddFleetExpenses({
   if (formik.values.category !== "")
     formik.setFieldValue("category", "");
 }
+    if (!isVehicleExpenseType(formik.values.vehicleType)) {
+      if (formik.values.vehicle !== "") formik.setFieldValue("vehicle", "");
+      if (formik.values.vehicle_id !== "") formik.setFieldValue("vehicle_id", "");
+    }
     // When not Salary, clear instructor
     if (vt !== "salary" && formik.values.instructor !== "") {
       formik.setFieldValue("instructor", "");
     }
 
-    // When Salary selected, clear vehicle/category/vendor and fuel/odo fields
+    // When Salary selected, clear vehicle/category/vendor and odometer fields
     if (vt === "salary") {
       if (formik.values.vehicle !== "") formik.setFieldValue("vehicle", "");
       if (formik.values.category !== "") formik.setFieldValue("category", "");
       if (formik.values.vendor !== "") formik.setFieldValue("vendor", "");
-      if (formik.values.liters !== "") formik.setFieldValue("liters", "");
-      if (formik.values.pricePerLiter !== "") formik.setFieldValue("pricePerLiter", "");
-      if (formik.values.fullTank) formik.setFieldValue("fullTank", false);
       if (formik.values.odometer !== "") formik.setFieldValue("odometer", "");
     }
 
@@ -314,22 +335,11 @@ export default function AddFleetExpenses({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showModal, initialValues]);
 
-  // hide vehicle for Stationery, Salary, Other, Food & Snacks
-  const hideVehicleField =
-  normalize(formik.values.vehicleType) === "stationery" ||
-  normalize(formik.values.vehicleType) === "salary" ||
-  normalize(formik.values.vehicleType) === "rent" ||
-  normalize(formik.values.vehicleType) === "other" ||
-  normalize(formik.values.vehicleType) === "food & snacks" ||
-  normalize(formik.values.vehicleType) === "rto payment";
+  const hideVehicleField = !isVehicleExpenseType(formik.values.vehicleType);
 
   // helper flag used in several places
   const isSalary = normalize(formik.values.vehicleType) === "salary";
 
-  const showFuelFields =
-    normalize(formik.values.vehicleType) !== "other" &&
-    normalize(formik.values.vehicleType) !== "stationery" &&
-    formik.values.category === "Fuel";
   const showOdometer =
     normalize(formik.values.vehicleType) !== "other" &&
     normalize(formik.values.vehicleType) !== "stationery" &&
@@ -367,12 +377,13 @@ export default function AddFleetExpenses({
       keyboard={false}
       size="lg"
       centered
+      dialogClassName="fleet-expense-form-dialog"
     >
-      <Modal.Header closeButton>
+      <Modal.Header closeButton className="fleet-expense-form-header">
         <Modal.Title>{viewOnly ? "View Expense" : isEdit ? "Update Expense" : "Add Expense"}</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
+      <Modal.Body className="fleet-expense-form-body">
         {viewOnly ? (
           <div style={{ padding: "0" }}>
             <div style={{ marginBottom: "20px", paddingBottom: "16px", borderBottom: "1px solid #e0e0e0" }}>
@@ -396,10 +407,12 @@ export default function AddFleetExpenses({
                 <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "80px" }}>Category:</span>
                 <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.category || "N/A"}</span>
               </div>
-              <div style={{ display: "flex" }}>
-                <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "100px" }}>Vehicle:</span>
-                <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.vehicle || "N/A"}</span>
-              </div>
+              {!hideVehicleField && (
+                <div style={{ display: "flex" }}>
+                  <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "100px" }}>Vehicle:</span>
+                  <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.vehicle || "N/A"}</span>
+                </div>
+              )}
 
               <div style={{ display: "flex" }}>
                 <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "80px" }}>Amount:</span>
@@ -410,19 +423,6 @@ export default function AddFleetExpenses({
                   <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "100px" }}>Odometer (km):</span>
                   <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.odometer || "N/A"}</span>
                 </div>
-              )}
-
-              {showFuelFields && (
-                <>
-                  <div style={{ display: "flex" }}>
-                    <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "80px" }}>Liters:</span>
-                    <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>{formik.values.liters || "N/A"}</span>
-                  </div>
-                  <div style={{ display: "flex" }}>
-                    <span style={{ fontSize: "13px", color: "#6c757d", fontWeight: "500", minWidth: "100px" }}>Price/Liter:</span>
-                    <span style={{ fontSize: "13px", color: "#212529", fontWeight: "400" }}>₹{formik.values.pricePerLiter || "N/A"}</span>
-                  </div>
-                </>
               )}
 
               {formik.values.notes && (
@@ -447,7 +447,7 @@ export default function AddFleetExpenses({
             </div>
           </div>
         ) : (
-          <form noValidate onSubmit={(e) => { e.preventDefault(); explicitSubmit(); }}>
+          <form className="fleet-expense-form" noValidate onSubmit={(e) => { e.preventDefault(); explicitSubmit(); }}>
             {/* Primary expense fields wrap into available columns. */}
             <div className="row">
               <div className="col-md-6 mb-3">
@@ -455,14 +455,6 @@ export default function AddFleetExpenses({
                 <input type="date" name="date" className={`form-control ${showInvalid("date")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.date} />
                 <div className="invalid-feedback">{formik.errors.date}</div>
               </div>
-
-              {!hideVehicleField && (
-                <div className="col-md-6 mb-3">
-                  <label>Vehicle {normalize(formik.values.vehicleType) !== "stationery" && <span style={{ color: "red" }}>*</span>}</label>
-                  <input type="text" name="vehicle" className={`form-control ${showInvalid("vehicle")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.vehicle} placeholder="Enter vehicle name or number" />
-                  <div className="invalid-feedback">{formik.errors.vehicle}</div>
-                </div>
-              )}
 
               <div className="col-md-6 mb-3">
                 <label>Expense Type <span style={{ color: "red" }}>*</span></label>
@@ -481,6 +473,14 @@ export default function AddFleetExpenses({
                     {getCategoryOptions(formik.values.vehicleType).map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                   <div className="invalid-feedback">{formik.errors.category}</div>
+                </div>
+              )}
+
+              {!hideVehicleField && (
+                <div className="col-md-6 mb-3">
+                  <label>Vehicle <span style={{ color: "red" }}>*</span></label>
+                  <input type="text" name="vehicle" className={`form-control ${showInvalid("vehicle")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.vehicle} placeholder="Enter vehicle name or number" />
+                  <div className="invalid-feedback">{formik.errors.vehicle}</div>
                 </div>
               )}
             </div>
@@ -519,28 +519,6 @@ export default function AddFleetExpenses({
             )}
           </div>
 
-          {/* Fuel fields */}
-          {showFuelFields && (
-            <div className="row">
-              <div className="col-md-4 mb-3">
-                <label>Liters</label>
-                <input type="text" name="liters" className={`form-control ${showInvalid("liters")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.liters} placeholder="Enter liters filled" />
-                <div className="invalid-feedback">{formik.errors.liters}</div>
-              </div>
-              <div className="col-md-4 mb-3">
-                <label>Price / Liter</label>
-                <input type="text" name="pricePerLiter" className={`form-control ${showInvalid("pricePerLiter")}`} onChange={formik.handleChange} onBlur={formik.handleBlur} value={formik.values.pricePerLiter} placeholder="Enter price per liter" />
-                <div className="invalid-feedback">{formik.errors.pricePerLiter}</div>
-              </div>
-              <div className="col-md-4 mb-3 d-flex align-items-center">
-                <div>
-                  <label style={{ display: "block" }}>Full tank?</label>
-                  <input type="checkbox" name="fullTank" onChange={(e) => formik.setFieldValue("fullTank", e.target.checked)} checked={formik.values.fullTank} />
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Amount + Notes */}
           <div className="row">
             <div className="col-md-6 mb-3">
@@ -555,7 +533,7 @@ export default function AddFleetExpenses({
             </div>
           </div>
 
-          <div className="d-flex justify-content-end mt-3">
+          <div className="d-flex justify-content-end mt-3 fleet-expense-form-actions">
             <button type="button" className="btn btn-secondary me-2" onClick={() => { formik.resetForm(); hideModal(); }}>
               Cancel
             </button>

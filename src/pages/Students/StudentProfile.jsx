@@ -6,7 +6,31 @@ import { useDispatch } from "react-redux";
 import { getStudentReceiptInfo } from "../../store/students/actions"; // adjust the path if needed
 import { ToastContainer, toast } from "react-toastify";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
-import { getAdminPrintWatermark } from "../../utils/printBranding";
+import {
+  addAdminPrintLogo,
+  getAdminPrintHeader,
+  getAdminPrintWatermark,
+} from "../../utils/printBranding";
+import { ensureTenantLogo } from "../../hooks/useTenantLogo";
+import "./studentPayments.css";
+
+const getPaymentStatusClass = (value) => {
+  const status = String(value || "").toLowerCase();
+
+  if (status.includes("complete") || status.includes("paid") || status.includes("success")) {
+    return "is-completed";
+  }
+
+  if (status.includes("pending") || status.includes("partial")) {
+    return "is-pending";
+  }
+
+  if (status.includes("fail") || status.includes("cancel")) {
+    return "is-failed";
+  }
+
+  return "is-neutral";
+};
 
 export default function StudentProfileModal({ show, onClose, student }) {
 
@@ -21,29 +45,29 @@ export default function StudentProfileModal({ show, onClose, student }) {
     
   }
 
-  dispatch(getStudentReceiptInfo({ receipt_no: receiptNo }, (response) => {
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    toast.error("Please allow pop-ups to print the receipt.");
+    return;
+  }
+  const tenantLogoPromise = ensureTenantLogo(dispatch);
+
+  dispatch(getStudentReceiptInfo({ receipt_no: receiptNo }, async (response) => {
     if (response) {
-      const printWindow = window.open("", "_blank");
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Receipt - ${receiptNo}</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              table { width: 100%; border-collapse: collapse; }
-              th, td { padding: 8px; text-align: left; }
-            </style>
-          </head>
-          <body>
-            ${getAdminPrintWatermark()}
-            ${response}
-          </body>
-        </html>
-      `);
+      const tenantLogo = await tenantLogoPromise;
+      printWindow.document.write(addAdminPrintLogo(response, tenantLogo));
       printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
+      const printReceipt = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+      if (printWindow.document.readyState === "complete") {
+        window.setTimeout(printReceipt, 0);
+      } else {
+        printWindow.onload = printReceipt;
+      }
     } else {
+      printWindow.close();
       alert("Failed to load receipt content.");
     }
   }));
@@ -51,7 +75,7 @@ export default function StudentProfileModal({ show, onClose, student }) {
 
 
 
-  const handlePrintTable = () => {
+  const handlePrintTable = async () => {
     if (!Array.isArray(student?.payments) || student.payments.length === 0) return;
 
     const escapeHtml = (value) =>
@@ -90,6 +114,11 @@ export default function StudentProfileModal({ show, onClose, student }) {
       .join("");
 
     const printWindow = window.open("", "_blank", "width=900,height=700");
+    if (!printWindow) {
+      toast.error("Please allow pop-ups to print the payment history.");
+      return;
+    }
+    const tenantLogo = await ensureTenantLogo(dispatch);
     printWindow.document.write(`<!doctype html>
       <html>
         <head>
@@ -100,7 +129,9 @@ export default function StudentProfileModal({ show, onClose, student }) {
             * { box-sizing: border-box; }
             body { margin: 0; color: #172033; font: 12px Arial, Helvetica, sans-serif; }
             .report { position: relative; z-index: 1; min-height: 250mm; }
-            .header { padding-bottom: 14px; border-bottom: 2px solid #1f4e78; text-align: center; }
+            .header { display: grid; grid-template-columns: 112px minmax(0, 1fr) 112px; min-height: 86px; align-items: center; padding-bottom: 14px; border-bottom: 2px solid #1f4e78; }
+            .header-copy { align-self: center; text-align: center; }
+            .header-spacer { width: 112px; }
             .org { margin: 0 0 5px; font-size: 21px; }
             .title { margin: 0; color: #1f4e78; font-size: 17px; letter-spacing: .8px; text-transform: uppercase; }
             .details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 28px; margin: 18px 0; padding: 12px 14px; border: 1px solid #d5dce5; border-radius: 4px; background: #f7f9fc; }
@@ -122,11 +153,15 @@ export default function StudentProfileModal({ show, onClose, student }) {
           </style>
         </head>
         <body>
-          ${getAdminPrintWatermark()}
+          ${getAdminPrintWatermark(tenantLogo)}
           <main class="report">
             <header class="header">
-              ${organizationName ? `<h1 class="org">${escapeHtml(organizationName)}</h1>` : ""}
-              <h2 class="title">Student Payment History</h2>
+              ${getAdminPrintHeader(tenantLogo)}
+              <div class="header-copy">
+                ${organizationName ? `<h1 class="org">${escapeHtml(organizationName)}</h1>` : ""}
+                <h2 class="title">Student Payment History</h2>
+              </div>
+              <span class="header-spacer" aria-hidden="true"></span>
             </header>
             <section class="details">
               <div class="detail"><span class="label">Student:</span><span class="value">${escapeHtml(student.name)}</span></div>
@@ -152,29 +187,31 @@ export default function StudentProfileModal({ show, onClose, student }) {
   if (!student) return null;
 
   return (
-    <Modal show={show} onHide={onClose} size="lg" centered>
-      <Modal.Header closeButton>
-        <Modal.Title>👤 Student Profile</Modal.Title>
+    <Modal show={show} onHide={onClose} size="lg" centered dialogClassName="student-profile-dialog">
+      <Modal.Header closeButton className="student-profile-header">
+        <div className="student-profile-title-icon" aria-hidden="true">
+          <i className="bi bi-person" />
+        </div>
+        <Modal.Title>Student Profile</Modal.Title>
       </Modal.Header>
-      <Modal.Body className="px-4">
+      <Modal.Body className="student-profile-body">
         {/* Profile Header */}
-        <div className="d-flex align-items-center mb-4 border-bottom pb-3">
+        <div className="student-profile-summary">
           <img
             src={avatar}
             alt="Student Avatar"
-            className="rounded-circle me-3"
-            style={{ width: 80, height: 80, objectFit: "cover" }}
+            className="student-profile-avatar"
           />
-          <div>
-            <h4 className="mb-1">{student.name}</h4>
-            <div className="text-muted">
+          <div className="student-profile-summary-copy">
+            <h4>{student.name}</h4>
+            <div>
               Application No: {student.application_number}
             </div>
           </div>
         </div>
 
         {/* Two Column Layout */}
-        <div className="row">
+        <div className="row student-profile-details">
           {/* Left Column */}
           <div className="col-md-6">
             <ProfileItem label="Name" value={student.name} />
@@ -200,11 +237,11 @@ export default function StudentProfileModal({ show, onClose, student }) {
 
           {/* Right Column */}
           <div className="col-md-6">
+            <ProfileItem label="Total Amount" value={student.total_amount} />
             <ProfileItem label="Paid Amount" value={student.paid_amount} />
             {student.discount > 0 && (
               <ProfileItem label="Discount" value={student.discount} />
             )}
-            <ProfileItem label="Total Amount" value={student.total_amount} />
             <ProfileItem label="Balance" value={student.balance} />
             <ProfileItem
               label="Full Payment Status"
@@ -220,6 +257,10 @@ export default function StudentProfileModal({ show, onClose, student }) {
             />
             <ProfileItem label="Courses Enrolled" value={student.plan} />
             <ProfileItem
+              label="No. of Training Days"
+              value={student.training_days}
+            />
+            <ProfileItem
               label="Classes Completed"
               value={student.classesCompleted}
             />
@@ -227,20 +268,20 @@ export default function StudentProfileModal({ show, onClose, student }) {
         </div>
         {/* Payments Table */}
         {Array.isArray(student.payments) && student.payments.length > 0 && (
-          <div className="mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <h5 className="mb-0">💳 Payment History</h5>
+          <div className="student-payment-history">
+            <div className="student-payment-history-header">
+              <h5><i className="bi bi-credit-card" aria-hidden="true" /> Payment History</h5>
               <Button
                 variant="outline-primary"
                 size="sm"
                 onClick={handlePrintTable}
               >
-                Print Payment Table
+                <i className="bi bi-printer" aria-hidden="true" /> Print Payments
               </Button>
             </div>
 
-            <div className="table-responsive">
-              <table className="table table-bordered table-sm">
+            <div className="table-responsive student-payment-history-table-wrap">
+              <table className="table table-bordered table-sm student-payment-history-table">
                 <thead className="table-light">
                   <tr>
                     <th>Receipt No</th>
@@ -256,14 +297,18 @@ export default function StudentProfileModal({ show, onClose, student }) {
                 <tbody>
                   {student.payments.map((payment, index) => (
                     <tr key={index}>
-                      <td>{payment.receipt_no || "-"}</td>
-                      <td>{payment.amount}</td>
-                      <td>{formatDateDDMMYYYY(payment.date)}</td>
-                      <td>{payment.payment_method || payment.method || "-"}</td>
-                      <td>{payment.payment_status || payment.status || "-"}</td>
-                      <td>{payment.remarks || "-"}</td>
+                      <td data-label="Receipt No">{payment.receipt_no || "-"}</td>
+                      <td data-label="Amount" className="student-payment-amount">₹{Number(payment.amount || 0).toLocaleString("en-IN")}</td>
+                      <td data-label="Date">{formatDateDDMMYYYY(payment.date)}</td>
+                      <td data-label="Method">{payment.payment_method || payment.method || "-"}</td>
+                      <td data-label="Status">
+                        <span className={`student-payment-status ${getPaymentStatusClass(payment.payment_status || payment.status)}`}>
+                          {payment.payment_status || payment.status || "-"}
+                        </span>
+                      </td>
+                      <td data-label="Remarks">{payment.remarks || "-"}</td>
                       {/* <td>{payment.payment_received_by || "-"}</td> */}
-                      <td>
+                      <td data-label="Action" className="student-payment-row-action">
                         {payment.receipt_no && (
                           <Button
                            
@@ -272,7 +317,7 @@ export default function StudentProfileModal({ show, onClose, student }) {
                               handlePrintReceipt(payment.receipt_no)
                             }
                           >
-                            🖨 Print
+                            <i className="bi bi-printer" aria-hidden="true" /> Print
                           </Button>
                         )}
                       </td>
@@ -293,7 +338,7 @@ export default function StudentProfileModal({ show, onClose, student }) {
           pauseOnHover
         />
       </Modal.Body>
-      <Modal.Footer className="justify-content-end">
+      <Modal.Footer className="student-profile-footer">
         <Button variant="secondary" onClick={onClose}>
           Close
         </Button>
@@ -304,8 +349,8 @@ export default function StudentProfileModal({ show, onClose, student }) {
 
 // Reusable row layout
 const ProfileItem = ({ label, value }) => (
-  <div className="d-flex justify-content-between border-bottom py-2">
-    <span className="fw-semibold text-muted">{label}:</span>
-    <span className="text-dark">{value || "N/A"}</span>
+  <div className="student-profile-item">
+    <span>{label}</span>
+    <strong>{value === undefined || value === null || value === "" ? "N/A" : value}</strong>
   </div>
 );

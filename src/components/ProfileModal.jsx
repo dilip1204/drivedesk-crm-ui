@@ -1,46 +1,86 @@
+/** @jsxRuntime classic */
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
-//import "./ProfileModal.css";
+import "./ProfileModal.css";
 
-export default function ProfileModal({ show, onClose, title, avatar, data = [] }) {
+const getStatusClass = (value) => {
+  const status = String(value || "").toLowerCase();
+
+  if (status.includes("cancel") || status.includes("inactive") || status.includes("miss")) {
+    return "is-danger";
+  }
+
+  if (status.includes("contact") || status.includes("complete") || status.includes("active")) {
+    return "is-success";
+  }
+
+  if (status.includes("pending") || status.includes("follow")) {
+    return "is-warning";
+  }
+
+  return "is-neutral";
+};
+
+const hasValue = (value) => value !== undefined && value !== null && value !== "";
+
+export default function ProfileModal({ show, onClose, title, avatar, data = [], variant = "default" }) {
+  const name = data.find((item) => item.label === "Name")?.value || title || "Profile";
+  const subtitle =
+    data.find((item) => item.label === "Application No")?.value ||
+    data.find((item) => item.label === "Mobile Number")?.value ||
+    "Profile information";
+
   return (
-    <Modal show={show} onHide={onClose} size="lg" centered>
-      <Modal.Header closeButton>
+    <Modal
+      show={show}
+      onHide={onClose}
+      size="lg"
+      centered
+      dialogClassName={`profile-modal-dialog profile-modal-${variant}`}
+    >
+      <Modal.Header closeButton className="profile-modal-header">
+        <span className="profile-modal-title-icon" aria-hidden="true">
+          <i className="bi bi-person-vcard" />
+        </span>
         <Modal.Title>{title || "Profile"}</Modal.Title>
       </Modal.Header>
-      <Modal.Body className="px-4">
-        {/* Avatar + Header */}
-        <div className="d-flex align-items-center mb-4 border-bottom pb-3">
-          <img
-            src={avatar}
-            alt="Avatar"
-            className="rounded-circle me-3"
-            style={{ width: 80, height: 80, objectFit: "cover" }}
-          />
-          <div>
-            <h4 className="mb-1">{data.find(item => item.label === "Name")?.value || title}</h4>
-            <div className="text-muted">{data.find(item => item.label === "Application No")?.value || ""}</div>
+
+      <Modal.Body className="profile-modal-body">
+        <div className="profile-modal-summary">
+          <img src={avatar} alt="Avatar" className="profile-modal-avatar" />
+          <div className="profile-modal-summary-copy">
+            <span className="profile-modal-eyebrow">Profile details</span>
+            <h4>{name}</h4>
+            <div>{subtitle}</div>
           </div>
         </div>
 
-        {/* Two Column Fields */}
-        <div className="row">
+        <div className="profile-modal-details">
           {data.length > 0 &&
-            [0, 1].map(col => (
-              <div className="col-md-6" key={col}>
-                {data
-                  .filter((_, index) => index % 2 === col)
-                  .map((item, idx) => (
-                    <div className="d-flex justify-content-between border-bottom py-2" key={idx}>
-                      <span className="fw-semibold text-muted">{item.label}:</span>
-                      <span className="text-dark">{item.value || "N/A"}</span>
-                    </div>
-                  ))}
-              </div>
-            ))}
+            data.map((item, index) => {
+              const isStatus = item.label.toLowerCase().includes("status");
+              const displayValue = hasValue(item.value) ? item.value : "N/A";
+
+              return (
+                <div
+                  className="profile-modal-item"
+                  key={`${item.label}-${index}`}
+                >
+                  <span className="profile-modal-label">{item.label}</span>
+                  {isStatus ? (
+                    <span className={`profile-modal-status ${getStatusClass(displayValue)}`}>
+                      {displayValue}
+                    </span>
+                  ) : (
+                    <strong>{displayValue}</strong>
+                  )}
+                </div>
+              );
+            })}
         </div>
       </Modal.Body>
-      <Modal.Footer>
+
+      <Modal.Footer className="profile-modal-footer">
         <Button variant="secondary" onClick={onClose}>
           Close
         </Button>

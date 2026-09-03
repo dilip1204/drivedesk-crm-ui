@@ -54,6 +54,24 @@ const parseEnquiriesResponse = (res, fallbackPageSize = 10) => {
   };
 };
 
+const getContactLinks = (mobileNumber) => {
+  const rawNumber = String(mobileNumber || "").trim();
+  const digits = rawNumber.replace(/\D/g, "");
+
+  if (!digits) return { call: "", whatsapp: "" };
+
+  const whatsappNumber = digits.length === 10
+    ? `91${digits}`
+    : digits.length === 11 && digits.startsWith("0")
+      ? `91${digits.slice(1)}`
+      : digits;
+
+  return {
+    call: `tel:${rawNumber.replace(/[^\d+]/g, "")}`,
+    whatsapp: `https://wa.me/${whatsappNumber}`,
+  };
+};
+
 const Enquiries = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -534,6 +552,7 @@ const Enquiries = () => {
                                   String(enquiries?.follow_up_status || "")
                                     .trim()
                                     .toLowerCase() === "enrolled";
+                                const contactLinks = getContactLinks(enquiries?.mobile_number);
                                 return (
                                   <>
                               <td data-label="S.No">
@@ -555,6 +574,32 @@ const Enquiries = () => {
                                 </span>
                               </td>
                               <td data-label="Actions" className="enquiries-row-actions">
+                                {contactLinks.call && (
+                                  <a
+                                    className="btn btn-sm enquiry-action-icon enquiry-contact-action enquiry-call-action"
+                                    href={contactLinks.call}
+                                    title={`Call ${enquiries.name || "customer"}`}
+                                    data-tooltip="Call customer"
+                                    aria-label={`Call ${enquiries.name || "customer"} at ${enquiries.mobile_number}`}
+                                  >
+                                    <i className="bi bi-telephone-fill" aria-hidden="true"></i>
+                                    <span className="enquiry-action-label">Call</span>
+                                  </a>
+                                )}{" "}
+                                {contactLinks.whatsapp && (
+                                  <a
+                                    className="btn btn-sm enquiry-action-icon enquiry-contact-action enquiry-whatsapp-action"
+                                    href={contactLinks.whatsapp}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={`WhatsApp ${enquiries.name || "customer"}`}
+                                    data-tooltip="Open WhatsApp"
+                                    aria-label={`Open WhatsApp conversation with ${enquiries.name || "customer"} at ${enquiries.mobile_number}`}
+                                  >
+                                    <i className="bi bi-whatsapp" aria-hidden="true"></i>
+                                    <span className="enquiry-action-label">WhatsApp</span>
+                                  </a>
+                                )}{" "}
                                 <button
                                 className="btn btn-sm btn-warning enquiry-action-icon"
                                 title="Edit Enquiries"

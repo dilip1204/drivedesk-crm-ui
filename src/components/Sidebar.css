@@ -175,24 +175,97 @@
 
 .drivedesk-sidebar .renewals-subnav {
   display: none;
-  margin: 3px 0 5px 34px;
-  padding: 0;
+  margin: 5px 3px 7px 22px;
+  padding: 4px 0 4px 12px;
+  border-left: 1px solid rgba(120, 166, 255, .22);
   list-style: none;
 }
 
 .drivedesk-sidebar .renewals-nav.expand .renewals-subnav { display: block; }
+.drivedesk-sidebar .renewals-nav { position: relative; }
+.drivedesk-sidebar .renewals-nav > .sidenav-item-link { padding-right: 42px !important; }
+.drivedesk-sidebar .renewals-nav-toggle {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  z-index: 2;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8294aa;
+  cursor: pointer;
+  place-items: center;
+  transition: background-color .16s ease, color .16s ease;
+}
+.drivedesk-sidebar .renewals-nav-toggle:hover,
+.drivedesk-sidebar .renewals-nav-toggle:focus-visible {
+  background: rgba(255, 255, 255, .09);
+  color: #fff;
+  outline: none;
+}
+.drivedesk-sidebar .renewals-nav-toggle i { font-size: 17px; transition: transform .18s ease; }
+.drivedesk-sidebar .renewals-nav.expand .renewals-nav-toggle {
+  color: #78a6ff;
+}
+.drivedesk-sidebar .renewals-nav.expand .renewals-nav-toggle i {
+  transform: rotate(180deg);
+}
 .drivedesk-sidebar .renewals-subnav a {
-  display: block;
-  padding: 7px 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 7px 9px;
   border-radius: 6px;
   color: #98a7ba;
   font-size: 11px;
   text-decoration: none;
+  transition: background-color .15s ease, color .15s ease, transform .15s ease;
 }
+.drivedesk-sidebar .renewals-subnav a i {
+  flex: 0 0 16px;
+  width: 16px;
+  color: #8294aa;
+  font-size: 15px;
+  text-align: center;
+}
+.drivedesk-sidebar .renewals-subnav li.active a i,
+.drivedesk-sidebar .renewals-subnav a:hover i { color: #78a6ff; }
 .drivedesk-sidebar .renewals-subnav a:hover,
 .drivedesk-sidebar .renewals-subnav li.active a { background: rgba(76,132,255,.14); color: #fff; }
+.drivedesk-sidebar .renewals-subnav a:hover { transform: translateX(1px); }
+.drivedesk-sidebar .renewals-subnav li.active a::before {
+  position: absolute;
+  top: 50%;
+  left: -15px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #78a6ff;
+  box-shadow: 0 0 0 3px rgba(120, 166, 255, .14);
+  content: "";
+  transform: translateY(-50%);
+}
 
 @media (min-width: 768px) {
+  .sidebar-minified .drivedesk-sidebar .renewals-nav-toggle,
+  .sidebar-minified .drivedesk-sidebar .renewals-subnav {
+    display: none;
+  }
+
+  .sidebar-minified .drivedesk-sidebar:hover .renewals-nav.expand .renewals-subnav {
+    display: block;
+  }
+
+  .sidebar-minified .drivedesk-sidebar:hover .renewals-nav-toggle {
+    display: grid;
+  }
+
   .sidebar-minified .drivedesk-sidebar .sidebar-inner {
     padding-right: 10px;
     padding-left: 10px;

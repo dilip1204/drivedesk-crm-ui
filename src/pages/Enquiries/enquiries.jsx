@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -17,9 +17,7 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import LoadingState from "../../components/LoadingState";
 import EmptyState from "../../components/EmptyState";
-import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import { getEnquiriesListInformation, getEnquiriesFilterListInformation } from "../../store/Enquiries/actions";
-import { deleteStudent } from "../../store/deleteStudent/actions";
 
 import avatar from "../../assets/img/avatar.png";
 import AddEnquiries from "./addEnquiries";
@@ -72,15 +70,70 @@ const getContactLinks = (mobileNumber) => {
   };
 };
 
+const getFollowUpIndicator = (followUpDate, status) => {
+  const normalizedStatus = String(status || "").trim().toLowerCase();
+  if (["enrolled", "converted", "dropped"].includes(normalizedStatus)) return null;
+  if (!followUpDate) return { label: "No date", tone: "none" };
+
+  const datePart = String(followUpDate).slice(0, 10);
+  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+  if (!dateMatch) return { label: "No date", tone: "none" };
+
+  const followUpDay = new Date(
+    Number(dateMatch[1]),
+    Number(dateMatch[2]) - 1,
+    Number(dateMatch[3])
+  );
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const daysUntilFollowUp = Math.round(
+    (followUpDay.getTime() - today.getTime()) / 86400000
+  );
+
+  if (daysUntilFollowUp < 0) {
+    const daysOverdue = Math.abs(daysUntilFollowUp);
+    return {
+      label: daysOverdue === 1 ? "Overdue by 1 day" : `Overdue by ${daysOverdue} days`,
+      tone: "overdue",
+    };
+  }
+
+  if (daysUntilFollowUp === 0) return { label: "Today", tone: "today" };
+  if (daysUntilFollowUp === 1) return { label: "Tomorrow", tone: "upcoming" };
+  return { label: `In ${daysUntilFollowUp} days`, tone: "upcoming" };
+};
+
+const QUICK_FILTERS = [
+  { value: "all", label: "All", icon: "bi-people" },
+  { value: "pending", label: "Pending", icon: "bi-hourglass-split" },
+  { value: "contacted", label: "Contacted", icon: "bi-chat-dots" },
+  { value: "enrolled", label: "Enrolled", icon: "bi-person-check" },
+  { value: "dropped", label: "Dropped", icon: "bi-person-x" },
+  { value: "today", label: "Today", icon: "bi-alarm" },
+  { value: "overdue", label: "Overdue", icon: "bi-exclamation-circle" },
+];
+
+const matchesQuickFilter = (enquiry, filter) => {
+  if (filter === "all") return true;
+
+  const status = String(enquiry?.follow_up_status || "").trim().toLowerCase();
+  if (filter === "enrolled") return status === "enrolled" || status === "converted";
+  if (["pending", "contacted", "dropped"].includes(filter)) return status === filter;
+
+  const indicator = getFollowUpIndicator(enquiry?.follow_up_date, enquiry?.follow_up_status);
+  if (filter === "today") return indicator?.tone === "today";
+  if (filter === "overdue") return indicator?.tone === "overdue";
+  return true;
+};
+
 const Enquiries = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [enquiriesData, setEnquiriesData] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedEnquiriesAppId, setSelectedEnquiriesAppId] = useState(null);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedEnquiries, setSelectedEnquiries] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -89,12 +142,13 @@ const Enquiries = () => {
   const [enquirySearch, setEnquirySearch] = useState("");
   const [debouncedEnquirySearch, setDebouncedEnquirySearch] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [quickFilter, setQuickFilter] = useState("all");
   const requestIdRef = useRef(0);
-  const [filters, setFilters] = useState({
+  const filters = {
     month: "",
     year: "",
     status: "All",
-  });
+  };
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -183,33 +237,6 @@ const Enquiries = () => {
     getEnquiriesList(currentPage, pageSize, debouncedEnquirySearch);
   }, [getEnquiriesList, currentPage, pageSize, debouncedEnquirySearch]);
 
-  const handleDeleteCloseModel = () => {
-    setShowDeleteModal(false);
-  };
-
-  const deleteDataConfirmation = () => {
-    setShowDeleteModal(true);
-  };
-
-  const deleteData = (appId) => {
-    const payloadDeleteStudent = {
-      appId: appId,
-    };
-
-    dispatch(
-      deleteStudent(payloadDeleteStudent, (res) => {
-        handleDeleteCloseModel();
-        getEnquiriesList();
-      })
-    );
-    handleDeleteCloseModel();
-  };
-
-  const deleteUser = (appId) => {
-    setShowDeleteModal(true);
-    setSelectedEnquiriesAppId(appId);
-  };
-
   const AddEnquiriesModal = () => {
     setShowModal(true);
     // setIsEdit(true)
@@ -280,7 +307,23 @@ const Enquiries = () => {
   };
 
   const normalizedEnquirySearch = enquirySearch.trim();
-  const searchedEnquiries = enquiriesData;
+  const searchedEnquiries = useMemo(
+    () => enquiriesData.filter((enquiry) => matchesQuickFilter(enquiry, quickFilter)),
+    [enquiriesData, quickFilter]
+  );
+
+  const quickFilterCounts = useMemo(
+    () => QUICK_FILTERS.reduce((counts, filter) => ({
+      ...counts,
+      [filter.value]: enquiriesData.filter((enquiry) =>
+        matchesQuickFilter(enquiry, filter.value)
+      ).length,
+    }), {}),
+    [enquiriesData]
+  );
+
+  const activeQuickFilterLabel =
+    QUICK_FILTERS.find((filter) => filter.value === quickFilter)?.label || "All";
 
   const clearEnquirySearch = () => {
     setEnquirySearch("");
@@ -338,11 +381,11 @@ const Enquiries = () => {
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
-                          <a href="#" className="enquiries-breadcrumb-home" aria-label="Enquiries home">
+                          <Link to="/dashboard" className="enquiries-breadcrumb-home" aria-label="Dashboard">
                             <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
                               <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
                             </svg>
-                          </a>
+                          </Link>
                         </li>
                         <li className="breadcrumb-item">Enquiries</li>
                         <li className="breadcrumb-item" aria-current="page">
@@ -490,6 +533,23 @@ const Enquiries = () => {
                   ) : (
                     <>
                     <div className="enquiries-list-card">
+                    <div className="enquiries-quick-filters" aria-label="Quick enquiry filters">
+                      {QUICK_FILTERS.map((filter) => (
+                        <button
+                          key={filter.value}
+                          type="button"
+                          className={`enquiries-quick-filter${
+                            quickFilter === filter.value ? " is-active" : ""
+                          }${filter.value === "overdue" ? " is-alert" : ""}`}
+                          onClick={() => setQuickFilter(filter.value)}
+                          aria-pressed={quickFilter === filter.value}
+                        >
+                          <i className={`bi ${filter.icon}`} aria-hidden="true" />
+                          <span>{filter.label}</span>
+                          <strong>{quickFilterCounts[filter.value] || 0}</strong>
+                        </button>
+                      ))}
+                    </div>
                     <div className="enquiries-search-toolbar" role="search">
                       <div className="enquiries-search-field">
                         <i className="bi bi-search" aria-hidden="true" />
@@ -525,6 +585,8 @@ const Enquiries = () => {
                       <span className="enquiries-search-count" aria-live="polite">
                         {isSearching
                           ? "Searching..."
+                          : quickFilter !== "all"
+                          ? `${searchedEnquiries.length} ${activeQuickFilterLabel.toLowerCase()} on this page`
                           : normalizedEnquirySearch
                           ? `${searchedEnquiries.length} of ${totalCount} results`
                           : `${enquiriesData.length} on this page`}
@@ -548,11 +610,26 @@ const Enquiries = () => {
                           {searchedEnquiries.length > 0 ? searchedEnquiries.map((enquiries, index) => (
                             <tr key={enquiries?.id || enquiries?.mobile_number || index}>
                               {(() => {
-                                const isEnrolled =
-                                  String(enquiries?.follow_up_status || "")
-                                    .trim()
-                                    .toLowerCase() === "enrolled";
+                                const normalizedStatus = String(
+                                  enquiries?.follow_up_status || "pending"
+                                ).trim().toLowerCase();
+                                const statusTone = normalizedStatus === "converted"
+                                  ? "enrolled"
+                                  : ["pending", "contacted", "enrolled", "dropped"].includes(normalizedStatus)
+                                    ? normalizedStatus
+                                    : "pending";
+                                const statusIcon = {
+                                  pending: "bi-hourglass-split",
+                                  contacted: "bi-chat-dots-fill",
+                                  enrolled: "bi-check-circle-fill",
+                                  dropped: "bi-x-circle-fill",
+                                }[statusTone];
+                                const isEnrolled = statusTone === "enrolled";
                                 const contactLinks = getContactLinks(enquiries?.mobile_number);
+                                const followUpIndicator = getFollowUpIndicator(
+                                  enquiries?.follow_up_date,
+                                  enquiries?.follow_up_status
+                                );
                                 return (
                                   <>
                               <td data-label="S.No">
@@ -565,11 +642,33 @@ const Enquiries = () => {
                                 {formatDateDDMMYYYY(enquiries.enquiry_date || enquiries.created_at)}
                               </td>
                               <td data-label="Follow Up Date">
-                                {formatDateDDMMYYYY(enquiries.follow_up_date)}
+                                <div className="enquiry-follow-up-display">
+                                  <span>{formatDateDDMMYYYY(enquiries.follow_up_date)}</span>
+                                  {followUpIndicator && (
+                                    <span
+                                      className={`enquiry-follow-up-badge is-${followUpIndicator.tone}`}
+                                      aria-label={`Follow-up ${followUpIndicator.label}`}
+                                    >
+                                      <i
+                                        className={`bi ${
+                                          followUpIndicator.tone === "overdue"
+                                            ? "bi-exclamation-circle-fill"
+                                            : followUpIndicator.tone === "today"
+                                              ? "bi-alarm-fill"
+                                              : followUpIndicator.tone === "upcoming"
+                                                ? "bi-calendar-event"
+                                                : "bi-calendar-x"
+                                        }`}
+                                        aria-hidden="true"
+                                      />
+                                      {followUpIndicator.label}
+                                    </span>
+                                  )}
+                                </div>
                               </td>
                               <td data-label="Status" className="status">
-                                <span className="enquiry-status-value">
-                                  <i className="bi bi-check-circle" aria-hidden="true"></i>
+                                <span className={`enquiry-status-value is-${statusTone}`}>
+                                  <i className={`bi ${statusIcon}`} aria-hidden="true"></i>
                                   <span>{enquiries.follow_up_status || "Pending"}</span>
                                 </span>
                               </td>
@@ -642,10 +741,18 @@ const Enquiries = () => {
                               <td colSpan="8">
                                 <EmptyState
                                   icon="bi bi-person-x"
-                                  title="No matching enquiry"
-                                  description={`No student name or mobile number matches “${enquirySearch.trim()}”.`}
-                                  actionLabel="Clear search"
-                                  onAction={clearEnquirySearch}
+                                  title={`No ${activeQuickFilterLabel.toLowerCase()} enquiries`}
+                                  description={
+                                    quickFilter !== "all"
+                                      ? `No ${activeQuickFilterLabel.toLowerCase()} enquiries are available on this page.`
+                                      : `No student name or mobile number matches “${enquirySearch.trim()}”.`
+                                  }
+                                  actionLabel={quickFilter !== "all" ? "Show all" : "Clear search"}
+                                  onAction={
+                                    quickFilter !== "all"
+                                      ? () => setQuickFilter("all")
+                                      : clearEnquirySearch
+                                  }
                                   variant="compact"
                                 />
                               </td>
@@ -667,61 +774,6 @@ const Enquiries = () => {
                         }}
                       />
                     )}
-                    {/* <div className="row g-4">
-                      {enquiriesData.map((enquiries, index) => (
-                        <div
-                          className="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3"
-                          key={index}
-                        >
-                          <div className="student-card position-relative">
-                            
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: "5px",
-                                right: "5px",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "5px",
-                              }}
-                            >
-                              <button
-                                className="btn btn-sm btn-warning"
-                                title="Edit Enquiries"
-                                onClick={() => handleEditEnquiries(enquiries)}
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </button>
-                              
-                            </div>
-
-                            <div>
-                              <img src={avatar} alt="Avatar" />
-                              <h5>{enquiries.name || "Name"}</h5>
-                              <p>{enquiries.mobile_number || "N/A"}</p>
-                              <p>{enquiries.email || "N/A"}</p>
-                            </div>
-
-                            <div>
-                              <div className="card-buttons">
-                                <Link
-                                  to="#"
-                                  onClick={() => openEnquriesProfile(enquiries)}
-                                  className="btn btn-primary btn-sm"
-                                >
-                                  View
-                                </Link>
-                                
-                              </div>
-                              <div className="completed-classes">
-                                <i className="bi bi-check-circle"></i>{" "}
-                                {enquiries.follow_up_status}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div> */}
                     </>
                   )}
                 </div>
@@ -738,13 +790,6 @@ const Enquiries = () => {
               isEdit={isEdit}
             ></AddEnquiries>
 
-            <DeleteConfirmation
-              showDeleteModal={showDeleteModal}
-              hideDeleteModal={handleDeleteCloseModel}
-              confirmModal={deleteData}
-              id={selectedEnquiriesAppId}
-              message={"Are you sure want to delete this enquiries?"}
-            />
             <ProfileModal
               show={showProfileModal}
               onClose={() => setShowProfileModal(false)}

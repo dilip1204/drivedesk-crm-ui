@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useTenantLogo } from "../hooks/useTenantLogo";
@@ -25,6 +25,12 @@ export default function Sidebar() {
   const { role } = useAuth(); // 👈 Fetch user role
 
   const isActive = (path) => location.pathname.startsWith(path);
+  const [renewalsOpen, setRenewalsOpen] = useState(isActive("/renewals"));
+
+  useEffect(() => {
+    if (isActive("/renewals")) setRenewalsOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   useEffect(() => {
     const closeOnEscape = (event) => {
@@ -52,20 +58,6 @@ export default function Sidebar() {
 
         <div className="sidebar-scroll-area" data-simplebar>
           <ul className="nav sidebar-inner" id="sidebar-menu" aria-label="DriveDesk pages">
-
-            <li className={`has-sub renewals-nav ${isActive("/renewals") ? "active expand" : ""}`}>
-              <Link className="sidenav-item-link" to="/renewals/dashboard" title="Renewals">
-                <i className="mdi mdi-card-account-details-outline"></i>
-                <span className="nav-text">Renewals</span>
-              </Link>
-              <ul className="renewals-subnav" aria-label="Renewal pages">
-                <li className={location.pathname === "/renewals/dashboard" ? "active" : ""}><Link to="/renewals/dashboard">Dashboard</Link></li>
-                <li className={location.pathname === "/renewals/licence-expiries" ? "active" : ""}><Link to="/renewals/licence-expiries">Licence Expiries</Link></li>
-                <li className={location.pathname === "/renewals/external-customers" ? "active" : ""}><Link to="/renewals/external-customers">External Customers</Link></li>
-                <li className={location.pathname === "/renewals/vehicles" ? "active" : ""}><Link to="/renewals/vehicles">Vehicle Documents</Link></li>
-                <li className={location.pathname === "/renewals/vehicle-document-expiries" ? "active" : ""}><Link to="/renewals/vehicle-document-expiries">Document Expiries</Link></li>
-              </ul>
-            </li>
 
             {role !== "super_admin" && (
               <>
@@ -130,6 +122,30 @@ export default function Sidebar() {
                 <i className="mdi mdi-cash-multiple"></i>
                   <span className="nav-text">Expenses</span>
                 </Link>
+              </li>
+
+              <li className={`has-sub renewals-nav ${isActive("/renewals") ? "active" : ""} ${renewalsOpen ? "expand" : ""}`}>
+                <Link className="sidenav-item-link" to="/renewals/dashboard" title="Renewals">
+                  <i className="mdi mdi-autorenew"></i>
+                  <span className="nav-text">Renewals</span>
+                </Link>
+                <button
+                  type="button"
+                  className="renewals-nav-toggle"
+                  onClick={() => setRenewalsOpen((isOpen) => !isOpen)}
+                  aria-label={renewalsOpen ? "Collapse Renewals menu" : "Expand Renewals menu"}
+                  aria-expanded={renewalsOpen}
+                  aria-controls="renewals-submenu"
+                >
+                  <i className="mdi mdi-chevron-down" aria-hidden="true"></i>
+                </button>
+                <ul id="renewals-submenu" className="renewals-subnav" aria-label="Renewal pages">
+                  <li className={location.pathname === "/renewals/dashboard" ? "active" : ""}><Link to="/renewals/dashboard"><i className="mdi mdi-view-dashboard-outline" aria-hidden="true" />Dashboard</Link></li>
+                  <li className={location.pathname === "/renewals/licence-expiries" ? "active" : ""}><Link to="/renewals/licence-expiries"><i className="mdi mdi-account-card-details" aria-hidden="true" />Licence Expiries</Link></li>
+                  <li className={location.pathname === "/renewals/external-customers" ? "active" : ""}><Link to="/renewals/external-customers"><i className="mdi mdi-account-multiple" aria-hidden="true" />External Customers</Link></li>
+                  <li className={location.pathname === "/renewals/vehicles" ? "active" : ""}><Link to="/renewals/vehicles"><i className="mdi mdi-car" aria-hidden="true" />Vehicle Documents</Link></li>
+                  <li className={location.pathname === "/renewals/vehicle-document-expiries" ? "active" : ""}><Link to="/renewals/vehicle-document-expiries"><i className="mdi mdi-file-document" aria-hidden="true" />Document Expiries</Link></li>
+                </ul>
               </li>
 
               <li className={`has-sub ${isActive("/tutorials") ? "active expand" : ""}`}>

@@ -11,15 +11,15 @@ import "./Renewals.css";
 
 const STATUS_CARDS = [
   { key: "expired", query: "EXPIRED", label: "Expired", icon: "mdi-alert-circle-outline", tone: "danger" },
-  { key: "expiring_7_days", query: "EXPIRING_7_DAYS", label: "Within 7 days", icon: "mdi-clock-alert-outline", tone: "urgent" },
+  { key: "expiring_7_days", query: "EXPIRING_7_DAYS", label: "Within 7 days", icon: "mdi-alarm", tone: "urgent" },
   { key: "expiring_30_days", query: "EXPIRING_30_DAYS", label: "Within 30 days", icon: "mdi-calendar-alert", tone: "warning" },
-  { key: "expiring_60_days", query: "EXPIRING_60_DAYS", label: "Within 60 days", icon: "mdi-calendar-clock", tone: "notice" },
+  { key: "expiring_60_days", query: "EXPIRING_60_DAYS", label: "Within 60 days", icon: "mdi-timetable", tone: "notice" },
 ];
 
 const SECTIONS = [
-  { key: "licence", label: "Driving Licences", description: "Passed students and external DL customers", icon: "mdi-card-account-details-outline", documentType: "DL", report: "/renewals/licence-expiries" },
-  { key: "conductor_licence", label: "Conductor Licences", description: "External conductor licence customers", icon: "mdi-badge-account-outline", documentType: "CL", report: "/renewals/licence-expiries" },
-  { key: "vehicle_documents", label: "Vehicle Documents", description: "FC, insurance, tax, permits and other records", icon: "mdi-car-info", report: "/renewals/vehicle-document-expiries" },
+  { key: "licence", label: "Driving Licences", shortLabel: "DL", description: "Passed students and external DL customers", icon: "mdi-account-card-details", documentType: "DL", report: "/renewals/licence-expiries", tone: "blue" },
+  { key: "conductor_licence", label: "Conductor Licences", shortLabel: "CL", description: "External conductor licence customers", icon: "mdi-account-multiple", documentType: "CL", report: "/renewals/licence-expiries", tone: "purple" },
+  { key: "vehicle_documents", label: "Vehicle Documents", shortLabel: "VEHICLE", description: "FC, insurance, tax, permits and other records", icon: "mdi-car", report: "/renewals/vehicle-document-expiries", tone: "teal" },
 ];
 
 const getErrorMessage = (error) => {
@@ -60,6 +60,13 @@ export default function RenewalDashboard() {
     (total, section) => total + (Number(dashboard?.[section.key]?.expired) || 0),
     0
   );
+  const statusTotals = STATUS_CARDS.map((status) => ({
+    ...status,
+    count: SECTIONS.reduce(
+      (total, section) => total + (Number(dashboard?.[section.key]?.[status.key]) || 0),
+      0
+    ),
+  }));
 
   return (
     <div className="header-fixed sidebar-fixed sidebar-dark header-light renewals-page" id="body">
@@ -68,7 +75,7 @@ export default function RenewalDashboard() {
         <div className="page-wrapper">
           <Header />
           <div className="content-wrapper">
-            <main className="content renewals-content">
+            <main className="content renewals-content renewal-dashboard-content">
               <header className="renewals-hero renewal-dashboard-hero">
                 <div><span className="renewals-eyebrow">Renewals</span><h1>Renewal Dashboard</h1><p>Licence and vehicle-document expiries requiring attention.</p></div>
                 <Button variant="outline-secondary" onClick={loadDashboard} disabled={loading}><i className={`mdi ${loading ? "mdi-loading mdi-spin" : "mdi-refresh"}`} /> {loading ? "Refreshing" : "Refresh"}</Button>
@@ -81,14 +88,19 @@ export default function RenewalDashboard() {
               ) : (
                 <>
                   <section className="renewal-dashboard-summary">
-                    <div><span>Expired records</span><strong>{expiredTotal.toLocaleString("en-IN")}</strong><small>Across driving licences, conductor licences and vehicle documents</small></div>
-                    <i className="mdi mdi-calendar-multiple-check" aria-hidden="true" />
+                    <div className="renewal-summary-icon"><i className="mdi mdi-autorenew" aria-hidden="true" /></div>
+                    <div className="renewal-summary-copy"><span>Renewal attention centre</span><h2>Stay ahead of every expiry</h2><p>Review licences and vehicle documents before their renewal dates.</p></div>
+                    <div className="renewal-summary-expired"><small>Expired now</small><strong>{expiredTotal.toLocaleString("en-IN")}</strong><span>Needs immediate action</span></div>
                   </section>
                   {error && <div className="renewal-dashboard-inline-error" role="alert">{error}</div>}
+                  <section className="renewal-urgency-overview" aria-label="Expiry overview">
+                    {statusTotals.map((status) => <article className={`renewal-urgency-card is-${status.tone}`} key={status.key}><span className="renewal-urgency-icon"><i className={`mdi ${status.icon}`} /></span><div><small>{status.label}</small><strong>{status.count.toLocaleString("en-IN")}</strong><span>Across all categories</span></div></article>)}
+                  </section>
+                  <div className="renewal-dashboard-section-title"><div><span>Category breakdown</span><h2>What needs renewal?</h2></div><small>Select any count to open its filtered report</small></div>
                   <div className="renewal-dashboard-sections">
                     {SECTIONS.map((section) => (
-                      <section className="renewals-card renewal-dashboard-section" key={section.key}>
-                        <header><span className="renewal-section-icon"><i className={`mdi ${section.icon}`} /></span><div><h2>{section.label}</h2><p>{section.description}</p></div></header>
+                      <section className={`renewals-card renewal-dashboard-section is-${section.tone}`} key={section.key}>
+                        <header><span className="renewal-section-icon"><i className={`mdi ${section.icon}`} /></span><div><span className="renewal-section-kicker">{section.shortLabel}</span><h2>{section.label}</h2><p>{section.description}</p></div><i className="mdi mdi-arrow-right renewal-section-arrow" /></header>
                         <div className="renewal-count-grid">
                           {STATUS_CARDS.map((status) => {
                             const count = Number(dashboard?.[section.key]?.[status.key]) || 0;

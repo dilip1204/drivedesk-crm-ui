@@ -68,7 +68,7 @@ export default function AppRoutes() {
       <Route
         path="/renewals/external-customers"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
             <ExternalRenewals />
           </ProtectedRoute>
         }
@@ -77,7 +77,7 @@ export default function AppRoutes() {
       <Route
         path="/renewals/licence-expiries"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
             <LicenceExpiries />
           </ProtectedRoute>
         }
@@ -86,7 +86,7 @@ export default function AppRoutes() {
       <Route
         path="/renewals/vehicles"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
             <VehicleDocuments />
           </ProtectedRoute>
         }
@@ -95,7 +95,7 @@ export default function AppRoutes() {
       <Route
         path="/renewals/vehicle-document-expiries"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
             <VehicleDocumentExpiries />
           </ProtectedRoute>
         }
@@ -104,7 +104,7 @@ export default function AppRoutes() {
       <Route
         path="/renewals/dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
             <RenewalDashboard />
           </ProtectedRoute>
         }

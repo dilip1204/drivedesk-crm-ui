@@ -142,9 +142,9 @@ export default function Sidebar() {
                 <ul id="renewals-submenu" className="renewals-subnav" aria-label="Renewal pages">
                   <li className={location.pathname === "/renewals/dashboard" ? "active" : ""}><Link to="/renewals/dashboard"><i className="mdi mdi-view-dashboard-outline" aria-hidden="true" />Dashboard</Link></li>
                   <li className={location.pathname === "/renewals/licence-expiries" ? "active" : ""}><Link to="/renewals/licence-expiries"><i className="mdi mdi-account-card-details" aria-hidden="true" />Licence Expiries</Link></li>
+                  <li className={location.pathname === "/renewals/vehicle-document-expiries" ? "active" : ""}><Link to="/renewals/vehicle-document-expiries"><i className="mdi mdi-file-document" aria-hidden="true" />Document Expiries</Link></li>
                   <li className={location.pathname === "/renewals/external-customers" ? "active" : ""}><Link to="/renewals/external-customers"><i className="mdi mdi-account-multiple" aria-hidden="true" />External Customers</Link></li>
                   <li className={location.pathname === "/renewals/vehicles" ? "active" : ""}><Link to="/renewals/vehicles"><i className="mdi mdi-car" aria-hidden="true" />Vehicle Documents</Link></li>
-                  <li className={location.pathname === "/renewals/vehicle-document-expiries" ? "active" : ""}><Link to="/renewals/vehicle-document-expiries"><i className="mdi mdi-file-document" aria-hidden="true" />Document Expiries</Link></li>
                 </ul>
               </li>
 

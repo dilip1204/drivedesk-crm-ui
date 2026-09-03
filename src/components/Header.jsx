@@ -20,7 +20,7 @@ const SEARCHABLE_PAGES = [
   { label: "Tariff", path: "/tariff", icon: "mdi-currency-inr", roles: ["admin"] },
   { label: "Training Session", path: "/trainingsession", icon: "mdi-school", roles: ["admin", "instructor"] },
   { label: "Attendance", path: "/attendance", icon: "mdi-calendar-check-outline", roles: ["admin", "instructor"] },
-  { label: "Outstanding Fees", path: "/outstandingfees", icon: "mdi-cash-clock", roles: ["admin", "instructor"] },
+  { label: "Payment Dues", path: "/outstandingfees", icon: "mdi-wallet-outline", roles: ["admin"] },
   { label: "Expenses", path: "/fleetexpenses", icon: "mdi-cash-multiple", roles: ["admin", "instructor"] },
   { label: "Finance Dashboard", path: "/finance-dashboard", icon: "mdi-finance", roles: ["super_admin"] },
   { label: "Tutorials", path: "/tutorials", icon: "mdi-play-circle-outline", roles: ["admin", "instructor"] },

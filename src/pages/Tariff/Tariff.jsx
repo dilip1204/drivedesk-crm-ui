@@ -10,10 +10,13 @@ import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
 
 
 import "../Students/Students.css";
+import "./Tariff.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import { getTariffsListInformation } from "../../store/tariff/actions";
 import { deleteTariff } from "../../store/tariff/actions";
@@ -146,7 +149,7 @@ const Tariff = () => {
   return (
     <>
       <div
-        className="header-fixed sidebar-fixed sidebar-dark header-light"
+        className="header-fixed sidebar-fixed sidebar-dark header-light tariff-page"
         id="body"
       >
         <div className="wrapper">
@@ -157,25 +160,27 @@ const Tariff = () => {
             <div className="content-wrapper">
               <div className="content">
                 {/* Breadcrumb */}
-                <div className="row">
+                <div className="row tariff-page-heading">
                   <div className="breadcrumb-wrapper col-xl-6">
                     <h1>Tariffs</h1>
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
-                          <a href="#">
-                            <span className="mdi mdi-home"></span>
+                          <a href="#" className="tariff-breadcrumb-home" aria-label="Tariffs home">
+                            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                              <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                            </svg>
                           </a>
                         </li>
                         <li className="breadcrumb-item">Tariffs</li>
                         <li className="breadcrumb-item" aria-current="page">
-                          TariffList
+                          Tariff List
                         </li>
                       </ol>
                     </nav>
                   </div>
 
-                  <div className="col-xl-6 text-right">
+                  <div className="col-xl-6 text-right tariff-page-actions">
                     {role === "admin" ? (
                       <button
                         type="button"
@@ -193,13 +198,17 @@ const Tariff = () => {
                 {/* Student List */}
                 <div>
                   {loading ? (
-                    <p className="text-center my-5">Loading tariffs...</p>
+                    <LoadingState label="Loading tariffs" />
                   ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
+                    <EmptyState
+                      icon="bi bi-card-list"
+                      title="No tariff plans found"
+                      description="Tariff plans will appear here after they are created."
+                    />
                   ) : (
                     <>
-                    <div className="table-responsive">
-                      <table className="table custom-table text-center align-middle">
+                    <div className="table-responsive tariff-table-wrap">
+                      <table className="table custom-table text-center align-middle tariff-table">
                         <thead className="table-light">
                           <tr>
                             <th>S.NO</th>
@@ -213,31 +222,35 @@ const Tariff = () => {
                         <tbody>
                           {tariffsData.map((tariff, index) => (
                             <tr key={index}>
-                              <td>{index+1}</td>
-                              <td>{tariff.plan_name || "Plan Name"}</td>
-                              <td>{tariff.training_days || 0} Training days</td>
-                              <td>{tariff.amount || "N/A"}</td>
+                              <td data-label="S.No">{index+1}</td>
+                              <td data-label="Plan Name" className="tariff-plan-name">{tariff.plan_name || "Plan Name"}</td>
+                              <td data-label="Training Days">{tariff.training_days || 0} Training days</td>
+                              <td data-label="Amount" className="tariff-amount">{tariff.amount || "N/A"}</td>
                               {/* <td className="status"><i className="bi bi-check-circle"></i>{" "} {tariff.reference_fee || 0} Reference fee</td> */}
-                              <td>
+                              <td data-label="Actions" className="tariff-row-actions">
                                 {role === "admin" ? (
                                 <>
                                   <button
-                                    className="btn btn-sm btn-warning"
+                                    className="btn btn-sm btn-warning tariff-action-icon"
                                     title="Edit Tariff"
+                                    data-tooltip="Edit Tariff"
+                                    aria-label="Edit Tariff"
                                     onClick={() => handleEditTariff(tariff)}
                                   >
-                                    {/* <i className="bi bi-pencil"></i> */}
-                                    Edit
+                                    <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                                    <span className="tariff-action-label">Edit</span>
                                   </button>{" "}
                                   <button
-                                    className="btn btn-sm btn-danger"
+                                    className="btn btn-sm btn-danger tariff-action-icon"
                                     title="Delete Tariff"
+                                    data-tooltip="Delete Tariff"
+                                    aria-label="Delete Tariff"
                                     onClick={() =>
                                       deleteTariffPlan(tariff.plan_name)
                                     }
                                   >
-                                    {/* <i className="bi bi-trash"></i> */}
-                                    Delete
+                                    <i className="bi bi-trash" aria-hidden="true"></i>
+                                    <span className="tariff-action-label">Delete</span>
                                   </button>
                                 </>
                               ) : (
@@ -246,9 +259,13 @@ const Tariff = () => {
                               <Link
                                   to="#"
                                   onClick={() => openTariffProfile(tariff)}
-                                  className="btn btn-primary btn-sm"
+                                  className="btn btn-primary btn-sm tariff-action-icon"
+                                  title="View Tariff"
+                                  data-tooltip="View Tariff"
+                                  aria-label="View Tariff"
                                 >
-                                  View
+                                  <i className="bi bi-eye" aria-hidden="true"></i>
+                                  <span className="tariff-action-label">View</span>
                                 </Link>
                               </td>
                             </tr>

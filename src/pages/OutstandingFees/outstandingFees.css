@@ -1,0 +1,393 @@
+.outstanding-fees-page .content {
+  color: var(--color-text, #172033);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.outstanding-fees-heading {
+  margin-bottom: 10px;
+}
+
+.outstanding-fees-content {
+  min-width: 0;
+}
+
+.payment-dues-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 10px;
+}
+
+.payment-dues-summary > div {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 58px;
+  padding: 9px 11px;
+  border: 1px solid #d9e0e8;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, .05);
+}
+
+.payment-dues-summary i {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #eef4ff;
+  color: #175cd3;
+  font-size: 14px;
+  place-items: center;
+}
+
+.payment-dues-summary span {
+  color: #667085;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.payment-dues-summary strong {
+  color: #172033;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.outstanding-fees-state {
+  display: flex;
+  min-height: 180px;
+  align-items: center;
+  gap: 9px;
+  justify-content: center;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-surface, #fff);
+  color: var(--color-muted, #667085);
+  font-size: 12px;
+  box-shadow: var(--shadow-card, 0 3px 12px rgba(16, 24, 40, .07));
+}
+
+.outstanding-fees-state.is-empty {
+  flex-direction: column;
+  gap: 5px;
+  text-align: center;
+}
+
+.outstanding-fees-state.is-empty i {
+  margin-bottom: 3px;
+  color: #98a2b3;
+  font-size: 26px;
+}
+
+.outstanding-fees-state.is-empty strong {
+  color: var(--color-text, #172033);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.outstanding-selection-toolbar {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 6px 8px 6px 12px;
+  border: 1px solid #f2d49b;
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #7a4b00;
+  font-size: 11px;
+}
+
+.outstanding-selection-toolbar .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.outstanding-fees-table {
+  min-width: 1120px;
+}
+
+.payment-reminder-actions {
+  min-width: 170px;
+  white-space: nowrap;
+}
+
+.payment-reminder-button {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+  padding: 4px 7px;
+  margin: 1px 2px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.payment-reminder-button.is-call { border-color: #bfd4ff; background: #edf5ff; color: #175cd3; }
+.payment-reminder-button.is-whatsapp { border-color: #b7e6c8; background: #eaf8ef; color: #128c4b; }
+.payment-reminder-button:hover { filter: brightness(.96); text-decoration: none; }
+.payment-reminder-unavailable { color: #98a2b3; font-size: 10px; }
+
+.outstanding-fees-table th:first-child,
+.outstanding-fees-table td:first-child {
+  width: 44px;
+  text-align: center !important;
+}
+
+.outstanding-fees-table th:nth-child(2),
+.outstanding-fees-table td:nth-child(2) {
+  width: 58px;
+}
+
+.outstanding-fees-table input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--color-primary, #1f4e78);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.outstanding-student-name {
+  color: var(--color-text, #172033);
+  font-weight: 500;
+}
+
+.outstanding-balance {
+  color: var(--color-text, #172033);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.outstanding-status {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #475467;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .15px;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.outstanding-status.is-success {
+  background: #eaf8f1;
+  color: #157347;
+}
+
+.outstanding-status.is-warning {
+  background: #fff4e5;
+  color: #a15c00;
+}
+
+.outstanding-status.is-danger {
+  background: #fff0f1;
+  color: #b42318;
+}
+
+.outstanding-adjustment-modal {
+  display: block;
+  z-index: 2000;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(16, 24, 40, .48);
+}
+
+.outstanding-adjustment-dialog {
+  width: min(420px, calc(100vw - 32px));
+  max-width: 420px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.outstanding-adjustment-dialog .modal-content {
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  color: var(--color-text, #172033);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+  box-shadow: 0 18px 48px rgba(16, 24, 40, .22);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.outstanding-adjustment-dialog .modal-header {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--color-border, #d9e0e8);
+  background: #f8fafc;
+}
+
+.outstanding-adjustment-icon {
+  display: grid;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #fff4e5;
+  color: var(--color-warning, #d97706);
+  font-size: 15px;
+  place-items: center;
+}
+
+.outstanding-adjustment-dialog .modal-title {
+  margin: 0;
+  color: var(--color-text, #172033);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.outstanding-adjustment-dialog .modal-body {
+  padding: 16px;
+  color: #475467;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.outstanding-adjustment-dialog .modal-body strong {
+  color: var(--color-text, #172033);
+}
+
+.outstanding-adjustment-dialog .modal-footer {
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--color-border, #d9e0e8);
+  background: #f8fafc;
+}
+
+.outstanding-adjustment-dialog .modal-footer .btn {
+  min-width: 82px;
+  height: 34px;
+  min-height: 34px;
+  padding: 5px 12px;
+  margin: 0;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 767.98px) {
+  .payment-dues-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .payment-dues-summary > div {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .payment-dues-summary strong {
+    grid-column: 2;
+  }
+  .outstanding-fees-heading {
+    margin-bottom: 8px;
+  }
+
+  .outstanding-selection-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .outstanding-selection-toolbar .btn {
+    width: 100%;
+    min-height: 40px;
+    justify-content: center;
+    font-size: 12px;
+    white-space: normal;
+  }
+
+  .outstanding-fees-table {
+    min-width: 0;
+  }
+
+  .outstanding-fees-table tbody td.outstanding-select-cell {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(105px, 38%) minmax(0, 1fr);
+    text-align: right !important;
+  }
+
+  .outstanding-select-cell input,
+  .outstanding-status {
+    justify-self: end;
+  }
+
+  .outstanding-fees-table input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+  }
+
+  .outstanding-balance {
+    text-align: right !important;
+  }
+
+  .payment-reminder-actions {
+    display: flex !important;
+    gap: 7px;
+  }
+
+  .payment-reminder-actions::before {
+    flex: 1 0 100%;
+  }
+
+  .payment-reminder-button {
+    min-height: 40px;
+    flex: 1 1 0;
+    font-size: 11px;
+  }
+
+  .outstanding-adjustment-modal {
+    padding: 8px;
+  }
+
+  .outstanding-adjustment-dialog {
+    width: calc(100vw - 16px);
+    max-width: none;
+    margin: 8px auto;
+  }
+
+  .outstanding-adjustment-dialog .modal-body {
+    font-size: 13px;
+  }
+
+  .outstanding-adjustment-dialog .modal-footer {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .outstanding-adjustment-dialog .modal-footer .btn {
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    font-size: 13px;
+  }
+}

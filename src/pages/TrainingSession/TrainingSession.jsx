@@ -1,22 +1,26 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
+import { Button, Modal } from "react-bootstrap";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
 
 import "./../Students/Students.css";
+import "./TrainingSession.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import AddTrainingSession from "./addTrainingSession";
-import RescheduleSession from "./RescheduleSession";
 
 import {
   getTrainingSessionListInformation,
   getTrainingSessionFilterListInformation,
+  RescheduleTrainingSession,
 } from "../../store/trainingSession/actions";
 
 import { getInstructorsListInformation } from "../../store/instructors/actions";
@@ -29,14 +33,72 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 import {
+  getAdminPrintHeader,
   getAdminPrintWatermark,
   isSriRagavendraOrganization,
 } from "../../utils/printBranding";
+import { ensureTenantLogo } from "../../hooks/useTenantLogo";
+
+const isCompletedSession = (session) =>
+  String(session?.status || session?.session_status || "")
+    .trim()
+    .toLowerCase() === "completed";
+
+const DAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const DEFAULT_WORKING_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+const normalizeWorkingDay = (day) => String(day || "").trim().slice(0, 3).toUpperCase();
+
+const parseSessionDate = (value) => {
+  const datePart = String(value || "").slice(0, 10);
+  const [year, month, day] = datePart.split("-").map(Number);
+  if (!year || !month || !day) return null;
+
+  const parsedDate = new Date(year, month - 1, day, 12, 0, 0);
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
+
+const toLocalISODate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getNextWorkingDate = (sessionDate, workingDays) => {
+  const currentDate = parseSessionDate(sessionDate);
+  if (!currentDate) return null;
+
+  const normalizedDays = Array.isArray(workingDays)
+    ? workingDays.map(normalizeWorkingDay).filter(Boolean)
+    : [];
+  const workingDaySet = new Set(normalizedDays.length ? normalizedDays : DEFAULT_WORKING_DAYS);
+  const candidate = new Date(currentDate);
+
+  for (let offset = 1; offset <= 7; offset += 1) {
+    candidate.setDate(candidate.getDate() + 1);
+    if (workingDaySet.has(DAY_CODES[candidate.getDay()])) {
+      return toLocalISODate(candidate);
+    }
+  }
+
+  return null;
+};
+
+const formatLeaveDate = (value) => {
+  const date = parseSessionDate(value);
+  if (!date) return value || "-";
+  return date.toLocaleDateString("en-IN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 
 const TrainingSession = () => {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
-  const [showRModal, setShowRModal] = useState(false);
   const [trainingSessionData, setTrainingSessionData] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,6 +109,9 @@ const TrainingSession = () => {
   const [sessionStudentData, setSessionStudentData] = useState(null);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filterApplied, setFilterApplied] = useState(false);
+  const [studentSearch, setStudentSearch] = useState("");
+  const [leavePlan, setLeavePlan] = useState(null);
+  const [markingLeave, setMarkingLeave] = useState(false);
   const completedTableRef = useRef(null);
 
   // NEW: completed sessions modal state
@@ -54,6 +119,13 @@ const TrainingSession = () => {
   const [completedSessions, setCompletedSessions] = useState([]);
   const [completedLoading, setCompletedLoading] = useState(false);
   const [completedError, setCompletedError] = useState(null);
+  const completedClassCount = useMemo(
+    () => completedSessions.reduce(
+      (total, session) => total + (Number(session?.num_classes) || 1),
+      0
+    ),
+    [completedSessions]
+  );
 
   const trainingSessionDataLists = useSelector(
     (state) => state.trainingSessionListInfo.trainingSessionList
@@ -104,7 +176,7 @@ const TrainingSession = () => {
     setSessionStudentData(null);
   };
 
-  const printCompletedTable = () => {
+  const printCompletedTable = async () => {
     const content = completedTableRef.current?.outerHTML || "<p>No data</p>";
     const firstSession = completedSessions[0] || {};
     const studentName = firstSession?.student_name || "-";
@@ -134,6 +206,11 @@ const TrainingSession = () => {
         .replace(/'/g, "&#039;");
 
     const win = window.open("", "", "width=900,height=700");
+    if (!win) {
+      toast.error("Please allow pop-ups to print the progress report.");
+      return;
+    }
+    const tenantLogo = await ensureTenantLogo(dispatch);
     win.document.write(`<!doctype html>
     <html>
       <head>
@@ -145,7 +222,9 @@ const TrainingSession = () => {
           html, body { width: 210mm; min-height: 297mm; margin: 0; padding: 0; }
           body { color: #172033; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
           .report { position: relative; z-index: 1; width: 210mm; min-height: 297mm; padding: 16mm; }
-          .report-header { padding-bottom: 14px; border-bottom: 2px solid #1f4e78; text-align: center; }
+          .report-header { display: grid; grid-template-columns: 112px minmax(0, 1fr) 112px; min-height: 86px; align-items: center; padding-bottom: 14px; border-bottom: 2px solid #1f4e78; }
+          .report-header-copy { align-self: center; text-align: center; }
+          .report-header-spacer { width: 112px; }
           .org-name { margin: 0 0 5px; color: #172033; font-size: 21px; font-weight: 700; text-transform: uppercase; }
           .report-title { margin: 0; color: #1f4e78; font-size: 17px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
           .website { margin: 5px 0 0; color: #1f4e78; font-size: 11px; font-weight: 600; }
@@ -170,12 +249,16 @@ const TrainingSession = () => {
         </style>
       </head>
       <body>
-        ${getAdminPrintWatermark()}
+        ${getAdminPrintWatermark(tenantLogo)}
         <main class="report">
           <header class="report-header">
-            ${orgNameForReport ? `<h1 class="org-name">${escapeHtml(orgNameForReport)}</h1>` : ""}
-            <h2 class="report-title">Student - Progress Report</h2>
-            ${isSriRagavendraOrganization() ? '<p class="website">www.sriragavendradrivingschool.com</p>' : ""}
+            ${getAdminPrintHeader(tenantLogo)}
+            <div class="report-header-copy">
+              ${orgNameForReport ? `<h1 class="org-name">${escapeHtml(orgNameForReport)}</h1>` : ""}
+              <h2 class="report-title">Student - Progress Report</h2>
+              ${isSriRagavendraOrganization() ? '<p class="website">www.sriragavendradrivingschool.com</p>' : ""}
+            </div>
+            <span class="report-header-spacer" aria-hidden="true"></span>
           </header>
           <section class="report-meta">
             <div class="meta-item"><span class="meta-label">Student:</span><span class="meta-value">${escapeHtml(studentName)}</span></div>
@@ -184,7 +267,7 @@ const TrainingSession = () => {
             <div class="meta-item"><span class="meta-label">Generated on:</span><span class="meta-value">${escapeHtml(reportDate)}</span></div>
           </section>
           ${content}
-          <div class="summary">Total completed sessions: <strong>${completedSessions.length}</strong></div>
+          <div class="summary">Total completed sessions: <strong>${completedClassCount}</strong></div>
           <section class="signatures">
             <div class="signature">Instructor Signature<small>${escapeHtml(instructorNames)}</small></div>
             <div class="signature">Authorized Signature<small>Driving School Authority</small></div>
@@ -270,28 +353,89 @@ const TrainingSession = () => {
     );
   };
 
-  const onReschduleStudentData = (res, isEdit) => {
-    setSelectedStudent(res.response);
-    toast[res.isError ? "error" : "success"](
-      res.isError ? "Failed....!" : isEdit ? res.response.message : "Session added successfully!"
-    );
-  };
-
   const handleEditStudent = (student) => {
+    if (isCompletedSession(student)) return;
     setSelectedStudent(student);
     setIsEdit(true);
     setShowModal(true);
   };
 
-  const handleRescheduleSession = (student) => {
-    setSelectedStudent(student);
-    setIsEdit(true);
-    setShowRModal(true);
+  const findSessionInstructor = (session) => {
+    const sessionInstructorId = session?.instructor_id || session?.instructorId;
+    const sessionInstructorMobile =
+      session?.instructor_mobile || session?.instructor_mobile_number || session?.instructorMobile;
+    const sessionInstructorName = String(session?.instructor_name || "").trim().toLowerCase();
+
+    return instructorsData.find((instructor) => {
+      const instructorId = instructor?.id || instructor?._id;
+      const instructorMobile = instructor?.mobile_number || instructor?.mobile;
+      const instructorName = String(instructor?.name || "").trim().toLowerCase();
+
+      return (
+        (sessionInstructorId && String(instructorId) === String(sessionInstructorId)) ||
+        (sessionInstructorMobile && String(instructorMobile) === String(sessionInstructorMobile)) ||
+        (sessionInstructorName && instructorName === sessionInstructorName)
+      );
+    });
+  };
+
+  const handleMarkLeave = (student) => {
+    if (isCompletedSession(student)) return;
+
+    const sessionId = student?._id || student?.id;
+    if (!sessionId) {
+      toast.error("Session ID was not found.");
+      return;
+    }
+
+    const instructor = findSessionInstructor(student);
+    const newDate = getNextWorkingDate(student?.date, instructor?.working_days);
+    if (!newDate) {
+      toast.error("Unable to determine the instructor's next working day.");
+      return;
+    }
+
+    setLeavePlan({ session: student, sessionId, instructor, newDate });
+  };
+
+  const closeLeaveConfirmation = () => {
+    if (markingLeave) return;
+    setLeavePlan(null);
+  };
+
+  const confirmMarkLeave = () => {
+    if (!leavePlan || markingLeave) return;
+
+    setMarkingLeave(true);
+    dispatch(
+      RescheduleTrainingSession(
+        {
+          session_id: leavePlan.sessionId,
+          action: "postpone",
+          new_date: leavePlan.newDate,
+        },
+        (res) => {
+          setMarkingLeave(false);
+
+          if (res?.isError || !res) {
+            const message =
+              res?.data?.detail ||
+              res?.detail ||
+              "Unable to mark leave and move the session.";
+            toast.error(typeof message === "string" ? message : "Unable to mark leave and move the session.");
+            return;
+          }
+
+          toast.success(`Leave marked. Session moved to ${formatLeaveDate(leavePlan.newDate)}.`);
+          setLeavePlan(null);
+          getTrainingSessionList();
+        }
+      )
+    );
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setShowRModal(false);
     setIsEdit(false);
     setSelectedStudent(null);
   };
@@ -326,22 +470,41 @@ const TrainingSession = () => {
     );
   };
 
+  const completedReportStudent = completedSessions[0]?.student_name || "-";
+  const completedReportInstructors = [
+    ...new Set(completedSessions.map((session) => session?.instructor_name).filter(Boolean)),
+  ].join(", ") || "-";
+
+  const normalizedStudentSearch = studentSearch.trim();
+  const searchedTrainingSessions = useMemo(() => {
+    const query = normalizedStudentSearch.toLowerCase();
+    if (!query) return trainingSessionData;
+
+    return trainingSessionData.filter((session) =>
+      String(session?.student_name || "").toLowerCase().includes(query)
+    );
+  }, [normalizedStudentSearch, trainingSessionData]);
+
   return (
     <>
-      <div className="header-fixed sidebar-fixed sidebar-dark header-light" id="body">
+      <div className="header-fixed sidebar-fixed sidebar-dark header-light training-session-page" id="body">
         <div className="wrapper">
           <Sidebar />
           <div className="page-wrapper">
             <Header />
             <div className="content-wrapper">
               <div className="content">
-                <div className="row">
+                <div className="row training-session-heading">
                   <div className="breadcrumb-wrapper col-xl-6">
                     <h1>Training Session</h1>
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
-                          <a href="#"><span className="mdi mdi-home"></span></a>
+                          <a href="#" className="training-breadcrumb-home" aria-label="Training sessions home">
+                            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                              <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                            </svg>
+                          </a>
                         </li>
                         <li className="breadcrumb-item">Training Session</li>
                         <li className="breadcrumb-item" aria-current="page">
@@ -350,7 +513,7 @@ const TrainingSession = () => {
                       </ol>
                     </nav>
                   </div>
-                  <div className="col-xl-6 text-right">
+                  <div className="col-xl-6 text-right training-session-toolbar">
                     <button
                       type="button"
                       className="mb-1 btn btn-secondary mr-2"
@@ -365,7 +528,7 @@ const TrainingSession = () => {
                 </div>
 
                 {filtersVisible && (
-                  <div className="card p-3 mb-4">
+                  <div className="card p-3 mb-4 training-filter-card">
                     <Formik
                       initialValues={filters}
                       validationSchema={FilterValidationSchema}
@@ -394,8 +557,8 @@ const TrainingSession = () => {
                     >
                       {({ errors, touched }) => (
                         <Form>
-                          <div className="row align-items-end">
-                            <div className="col-md-3">
+                          <div className="row align-items-end training-filter-grid">
+                            <div className="col-lg-3 col-md-6">
                               <label>Instructor</label>
                               <Field
                                 as="select"
@@ -414,19 +577,19 @@ const TrainingSession = () => {
                               </div>
                             </div>
 
-                            <div className="col-md-2">
+                            <div className="col-lg-2 col-md-6">
                               <label>Start Date</label>
                               <Field type="date" name="start_date" className="form-control" />
                               <div style={{ minHeight: "22px" }}></div>
                             </div>
 
-                            <div className="col-md-2">
+                            <div className="col-lg-2 col-md-6">
                               <label>End Date</label>
                               <Field type="date" name="end_date" className="form-control" />
                               <div style={{ minHeight: "22px" }}></div>
                             </div>
 
-                            <div className="col-md-2">
+                            <div className="col-lg-2 col-md-6">
                               <label>Status</label>
                               <Field as="select" name="status" className="form-control">
                                 <option value="All">All</option>
@@ -437,7 +600,7 @@ const TrainingSession = () => {
                               <div style={{ minHeight: "22px" }}></div>
                             </div>
 
-                            <div className="col-md-2 align-items-end">
+                            <div className="col-lg-2 col-md-6 align-items-end">
                               <button type="submit" className="btn btn-primary w-100">Apply</button>
                               <div style={{ minHeight: "22px" }}></div>
                             </div>
@@ -449,28 +612,69 @@ const TrainingSession = () => {
                 )}
 
                 {/* Training session List */}
-                <div>
-                   <button
-                                  className="btn btn-sm btn-warning"
-                                  title="Reschedule Session"
-                                 
-                                >
-                                  <i className="bi bi-clock-history"></i>
-                                </button> - <span>Reschedule Session</span> {"  "} &nbsp;
-                                <button
-                                  className="btn btn-sm btn-success"
-                                  title="Show Student Completed Sessions"
-                                 
-                                >
-                                  <i className="bi bi-clipboard-check"></i>
-                                </button> - <span>Show Student Completed Sessions</span>
+                <div className="training-session-list">
+                  <div className="training-action-legend">
+                    <div className="training-legend-item">
+                      <span className="training-legend-icon is-warning" aria-hidden="true">
+                        <i className="bi bi-calendar-x" />
+                      </span>
+                      <span>Mark leave and move to next working day</span>
+                    </div>
+                    <div className="training-legend-item">
+                      <span className="training-legend-icon is-success" aria-hidden="true">
+                        <i className="bi bi-clipboard-check" />
+                      </span>
+                      <span>View progress report</span>
+                    </div>
+                    <div className="training-student-search" role="search">
+                      <div className="training-student-search-control">
+                        <div className="training-student-search-field">
+                          <i className="bi bi-search" aria-hidden="true" />
+                          <input
+                            id="training-student-search-input"
+                            type="text"
+                            className="form-control"
+                            value={studentSearch}
+                            onChange={(event) => setStudentSearch(event.target.value)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Escape") setStudentSearch("");
+                            }}
+                            placeholder="Type a student name..."
+                            aria-label="Search by student name"
+                            autoComplete="off"
+                            spellCheck="false"
+                          />
+                          {studentSearch && (
+                            <button
+                              type="button"
+                              className="training-student-search-clear"
+                              onClick={() => setStudentSearch("")}
+                              aria-label="Clear student search"
+                            >
+                              <i className="bi bi-x-lg" aria-hidden="true" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <span className="training-student-search-count" aria-live="polite">
+                        {normalizedStudentSearch
+                          ? `${searchedTrainingSessions.length} of ${trainingSessionData.length}`
+                          : trainingSessionData.length}{" "}
+                        session{trainingSessionData.length === 1 ? "" : "s"}
+                      </span>
+                    </div>
+                  </div>
                   {loading ? (
-                    <p className="text-center my-5">Loading training session...</p>
+                    <LoadingState label="Loading training sessions" />
                   ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
+                    <EmptyState
+                      icon="bi bi-calendar2-x"
+                      title="No training sessions found"
+                      description="Training sessions will appear here after they are scheduled or when they match the selected filters."
+                    />
                   ) : (
-                    <div className="table-responsive" style={{display: "block"}}>
-                      <table className="table custom-table text-center align-middle">
+                    <div className="table-responsive training-session-table-wrap">
+                      <table className="table custom-table text-center align-middle training-session-table">
                         <thead className="table-light">
                           <tr>
                             <th>S.NO</th>
@@ -483,53 +687,61 @@ const TrainingSession = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {trainingSessionData.map((tsession, index) => (
-                            <tr key={index}>
-                              <td>{index + 1}</td>
-                              <td>{tsession.student_name || "Student Name"}</td>
-                              <td>{tsession.instructor_name || "Instructor Name"}</td>
-                              <td>{tsession.date || "N/A"}</td>
-                              <td>{tsession.actual_progress || "N/A"}</td>
-                              <td className="status">
-                                <i className="bi bi-check-circle"></i>{" "} {tsession.status}
+                          {searchedTrainingSessions.length > 0 ? (
+                            searchedTrainingSessions.map((tsession, index) => (
+                            <tr key={tsession.id || tsession._id || `${tsession.student_name}-${tsession.date}-${index}`}>
+                              <td data-label="S.No">{index + 1}</td>
+                              <td data-label="Student">{tsession.student_name || "Student Name"}</td>
+                              <td data-label="Instructor">{tsession.instructor_name || "Instructor Name"}</td>
+                              <td data-label="Date">{formatDateDDMMYYYY(tsession.date)}</td>
+                              <td data-label="Progress">{tsession.actual_progress || "N/A"}</td>
+                              <td data-label="Status" className="status">
+                                <span className="training-session-status">
+                                  <i className="bi bi-check-circle"></i> {tsession.status}
+                                </span>
                               </td>
-                              <td>
-                                <button
-                                  className="btn btn-primary btn-sm action-btn"
-                                  onClick={() => openSessionModal(tsession)}
-                                >
-                                  View
-                                </button>
-
-                                <button
-                                  className="btn btn-sm btn-warning action-btn"
-                                  title="Edit Training Session"
-                                  onClick={() => handleEditStudent(tsession)}
-                                >
-                                  {/* <i className="bi bi-pencil"></i> */}
-                                  Edit
-                                </button>
-
-                                <button
-                                  className="btn btn-sm btn-warning"
-                                  title="Reschedule Session"
-                                  onClick={() => handleRescheduleSession(tsession)}
-                                >
-                                  <i className="bi bi-clock-history"></i>
-                                </button>
-
-                                {/* NEW: Completed Sessions */}
-                                {"  "}
-                                <button
-                                  className="btn btn-sm btn-success"
-                                  title="Show Student Completed Sessions"
-                                  onClick={() => openCompletedModal(tsession)}
-                                >
-                                  <i className="bi bi-clipboard-check"></i>
-                                </button>
+                              <td data-label="Actions" className="training-session-actions">
+                                <div className="training-session-action-buttons">
+                                  <button className="btn btn-primary btn-sm training-session-action-button" title="View Training Session" aria-label="View Training Session" onClick={() => openSessionModal(tsession)}><i className="bi bi-eye" aria-hidden="true"></i><span className="training-session-action-label">View</span></button>
+                                  <button
+                                    className="btn btn-sm btn-warning training-session-action-button"
+                                    title={isCompletedSession(tsession) ? "Completed sessions cannot be edited" : "Edit Training Session"}
+                                    aria-label={isCompletedSession(tsession) ? "Edit disabled: session completed" : "Edit Training Session"}
+                                    disabled={isCompletedSession(tsession)}
+                                    onClick={() => handleEditStudent(tsession)}
+                                  >
+                                    <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                                    <span className="training-session-action-label">Edit</span>
+                                  </button>
+                                  <button
+                                    className="btn btn-sm btn-warning training-session-action-button"
+                                    title={isCompletedSession(tsession) ? "Completed sessions cannot be marked as leave" : "Mark leave and move this session"}
+                                    aria-label={isCompletedSession(tsession) ? "Mark leave disabled: session completed" : "Mark leave"}
+                                    disabled={isCompletedSession(tsession) || (markingLeave && leavePlan?.sessionId === (tsession?._id || tsession?.id))}
+                                    onClick={() => handleMarkLeave(tsession)}
+                                  >
+                                    <i className="bi bi-calendar-x" aria-hidden="true"></i>
+                                    <span className="training-session-action-label">Mark Leave</span>
+                                  </button>
+                                  <button className="btn btn-sm btn-success training-session-action-button" title="Open Student Progress Report" aria-label="Open Student Progress Report" onClick={() => openCompletedModal(tsession)}><i className="bi bi-clipboard-check" aria-hidden="true"></i><span className="training-session-action-label">Report</span></button>
+                                </div>
                               </td>
                             </tr>
-                          ))}
+                            ))
+                          ) : (
+                            <tr className="training-search-empty-row">
+                              <td colSpan="7">
+                                <EmptyState
+                                  icon="bi bi-person-x"
+                                  title="No matching student"
+                                  description={`No training sessions match “${normalizedStudentSearch}”.`}
+                                  actionLabel="Clear search"
+                                  onAction={() => setStudentSearch("")}
+                                  variant="compact"
+                                />
+                              </td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -547,14 +759,57 @@ const TrainingSession = () => {
               isEdit={isEdit}
             />
 
-            <RescheduleSession
-              showModal={showRModal}
-              hideModal={handleCloseModal}
-              onStudentAdded={getTrainingSessionList}
-              studentData={onReschduleStudentData}
-              id={selectedStudent}
-              isEdit={isEdit}
-            />
+            <Modal
+              show={Boolean(leavePlan)}
+              onHide={closeLeaveConfirmation}
+              centered
+              backdrop="static"
+              keyboard={!markingLeave}
+              dialogClassName="mark-leave-dialog"
+            >
+              <Modal.Header closeButton={!markingLeave} className="mark-leave-header">
+                <Modal.Title>Confirm Student Leave</Modal.Title>
+              </Modal.Header>
+              <Modal.Body className="mark-leave-body">
+                <div className="mark-leave-content">
+                  <span className="mark-leave-icon" aria-hidden="true">
+                    <i className="bi bi-calendar-x" />
+                  </span>
+                  <div>
+                    <p>
+                      Mark <strong>{leavePlan?.session?.student_name || "this student"}</strong> as
+                      leave for {formatDateDDMMYYYY(leavePlan?.session?.date)}?
+                    </p>
+                    <div className="mark-leave-date-change">
+                      <span>{formatLeaveDate(leavePlan?.session?.date)}</span>
+                      <i className="bi bi-arrow-right" aria-hidden="true" />
+                      <strong>{formatLeaveDate(leavePlan?.newDate)}</strong>
+                    </div>
+                    <small>
+                      The session will move automatically to the instructor&apos;s next working day.
+                    </small>
+                  </div>
+                </div>
+              </Modal.Body>
+              <Modal.Footer className="mark-leave-footer">
+                <Button variant="secondary" onClick={closeLeaveConfirmation} disabled={markingLeave}>
+                  Cancel
+                </Button>
+                <Button variant="warning" onClick={confirmMarkLeave} disabled={markingLeave}>
+                  {markingLeave ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm mr-1" aria-hidden="true" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-check2 mr-1" aria-hidden="true" />
+                      Mark Leave
+                    </>
+                  )}
+                </Button>
+              </Modal.Footer>
+            </Modal>
 
             <StudentTrainingSessionModal
               show={showSessionModal}
@@ -562,87 +817,127 @@ const TrainingSession = () => {
               session={sessionStudentData}
             />
 
-            {/* NEW: Completed Sessions Modal */}
+            {/* Completed Sessions Modal */}
             <div
-              className={`modal fade ${showCompletedModal ? "show d-block" : ""}`}
+              className={`modal fade completed-sessions-modal ${showCompletedModal ? "show d-block" : ""}`}
               tabIndex="-1"
               role="dialog"
               aria-hidden={!showCompletedModal}
-              style={{ background: showCompletedModal ? "rgba(0,0,0,0.5)" : "transparent" }}
+              aria-modal={showCompletedModal ? "true" : undefined}
+              aria-labelledby="completed-sessions-title"
+              style={{ background: showCompletedModal ? "rgba(16,24,40,0.58)" : "transparent" }}
             >
-              <div className="modal-dialog modal-lg" role="document">
-                <div className="modal-content">
-                 
-
-                  <div className="modal-header align-items-start">
-  <div className="flex-grow-1 text-center">
-    {orgNameForReport && (
-      <div className="mb-1" style={{ fontSize: "1rem", fontWeight: 700, color: "#1b223c" }}>
-        {orgNameForReport}
-      </div>
-    )}
-    <h5 className="modal-title mb-0" style={{ fontSize: "1.05rem" }}>Progress Report</h5>
-  </div>
-  <div className="d-flex gap-2">
-    <button
-      type="button"
-      className="btn btn-outline-primary"
-      onClick={printCompletedTable}
-      disabled={completedLoading || !!completedError || completedSessions.length === 0}
-      title="Print completed sessions"
-    >
-      <i className="bi bi-printer"></i> Print
-    </button>
-    <button
-      type="button"
-      className="close btn"
-      aria-label="Close"
-      onClick={() => setShowCompletedModal(false)}
-    >
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-</div>
-
-
-                  <div className="modal-body" style={{overflowX: "auto",whiteSpace: "nowrap"}}>
-                    {completedLoading ? (
-                      <p className="text-center my-4">Loading completed sessions...</p>
-                    ) : completedError ? (
-                      <p className="text-center text-danger my-4">{completedError}</p>
-                    ) : (
-                      <div className="table-responsive">
-                        <table ref={completedTableRef} className="table table-bordered align-middle text-center">
-  <thead className="table-light">
-    <tr>
-      <th>#</th>
-      <th>Date</th>
-      <th>Instructor</th>
-      <th>Student</th>
-      <th>Remarks</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    {completedSessions.map((row, idx) => (
-      <tr key={idx}>
-        <td>{idx + 1}</td>
-        <td>{formatDateDDMMYYYY(row?.date)}</td>
-        <td>{row?.instructor_name || "-"}</td>
-        <td>{row?.student_name || "-"}</td>
-        <td>{row?.remarks || "-"}</td>
-        <td><span className="badge badge-success">Completed</span></td>
-      </tr>
-    ))}
-  </tbody>
-</table>
-
+              <div className="modal-dialog modal-lg completed-sessions-dialog" role="document">
+                <div className="modal-content completed-sessions-content">
+                  <div className="modal-header completed-sessions-header">
+                    <div className="completed-report-identity">
+                      <span className="completed-report-icon" aria-hidden="true">
+                        <i className="bi bi-clipboard2-check" />
+                      </span>
+                      <div>
+                        {orgNameForReport && (
+                          <div className="completed-report-org">{orgNameForReport}</div>
+                        )}
+                        <h5 className="modal-title" id="completed-sessions-title">
+                          Student - Progress Report
+                        </h5>
+                        <p>Completed practical training sessions</p>
                       </div>
+                    </div>
+
+                    <div className="completed-report-actions">
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary completed-print-button"
+                        onClick={printCompletedTable}
+                        disabled={completedLoading || !!completedError || completedSessions.length === 0}
+                        title="Print completed sessions"
+                      >
+                        <i className="bi bi-printer" aria-hidden="true" />
+                        <span>Print Report</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn completed-report-close"
+                        aria-label="Close progress report"
+                        onClick={() => setShowCompletedModal(false)}
+                      >
+                        <i className="bi bi-x-lg" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="modal-body completed-sessions-body">
+                    {completedLoading ? (
+                      <LoadingState label="Loading completed sessions" />
+                    ) : completedError ? (
+                      <EmptyState
+                        icon="bi bi-calendar2-x"
+                        title="No completed sessions found"
+                        description={completedError}
+                        variant="compact"
+                      />
+                    ) : (
+                      <>
+                        <div className="completed-report-summary">
+                          <div className="completed-summary-item">
+                            <span>Student</span>
+                            <strong>{completedReportStudent}</strong>
+                          </div>
+                          <div className="completed-summary-item">
+                            <span>Instructor</span>
+                            <strong>{completedReportInstructors}</strong>
+                          </div>
+                          <div className="completed-summary-item">
+                            <span>Completed Sessions</span>
+                            <strong>{completedClassCount}</strong>
+                          </div>
+                        </div>
+
+                        <div className="table-responsive completed-sessions-table-wrap">
+                          <table ref={completedTableRef} className="table align-middle completed-sessions-table">
+                            <thead>
+                              <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Instructor</th>
+                                <th>No. of Classes</th>
+                                <th>Remarks</th>
+                                <th>Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {completedSessions.map((row, idx) => (
+                                <tr key={idx}>
+                                  <td data-label="#">{idx + 1}</td>
+                                  <td data-label="Date">{formatDateDDMMYYYY(row?.date)}</td>
+                                  <td data-label="Instructor">{row?.instructor_name || "-"}</td>
+                                  <td data-label="No. of Classes">{row?.num_classes ?? 1}</td>
+                                  <td data-label="Remarks">{row?.remarks || "-"}</td>
+                                  <td data-label="Status">
+                                    <span className="completed-session-status badge badge-success">
+                                      <i className="bi bi-check-circle-fill" aria-hidden="true" />
+                                      Completed
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
                     )}
                   </div>
 
-                  <div className="modal-footer">
-                    <button className="btn btn-secondary" onClick={() => setShowCompletedModal(false)}>
+                  <div className="modal-footer completed-sessions-footer">
+                    <span>
+                      {completedClassCount} completed {completedClassCount === 1 ? "session" : "sessions"}
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setShowCompletedModal(false)}
+                    >
                       Close
                     </button>
                   </div>

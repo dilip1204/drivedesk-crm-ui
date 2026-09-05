@@ -1,0 +1,628 @@
+.student-payment-dialog {
+  width: min(620px, calc(100vw - 32px));
+  max-width: 620px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.student-profile-dialog {
+  width: min(920px, calc(100vw - 32px));
+  max-width: 920px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.student-payment-dialog .modal-content,
+.student-profile-dialog .modal-content {
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  color: var(--color-text, #172033);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+  box-shadow: 0 18px 48px rgba(16, 24, 40, .2);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.student-payment-header,
+.student-profile-header {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--color-border, #d9e0e8);
+  background: #f8fafc;
+}
+
+.student-payment-title-icon,
+.student-profile-title-icon {
+  display: grid;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #edf3ff;
+  color: #356fe8;
+  font-size: 15px;
+  place-items: center;
+}
+
+.student-payment-header .modal-title,
+.student-profile-header .modal-title {
+  color: var(--color-text, #172033);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 15px !important;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+.student-payment-header .close,
+.student-profile-header .close {
+  margin: -5px -4px -5px auto;
+  padding: 8px;
+  color: var(--color-muted, #667085);
+  font-size: 22px;
+  opacity: 1;
+}
+
+.student-payment-form {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.student-payment-body {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px 12px;
+  overflow-y: auto;
+  padding: 14px 18px;
+  overscroll-behavior: contain;
+}
+
+.student-payment-balance {
+  display: flex;
+  min-height: 48px;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 11px;
+  border: 1px solid #b9e3ec;
+  border-radius: 8px;
+  background: #eefbfe;
+}
+
+.student-payment-balance span {
+  color: #47606a;
+  font-size: 10px !important;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.student-payment-balance strong {
+  color: #0b5363;
+  font-size: 15px !important;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.student-payment-field {
+  min-width: 0;
+  margin: 0;
+}
+
+.student-payment-field:last-child {
+  grid-column: 1 / -1;
+}
+
+.student-payment-field label {
+  display: block;
+  margin-bottom: 4px;
+  color: #344054;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 11px !important;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.student-payment-field .form-control {
+  width: 100%;
+  height: 34px;
+  min-height: 34px;
+  padding: 5px 9px;
+  border-color: var(--color-border, #d9e0e8);
+  border-radius: 6px;
+  background-color: #fff;
+  color: var(--color-text, #172033);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 12px !important;
+  font-weight: 400;
+  line-height: 1.25;
+  box-shadow: none;
+}
+
+.student-payment-field textarea.form-control {
+  min-height: 68px;
+  height: auto;
+  resize: vertical;
+}
+
+.student-payment-field .form-control::placeholder {
+  color: #98a2b3;
+  opacity: 1;
+}
+
+.student-payment-field .form-control:focus {
+  border-color: #8fb1ed;
+  box-shadow: 0 0 0 3px rgba(53, 111, 232, .12);
+}
+
+.student-payment-field .text-danger {
+  margin-top: 3px;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.student-payment-footer,
+.student-profile-footer {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--color-border, #d9e0e8);
+  background: #f8fafc;
+}
+
+.student-payment-footer .btn,
+.student-profile-footer .btn {
+  display: inline-flex;
+  min-width: 82px;
+  height: 34px;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  padding: 5px 12px;
+  margin: 0;
+  border-radius: 6px;
+  font-size: 11px !important;
+  font-weight: 500;
+}
+
+.student-profile-body {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 14px 16px 16px;
+  overscroll-behavior: contain;
+}
+
+.student-profile-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 11px 12px;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: 9px;
+  background: #f8fafc;
+}
+
+.student-profile-avatar {
+  flex: 0 0 50px;
+  width: 50px;
+  height: 50px;
+  border: 1px solid #cbd5e1;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.student-profile-summary-copy {
+  min-width: 0;
+}
+
+.student-profile-summary-copy h4 {
+  margin: 0 0 3px;
+  overflow: hidden;
+  color: var(--color-text, #172033);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.student-profile-summary-copy div {
+  color: var(--color-muted, #667085);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.student-profile-details {
+  margin-right: -6px;
+  margin-left: -6px;
+}
+
+.student-profile-details > [class*="col-"] {
+  padding-right: 6px;
+  padding-left: 6px;
+}
+
+.student-profile-details > [class*="col-"] {
+  overflow: hidden;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.student-profile-details > [class*="col-"]:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.student-profile-details > [class*="col-"]:last-child {
+  border-left: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.student-profile-item {
+  display: grid;
+  min-height: 34px;
+  grid-template-columns: minmax(120px, 43%) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 6px 9px;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.student-profile-item:last-child {
+  border-bottom: 0;
+}
+
+.student-profile-item > span {
+  color: var(--color-muted, #667085);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.student-profile-item > strong {
+  min-width: 0;
+  color: var(--color-text, #172033);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.student-payment-history {
+  margin-top: 14px;
+}
+
+.student-profile-licence {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.student-profile-licence .student-profile-details > [class*="col-"] {
+  background: #fff;
+}
+
+.student-payment-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.student-payment-history-header h5 {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--color-text, #172033);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-payment-history-header h5 i {
+  color: #356fe8;
+  font-size: 15px;
+}
+
+.student-payment-history-header .btn {
+  display: inline-flex;
+  height: 30px;
+  min-height: 30px;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.student-payment-history-table-wrap {
+  overflow: auto;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: 8px;
+}
+
+.student-payment-history-table {
+  min-width: 790px;
+  margin: 0;
+  color: var(--color-text, #172033);
+  font-size: 11px;
+}
+
+.student-payment-history-table thead th {
+  padding: 7px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border, #d9e0e8);
+  background: #f8fafc;
+  color: #475467;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.student-payment-history-table tbody td {
+  padding: 6px 8px;
+  border: 0;
+  border-bottom: 1px solid #edf0f4;
+  vertical-align: middle;
+}
+
+.student-payment-history-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.student-payment-amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.student-payment-status {
+  display: inline-flex;
+  min-height: 21px;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #475467;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.student-payment-status.is-completed,
+.student-payment-status.is-paid,
+.student-payment-status.is-success {
+  background: #eaf8f1;
+  color: #157347;
+}
+
+.student-payment-status.is-pending {
+  background: #fff4e5;
+  color: #a15c00;
+}
+
+.student-payment-status.is-failed,
+.student-payment-status.is-cancelled {
+  background: #fff0f1;
+  color: #b42318;
+}
+
+.student-payment-row-action .btn {
+  display: inline-flex;
+  height: 28px;
+  min-height: 28px;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+  padding: 3px 7px;
+  border-radius: 5px;
+  font-size: 10px;
+}
+
+@media (max-width: 767.98px) {
+  .student-payment-dialog,
+  .student-profile-dialog {
+    width: calc(100vw - 16px);
+    max-width: none;
+    margin: 8px auto;
+  }
+
+  .student-payment-dialog .modal-content,
+  .student-profile-dialog .modal-content {
+    max-height: calc(100dvh - 16px);
+    border-radius: 9px;
+  }
+
+  .student-payment-header,
+  .student-profile-header {
+    padding: 10px 12px;
+  }
+
+  .student-payment-header .modal-title,
+  .student-profile-header .modal-title {
+    font-size: 15px !important;
+  }
+
+  .student-payment-body {
+    grid-template-columns: 1fr;
+    padding: 12px 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .student-payment-balance,
+  .student-payment-field:last-child {
+    grid-column: auto;
+  }
+
+  .student-payment-field label {
+    font-size: 11px !important;
+  }
+
+  .student-payment-field .form-control {
+    height: 40px;
+    min-height: 40px;
+    font-size: 12px !important;
+  }
+
+  .student-payment-field textarea.form-control {
+    min-height: 76px;
+  }
+
+  .student-payment-footer,
+  .student-profile-footer {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 10px 12px;
+  }
+
+  .student-payment-footer .btn,
+  .student-profile-footer .btn {
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    font-size: 11px !important;
+  }
+
+  .student-profile-body {
+    padding: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .student-profile-summary {
+    padding: 10px;
+  }
+
+  .student-profile-details {
+    gap: 10px;
+    margin: 0;
+  }
+
+  .student-profile-details > [class*="col-"] {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+    padding: 0;
+    border: 1px solid var(--color-border, #d9e0e8) !important;
+    border-radius: 8px !important;
+  }
+
+  .student-profile-item {
+    min-height: 39px;
+    grid-template-columns: minmax(115px, 42%) minmax(0, 1fr);
+    padding: 7px 9px;
+  }
+
+  .student-profile-item > span,
+  .student-profile-item > strong {
+    font-size: 11px;
+  }
+
+  .student-payment-history-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .student-payment-history-header .btn {
+    width: 100%;
+    height: 38px;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .student-payment-history-table-wrap {
+    overflow: visible;
+    border: 0;
+  }
+
+  .student-payment-history-table {
+    display: block;
+    min-width: 0;
+    background: transparent;
+  }
+
+  .student-payment-history-table thead {
+    display: none;
+  }
+
+  .student-payment-history-table tbody,
+  .student-payment-history-table tr,
+  .student-payment-history-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .student-payment-history-table tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  .student-payment-history-table tbody tr {
+    overflow: hidden;
+    border: 1px solid var(--color-border, #d9e0e8);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .student-payment-history-table tbody td {
+    display: grid;
+    grid-template-columns: minmax(105px, 38%) minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #edf0f4;
+    font-size: 12px;
+    text-align: right !important;
+    overflow-wrap: anywhere;
+  }
+
+  .student-payment-history-table tbody td::before {
+    color: var(--color-muted, #667085);
+    content: attr(data-label);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .student-payment-history-table tbody td:last-child {
+    border-bottom: 0;
+  }
+
+  .student-payment-status,
+  .student-payment-row-action .btn {
+    justify-self: end;
+  }
+
+  .student-payment-row-action .btn {
+    width: 78px;
+    height: 34px;
+    font-size: 11px;
+  }
+}

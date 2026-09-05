@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import { addInstructor, updateInstructor } from "../../store/instructors/actions";
 import { IoClose } from "react-icons/io5";
+import "./addInstructors.css";
 
 const WEEK_DAYS = [
   { label: "Monday", value: "MON" },
@@ -59,6 +60,7 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
       const payload = {
         ...values,
         working_days: values.working_days || [],
+        ...(isEdit ? { original_mobile_number: id?.mobile_number } : {}),
       };
 
       const action = isEdit ? updateInstructor : addInstructor;
@@ -108,8 +110,8 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
   };
 
   return (
-    <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered>
-      <Modal.Header>
+    <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered dialogClassName="instructor-form-dialog">
+      <Modal.Header className="instructor-form-header">
         <Modal.Title>{isEdit ? 'Update Instructor' : 'Add Instructor'}</Modal.Title>
         <IoClose
           onClick={() => {
@@ -120,9 +122,9 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
           title="Close"
         />
       </Modal.Header>
-      <Modal.Body>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="row">
+      <Modal.Body className="instructor-form-body">
+        <form onSubmit={formik.handleSubmit} className="instructor-form">
+          <div className="row instructor-form-row">
             {[
               ['name', 'text'],
               ['email', 'email'],
@@ -132,7 +134,7 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
               ['available_to', 'time']
             ].map(([field, type]) => (
               <div className="col-md-6" key={field}>
-                <div className="form-group">
+                <div className="form-group instructor-form-group">
                   <label>
                     {field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                     <span style={{ color: 'red' }}>*</span>
@@ -153,18 +155,17 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
             ))}
 
             <div className="col-md-12">
-              <div className="form-group">
+              <div className="form-group instructor-form-group">
                 <label>Working Days</label>
-                <div className="border rounded p-3">
-                  <div className="d-flex flex-wrap">
+                <div className="border rounded p-3 instructor-working-days">
+                  <div className="instructor-working-days-list">
                     {WEEK_DAYS.map(({ label, value }) => (
                       <div
                         key={value}
-                        className="d-flex align-items-center mb-2 mr-4"
-                        style={{ minWidth: '140px' }}
+                        className="instructor-working-day"
                       >
                           <input
-                            className="mr-2"
+                            className="instructor-working-day-checkbox"
                             type="checkbox"
                             name="working_days"
                             value={value}
@@ -175,8 +176,7 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
                           />
                           <label
                             htmlFor={`working-day-${value}`}
-                            className="mb-0"
-                            style={{ cursor: 'pointer' }}
+                            className="instructor-working-day-label"
                           >
                             {label}
                           </label>
@@ -189,7 +189,7 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
             </div>
 
             <div className="col-md-6">
-              <div className="form-group">
+              <div className="form-group instructor-form-group">
                 <label>Status <span style={{ color: 'red' }}>*</span></label>
                 <select
                   name="is_active"
@@ -204,7 +204,7 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
             </div>
 
             <div className="col-md-6">
-              <div className="form-group">
+              <div className="form-group instructor-form-group">
                 <label>Role <span style={{ color: 'red' }}>*</span></label>
                 <input
                   type="text"
@@ -222,7 +222,7 @@ export default function Instructors({ showModal, hideModal, id, isEdit, onSaved,
             </div>
           </div>
 
-          <Modal.Footer>
+          <Modal.Footer className="instructor-form-footer">
             <Button variant="secondary" onClick={() => { formik.resetForm(); hideModal(); }}>Cancel</Button>
             <Button type="submit" variant="primary">{isEdit ? 'Update' : 'Add'}</Button>
           </Modal.Footer>

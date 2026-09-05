@@ -27,17 +27,8 @@ const Dashboard = () => {
   const currentMonth = String(today.getMonth() + 1).padStart(2, "0");
 
   const [selectedMonth, setSelectedMonth] = useState(`${currentYear}-${currentMonth}`);
-  const [selectedDate, setSelectedDate] = useState("");
 
   const { year, month } = useMemo(() => {
-    if (selectedDate) {
-      const [y, m] = selectedDate.split("-");
-      return {
-        year: y || currentYear,
-        month: m || currentMonth,
-      };
-    }
-
     if (selectedMonth) {
       const [y, m] = selectedMonth.split("-");
       return {
@@ -47,7 +38,7 @@ const Dashboard = () => {
     }
 
     return { year: currentYear, month: currentMonth };
-  }, [selectedDate, selectedMonth, currentYear, currentMonth]);
+  }, [selectedMonth, currentYear, currentMonth]);
 
   const fetchDashboardSummary = useCallback(() => {
     const values = {
@@ -208,21 +199,8 @@ const Dashboard = () => {
                           type="month"
                           className="form-control"
                           value={selectedMonth}
-                          onChange={(e) => {
-                            setSelectedMonth(e.target.value);
-                            setSelectedDate("");
-                          }}
+                          onChange={(e) => setSelectedMonth(e.target.value)}
                           title="Filter by month"
-                        />
-                      </label>
-                      <label>
-                        <span>Date</span>
-                        <input
-                          type="date"
-                          className="form-control"
-                          value={selectedDate}
-                          onChange={(e) => setSelectedDate(e.target.value)}
-                          title="Filter by date"
                         />
                       </label>
                     </div>

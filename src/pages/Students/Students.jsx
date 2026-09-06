@@ -36,10 +36,11 @@ import { getAdminPrintLogoSource, isDriveDeskAdmin } from "../../utils/printBran
 import { ensureTenantLogo, useTenantLogo } from "../../hooks/useTenantLogo";
 
 const formatStudentVehicleClasses = (student) => {
-  const value = student?.vehicle_class ??
-    student?.vehicle_classes ??
+  const value = student?.vehicle_classes ??
+    student?.vehicle_class ??
     student?.class_of_vehicle ??
     student?.vehicleClass ??
+    student?.student_details?.vehicle_classes ??
     student?.student_details?.vehicle_class ??
     student?.license_details?.license_classes;
 

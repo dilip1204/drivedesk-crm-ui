@@ -186,9 +186,10 @@ export default function StudentProfileModal({ show, onClose, student }) {
 
   if (!student) return null;
   const hasPassedTest = String(student.test_status || "").toUpperCase() === "PASSED";
-  const vehicleClasses = Array.isArray(student.vehicle_class)
-    ? student.vehicle_class.join(", ")
-    : student.vehicle_class;
+  const vehicleClassValue = student.vehicle_classes ?? student.vehicle_class;
+  const vehicleClasses = Array.isArray(vehicleClassValue)
+    ? vehicleClassValue.join(", ")
+    : vehicleClassValue;
 
   return (
     <Modal show={show} onHide={onClose} size="lg" centered dialogClassName="student-profile-dialog">
@@ -223,7 +224,7 @@ export default function StudentProfileModal({ show, onClose, student }) {
               label="Application Number"
               value={student.application_number}
             />
-            <ProfileItem label="DOB" value={student.dob} />
+            <ProfileItem label="DOB" value={formatDateDDMMYYYY(student.dob)} />
             <ProfileItem label="Mobile" value={student.mobile_number} />
             <ProfileItem label="Alternate Number" value={student.alternate_number} />
             <ProfileItem label="Aadhar Number" value={student.aadhar_number} />

@@ -167,7 +167,7 @@ export default function AddStudents({
     llr_number: id?.llr_number || "",
     llr_from_date: normalizeDateForInput(id?.llr_from_date),
     llr_to_date: normalizeDateForInput(id?.llr_to_date),
-    vehicle_class: normalizeVehicleClasses(id?.vehicle_class),
+    vehicle_classes: normalizeVehicleClasses(id?.vehicle_classes ?? id?.vehicle_class),
     email: id?.email || null,
     aadhar_number: id?.aadhar_number || "",
     plan: id?.plan || "",
@@ -216,7 +216,7 @@ export default function AddStudents({
       .nullable()
       .transform((value, originalValue) => originalValue === "" ? null : value)
       .min(Yup.ref("llr_from_date"), "LLR to date cannot be before LLR from date"),
-    vehicle_class: Yup.array().of(Yup.string()).nullable(),
+    vehicle_classes: Yup.array().of(Yup.string()).nullable(),
     test_application_number: Yup.string().nullable(),
     application_number: Yup.string().required("Application Number is required"),
     email: "", // optional
@@ -315,7 +315,7 @@ export default function AddStudents({
         test_date: values.test_date ? values.test_date : null,
         llr_from_date: values.llr_from_date || null,
         llr_to_date: values.llr_to_date || null,
-        vehicle_class: normalizeVehicleClasses(values.vehicle_class).join(", "),
+        vehicle_classes: normalizeVehicleClasses(values.vehicle_classes),
       };
 
       if (isEdit) {
@@ -338,7 +338,7 @@ export default function AddStudents({
           "llr_number",
           "llr_from_date",
           "llr_to_date",
-          "vehicle_class",
+          "vehicle_classes",
           "test_application_number",
         ].forEach((field) => delete normalizedValues[field]);
       }
@@ -877,7 +877,7 @@ export default function AddStudents({
                 <legend>Class of Vehicle</legend>
                 <div className="student-vehicle-class-options">
                   {VEHICLE_CLASS_OPTIONS.map((option) => {
-                    const selected = formik.values.vehicle_class.includes(option.value);
+                    const selected = formik.values.vehicle_classes.includes(option.value);
                     return (
                       <label key={option.value} className={selected ? "is-selected" : ""}>
                         <input
@@ -885,10 +885,10 @@ export default function AddStudents({
                           checked={selected}
                           disabled={!canEditLicence}
                           onChange={() => formik.setFieldValue(
-                            "vehicle_class",
+                            "vehicle_classes",
                             selected
-                              ? formik.values.vehicle_class.filter((value) => value !== option.value)
-                              : [...formik.values.vehicle_class, option.value]
+                              ? formik.values.vehicle_classes.filter((value) => value !== option.value)
+                              : [...formik.values.vehicle_classes, option.value]
                           )}
                         />
                         <span>{option.label}</span>

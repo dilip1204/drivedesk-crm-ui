@@ -185,6 +185,10 @@ export default function StudentProfileModal({ show, onClose, student }) {
 
 
   if (!student) return null;
+  const hasPassedTest = String(student.test_status || "").toUpperCase() === "PASSED";
+  const vehicleClasses = Array.isArray(student.vehicle_class)
+    ? student.vehicle_class.join(", ")
+    : student.vehicle_class;
 
   return (
     <Modal show={show} onHide={onClose} size="lg" centered dialogClassName="student-profile-dialog">
@@ -221,13 +225,17 @@ export default function StudentProfileModal({ show, onClose, student }) {
             />
             <ProfileItem label="DOB" value={student.dob} />
             <ProfileItem label="Mobile" value={student.mobile_number} />
+            <ProfileItem label="Alternate Number" value={student.alternate_number} />
             <ProfileItem label="Aadhar Number" value={student.aadhar_number} />
             <ProfileItem label="Plan" value={student.plan} />
+            <ProfileItem label="Class of Vehicle" value={vehicleClasses} />
             {/* <ProfileItem
               label="Initial Payment Method"
               value={student.initial_payment_method}
             /> */}
-            <ProfileItem label="Test Date" value={student.test_date} />
+            <ProfileItem label="Test Status" value={String(student.test_status || "NOT_ATTEMPTED").replace(/_/g, " ")} />
+            <ProfileItem label="Test Application Number" value={student.test_application_number} />
+            <ProfileItem label="Test Date" value={formatDateDDMMYYYY(student.test_date)} />
             <ProfileItem
               label="Training Start Date"
               value={formatDateDDMMYYYY(student.training_start_date)}
@@ -264,9 +272,12 @@ export default function StudentProfileModal({ show, onClose, student }) {
               label="Classes Completed"
               value={student.classesCompleted}
             />
+            <ProfileItem label="LLR Number" value={student.llr_number} />
+            <ProfileItem label="LLR From Date" value={formatDateDDMMYYYY(student.llr_from_date)} />
+            <ProfileItem label="LLR To Date" value={formatDateDDMMYYYY(student.llr_to_date)} />
           </div>
         </div>
-        <section className="student-profile-licence" aria-labelledby="student-profile-licence-title">
+        {hasPassedTest && <section className="student-profile-licence" aria-labelledby="student-profile-licence-title">
           <div className="student-payment-history-header">
             <h5 id="student-profile-licence-title">
               <i className="bi bi-card-checklist" aria-hidden="true" /> Test &amp; Licence Details
@@ -274,7 +285,6 @@ export default function StudentProfileModal({ show, onClose, student }) {
           </div>
           <div className="row student-profile-details">
             <div className="col-md-6">
-              <ProfileItem label="Test Status" value={String(student.test_status || "NOT_ATTEMPTED").replace(/_/g, " ")} />
               <ProfileItem label="Licence Number" value={student.license_details?.license_number} />
               <ProfileItem
                 label="Licence Classes"
@@ -290,7 +300,7 @@ export default function StudentProfileModal({ show, onClose, student }) {
               <ProfileItem label="Enrollment Number" value={student.license_details?.enrollment_number} />
             </div>
           </div>
-        </section>
+        </section>}
         {/* Payments Table */}
         {Array.isArray(student.payments) && student.payments.length > 0 && (
           <div className="student-payment-history">

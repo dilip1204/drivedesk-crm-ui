@@ -35,6 +35,33 @@ import schoolPrintLogo from "../../assets/logo/school_print_logo.png";
 import { getAdminPrintLogoSource, isDriveDeskAdmin } from "../../utils/printBranding";
 import { ensureTenantLogo, useTenantLogo } from "../../hooks/useTenantLogo";
 
+const formatStudentVehicleClasses = (student) => {
+  const value = student?.vehicle_class ??
+    student?.vehicle_classes ??
+    student?.class_of_vehicle ??
+    student?.vehicleClass ??
+    student?.student_details?.vehicle_class ??
+    student?.license_details?.license_classes;
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => typeof item === "object" ? item?.value ?? item?.name ?? item?.label : item)
+      .filter(Boolean)
+      .join(", ") || "-";
+  }
+
+  if (value && typeof value === "object") {
+    return String(value.value ?? value.name ?? value.label ?? "").trim() || "-";
+  }
+
+  const classes = String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return classes.join(", ") || "-";
+};
+
 const Students = () => {
   const dispatch = useDispatch();
   const { logoSrc: tenantLogo, hasTenantLogo } = useTenantLogo(null);
@@ -457,6 +484,7 @@ const Students = () => {
           <thead>
             <tr>
               <th>#</th>
+              <th>Class of Vehicle</th>
               <th>Plan</th>
               <th>Application No</th>
               <th>Name</th>
@@ -468,6 +496,7 @@ const Students = () => {
             {students.map((student, index) => (
               <tr key={student.application_number || index}>
                 <td>{index + 1}</td>
+                <td>{formatStudentVehicleClasses(student)}</td>
                 <td>{student.plan || "-"}</td>
                 <td>{student.application_number || "-"}</td>
                 <td>{student.name || "-"}</td>

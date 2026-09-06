@@ -46,6 +46,27 @@ const normalizeOutstandingResponse = (response) => {
   return { students, total };
 };
 
+const getPaymentContactLinks = (student) => {
+  const rawNumber = String(student?.mobile_number || "").trim();
+  const digits = rawNumber.replace(/\D/g, "");
+  if (!digits) return { call: "", whatsapp: "" };
+
+  const whatsappNumber = digits.length === 10
+    ? `91${digits}`
+    : digits.length === 11 && digits.startsWith("0")
+      ? `91${digits.slice(1)}`
+      : digits;
+  const balance = Number(student?.balance || 0).toLocaleString("en-IN");
+  const message = encodeURIComponent(
+    `Hello ${student?.name || "Student"}, this is a reminder from DriveDesk. Your pending course fee balance is ₹${balance}. Please contact us if you need any assistance.`
+  );
+
+  return {
+    call: `tel:${rawNumber.replace(/[^\d+]/g, "")}`,
+    whatsapp: `https://wa.me/${whatsappNumber}?text=${message}`,
+  };
+};
+
 const OutstandingFees = () => {
   const { role } = useAuth();
   const isAdmin = String(role || "").toLowerCase() === "admin";
@@ -60,6 +81,13 @@ const OutstandingFees = () => {
   const startIndex = (currentPage - 1) * pageSize;
 
  const currentRecords = outstandingFeesData;
+  const pageBalance = currentRecords.reduce(
+    (sum, student) => sum + (Number(student?.balance) || 0),
+    0
+  );
+  const contactReadyCount = currentRecords.filter(
+    (student) => String(student?.mobile_number || "").replace(/\D/g, "").length >= 10
+  ).length;
 
   const [totalCount, setTotalCount] = useState(0);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -284,7 +312,7 @@ const OutstandingFees = () => {
                 {/* Breadcrumb */}
                 <div className="row students-page-heading outstanding-fees-heading">
                   <div className="breadcrumb-wrapper col-xl-6">
-                    <h1>Outstanding Fees</h1>
+                    <h1>Payment Dues</h1>
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
@@ -294,7 +322,7 @@ const OutstandingFees = () => {
                             </svg>
                           </a>
                         </li>
-                        <li className="breadcrumb-item">Outstanding Fees</li>
+                        <li className="breadcrumb-item">Payment Dues</li>
                         <li className="breadcrumb-item" aria-current="page">
                           Fee List
                         </li>
@@ -328,6 +356,12 @@ const OutstandingFees = () => {
                     />
                   ) : (
                     <>
+                    <div className="payment-dues-summary" aria-label="Payment dues summary for this page">
+                      <div><i className="bi bi-people" aria-hidden="true" /><span>Students on this page</span><strong>{currentRecords.length}</strong></div>
+                      <div><i className="bi bi-wallet2" aria-hidden="true" /><span>Balance on this page</span><strong>₹{pageBalance.toLocaleString("en-IN")}</strong></div>
+                      <div><i className="bi bi-telephone" aria-hidden="true" /><span>Contact ready</span><strong>{contactReadyCount}</strong></div>
+                      <div><i className="bi bi-collection" aria-hidden="true" /><span>Total due records</span><strong>{totalCount}</strong></div>
+                    </div>
                     {selectedIds.length > 0 && (
                       <div className="outstanding-selection-toolbar">
                         <span><strong>{selectedIds.length}</strong> selected</span>
@@ -365,11 +399,14 @@ const OutstandingFees = () => {
                             <th>Registered Date</th>
                             <th>Status</th>
                             <th>Full Payment Status</th>
+                            <th>Reminder</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {currentRecords.map((outstandingFees, index) => (
-                            <tr key={index}>
+                          {currentRecords.map((outstandingFees, index) => {
+                            const contactLinks = getPaymentContactLinks(outstandingFees);
+                            return (
+                            <tr key={outstandingFees?.id || outstandingFees?.mobile_number || index}>
                               <td data-label="Select" className="outstanding-select-cell">
                                 <input
                                   type="checkbox"
@@ -395,8 +432,21 @@ const OutstandingFees = () => {
                                   {outstandingFees?.full_payment_status || "N/A"}
                                 </span>
                               </td>
+                              <td data-label="Reminder" className="payment-reminder-actions">
+                                {contactLinks.call && (
+                                  <a className="payment-reminder-button is-call" href={contactLinks.call} aria-label={`Call ${outstandingFees?.name || "student"}`}>
+                                    <i className="bi bi-telephone-fill" aria-hidden="true" />Call
+                                  </a>
+                                )}
+                                {contactLinks.whatsapp && (
+                                  <a className="payment-reminder-button is-whatsapp" href={contactLinks.whatsapp} target="_blank" rel="noopener noreferrer" aria-label={`Send payment reminder to ${outstandingFees?.name || "student"} on WhatsApp`}>
+                                    <i className="bi bi-whatsapp" aria-hidden="true" />WhatsApp
+                                  </a>
+                                )}
+                                {!contactLinks.call && <span className="payment-reminder-unavailable">No mobile</span>}
+                              </td>
                             </tr>
-                          ))}
+                          );})}
                         </tbody>
                       </table>
                       <Pagination

@@ -95,12 +95,20 @@ export default function Sidebar() {
                 </li>
 
             {role === "admin" && (
-              <li className={`has-sub ${isActive("/tariff") ? "active expand" : ""}`}>
-                <Link className="sidenav-item-link" to="/tariff" title="Tariff">
-                  <i className="mdi mdi-currency-inr"></i>
-                  <span className="nav-text">Tariff</span>
-                </Link>
-              </li>
+              <>
+                <li className={`has-sub ${isActive("/tariff") ? "active expand" : ""}`}>
+                  <Link className="sidenav-item-link" to="/tariff" title="Tariff">
+                    <i className="mdi mdi-currency-inr"></i>
+                    <span className="nav-text">Tariff</span>
+                  </Link>
+                </li>
+                <li className={`has-sub ${isActive("/outstandingfees") ? "active expand" : ""}`}>
+                  <Link className="sidenav-item-link" to="/outstandingfees" title="Payment Dues">
+                    <i className="mdi mdi-wallet-outline"></i>
+                    <span className="nav-text">Payment Dues</span>
+                  </Link>
+                </li>
+              </>
             )}
             
               <li className={`has-sub ${isActive("/trainingsession") ? "active expand" : ""}`}>

@@ -52,8 +52,8 @@ const parseEnquiriesResponse = (res, fallbackPageSize = 10) => {
   };
 };
 
-const getContactLinks = (mobileNumber) => {
-  const rawNumber = String(mobileNumber || "").trim();
+const getContactLinks = (enquiry) => {
+  const rawNumber = String(enquiry?.mobile_number || "").trim();
   const digits = rawNumber.replace(/\D/g, "");
 
   if (!digits) return { call: "", whatsapp: "" };
@@ -63,10 +63,15 @@ const getContactLinks = (mobileNumber) => {
     : digits.length === 11 && digits.startsWith("0")
       ? `91${digits.slice(1)}`
       : digits;
+  const customerName = String(enquiry?.name || "Customer").trim();
+  const courseInterest = String(enquiry?.course_interest || "driving course").trim();
+  const message = encodeURIComponent(
+    `Hello ${customerName}, thank you for contacting DriveDesk regarding ${courseInterest}. We would be happy to assist you. Please let us know a convenient time to discuss the course details.`
+  );
 
   return {
     call: `tel:${rawNumber.replace(/[^\d+]/g, "")}`,
-    whatsapp: `https://wa.me/${whatsappNumber}`,
+    whatsapp: `https://wa.me/${whatsappNumber}?text=${message}`,
   };
 };
 
@@ -625,7 +630,7 @@ const Enquiries = () => {
                                   dropped: "bi-x-circle-fill",
                                 }[statusTone];
                                 const isEnrolled = statusTone === "enrolled";
-                                const contactLinks = getContactLinks(enquiries?.mobile_number);
+                                const contactLinks = getContactLinks(enquiries);
                                 const followUpIndicator = getFollowUpIndicator(
                                   enquiries?.follow_up_date,
                                   enquiries?.follow_up_status

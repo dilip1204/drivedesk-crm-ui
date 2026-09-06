@@ -14,6 +14,50 @@
   min-width: 0;
 }
 
+.payment-dues-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 10px;
+}
+
+.payment-dues-summary > div {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 58px;
+  padding: 9px 11px;
+  border: 1px solid #d9e0e8;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, .05);
+}
+
+.payment-dues-summary i {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #eef4ff;
+  color: #175cd3;
+  font-size: 14px;
+  place-items: center;
+}
+
+.payment-dues-summary span {
+  color: #667085;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.payment-dues-summary strong {
+  color: #172033;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .outstanding-fees-state {
   display: flex;
   min-height: 180px;
@@ -70,8 +114,33 @@
 }
 
 .outstanding-fees-table {
-  min-width: 980px;
+  min-width: 1120px;
 }
+
+.payment-reminder-actions {
+  min-width: 170px;
+  white-space: nowrap;
+}
+
+.payment-reminder-button {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+  padding: 4px 7px;
+  margin: 1px 2px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.payment-reminder-button.is-call { border-color: #bfd4ff; background: #edf5ff; color: #175cd3; }
+.payment-reminder-button.is-whatsapp { border-color: #b7e6c8; background: #eaf8ef; color: #128c4b; }
+.payment-reminder-button:hover { filter: brightness(.96); text-decoration: none; }
+.payment-reminder-unavailable { color: #98a2b3; font-size: 10px; }
 
 .outstanding-fees-table th:first-child,
 .outstanding-fees-table td:first-child {
@@ -226,6 +295,17 @@
 }
 
 @media (max-width: 767.98px) {
+  .payment-dues-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .payment-dues-summary > div {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .payment-dues-summary strong {
+    grid-column: 2;
+  }
   .outstanding-fees-heading {
     margin-bottom: 8px;
   }
@@ -268,6 +348,21 @@
 
   .outstanding-balance {
     text-align: right !important;
+  }
+
+  .payment-reminder-actions {
+    display: flex !important;
+    gap: 7px;
+  }
+
+  .payment-reminder-actions::before {
+    flex: 1 0 100%;
+  }
+
+  .payment-reminder-button {
+    min-height: 40px;
+    flex: 1 1 0;
+    font-size: 11px;
   }
 
   .outstanding-adjustment-modal {

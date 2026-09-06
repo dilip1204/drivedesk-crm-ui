@@ -14,6 +14,19 @@ import EmptyState from "../../components/EmptyState";
 import { useAuth } from "../../hooks/useAuth";
 import "./addStudents.css";
 
+const VEHICLE_CLASS_OPTIONS = [
+  { value: "MCWOG", label: "MCWOG" },
+  { value: "MCWG", label: "MCWG" },
+  { value: "LMV", label: "LMV" },
+  { value: "LMV Transport", label: "LMV Transport" },
+  { value: "HMV / Transport Vehicle", label: "HMV / Transport Vehicle" },
+];
+
+const normalizeVehicleClasses = (value) => {
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+  return String(value || "").split(",").map((item) => item.trim()).filter(Boolean);
+};
+
 export default function AddStudents({
   showModal,
   hideModal,
@@ -42,7 +55,6 @@ export default function AddStudents({
     rto: "",
     enrollment_number: "",
   });
-  const [licenceSaving, setLicenceSaving] = useState(false);
   const [licenceFeedback, setLicenceFeedback] = useState(null);
   const previousInstructorNameRef = useRef("");
   const getLocalISODate = (date = new Date()) => {
@@ -110,64 +122,6 @@ export default function AddStudents({
     setLicenceFeedback(null);
   };
 
-  const saveLicenceDetails = () => {
-    if (!canEditLicence) return;
-    const isPassed = licenceForm.test_status === "PASSED";
-    const licenseClasses = licenceForm.license_classes
-      .split(",")
-      .map((value) => value.trim().toUpperCase())
-      .filter((value, index, values) => value && values.indexOf(value) === index);
-
-    if (isPassed && licenceForm.issue_date && licenceForm.expiry_date &&
-      licenceForm.expiry_date < licenceForm.issue_date) {
-      setLicenceFeedback({ type: "danger", message: "Expiry date cannot be before issue date." });
-      return;
-    }
-
-    const studentDataPayload = { test_status: licenceForm.test_status };
-    if (isPassed) {
-      studentDataPayload.license_details = {
-        license_number: licenceForm.license_number.trim(),
-        license_classes: licenseClasses,
-        issue_date: licenceForm.issue_date || null,
-        expiry_date: licenceForm.expiry_date || null,
-        rto: licenceForm.rto.trim(),
-        enrollment_number: licenceForm.enrollment_number.trim(),
-      };
-    }
-
-    setLicenceSaving(true);
-    setLicenceFeedback(null);
-    dispatch(updateStudent({
-      mobile_number: id?.mobile_number,
-      studentData: studentDataPayload,
-    }, (response) => {
-      const responseData = response?.data || response || {};
-      const hasError =
-        responseData?.isError === true ||
-        Number(responseData?.statusCode) >= 400 ||
-        Number(response?.status) >= 400;
-      const rawMessage =
-        responseData?.response || responseData?.detail || response?.statusText;
-      const message = typeof rawMessage === "string"
-        ? rawMessage
-        : "Unable to save test and licence details.";
-
-      setLicenceSaving(false);
-      if (hasError) {
-        setLicenceFeedback({ type: "danger", message });
-        return;
-      }
-
-      setLicenceForm((current) => ({
-        ...current,
-        license_classes: licenseClasses.join(", "),
-      }));
-      setLicenceFeedback({ type: "success", message: "Test and licence details saved successfully." });
-      if (typeof onStudentAdded === "function") onStudentAdded();
-    }));
-  };
-
   // --- helpers for time normalization ---
   // Accepts "HH:MM", "H:MM AM/PM", or "HH:MM AM/PM" -> returns "HH:MM" (24h)
   const to24h = (input) => {
@@ -207,7 +161,13 @@ export default function AddStudents({
     name: id?.name || "",
     dob: normalizeDateForInput(id?.dob),
     mobile_number: id?.mobile_number || "",
+    alternate_number: id?.alternate_number || "",
     application_number: id?.application_number || "",
+    test_application_number: id?.test_application_number || "",
+    llr_number: id?.llr_number || "",
+    llr_from_date: normalizeDateForInput(id?.llr_from_date),
+    llr_to_date: normalizeDateForInput(id?.llr_to_date),
+    vehicle_class: normalizeVehicleClasses(id?.vehicle_class),
     email: id?.email || null,
     aadhar_number: id?.aadhar_number || "",
     plan: id?.plan || "",
@@ -248,6 +208,16 @@ export default function AddStudents({
     mobile_number: Yup.string()
       .matches(/^\d{10}$/, "Mobile number must be 10 digits")
       .required("Mobile number is required"),
+    alternate_number: Yup.string()
+      .matches(/^$|^\d{10}$/, "Alternate number must be 10 digits"),
+    llr_number: Yup.string().nullable(),
+    llr_from_date: Yup.date().nullable().transform((value, originalValue) => originalValue === "" ? null : value),
+    llr_to_date: Yup.date()
+      .nullable()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .min(Yup.ref("llr_from_date"), "LLR to date cannot be before LLR from date"),
+    vehicle_class: Yup.array().of(Yup.string()).nullable(),
+    test_application_number: Yup.string().nullable(),
     application_number: Yup.string().required("Application Number is required"),
     email: "", // optional
     aadhar_number: Yup.string().required("Aadhar number is required"),
@@ -320,10 +290,58 @@ export default function AddStudents({
     initialValues,
     validationSchema,
     onSubmit: (values) => {
+      const isPassed = licenceForm.test_status === "PASSED";
+      const licenseClasses = licenceForm.license_classes
+        .split(",")
+        .map((value) => value.trim().toUpperCase())
+        .filter((value, index, items) => value && items.indexOf(value) === index);
+
+      if (
+        isEdit &&
+        isPassed &&
+        licenceForm.issue_date &&
+        licenceForm.expiry_date &&
+        licenceForm.expiry_date < licenceForm.issue_date
+      ) {
+        setLicenceFeedback({
+          type: "danger",
+          message: "Expiry date cannot be before issue date.",
+        });
+        return;
+      }
+
       const normalizedValues = {
         ...values,
         test_date: values.test_date ? values.test_date : null,
+        llr_from_date: values.llr_from_date || null,
+        llr_to_date: values.llr_to_date || null,
+        vehicle_class: normalizeVehicleClasses(values.vehicle_class).join(", "),
       };
+
+      if (isEdit) {
+        normalizedValues.test_status = licenceForm.test_status;
+        if (isPassed) {
+          normalizedValues.license_details = {
+            license_number: licenceForm.license_number.trim(),
+            license_classes: licenseClasses,
+            issue_date: licenceForm.issue_date || null,
+            expiry_date: licenceForm.expiry_date || null,
+            rto: licenceForm.rto.trim(),
+            enrollment_number: licenceForm.enrollment_number.trim(),
+          };
+        }
+      }
+
+      if (!isEdit) {
+        [
+          "alternate_number",
+          "llr_number",
+          "llr_from_date",
+          "llr_to_date",
+          "vehicle_class",
+          "test_application_number",
+        ].forEach((field) => delete normalizedValues[field]);
+      }
 
       let updatedValues = {};
 
@@ -620,6 +638,15 @@ export default function AddStudents({
     "dob",
     "mobile_number",
     "application_number",
+    ...(isEdit
+      ? [
+          "alternate_number",
+          "test_application_number",
+          "llr_number",
+          "llr_from_date",
+          "llr_to_date",
+        ]
+      : []),
     "aadhar_number",
     "plan",
     "payment_method",
@@ -808,7 +835,7 @@ export default function AddStudents({
                           formik.touched[field] && formik.errors[field] ? " is-invalid" : ""
                         }${showBalanceWarning && field === "balance" ? " is-invalid" : ""}`}
                         onChange={
-                          ["mobile_number", "aadhar_number", "discount", "training_days"].includes(
+                          ["mobile_number", "alternate_number", "aadhar_number", "discount", "training_days"].includes(
                             field
                           )
                             ? handleNumericInput
@@ -820,6 +847,8 @@ export default function AddStudents({
                         readOnly={["balance", "total_amount", "instructor_mobile"].includes(field)}
                         maxLength={
                           field === "mobile_number"
+                            ? 10
+                            : field === "alternate_number"
                             ? 10
                             : field === "aadhar_number"
                             ? 12
@@ -841,6 +870,36 @@ export default function AddStudents({
               ))}
             </div>
           ))}
+
+          {isEdit && <div className="row student-form-row">
+            <div className="col-12">
+              <fieldset className="student-vehicle-class-fieldset">
+                <legend>Class of Vehicle</legend>
+                <div className="student-vehicle-class-options">
+                  {VEHICLE_CLASS_OPTIONS.map((option) => {
+                    const selected = formik.values.vehicle_class.includes(option.value);
+                    return (
+                      <label key={option.value} className={selected ? "is-selected" : ""}>
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          disabled={!canEditLicence}
+                          onChange={() => formik.setFieldValue(
+                            "vehicle_class",
+                            selected
+                              ? formik.values.vehicle_class.filter((value) => value !== option.value)
+                              : [...formik.values.vehicle_class, option.value]
+                          )}
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <small>Optional. Multiple selections are sent as comma-separated text with Update.</small>
+              </fieldset>
+            </div>
+          </div>}
 
           <div className="row student-form-row">
             <div className="col-md-6">
@@ -866,35 +925,45 @@ export default function AddStudents({
           </div>
 
           {isEdit && (
-            <section className="student-licence-section" aria-labelledby="student-licence-title">
-              <div className="student-licence-heading">
-                <div>
-                  <h6 id="student-licence-title">Test &amp; Licence Details</h6>
-                  <p>Licence information is available only after the student has passed the test.</p>
-                </div>
-                <span className={`student-test-status is-${licenceForm.test_status.toLowerCase().replace(/_/g, "-")}`}>
-                  {licenceForm.test_status.replace(/_/g, " ")}
-                </span>
+            <section className="student-test-status-panel" aria-labelledby="student-test-status-title">
+              <div>
+                <label id="student-test-status-title" htmlFor="test_status">Test Status</label>
+                <select
+                  id="test_status"
+                  name="test_status"
+                  className="form-control"
+                  value={licenceForm.test_status}
+                  onChange={handleLicenceChange}
+                  disabled={!canEditLicence}
+                >
+                  <option value="NOT_ATTEMPTED">Not Attempted</option>
+                  <option value="PASSED">Passed</option>
+                  <option value="FAILED">Failed</option>
+                </select>
               </div>
-
+              <span className={`student-test-status is-${licenceForm.test_status.toLowerCase().replace(/_/g, "-")}`}>
+                {licenceForm.test_status.replace(/_/g, " ")}
+              </span>
               {licenceFeedback && (
-                <Alert variant={licenceFeedback.type} className="py-2">
+                <Alert variant={licenceFeedback.type} className="student-test-status-feedback py-2">
                   {licenceFeedback.message}
                 </Alert>
               )}
+              <small className="student-test-status-help">Saved with the main Update button.</small>
+            </section>
+          )}
+
+          {isEdit && licenceForm.test_status === "PASSED" && (
+            <section className="student-licence-section" aria-labelledby="student-licence-title">
+              <div className="student-licence-heading">
+                <div>
+                  <h6 id="student-licence-title">Licence Details</h6>
+                  <p>Enter the licence information issued after the student passed the test.</p>
+                </div>
+              </div>
 
               <div className="row student-form-row">
-                <div className="col-md-6">
-                  <div className="form-group student-form-group">
-                    <label htmlFor="test_status">Test Status</label>
-                    <select id="test_status" name="test_status" className="form-control" value={licenceForm.test_status} onChange={handleLicenceChange} disabled={!canEditLicence}>
-                      <option value="NOT_ATTEMPTED">Not Attempted</option>
-                      <option value="PASSED">Passed</option>
-                      <option value="FAILED">Failed</option>
-                    </select>
-                  </div>
-                </div>
-                {[
+                {licenceForm.test_status === "PASSED" && [
                   ["license_number", "Licence Number", "text"],
                   ["license_classes", "Licence Classes", "text"],
                   ["issue_date", "Issue Date", "date"],
@@ -912,7 +981,7 @@ export default function AddStudents({
                         className="form-control"
                         value={licenceForm[name]}
                         onChange={handleLicenceChange}
-                        disabled={!canEditLicence || licenceForm.test_status !== "PASSED"}
+                        disabled={!canEditLicence}
                         placeholder={name === "license_classes" ? "Example: MCWG, LMV" : undefined}
                       />
                       {name === "license_classes" && licenceForm.test_status === "PASSED" && (
@@ -922,11 +991,6 @@ export default function AddStudents({
                   </div>
                 ))}
               </div>
-              {canEditLicence && <div className="student-licence-actions">
-                <Button type="button" variant="outline-primary" onClick={saveLicenceDetails} disabled={licenceSaving}>
-                  {licenceSaving ? "Saving..." : "Save Test & Licence Details"}
-                </Button>
-              </div>}
             </section>
           )}
 

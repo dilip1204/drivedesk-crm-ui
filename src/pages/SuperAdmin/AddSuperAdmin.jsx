@@ -4,17 +4,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import { addSuperAdmin, updateSuperAdmin } from "../../store/superAdmin/actions";
-import { getTenantLogo } from "../../store/login/actions";
 
 export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, selected = null, onSuccess }) {
     const dispatch = useDispatch();
     const logoInputRef = useRef(null);
     const uploadObjectUrlRef = useRef("");
-    const fetchedLogoObjectUrlRef = useRef("");
     const [logoFile, setLogoFile] = useState(null);
     const [logoPreview, setLogoPreview] = useState("");
     const [savedLogoPreview, setSavedLogoPreview] = useState("");
-    const [logoLoading, setLogoLoading] = useState(false);
     const [logoError, setLogoError] = useState("");
 
     const existingLogoUrl = selected?.logo_url || selected?.logoUrl || "";
@@ -26,51 +23,18 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
         }
     };
 
-    const revokeFetchedLogoObjectUrl = () => {
-        if (fetchedLogoObjectUrlRef.current) {
-            URL.revokeObjectURL(fetchedLogoObjectUrlRef.current);
-            fetchedLogoObjectUrlRef.current = "";
-        }
-    };
-
     useEffect(() => {
-        let isActive = true;
-
         revokeUploadObjectUrl();
-        revokeFetchedLogoObjectUrl();
         setLogoFile(null);
         setLogoError("");
         setLogoPreview("");
         setSavedLogoPreview(isEdit ? existingLogoUrl : "");
-        setLogoLoading(false);
         if (logoInputRef.current) logoInputRef.current.value = "";
 
-        const loadSavedLogo = () => {
-            if (!showModal || !isEdit || !selected?.tenant_id) return;
-
-            setLogoLoading(true);
-            dispatch(
-                getTenantLogo(selected.tenant_id, selected?.logo_uploaded_at, (logoBlob, error) => {
-                    if (!isActive) return;
-
-                    setLogoLoading(false);
-                    if (error || !(logoBlob instanceof Blob) || logoBlob.size === 0) return;
-
-                    const fetchedLogoUrl = URL.createObjectURL(logoBlob);
-                    fetchedLogoObjectUrlRef.current = fetchedLogoUrl;
-                    setSavedLogoPreview(fetchedLogoUrl);
-                })
-            );
-        };
-
-        loadSavedLogo();
-
         return () => {
-            isActive = false;
             revokeUploadObjectUrl();
-            revokeFetchedLogoObjectUrl();
         };
-    }, [dispatch, showModal, isEdit, selected?.tenant_id, selected?.logo_uploaded_at, existingLogoUrl]);
+    }, [showModal, isEdit, existingLogoUrl]);
 
     const initialValues = isEdit
         ? {
@@ -289,9 +253,7 @@ export default function AddSuperAdmin({ showModal, hideModal, isEdit = false, se
 
                         <div className="superadmin-logo-upload">
                             <div className="superadmin-logo-preview" aria-label="Tenant logo preview">
-                                {logoLoading && !logoPreview ? (
-                                    <span className="spinner-border spinner-border-sm" role="status" aria-label="Loading saved logo"></span>
-                                ) : logoPreview || savedLogoPreview ? (
+                                {logoPreview || savedLogoPreview ? (
                                     <img src={logoPreview || savedLogoPreview} alt="Tenant logo preview" />
                                 ) : (
                                     <span aria-hidden="true">

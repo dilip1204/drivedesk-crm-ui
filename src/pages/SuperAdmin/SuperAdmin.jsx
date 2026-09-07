@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Modal } from "react-bootstrap";
 import { ToastContainer, toast } from "react-toastify";
@@ -18,9 +18,11 @@ import Pagination from "../Students/Pagenation";
 import AddSuperAdmin from "./AddSuperAdmin";
 
 import { getSuperAdminList } from "../../store/superAdmin/actions";
-import { getTenantLogo } from "../../store/login/actions";
 
 const EMPTY_VALUE = "—";
+
+const getTenantLogoSource = (tenant) =>
+    tenant?.logo_url || tenant?.logoUrl || tenant?.org_logo || tenant?.logo || "";
 
 const SuperAdmin = () => {
     const dispatch = useDispatch();
@@ -37,49 +39,6 @@ const SuperAdmin = () => {
     const [selected, setSelected] = useState(null);
     const [showViewModal, setShowViewModal] = useState(false);
     const [viewTenant, setViewTenant] = useState(null);
-    const [tenantLogoUrls, setTenantLogoUrls] = useState({});
-    const [tenantLogoLoading, setTenantLogoLoading] = useState({});
-    const tenantLogoObjectUrlsRef = useRef({});
-    const tenantLogoRequestIdsRef = useRef({});
-
-    const loadTenantLogo = useCallback((tenant, requestedVersion) => {
-        const tenantId = tenant?.tenant_id;
-        if (!tenantId) return;
-
-        const requestId = `${Date.now()}-${Math.random()}`;
-        tenantLogoRequestIdsRef.current[tenantId] = requestId;
-        setTenantLogoLoading((previous) => ({ ...previous, [tenantId]: true }));
-
-        dispatch(getTenantLogo(
-            tenantId,
-            requestedVersion || tenant?.logo_uploaded_at || Date.now(),
-            (logoBlob, logoError) => {
-                if (tenantLogoRequestIdsRef.current[tenantId] !== requestId) return;
-
-                setTenantLogoLoading((previous) => ({ ...previous, [tenantId]: false }));
-                const previousObjectUrl = tenantLogoObjectUrlsRef.current[tenantId];
-
-                if (logoError || !(logoBlob instanceof Blob) || logoBlob.size === 0) {
-                    if (previousObjectUrl) URL.revokeObjectURL(previousObjectUrl);
-                    delete tenantLogoObjectUrlsRef.current[tenantId];
-                    setTenantLogoUrls((previous) => {
-                        const next = { ...previous };
-                        delete next[tenantId];
-                        return next;
-                    });
-                    return;
-                }
-
-                const nextObjectUrl = URL.createObjectURL(logoBlob);
-                if (previousObjectUrl && previousObjectUrl !== nextObjectUrl) {
-                    URL.revokeObjectURL(previousObjectUrl);
-                }
-                tenantLogoObjectUrlsRef.current[tenantId] = nextObjectUrl;
-                setTenantLogoUrls((previous) => ({ ...previous, [tenantId]: nextObjectUrl }));
-            }
-        ));
-    }, [dispatch]);
-
     const fetchList = (page = currentPage, limit = pageSize) => {
         setLoading(true);
         dispatch(
@@ -100,18 +59,6 @@ const SuperAdmin = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, pageSize]);
 
-    useEffect(() => {
-        tenants.forEach((tenant) => loadTenantLogo(tenant));
-    }, [tenants, loadTenantLogo]);
-
-    useEffect(() => () => {
-        Object.values(tenantLogoObjectUrlsRef.current).forEach((objectUrl) => {
-            if (objectUrl) URL.revokeObjectURL(objectUrl);
-        });
-        tenantLogoObjectUrlsRef.current = {};
-        tenantLogoRequestIdsRef.current = {};
-    }, []);
-
     const handleAdd = () => {
         setIsEdit(false);
         setSelected(null);
@@ -120,14 +67,13 @@ const SuperAdmin = () => {
 
     const handleEdit = (tenant) => {
         setIsEdit(true);
-        setSelected({ ...tenant, logoUrl: tenantLogoUrls[tenant.tenant_id] || "" });
+        setSelected({ ...tenant, logoUrl: getTenantLogoSource(tenant) });
         setShowModal(true);
     };
 
     const handleView = (tenant) => {
         setViewTenant(tenant);
         setShowViewModal(true);
-        loadTenantLogo(tenant);
     };
 
     const handleSuccess = (action, errRes, patchResponse) => {
@@ -152,9 +98,6 @@ const SuperAdmin = () => {
                     : previous
                 );
 
-                if (responseData?.logo_updated) {
-                    loadTenantLogo(updatedTenant, updatedTenant.logo_uploaded_at || Date.now());
-                }
             }
             fetchList(currentPage, pageSize);
         } else {
@@ -272,12 +215,10 @@ const SuperAdmin = () => {
                                                                 <td data-label="S.No" className="superadmin-col-sn">{startIndex + index + 1}</td>
                                                                 <td data-label="Organisation" className="superadmin-cell-wrap superadmin-col-org">
                                                                     <span className="superadmin-org-mark" aria-hidden="true">
-                                                                        {tenantLogoLoading[tenant.tenant_id] && !tenantLogoUrls[tenant.tenant_id] ? (
-                                                                            <span className="spinner-border spinner-border-sm" role="status" aria-label="Loading tenant logo"></span>
-                                                                        ) : tenantLogoUrls[tenant.tenant_id] ? (
+                                                                        {getTenantLogoSource(tenant) ? (
                                                                             <img
-                                                                                key={tenant.logo_uploaded_at || tenantLogoUrls[tenant.tenant_id]}
-                                                                                src={tenantLogoUrls[tenant.tenant_id]}
+                                                                                key={tenant.logo_uploaded_at || getTenantLogoSource(tenant)}
+                                                                                src={getTenantLogoSource(tenant)}
                                                                                 alt=""
                                                                             />
                                                                         ) : (
@@ -374,12 +315,10 @@ const SuperAdmin = () => {
                         <>
                             <div className="superadmin-tenant-profile">
                                 <span className="superadmin-tenant-avatar">
-                                    {tenantLogoLoading[viewTenant.tenant_id] && !tenantLogoUrls[viewTenant.tenant_id] ? (
-                                        <span className="spinner-border spinner-border-sm" role="status" aria-label="Loading tenant logo"></span>
-                                    ) : tenantLogoUrls[viewTenant.tenant_id] ? (
+                                    {getTenantLogoSource(viewTenant) ? (
                                         <img
-                                            key={viewTenant.logo_uploaded_at || tenantLogoUrls[viewTenant.tenant_id]}
-                                            src={tenantLogoUrls[viewTenant.tenant_id]}
+                                            key={viewTenant.logo_uploaded_at || getTenantLogoSource(viewTenant)}
+                                            src={getTenantLogoSource(viewTenant)}
                                             alt={`${viewTenant.org_name || "Tenant"} logo`}
                                         />
                                     ) : (

@@ -1,6 +1,5 @@
 import { all } from 'redux-saga/effects';
 import {
-    watchGetTenantLogo,
     watchLoginUser,
     watchRequestLoginOtp,
     watchVerifyLoginOtp,
@@ -25,7 +24,6 @@ export function* mainSaga() {
         watchLoginUser(),
         watchRequestLoginOtp(),
         watchVerifyLoginOtp(),
-        watchGetTenantLogo(),
         watchStudentListInformation(),
         watchAddStudent(),
         watchDeleteStudent(),

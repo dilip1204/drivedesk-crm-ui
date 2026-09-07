@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useSearchParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -34,6 +34,7 @@ import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 import schoolPrintLogo from "../../assets/logo/school_print_logo.png";
 import { getAdminPrintLogoSource, isDriveDeskAdmin } from "../../utils/printBranding";
 import { ensureTenantLogo, useTenantLogo } from "../../hooks/useTenantLogo";
+import { useSubscription } from "../../hooks/useSubscription";
 
 const formatStudentVehicleClasses = (student) => {
   const value = student?.vehicle_classes ??
@@ -65,6 +66,7 @@ const formatStudentVehicleClasses = (student) => {
 
 const Students = () => {
   const dispatch = useDispatch();
+  const { isLimited } = useSubscription();
   const { logoSrc: tenantLogo, hasTenantLogo } = useTenantLogo(null);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -93,10 +95,6 @@ const Students = () => {
 
   // before your table rows
   const startIndex = (currentPage - 1) * pageSize;
-
-  const studentDataLists = useSelector(
-    (state) => state.studentsListInfo.studentsList
-  );
 
   const [searchParams] = useSearchParams();
   const initialMonth = searchParams.get("month") || "";
@@ -333,8 +331,6 @@ const Students = () => {
     setSelectedStudentAppId(appId);
   };
 
-  const AddStudentsModal = () => setShowModal(true);
-
   const handleEditStudent = (student) => {
     setSelectedStudent(student);
     setIsEdit(true);
@@ -542,8 +538,6 @@ const Students = () => {
     }, 2000);
   };
 
-  const totalPages = Math.ceil(totalCount / pageSize);
-
   let orgNameForPrint = "Students Test List";
   let tenantInfoForPrint = {};
   try {
@@ -617,6 +611,7 @@ const Students = () => {
                       type="button"
                       className="mb-1 btn btn-primary mr-2"
                       onClick={() => setShowModal(true)}
+                      style={isLimited ? { display: "none" } : undefined}
                     >
                       <i className="bi bi-plus-lg"></i> Add Students
                     </button>
@@ -899,6 +894,7 @@ const Students = () => {
                                     data-tooltip="Edit Student"
                                     aria-label="Edit Student"
                                     onClick={() => handleEditStudent(student)}
+                                    style={isLimited ? { display: "none" } : undefined}
                                   >
                                     <i className="bi bi-pencil-square" aria-hidden="true"></i>
                                     <span className="students-action-label">Edit</span>
@@ -924,6 +920,7 @@ const Students = () => {
                                       getOneStudentPaymentData(true, student)
                                     }
                                     disabled={Number(student.balance) <= 0}
+                                    style={isLimited ? { display: "none" } : undefined}
                                   >
                                     <i className="bi bi-cash-coin" aria-hidden="true"></i>
                                     <span className="students-action-label">Fee</span>
@@ -947,6 +944,7 @@ const Students = () => {
                                     onClick={() =>
                                       deleteUser(student.mobile_number)
                                     }
+                                    style={isLimited ? { display: "none" } : undefined}
                                   >
                                     <i className="bi bi-trash" aria-hidden="true"></i>
                                     <span className="students-action-label">Delete</span>

@@ -26,6 +26,20 @@ const isServerError = (error) => {
     return Number.isInteger(statusCode) && statusCode >= 500 && statusCode <= 504;
 };
 
+const getSubscriptionStatus = () => {
+    try {
+        const subscription = JSON.parse(localStorage.getItem('tenantSubscription') || 'null');
+        if (subscription?.subscription_status) return subscription.subscription_status;
+        const tenant = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        return tenant?.subscription_status || '';
+    } catch (error) {
+        return '';
+    }
+};
+
+const isMutationRequest = (method = '') =>
+    ['post', 'put', 'patch', 'delete'].includes(String(method).toLowerCase());
+
 const startTrackedRequest = () => {
     if (requestBatchTimer) {
         clearTimeout(requestBatchTimer);
@@ -103,6 +117,25 @@ instance.interceptors.request.use(
     (config) => {
         startTrackedRequest();
 
+        if (getSubscriptionStatus() === 'LIMITED' && isMutationRequest(config.method)) {
+            const limitedError = {
+                config,
+                response: {
+                    status: 403,
+                    data: {
+                        isError: true,
+                        statusCode: 403,
+                        response: 'Your subscription has expired. Please renew to continue using DriveDesk.',
+                    },
+                },
+            };
+            finishTrackedRequest();
+            window.dispatchEvent(new CustomEvent('drivedesk:subscription-error', {
+                detail: limitedError.response.data.response,
+            }));
+            return Promise.reject(limitedError);
+        }
+
         const isMultipartRequest =
             typeof FormData !== 'undefined' && config.data instanceof FormData;
 
@@ -137,6 +170,12 @@ instance.interceptors.response.use(
     (error) => {
         const statusCode = error?.response?.status;
         const responseData = error?.response?.data;
+
+        if (statusCode === 403 && typeof responseData?.response === 'string') {
+            window.dispatchEvent(new CustomEvent('drivedesk:subscription-error', {
+                detail: responseData.response,
+            }));
+        }
 
         if (
             (statusCode === 401 || isTokenExpiredDetail(responseData)) &&

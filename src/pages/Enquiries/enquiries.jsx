@@ -26,6 +26,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ProfileModal from "../../components/ProfileModal";
 import Pagination from "../Students/Pagenation";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
+import { useSubscription } from "../../hooks/useSubscription";
 
 const parseEnquiriesResponse = (res, fallbackPageSize = 10) => {
   const response = res?.response;
@@ -133,6 +134,7 @@ const matchesQuickFilter = (enquiry, filter) => {
 };
 
 const Enquiries = () => {
+  const { isLimited } = useSubscription();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
@@ -374,6 +376,7 @@ const Enquiries = () => {
                       type="button"
                       className="mb-1 btn btn-primary"
                       onClick={AddEnquiriesModal}
+                      style={isLimited ? { display: "none" } : undefined}
                     >
                       <i className="bi bi-plus-lg"></i> Add Enquiries
                     </button>
@@ -411,6 +414,7 @@ const Enquiries = () => {
                       type="button"
                       className="mb-1 btn btn-primary"
                       onClick={AddEnquiriesModal}
+                      style={isLimited ? { display: "none" } : undefined}
                     >
                       <i className="bi bi-plus-lg"></i> Add Enquiries
                     </button>
@@ -690,7 +694,7 @@ const Enquiries = () => {
                                     <span className="enquiry-action-label">Call</span>
                                   </a>
                                 )}{" "}
-                                {contactLinks.whatsapp && (
+                                {contactLinks.whatsapp && !isLimited && (
                                   <a
                                     className="btn btn-sm enquiry-action-icon enquiry-contact-action enquiry-whatsapp-action"
                                     href={contactLinks.whatsapp}

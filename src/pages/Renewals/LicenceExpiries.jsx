@@ -11,6 +11,7 @@ import Pagination from "../Students/Pagenation";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 import { getLicenceExpiries } from "../../services/functional/renewals/renewalService";
 import { useAuth } from "../../hooks/useAuth";
+import { useSubscription } from "../../hooks/useSubscription";
 import "./Renewals.css";
 
 const EMPTY_FILTERS = { document_type: "", expiry_from: "", expiry_to: "", expiry_status: "", search: "" };
@@ -32,7 +33,8 @@ const getErrorMessage = (error) => {
 
 export default function LicenceExpiries() {
   const { role } = useAuth();
-  const isAdmin = role === "admin";
+  const { isLimited } = useSubscription();
+  const isAdmin = role === "admin" && !isLimited;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialFilters = useMemo(() => filtersFromSearchParams(searchParams), [searchParams]);

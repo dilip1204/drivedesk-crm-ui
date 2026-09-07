@@ -1,4 +1,3 @@
-import { GET_STUDENTS_FILTER_LIST } from "../students/types";
 import { 
     GET_TRAINING_SESSION_LIST,
     GET_TRAINING_SESSION_FILTER_LIST,

@@ -26,9 +26,11 @@ export default function Sidebar() {
 
   const isActive = (path) => location.pathname.startsWith(path);
   const [renewalsOpen, setRenewalsOpen] = useState(isActive("/renewals"));
+  const [subscriptionsOpen, setSubscriptionsOpen] = useState(isActive("/superadmin/subscriptions"));
 
   useEffect(() => {
     if (isActive("/renewals")) setRenewalsOpen(true);
+    if (isActive("/superadmin/subscriptions")) setSubscriptionsOpen(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
@@ -162,6 +164,12 @@ export default function Sidebar() {
                   <span className="nav-text">Tutorials</span>
                 </Link>
               </li>
+              <li className={`has-sub ${location.pathname === "/subscription" ? "active expand" : ""}`}>
+                <Link className="sidenav-item-link" to="/subscription" title="My Subscription">
+                  <i className="mdi mdi-credit-card-outline"></i>
+                  <span className="nav-text">My Subscription</span>
+                </Link>
+              </li>
               </>
             )}
 
@@ -190,6 +198,20 @@ export default function Sidebar() {
                     <i className="mdi mdi-finance"></i>
                     <span className="nav-text">Finance</span>
                   </Link>
+                </li>
+                <li className={`has-sub renewals-nav ${isActive("/superadmin/subscriptions") ? "active" : ""} ${subscriptionsOpen ? "expand" : ""}`}>
+                  <Link className="sidenav-item-link" to="/superadmin/subscriptions" title="Subscription Management">
+                    <i className="mdi mdi-credit-card-clock"></i>
+                    <span className="nav-text">Subscription Management</span>
+                  </Link>
+                  <button type="button" className="renewals-nav-toggle" onClick={() => setSubscriptionsOpen((open) => !open)} aria-label={subscriptionsOpen ? "Collapse Subscription menu" : "Expand Subscription menu"} aria-expanded={subscriptionsOpen}>
+                    <i className="mdi mdi-chevron-down" aria-hidden="true"></i>
+                  </button>
+                  <ul className="renewals-subnav" aria-label="Subscription Management pages">
+                    <li className={location.pathname === "/superadmin/subscriptions" ? "active" : ""}><Link to="/superadmin/subscriptions"><i className="mdi mdi-view-dashboard-outline" />Dashboard</Link></li>
+                    <li className={location.pathname === "/superadmin/subscriptions/tenants" ? "active" : ""}><Link to="/superadmin/subscriptions/tenants"><i className="mdi mdi-domain" />Tenant Subscriptions</Link></li>
+                    <li className={location.pathname === "/superadmin/subscriptions/settings" ? "active" : ""}><Link to="/superadmin/subscriptions/settings"><i className="mdi mdi-cog-outline" />Settings</Link></li>
+                  </ul>
                 </li>
               </>
             )}

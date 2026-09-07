@@ -108,7 +108,6 @@ const TrainingSession = () => {
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [sessionStudentData, setSessionStudentData] = useState(null);
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [filterApplied, setFilterApplied] = useState(false);
   const [studentSearch, setStudentSearch] = useState("");
   const [leavePlan, setLeavePlan] = useState(null);
   const [markingLeave, setMarkingLeave] = useState(false);
@@ -148,7 +147,7 @@ const TrainingSession = () => {
   }
 
   const today = new Date().toISOString().split("T")[0];
-  const [filters, setFilters] = useState({
+  const [filters] = useState({
     instructor_id: "ALL",
     start_date: today,
     end_date: today,
@@ -519,7 +518,6 @@ const TrainingSession = () => {
                       className="mb-1 btn btn-secondary mr-2"
                       onClick={() => {
                         setFiltersVisible(!filtersVisible);
-                        if (!filtersVisible) setFilterApplied(false);
                       }}
                     >
                       <i className="bi bi-funnel"></i> Filter
@@ -550,7 +548,6 @@ const TrainingSession = () => {
                               setError("No training session found.");
                             }
                             setLoading(false);
-                            setFilterApplied(true);
                           })
                         );
                       }}

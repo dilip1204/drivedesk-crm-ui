@@ -11,6 +11,7 @@ import EmptyState from "../../components/EmptyState";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import Pagination from "../Students/Pagenation";
 import { useAuth } from "../../hooks/useAuth";
+import { useSubscription } from "../../hooks/useSubscription";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 import {
   createVehicle, deleteVehicle, getVehicle, getVehicles, updateVehicle,
@@ -60,7 +61,8 @@ const getVehicleId = (vehicle) => vehicle?.id || vehicle?.vehicle_id || vehicle?
 
 export default function VehicleDocuments() {
   const { role } = useAuth();
-  const isAdmin = role === "admin";
+  const { isLimited } = useSubscription();
+  const isAdmin = role === "admin" && !isLimited;
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);

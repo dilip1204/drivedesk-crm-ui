@@ -14,6 +14,7 @@ import expensesReducer from "./expenses/reducer";
 import superAdminReducer from "./superAdmin/reducer";
 import financeDashboardReducer from "./financeDashboard/reducer";
 import tenantUsageReducer from "./tenantUsage/reducer";
+import subscriptionReducer from "./subscription/reducer";
 import { getOutstandingFees } from "./dashboardSummary/actions";
 
 
@@ -32,5 +33,6 @@ export const mainReducer = combineReducers({
     superAdminInfo: superAdminReducer,
     financeDashboardInfo: financeDashboardReducer,
     tenantUsageInfo: tenantUsageReducer,
+    subscriptionInfo: subscriptionReducer,
     outstandingFeesInfo: getOutstandingFees
 })

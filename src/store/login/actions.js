@@ -1,5 +1,4 @@
 import {
-    GET_TENANT_LOGO,
     LOGIN_USER_DATA,
     REQUEST_LOGIN_OTP,
     VERIFY_LOGIN_OTP,
@@ -29,12 +28,3 @@ export function verifyLoginOtp(mobileNumber, otp, fn) {
     };
 }
 
-export function getTenantLogo(tenantId, versionOrCallback, callback) {
-    const version = typeof versionOrCallback === 'function' ? undefined : versionOrCallback;
-    const fn = typeof versionOrCallback === 'function' ? versionOrCallback : callback;
-    return {
-        type: GET_TENANT_LOGO,
-        param: { tenantId, version },
-        fn,
-    };
-}

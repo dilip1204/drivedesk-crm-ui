@@ -1,9 +1,5 @@
 import { put, call, takeEvery } from 'redux-saga/effects';
 import {
-    GET_TENANT_LOGO,
-    GET_TENANT_LOGO_ERROR,
-    GET_TENANT_LOGO_PENDING,
-    GET_TENANT_LOGO_SUCCESS,
     LOGIN_USER_DATA,
     LOGIN_USER_DATA_ERROR,
     LOGIN_USER_DATA_PENDING,
@@ -18,7 +14,7 @@ import {
     VERIFY_LOGIN_OTP_SUCCESS,
 } from './types';
 
-import { superAdminService, userLogin } from '../../services/functional';
+import { userLogin } from '../../services/functional';
 
 function* loginUser({ param, fn }){
     try {
@@ -66,24 +62,6 @@ function* verifyOtp({ param, fn }) {
     }
 }
 
-function* loadTenantLogo({ param, fn }) {
-    const tenantId = typeof param === 'object' ? param?.tenantId : param;
-    const version = typeof param === 'object' ? param?.version : undefined;
-    try {
-        yield put({ type: GET_TENANT_LOGO_PENDING, tenantId });
-        const response = yield call(superAdminService.getTenantLogo, tenantId, version);
-        const logoBlob = response.data;
-        yield put({
-            type: GET_TENANT_LOGO_SUCCESS,
-            data: { tenantId, hasLogo: Boolean(logoBlob?.size) },
-        });
-        if (typeof fn === 'function') fn(logoBlob);
-    } catch (error) {
-        yield put({ type: GET_TENANT_LOGO_ERROR, error: error?.response || error });
-        if (typeof fn === 'function') fn(null, error);
-    }
-}
-
 export function* watchLoginUser() {
     yield takeEvery(LOGIN_USER_DATA, loginUser);
 }
@@ -96,6 +74,3 @@ export function* watchVerifyLoginOtp() {
     yield takeEvery(VERIFY_LOGIN_OTP, verifyOtp);
 }
 
-export function* watchGetTenantLogo() {
-    yield takeEvery(GET_TENANT_LOGO, loadTenantLogo);
-}

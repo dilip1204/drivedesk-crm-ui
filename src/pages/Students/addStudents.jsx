@@ -209,6 +209,8 @@ export default function AddStudents({
       .matches(/^\d{10}$/, "Mobile number must be 10 digits")
       .required("Mobile number is required"),
     alternate_number: Yup.string()
+      .nullable()
+      .notRequired()
       .matches(/^$|^\d{10}$/, "Alternate number must be 10 digits"),
     llr_number: Yup.string().nullable(),
     llr_from_date: Yup.date().nullable().transform((value, originalValue) => originalValue === "" ? null : value),
@@ -312,6 +314,9 @@ export default function AddStudents({
 
       const normalizedValues = {
         ...values,
+        alternate_number: values.alternate_number
+          ? Number(values.alternate_number)
+          : null,
         test_date: values.test_date ? values.test_date : null,
         llr_from_date: values.llr_from_date || null,
         llr_to_date: values.llr_to_date || null,
@@ -319,6 +324,15 @@ export default function AddStudents({
       };
 
       if (isEdit) {
+        if (
+          normalizedValues.alternate_number === null &&
+          (id?.alternate_number === null ||
+            id?.alternate_number === undefined ||
+            id?.alternate_number === "")
+        ) {
+          delete normalizedValues.alternate_number;
+        }
+
         normalizedValues.test_status = licenceForm.test_status;
         if (isPassed) {
           normalizedValues.license_details = {
@@ -333,12 +347,14 @@ export default function AddStudents({
       }
 
       if (!isEdit) {
+        if (normalizedValues.alternate_number === null) {
+          delete normalizedValues.alternate_number;
+        }
+
         [
-          "alternate_number",
           "llr_number",
           "llr_from_date",
           "llr_to_date",
-          "vehicle_classes",
           "test_application_number",
         ].forEach((field) => delete normalizedValues[field]);
       }
@@ -637,10 +653,10 @@ export default function AddStudents({
     "name",
     "dob",
     "mobile_number",
+    "alternate_number",
     "application_number",
     ...(isEdit
       ? [
-          "alternate_number",
           "test_application_number",
           "llr_number",
           "llr_from_date",
@@ -871,7 +887,7 @@ export default function AddStudents({
             </div>
           ))}
 
-          {isEdit && <div className="row student-form-row">
+          <div className="row student-form-row">
             <div className="col-12">
               <fieldset className="student-vehicle-class-fieldset">
                 <legend>Class of Vehicle</legend>
@@ -883,7 +899,6 @@ export default function AddStudents({
                         <input
                           type="checkbox"
                           checked={selected}
-                          disabled={!canEditLicence}
                           onChange={() => formik.setFieldValue(
                             "vehicle_classes",
                             selected
@@ -896,10 +911,10 @@ export default function AddStudents({
                     );
                   })}
                 </div>
-                <small>Optional. Multiple selections are sent as comma-separated text with Update.</small>
+                <small>Optional. Selected classes are saved when adding or updating the student.</small>
               </fieldset>
             </div>
-          </div>}
+          </div>
 
           <div className="row student-form-row">
             <div className="col-md-6">

@@ -1,7 +1,4 @@
 import {
-    GET_TENANT_LOGO_ERROR,
-    GET_TENANT_LOGO_PENDING,
-    GET_TENANT_LOGO_SUCCESS,
    // LOGIN_USER_DATA,
     LOGIN_USER_DATA_ERROR,
     LOGIN_USER_DATA_PENDING,
@@ -24,9 +21,6 @@ const initialState = {
     otpVerifyResponse: null,
     otpVerifyLoader: false,
     otpVerifyError: null,
-    tenantLogoStatus: null,
-    tenantLogoLoader: false,
-    tenantLogoError: null,
 }
 
 export default function UserLoginReducer(state = initialState, action) {
@@ -83,24 +77,6 @@ export default function UserLoginReducer(state = initialState, action) {
                 ...state,
                 otpVerifyError: action.error,
                 otpVerifyLoader: false,
-            }
-        case GET_TENANT_LOGO_PENDING:
-            return {
-                ...state,
-                tenantLogoLoader: true,
-                tenantLogoError: null,
-            }
-        case GET_TENANT_LOGO_SUCCESS:
-            return {
-                ...state,
-                tenantLogoStatus: action.data,
-                tenantLogoLoader: false,
-            }
-        case GET_TENANT_LOGO_ERROR:
-            return {
-                ...state,
-                tenantLogoError: action.error,
-                tenantLogoLoader: false,
             }
         default:
             return state;

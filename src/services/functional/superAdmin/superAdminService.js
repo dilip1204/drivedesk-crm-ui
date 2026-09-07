@@ -39,19 +39,6 @@ export const updateSuperAdmin = (param) => {
     );
 };
 
-export const getTenantLogo = (tenantId, version) => {
-    if (!tenantId) {
-        return Promise.reject(new Error('Tenant ID is required to load the logo.'));
-    }
-
-    const cacheVersion = version || Date.now();
-    return request(
-        METHOD_TYPES.GET,
-        `${ENDPOINTS.getTenantLogo}${encodeURIComponent(tenantId)}?v=${encodeURIComponent(cacheVersion)}`,
-        { responseType: 'blob' }
-    );
-};
-
 export const getWhatsAppUsage = (period) => {
     const query = new URLSearchParams({ period }).toString();
     return request(

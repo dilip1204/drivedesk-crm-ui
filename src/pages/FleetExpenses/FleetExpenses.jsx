@@ -21,6 +21,7 @@ import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfir
 import { getExpensesListInformation, deleteExpenses } from "../../store/expenses/actions";
 import { Chart, registerables } from "chart.js";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
+import { useSubscription } from "../../hooks/useSubscription";
 Chart.register(...registerables);
 
 const getExpenseType = (expense) =>
@@ -32,13 +33,9 @@ const getExpenseType = (expense) =>
   expense.type ||
   "Other";
 
-const truncateText = (value, maxLength = 15) => {
-  const text = (value || "-").toString();
-  return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
-};
-
 const FleetExpenses = () => {
   const dispatch = useDispatch();
+  const { isLimited } = useSubscription();
 
   // UI state
   const [showModal, setShowModal] = useState(false);
@@ -421,7 +418,7 @@ const FleetExpenses = () => {
                   </div>
 
                   <div className="col-xl-6 text-right fleet-expenses-actions">
-                    <button className="mb-1 btn btn-primary mr-2" onClick={() => { setIsEdit(false); setSelectedExpenses(null); setShowModal(true); }}>
+                    <button className="mb-1 btn btn-primary mr-2" style={isLimited ? { display: "none" } : undefined} onClick={() => { setIsEdit(false); setSelectedExpenses(null); setShowModal(true); }}>
                       <i className="bi bi-plus-lg" /> Add Expense
                     </button>
                   </div>

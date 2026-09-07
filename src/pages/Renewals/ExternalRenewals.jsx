@@ -12,6 +12,7 @@ import EmptyState from "../../components/EmptyState";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import Pagination from "../Students/Pagenation";
 import { useAuth } from "../../hooks/useAuth";
+import { useSubscription } from "../../hooks/useSubscription";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 import {
   createRenewal,
@@ -74,7 +75,8 @@ const toPayload = (form) => ({
 
 export default function ExternalRenewals() {
   const { role } = useAuth();
-  const isAdmin = role === "admin";
+  const { isLimited } = useSubscription();
+  const isAdmin = role === "admin" && !isLimited;
   const [searchParams, setSearchParams] = useSearchParams();
   const linkedRecordOpened = useRef(false);
   const [items, setItems] = useState([]);

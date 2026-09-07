@@ -28,6 +28,7 @@ import {
   getAdminPrintWatermark,
 } from "../../utils/printBranding";
 import { ensureTenantLogo } from "../../hooks/useTenantLogo";
+import { useSubscription } from "../../hooks/useSubscription";
 
 const escapeHtml = (value) =>
   String(value ?? "")
@@ -68,6 +69,7 @@ const getPaymentContactLinks = (student) => {
 };
 
 const OutstandingFees = () => {
+  const { isLimited } = useSubscription();
   const { role } = useAuth();
   const isAdmin = String(role || "").toLowerCase() === "admin";
   const dispatch = useDispatch();
@@ -438,7 +440,7 @@ const OutstandingFees = () => {
                                     <i className="bi bi-telephone-fill" aria-hidden="true" />Call
                                   </a>
                                 )}
-                                {contactLinks.whatsapp && (
+                                {contactLinks.whatsapp && !isLimited && (
                                   <a className="payment-reminder-button is-whatsapp" href={contactLinks.whatsapp} target="_blank" rel="noopener noreferrer" aria-label={`Send payment reminder to ${outstandingFees?.name || "student"} on WhatsApp`}>
                                     <i className="bi bi-whatsapp" aria-hidden="true" />WhatsApp
                                   </a>

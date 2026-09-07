@@ -9,6 +9,7 @@ import {
   userLogin,
   verifyLoginOtp,
 } from "../../store/login/actions";
+import { resetSubscriptionState } from "../../store/subscription/actions";
 import { PublicBrand } from "../../components/PublicLayout";
 import heroImage from "../../assets/img/bg_login.png";
 import "./Login.css";
@@ -88,6 +89,8 @@ const Login = () => {
   }, [otpRequested]);
 
   const completeLogin = (authResponse) => {
+    dispatch(resetSubscriptionState());
+    localStorage.removeItem("tenantSubscription");
     localStorage.setItem("token", `Bearer ${authResponse.access_token}`);
 
     const tenantInfo = authResponse.tenant_info || {};
@@ -111,8 +114,14 @@ const Login = () => {
       userLogin(data, (res) => {
         if (res && !res.isError && res.response?.access_token) {
           completeLogin(res.response);
-        } else if (res?.statusCode === 422 || res?.isError) {
-          setLoginError(res?.message || "Invalid login credentials.");
+        } else if (res?.statusCode === 422 || res?.isError || res?.status === 403 || res?.data?.isError) {
+          setLoginError(
+            res?.data?.response ||
+            res?.response?.data?.response ||
+            res?.response ||
+            res?.message ||
+            "Invalid login credentials."
+          );
         } else {
           setLoginError(
             res?.response?.data?.response || res?.message || "Login failed. Please try again."

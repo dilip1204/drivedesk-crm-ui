@@ -5,6 +5,7 @@ import avatar from "../assets/img/avatar.png";
 import logoIcon from "../assets/logo/logo_icon_white.png";
 import { useTenantLogo } from "../hooks/useTenantLogo";
 import PWAInstallButton from "./PWAInstallButton";
+import SubscriptionBanner from "./SubscriptionBanner";
 import "./Header.css";
 
 const SEARCHABLE_PAGES = [
@@ -24,9 +25,13 @@ const SEARCHABLE_PAGES = [
   { label: "Expenses", path: "/fleetexpenses", icon: "mdi-cash-multiple", roles: ["admin", "instructor"] },
   { label: "Finance Dashboard", path: "/finance-dashboard", icon: "mdi-finance", roles: ["super_admin"] },
   { label: "Tutorials", path: "/tutorials", icon: "mdi-play-circle-outline", roles: ["admin", "instructor"] },
+  { label: "My Subscription", path: "/subscription", icon: "mdi-credit-card-outline", roles: ["admin", "instructor"] },
   { label: "Super Admin", path: "/superadmin", icon: "mdi-shield-account", roles: ["super_admin"] },
   { label: "Tenant Usage", path: "/super-admin/usage", icon: "mdi-chart-bar", roles: ["super_admin"] },
   { label: "WhatsApp Usage", path: "/superadmin/whatsapp-usage", icon: "mdi-whatsapp", roles: ["super_admin"] },
+  { label: "Subscription Dashboard", path: "/superadmin/subscriptions", icon: "mdi-credit-card-clock", roles: ["super_admin"] },
+  { label: "Tenant Subscriptions", path: "/superadmin/subscriptions/tenants", icon: "mdi-domain", roles: ["super_admin"] },
+  { label: "Subscription Settings", path: "/superadmin/subscriptions/settings", icon: "mdi-cog-outline", roles: ["super_admin"] },
 ];
 
 export default function Header() {
@@ -37,6 +42,7 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [serverError, setServerError] = useState(null);
+  const [subscriptionError, setSubscriptionError] = useState("");
   const profileMenuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,6 +73,12 @@ export default function Header() {
     setDisplayName(resolvedName);
     setDisplayRole(formatRoleLabel(roleInfo?.role || role));
     setCurrentRole(role);
+  }, []);
+
+  useEffect(() => {
+    const handleSubscriptionError = (event) => setSubscriptionError(String(event.detail || "Action unavailable."));
+    window.addEventListener("drivedesk:subscription-error", handleSubscriptionError);
+    return () => window.removeEventListener("drivedesk:subscription-error", handleSubscriptionError);
   }, []);
 
   const visiblePages = useMemo(
@@ -362,6 +374,14 @@ export default function Header() {
         </div>
       </nav>
       </header>
+      {currentRole !== "super_admin" && <SubscriptionBanner />}
+      {subscriptionError && (
+        <div className="subscription-banner is-limited" role="alert">
+          <i className="mdi mdi-lock-outline" aria-hidden="true" />
+          <span>{subscriptionError}</span>
+          <button type="button" className="btn btn-sm btn-link ml-auto" onClick={() => setSubscriptionError("")} aria-label="Dismiss message">×</button>
+        </div>
+      )}
       {serverError && (
         <section className="api-error-banner" role="alert" aria-live="assertive">
         <span className="api-error-banner__icon" aria-hidden="true">

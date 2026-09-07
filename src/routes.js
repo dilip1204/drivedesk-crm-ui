@@ -26,6 +26,8 @@ import LicenceExpiries from "./pages/Renewals/LicenceExpiries";
 import VehicleDocuments from "./pages/Renewals/VehicleDocuments";
 import VehicleDocumentExpiries from "./pages/Renewals/VehicleDocumentExpiries";
 import RenewalDashboard from "./pages/Renewals/RenewalDashboard";
+import SubscriptionManagement from "./pages/Subscriptions/SubscriptionManagement";
+import MySubscription from "./pages/Subscriptions/MySubscription";
 
 export default function AppRoutes() {
   return (
@@ -214,6 +216,42 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["super_admin"]}>
             <WhatsAppUsage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/subscription"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
+            <MySubscription />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin/subscriptions"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <SubscriptionManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin/subscriptions/tenants"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <SubscriptionManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin/subscriptions/settings"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <SubscriptionManagement />
           </ProtectedRoute>
         }
       />

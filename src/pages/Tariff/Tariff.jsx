@@ -26,9 +26,11 @@ import AddTariffs from "./addTariffs";
 import ProfileModal from "../../components/ProfileModal"; // new generic component
 
 import { useAuth } from "../../hooks/useAuth";
+import { useSubscription } from "../../hooks/useSubscription";
 
 const Tariff = () => {
   const { role } = useAuth();
+  const { isLimited } = useSubscription();
 
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
@@ -92,10 +94,6 @@ const Tariff = () => {
 
   const handleDeleteCloseModel = () => {
     setShowDeleteModal(false);
-  };
-
-  const deleteDataConfirmation = () => {
-    setShowDeleteModal(true);
   };
 
   const deleteData = (appId) => {
@@ -181,7 +179,7 @@ const Tariff = () => {
                   </div>
 
                   <div className="col-xl-6 text-right tariff-page-actions">
-                    {role === "admin" ? (
+                    {role === "admin" && !isLimited ? (
                       <button
                         type="button"
                         className="mb-1 btn btn-primary"

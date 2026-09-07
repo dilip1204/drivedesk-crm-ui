@@ -49,4 +49,6 @@ export const ENDPOINTS = {
     getTenantUsageDashboard: 'usage/dashboard',
     getTenantUsageList: 'usage',
     renewals: 'renewals',
+    subscription: 'subscription',
+    subscriptionSettings: 'system-settings/subscription',
 } 

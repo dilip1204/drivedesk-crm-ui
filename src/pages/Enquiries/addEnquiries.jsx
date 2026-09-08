@@ -107,12 +107,16 @@ export default function AddEnquiries({
     return normalized === "converted" || normalized === "enrolled";
   };
 
+  const isRenewalEnrollmentStatus = (status) =>
+    String(status || "").trim().toLowerCase() === "renewal enrollment";
+
   const normalizeFollowUpStatus = (status) => {
     const normalized = String(status || "").trim().toLowerCase();
     if (normalized === "converted") return "Enrolled";
     if (normalized === "pending") return "Pending";
     if (normalized === "contacted") return "Contacted";
     if (normalized === "enrolled") return "Enrolled";
+    if (normalized === "renewal enrollment") return "Renewal Enrollment";
     if (normalized === "dropped") return "Dropped";
     return "Pending";
   };
@@ -718,6 +722,7 @@ export default function AddEnquiries({
                   <option value="Pending">Pending</option>
                   <option value="Contacted">Contacted</option>
                   <option value="Enrolled">Enrolled</option>
+                  <option value="Renewal Enrollment">Renewal Enrollment</option>
                   <option value="Dropped">Dropped</option>
                 </select>
                 {formik.touched.follow_up_status &&
@@ -729,7 +734,8 @@ export default function AddEnquiries({
               </div>
             </div>
 
-            {!isEnrolledStatus(formik.values.follow_up_status) && (
+            {!isEnrolledStatus(formik.values.follow_up_status) &&
+              !isRenewalEnrollmentStatus(formik.values.follow_up_status) && (
               <div className="col-md-6">
                 <div className="form-group enquiry-form-group">
                   <label>Follow Up Date</label>

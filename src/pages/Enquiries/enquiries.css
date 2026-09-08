@@ -327,6 +327,12 @@
   color: #027a48;
 }
 
+.enquiry-status-value.is-renewal {
+  border-color: #c4b5fd;
+  background: #f5f3ff;
+  color: #6941c6;
+}
+
 .enquiry-status-value.is-dropped {
   border-color: #e2e8f0;
   background: #f1f5f9;

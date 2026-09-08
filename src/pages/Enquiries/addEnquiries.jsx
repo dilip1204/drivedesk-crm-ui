@@ -15,6 +15,24 @@ import EmptyState from "../../components/EmptyState";
 import { IoClose } from "react-icons/io5";
 import "./addEnquiries.css";
 
+const VEHICLE_CLASS_OPTIONS = [
+  { value: "MCWOG", label: "MCWOG" },
+  { value: "MCWG", label: "MCWG" },
+  { value: "LMV", label: "LMV" },
+  { value: "LMV Transport", label: "LMV Transport" },
+  { value: "HMV / Transport Vehicle", label: "HMV / Transport Vehicle" },
+];
+
+const normalizeVehicleClasses = (value) => {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
 export default function AddEnquiries({
   showModal,
   hideModal,
@@ -107,12 +125,16 @@ export default function AddEnquiries({
     return normalized === "converted" || normalized === "enrolled";
   };
 
+  const isRenewalEnrollmentStatus = (status) =>
+    String(status || "").trim().toLowerCase() === "renewal enrollment";
+
   const normalizeFollowUpStatus = (status) => {
     const normalized = String(status || "").trim().toLowerCase();
     if (normalized === "converted") return "Enrolled";
     if (normalized === "pending") return "Pending";
     if (normalized === "contacted") return "Contacted";
     if (normalized === "enrolled") return "Enrolled";
+    if (normalized === "renewal enrollment") return "Renewal Enrollment";
     if (normalized === "dropped") return "Dropped";
     return "Pending";
   };
@@ -149,7 +171,11 @@ export default function AddEnquiries({
         name: values?.name || "",
         dob: values?.dob || "",
         mobile_number: values?.mobile_number || "",
+        ...(values?.alternate_number
+          ? { alternate_number: Number(values.alternate_number) }
+          : {}),
         application_number: values?.application_number || "",
+        vehicle_classes: normalizeVehicleClasses(values?.vehicle_classes),
         email: values?.email || null,
         aadhar_number: values?.aadhar_number || "",
         plan: values?.course_interest || "",
@@ -175,6 +201,7 @@ export default function AddEnquiries({
   const initialValues = {
     name: id?.name || "",
     mobile_number: id?.mobile_number || "",
+    alternate_number: id?.alternate_number || "",
     referred_by: id?.referred_by || "",
     email: id?.email || null,
     course_interest: id?.course_interest || "",
@@ -185,6 +212,7 @@ export default function AddEnquiries({
     paid_amount: "",
     dob: formatDateInput(id?.dob),
     application_number: id?.application_number || "",
+    vehicle_classes: normalizeVehicleClasses(id?.vehicle_classes ?? id?.vehicle_class),
     aadhar_number: id?.aadhar_number || "",
     payment_method: id?.payment_method || "",
     instructor_name: id?.instructor_name || "",
@@ -202,6 +230,11 @@ export default function AddEnquiries({
     mobile_number: Yup.string()
       .matches(/^\d{10}$/, "Mobile number must be 10 digits")
       .required("Mobile number is required"),
+    alternate_number: Yup.string()
+      .nullable()
+      .notRequired()
+      .matches(/^$|^\d{10}$/, "Alternate number must be 10 digits"),
+    vehicle_classes: Yup.array().of(Yup.string()).nullable(),
     //referred_by: Yup.string().required("Referred by is required"),
     //email: Yup.string().email("Invalid email").required("Email is required"),
     course_interest: Yup.string().required("Course interest is required"),
@@ -718,6 +751,7 @@ export default function AddEnquiries({
                   <option value="Pending">Pending</option>
                   <option value="Contacted">Contacted</option>
                   <option value="Enrolled">Enrolled</option>
+                  <option value="Renewal Enrollment">Renewal Enrollment</option>
                   <option value="Dropped">Dropped</option>
                 </select>
                 {formik.touched.follow_up_status &&
@@ -729,7 +763,8 @@ export default function AddEnquiries({
               </div>
             </div>
 
-            {!isEnrolledStatus(formik.values.follow_up_status) && (
+            {!isEnrolledStatus(formik.values.follow_up_status) &&
+              !isRenewalEnrollmentStatus(formik.values.follow_up_status) && (
               <div className="col-md-6">
                 <div className="form-group enquiry-form-group">
                   <label>Follow Up Date</label>
@@ -779,6 +814,37 @@ export default function AddEnquiries({
 
                     <div className="col-md-6">
                       <div className="form-group enquiry-form-group">
+                        <label>
+                          Alternate Number <span className="enquiry-optional-label">Optional</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="alternate_number"
+                          inputMode="numeric"
+                          maxLength="10"
+                          className={`form-control${
+                            formik.touched.alternate_number && formik.errors.alternate_number
+                              ? " is-invalid"
+                              : ""
+                          }`}
+                          value={formik.values.alternate_number || ""}
+                          onChange={(event) =>
+                            formik.setFieldValue(
+                              "alternate_number",
+                              event.target.value.replace(/\D/g, "").slice(0, 10)
+                            )
+                          }
+                          onBlur={formik.handleBlur}
+                          placeholder="Enter alternate mobile number"
+                        />
+                        {formik.touched.alternate_number && formik.errors.alternate_number && (
+                          <div className="text-danger">{formik.errors.alternate_number}</div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div className="form-group enquiry-form-group">
                         <label>Application Number <span className="required-mark">*</span></label>
                         <input
                           type="text"
@@ -818,6 +884,38 @@ export default function AddEnquiries({
                           <div className="text-danger">{formik.errors.aadhar_number}</div>
                         )}
                       </div>
+                    </div>
+
+                    <div className="col-12">
+                      <fieldset className="enquiry-vehicle-class-fieldset">
+                        <legend>
+                          Class of Vehicle <span className="enquiry-optional-label">Optional</span>
+                        </legend>
+                        <div className="enquiry-vehicle-class-options">
+                          {VEHICLE_CLASS_OPTIONS.map((option) => {
+                            const selected = formik.values.vehicle_classes.includes(option.value);
+                            return (
+                              <label key={option.value} className={selected ? "is-selected" : ""}>
+                                <input
+                                  type="checkbox"
+                                  checked={selected}
+                                  onChange={() =>
+                                    formik.setFieldValue(
+                                      "vehicle_classes",
+                                      selected
+                                        ? formik.values.vehicle_classes.filter(
+                                            (value) => value !== option.value
+                                          )
+                                        : [...formik.values.vehicle_classes, option.value]
+                                    )
+                                  }
+                                />
+                                <span>{option.label}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </fieldset>
                     </div>
 
                     <div className="col-md-6">

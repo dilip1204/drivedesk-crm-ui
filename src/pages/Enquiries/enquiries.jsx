@@ -78,7 +78,7 @@ const getContactLinks = (enquiry) => {
 
 const getFollowUpIndicator = (followUpDate, status) => {
   const normalizedStatus = String(status || "").trim().toLowerCase();
-  if (["enrolled", "converted", "dropped"].includes(normalizedStatus)) return null;
+  if (["enrolled", "converted", "renewal enrollment", "dropped"].includes(normalizedStatus)) return null;
   if (!followUpDate) return { label: "No date", tone: "none" };
 
   const datePart = String(followUpDate).slice(0, 10);
@@ -501,6 +501,7 @@ const Enquiries = () => {
                                 <option value="Pending">Pending</option>
                                 <option value="Contacted">Contacted</option>
                                 <option value="Converted">Converted</option>
+                                <option value="Renewal Enrollment">Renewal Enrollment</option>
                                 <option value="Dropped">Dropped</option>
                               </Field>
                               <ErrorMessage
@@ -624,13 +625,16 @@ const Enquiries = () => {
                                 ).trim().toLowerCase();
                                 const statusTone = normalizedStatus === "converted"
                                   ? "enrolled"
-                                  : ["pending", "contacted", "enrolled", "dropped"].includes(normalizedStatus)
-                                    ? normalizedStatus
-                                    : "pending";
+                                  : normalizedStatus === "renewal enrollment"
+                                    ? "renewal"
+                                    : ["pending", "contacted", "enrolled", "dropped"].includes(normalizedStatus)
+                                      ? normalizedStatus
+                                      : "pending";
                                 const statusIcon = {
                                   pending: "bi-hourglass-split",
                                   contacted: "bi-chat-dots-fill",
                                   enrolled: "bi-check-circle-fill",
+                                  renewal: "bi-arrow-repeat",
                                   dropped: "bi-x-circle-fill",
                                 }[statusTone];
                                 const isEnrolled = statusTone === "enrolled";

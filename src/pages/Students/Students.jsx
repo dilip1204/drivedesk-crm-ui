@@ -114,6 +114,7 @@ const Students = () => {
     status: "All",
     instructor_name: "",
     test_date: "",
+    llr_30_days_completed: "",
   });
 
   // Updated Validation: IF year is selected -> month is mandatory
@@ -141,6 +142,7 @@ const Students = () => {
     status: Yup.string().nullable(),
     instructor_name: Yup.string().nullable(),
     test_date: Yup.string().nullable(),
+    llr_30_days_completed: Yup.string().nullable(),
   });
 
   const openProfileModal = (student) => {
@@ -244,7 +246,8 @@ const Students = () => {
       (initialYear && initialYear !== "") ||
       (filters.status && filters.status !== "All") ||
       (filters.instructor_name && filters.instructor_name !== "") ||
-      (filters.test_date && filters.test_date !== "");
+      (filters.test_date && filters.test_date !== "") ||
+      filters.llr_30_days_completed === "true";
 
     if (hasQueryFilters) {
       // Build cleaned filter object from current filters (use initialMonth/year from URL first)
@@ -690,6 +693,7 @@ const Students = () => {
                         status: filters.status ?? "All",
                         instructor_name: filters.instructor_name ?? "",
                         test_date: filters.test_date ?? "",
+                        llr_30_days_completed: filters.llr_30_days_completed ?? "",
                       }}
                       validationSchema={FilterValidationSchema}
                       onSubmit={(values) => {
@@ -837,7 +841,24 @@ const Students = () => {
                               />
                             </div>
 
-                            <div className="col-md-1 d-flex align-items-end">
+                            <div className="col-md-3">
+                              <label>LLR Eligibility</label>
+                              <Field
+                                as="select"
+                                name="llr_30_days_completed"
+                                className="form-control students-select-arrow"
+                              >
+                                <option value="">All LLR Dates</option>
+                                <option value="true">30 Days Completed</option>
+                              </Field>
+                              <ErrorMessage
+                                name="llr_30_days_completed"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
+
+                            <div className="col-md-2 d-flex align-items-end">
                               <button
                                 type="submit"
                                 className="btn btn-primary w-100"

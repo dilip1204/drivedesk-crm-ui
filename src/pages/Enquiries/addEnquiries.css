@@ -150,6 +150,58 @@
   font-weight: 400;
 }
 
+.enquiry-vehicle-class-fieldset {
+  margin: 0 0 11px;
+  padding: 10px 11px;
+  border: 1px solid #d7e2f1;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.enquiry-vehicle-class-fieldset legend {
+  width: auto;
+  margin: 0 0 7px;
+  padding: 0;
+  color: var(--color-text, #172033);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.enquiry-vehicle-class-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.enquiry-vehicle-class-options label {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid #d7e2f1;
+  border-radius: 7px;
+  background: #fff;
+  color: #344054;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.enquiry-vehicle-class-options label.is-selected {
+  border-color: #4f7cff;
+  background: #eef4ff;
+  color: #1849a9;
+}
+
+.enquiry-vehicle-class-options input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: #4f7cff;
+}
+
 .enquiry-payment-summary {
   display: flex;
   min-height: 34px;

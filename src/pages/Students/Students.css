@@ -153,7 +153,7 @@
 /* ── Print header ── */
 .print-header-top {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) 72px;
+  grid-template-columns: 150px minmax(0, 1fr) 150px;
   align-items: center;
   margin-bottom: 10px;
 }
@@ -161,8 +161,8 @@
 .print-logo-area { flex-shrink: 0; }
 
 .print-school-logo {
-  width: 72px;
-  height: 72px;
+  width: 140px;
+  height: 84px;
   object-fit: contain;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -192,7 +192,7 @@
   text-align: center;
 }
 
-.print-header-spacer { width: 72px; }
+.print-header-spacer { width: 150px; }
 
 .print-org-name {
   margin: 0 0 3px 0;
@@ -248,20 +248,20 @@
   }
 
   .print-header-top {
-    grid-template-columns: 62px minmax(0, 1fr) 62px;
-    min-height: 58px;
+    grid-template-columns: 150px minmax(0, 1fr) 150px;
+    min-height: 84px;
     margin-bottom: 7px;
   }
 
   .print-school-logo {
-    width: 58px;
-    height: 58px;
-    padding: 3px;
+    width: 140px;
+    height: 84px;
+    padding: 0;
     border: 0;
     border-radius: 0;
   }
 
-  .print-header-spacer { width: 62px; }
+  .print-header-spacer { width: 150px; }
 
   .print-org-name {
     margin-bottom: 1px;

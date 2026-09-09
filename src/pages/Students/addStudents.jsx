@@ -8,6 +8,24 @@ import { IoClose } from "react-icons/io5";
 import { getStudentReceiptInfo } from "../../store/students/actions";
 import { getInstructorAvailInformation } from "../../store/instructors/actions";
 import { addAdminPrintLogo } from "../../utils/printBranding";
+import { ensureTenantLogo } from "../../hooks/useTenantLogo";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
+import { useAuth } from "../../hooks/useAuth";
+import "./addStudents.css";
+
+const VEHICLE_CLASS_OPTIONS = [
+  { value: "MCWOG", label: "MCWOG" },
+  { value: "MCWG", label: "MCWG" },
+  { value: "LMV", label: "LMV" },
+  { value: "LMV Transport", label: "LMV Transport" },
+  { value: "HMV / Transport Vehicle", label: "HMV / Transport Vehicle" },
+];
+
+const normalizeVehicleClasses = (value) => {
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+  return String(value || "").split(",").map((item) => item.trim()).filter(Boolean);
+};
 
 export default function AddStudents({
   showModal,
@@ -20,12 +38,24 @@ export default function AddStudents({
   instructors = [],
 }) {
   const dispatch = useDispatch();
+  const { role } = useAuth();
+  const canEditLicence = role === "admin";
   const [isPrintEnabled, setIsPrintEnabled] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
   const [htmlContent, setHtmlContent] = useState("");
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState("");
   const [availabilityDay, setAvailabilityDay] = useState(null);
+  const [licenceForm, setLicenceForm] = useState({
+    test_status: "NOT_ATTEMPTED",
+    license_number: "",
+    license_classes: "",
+    issue_date: "",
+    expiry_date: "",
+    rto: "",
+    enrollment_number: "",
+  });
+  const [licenceFeedback, setLicenceFeedback] = useState(null);
   const previousInstructorNameRef = useRef("");
   const getLocalISODate = (date = new Date()) => {
     const y = date.getFullYear();
@@ -69,6 +99,29 @@ export default function AddStudents({
     return "";
   };
 
+  useEffect(() => {
+    const details = id?.license_details || {};
+    setLicenceForm({
+      test_status: id?.test_status || "NOT_ATTEMPTED",
+      license_number: details.license_number || "",
+      license_classes: Array.isArray(details.license_classes)
+        ? details.license_classes.join(", ")
+        : details.license_classes || "",
+      issue_date: normalizeDateForInput(details.issue_date),
+      expiry_date: normalizeDateForInput(details.expiry_date),
+      rto: details.rto || "",
+      enrollment_number: details.enrollment_number || "",
+    });
+    setLicenceFeedback(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, showModal]);
+
+  const handleLicenceChange = (event) => {
+    const { name, value } = event.target;
+    setLicenceForm((current) => ({ ...current, [name]: value }));
+    setLicenceFeedback(null);
+  };
+
   // --- helpers for time normalization ---
   // Accepts "HH:MM", "H:MM AM/PM", or "HH:MM AM/PM" -> returns "HH:MM" (24h)
   const to24h = (input) => {
@@ -108,7 +161,13 @@ export default function AddStudents({
     name: id?.name || "",
     dob: normalizeDateForInput(id?.dob),
     mobile_number: id?.mobile_number || "",
+    alternate_number: id?.alternate_number || "",
     application_number: id?.application_number || "",
+    test_application_number: id?.test_application_number || "",
+    llr_number: id?.llr_number || "",
+    llr_from_date: normalizeDateForInput(id?.llr_from_date),
+    llr_to_date: normalizeDateForInput(id?.llr_to_date),
+    vehicle_classes: normalizeVehicleClasses(id?.vehicle_classes ?? id?.vehicle_class),
     email: id?.email || null,
     aadhar_number: id?.aadhar_number || "",
     plan: id?.plan || "",
@@ -149,6 +208,18 @@ export default function AddStudents({
     mobile_number: Yup.string()
       .matches(/^\d{10}$/, "Mobile number must be 10 digits")
       .required("Mobile number is required"),
+    alternate_number: Yup.string()
+      .nullable()
+      .notRequired()
+      .matches(/^$|^\d{10}$/, "Alternate number must be 10 digits"),
+    llr_number: Yup.string().nullable(),
+    llr_from_date: Yup.date().nullable().transform((value, originalValue) => originalValue === "" ? null : value),
+    llr_to_date: Yup.date()
+      .nullable()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .min(Yup.ref("llr_from_date"), "LLR to date cannot be before LLR from date"),
+    vehicle_classes: Yup.array().of(Yup.string()).nullable(),
+    test_application_number: Yup.string().nullable(),
     application_number: Yup.string().required("Application Number is required"),
     email: "", // optional
     aadhar_number: Yup.string().required("Aadhar number is required"),
@@ -221,10 +292,72 @@ export default function AddStudents({
     initialValues,
     validationSchema,
     onSubmit: (values) => {
+      const isPassed = licenceForm.test_status === "PASSED";
+      const licenseClasses = licenceForm.license_classes
+        .split(",")
+        .map((value) => value.trim().toUpperCase())
+        .filter((value, index, items) => value && items.indexOf(value) === index);
+
+      if (
+        isEdit &&
+        isPassed &&
+        licenceForm.issue_date &&
+        licenceForm.expiry_date &&
+        licenceForm.expiry_date < licenceForm.issue_date
+      ) {
+        setLicenceFeedback({
+          type: "danger",
+          message: "Expiry date cannot be before issue date.",
+        });
+        return;
+      }
+
       const normalizedValues = {
         ...values,
+        alternate_number: values.alternate_number
+          ? Number(values.alternate_number)
+          : null,
         test_date: values.test_date ? values.test_date : null,
+        llr_from_date: values.llr_from_date || null,
+        llr_to_date: values.llr_to_date || null,
+        vehicle_classes: normalizeVehicleClasses(values.vehicle_classes),
       };
+
+      if (isEdit) {
+        if (
+          normalizedValues.alternate_number === null &&
+          (id?.alternate_number === null ||
+            id?.alternate_number === undefined ||
+            id?.alternate_number === "")
+        ) {
+          delete normalizedValues.alternate_number;
+        }
+
+        normalizedValues.test_status = licenceForm.test_status;
+        if (isPassed) {
+          normalizedValues.license_details = {
+            license_number: licenceForm.license_number.trim(),
+            license_classes: licenseClasses,
+            issue_date: licenceForm.issue_date || null,
+            expiry_date: licenceForm.expiry_date || null,
+            rto: licenceForm.rto.trim(),
+            enrollment_number: licenceForm.enrollment_number.trim(),
+          };
+        }
+      }
+
+      if (!isEdit) {
+        if (normalizedValues.alternate_number === null) {
+          delete normalizedValues.alternate_number;
+        }
+
+        [
+          "llr_number",
+          "llr_from_date",
+          "llr_to_date",
+          "test_application_number",
+        ].forEach((field) => delete normalizedValues[field]);
+      }
 
       let updatedValues = {};
 
@@ -520,7 +653,16 @@ export default function AddStudents({
     "name",
     "dob",
     "mobile_number",
+    "alternate_number",
     "application_number",
+    ...(isEdit
+      ? [
+          "test_application_number",
+          "llr_number",
+          "llr_from_date",
+          "llr_to_date",
+        ]
+      : []),
     "aadhar_number",
     "plan",
     "payment_method",
@@ -553,18 +695,31 @@ export default function AddStudents({
       return;
     }
 
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow pop-ups to print the receipt.");
+      return;
+    }
+    const tenantLogoPromise = ensureTenantLogo(dispatch);
+
     dispatch(
-      getStudentReceiptInfo({ receipt_no }, (response) => {
+      getStudentReceiptInfo({ receipt_no }, async (response) => {
         if (response) {
           setHtmlContent(response);
-          setTimeout(() => {
-            const printWindow = window.open("", "_blank");
-            printWindow.document.write(addAdminPrintLogo(response));
-            printWindow.document.close();
+          const tenantLogo = await tenantLogoPromise;
+          printWindow.document.write(addAdminPrintLogo(response, tenantLogo));
+          printWindow.document.close();
+          const printReceipt = () => {
             printWindow.focus();
             printWindow.print();
-          }, 100);
+          };
+          if (printWindow.document.readyState === "complete") {
+            window.setTimeout(printReceipt, 0);
+          } else {
+            printWindow.onload = printReceipt;
+          }
         } else {
+          printWindow.close();
           alert("Failed to fetch receipt info.");
         }
       })
@@ -572,8 +727,8 @@ export default function AddStudents({
   };
 
   return (
-    <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered>
-      <Modal.Header>
+    <Modal show={showModal} onHide={hideModal} backdrop="static" keyboard={false} size="lg" centered dialogClassName="student-form-dialog">
+      <Modal.Header className="student-form-header">
         <Modal.Title>{isEdit ? "Update Student" : "Add Student"}</Modal.Title>
         <IoClose
           onClick={() => {
@@ -589,8 +744,8 @@ export default function AddStudents({
           title="Close"
         />
       </Modal.Header>
-      <Modal.Body>
-        <form onSubmit={formik.handleSubmit}>
+      <Modal.Body className="student-form-body">
+        <form onSubmit={formik.handleSubmit} className="student-form">
           {showBalanceWarning && (
             <Alert variant="warning">
               Warning: Balance is negative. Please verify paid and total amounts.
@@ -598,10 +753,10 @@ export default function AddStudents({
           )}
 
           {fieldPairs.map((pair, rowIndex) => (
-            <div className="row" key={rowIndex}>
+            <div className="row student-form-row" key={rowIndex}>
               {pair.map((field) => (
                 <div className="col-md-6" key={field}>
-                  <div className="form-group">
+                  <div className="form-group student-form-group">
                     <label>
                       {field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       {[
@@ -696,7 +851,7 @@ export default function AddStudents({
                           formik.touched[field] && formik.errors[field] ? " is-invalid" : ""
                         }${showBalanceWarning && field === "balance" ? " is-invalid" : ""}`}
                         onChange={
-                          ["mobile_number", "aadhar_number", "discount", "training_days"].includes(
+                          ["mobile_number", "alternate_number", "aadhar_number", "discount", "training_days"].includes(
                             field
                           )
                             ? handleNumericInput
@@ -708,6 +863,8 @@ export default function AddStudents({
                         readOnly={["balance", "total_amount", "instructor_mobile"].includes(field)}
                         maxLength={
                           field === "mobile_number"
+                            ? 10
+                            : field === "alternate_number"
                             ? 10
                             : field === "aadhar_number"
                             ? 12
@@ -730,9 +887,38 @@ export default function AddStudents({
             </div>
           ))}
 
-          <div className="row">
+          <div className="row student-form-row">
+            <div className="col-12">
+              <fieldset className="student-vehicle-class-fieldset">
+                <legend>Class of Vehicle</legend>
+                <div className="student-vehicle-class-options">
+                  {VEHICLE_CLASS_OPTIONS.map((option) => {
+                    const selected = formik.values.vehicle_classes.includes(option.value);
+                    return (
+                      <label key={option.value} className={selected ? "is-selected" : ""}>
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={() => formik.setFieldValue(
+                            "vehicle_classes",
+                            selected
+                              ? formik.values.vehicle_classes.filter((value) => value !== option.value)
+                              : [...formik.values.vehicle_classes, option.value]
+                          )}
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <small>Optional. Selected classes are saved when adding or updating the student.</small>
+              </fieldset>
+            </div>
+          </div>
+
+          <div className="row student-form-row">
             <div className="col-md-6">
-              <div className="form-group">
+              <div className="form-group student-form-group">
                 <label>
                   Test Date
                 </label>
@@ -753,15 +939,85 @@ export default function AddStudents({
             </div>
           </div>
 
+          {isEdit && (
+            <section className="student-test-status-panel" aria-labelledby="student-test-status-title">
+              <div>
+                <label id="student-test-status-title" htmlFor="test_status">Test Status</label>
+                <select
+                  id="test_status"
+                  name="test_status"
+                  className="form-control"
+                  value={licenceForm.test_status}
+                  onChange={handleLicenceChange}
+                  disabled={!canEditLicence}
+                >
+                  <option value="NOT_ATTEMPTED">Not Attempted</option>
+                  <option value="PASSED">Passed</option>
+                  <option value="FAILED">Failed</option>
+                </select>
+              </div>
+              <span className={`student-test-status is-${licenceForm.test_status.toLowerCase().replace(/_/g, "-")}`}>
+                {licenceForm.test_status.replace(/_/g, " ")}
+              </span>
+              {licenceFeedback && (
+                <Alert variant={licenceFeedback.type} className="student-test-status-feedback py-2">
+                  {licenceFeedback.message}
+                </Alert>
+              )}
+              <small className="student-test-status-help">Saved with the main Update button.</small>
+            </section>
+          )}
+
+          {isEdit && licenceForm.test_status === "PASSED" && (
+            <section className="student-licence-section" aria-labelledby="student-licence-title">
+              <div className="student-licence-heading">
+                <div>
+                  <h6 id="student-licence-title">Licence Details</h6>
+                  <p>Enter the licence information issued after the student passed the test.</p>
+                </div>
+              </div>
+
+              <div className="row student-form-row">
+                {licenceForm.test_status === "PASSED" && [
+                  ["license_number", "Licence Number", "text"],
+                  ["license_classes", "Licence Classes", "text"],
+                  ["issue_date", "Issue Date", "date"],
+                  ["expiry_date", "Expiry Date", "date"],
+                  ["rto", "RTO", "text"],
+                  ["enrollment_number", "Enrollment Number", "text"],
+                ].map(([name, label, type]) => (
+                  <div className="col-md-6" key={name}>
+                    <div className="form-group student-form-group">
+                      <label htmlFor={name}>{label}</label>
+                      <input
+                        id={name}
+                        name={name}
+                        type={type}
+                        className="form-control"
+                        value={licenceForm[name]}
+                        onChange={handleLicenceChange}
+                        disabled={!canEditLicence}
+                        placeholder={name === "license_classes" ? "Example: MCWG, LMV" : undefined}
+                      />
+                      {name === "license_classes" && licenceForm.test_status === "PASSED" && (
+                        <small className="form-text text-muted">Separate multiple classes with commas.</small>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {(formik.values.instructor_name &&
             (formik.values.training_start_date || formik.values.test_date)) && (
-            <div className="row">
+            <div className="row student-form-row">
               <div className="col-12">
                 <div
-                  className="p-3 mb-3"
+                  className="p-3 mb-3 student-availability-panel"
                   style={{ border: "1px solid #e9ecef", borderRadius: 8 }}
                 >
-                  <div className="d-flex justify-content-between align-items-center mb-2">
+                  <div className="d-flex justify-content-between align-items-center mb-2 student-availability-header">
                     <h6 className="mb-0">Instructor Availability</h6>
                     <a
                       href={`/instructors/${formik.values.instructor_mobile || formik.values.instructor_id}/availability`}
@@ -778,7 +1034,7 @@ export default function AddStudents({
                   </div>
 
                   {availabilityLoading && (
-                    <div className="text-secondary small">Loading availability...</div>
+                    <LoadingState label="Loading availability" variant="compact" />
                   )}
 
                   {!availabilityLoading && availabilityError && (
@@ -794,8 +1050,8 @@ export default function AddStudents({
                         <span>
                           Booked: <strong>{availabilityDay.booked_slots?.length || 0}</strong>
                         </span>
-                        {availabilityDay.is_sunday && (
-                          <span className="text-warning"><strong>Sunday (off day)</strong></span>
+                        {availabilityDay.is_working_day === false && (
+                          <span className="text-warning"><strong>Non-working day</strong></span>
                         )}
                       </div>
 
@@ -853,16 +1109,19 @@ export default function AddStudents({
                   )}
 
                   {!availabilityLoading && !availabilityError && !availabilityDay && (
-                    <div className="text-muted small">
-                      No availability data found for the selected date.
-                    </div>
+                    <EmptyState
+                      icon="bi bi-calendar2-x"
+                      title="No availability found"
+                      description="No instructor availability is configured for the selected date."
+                      variant="compact"
+                    />
                   )}
                 </div>
               </div>
             </div>
           )}
 
-          <Modal.Footer>
+          <Modal.Footer className="student-form-footer">
             {!isPrintEnabled ? (
               <>
                 <Button

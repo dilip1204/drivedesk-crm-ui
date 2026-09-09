@@ -1,0 +1,78 @@
+.app-empty-state {
+  display: flex;
+  min-height: 164px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px 20px;
+  color: var(--color-text, #172033);
+  font-family: "Segoe UI", Arial, sans-serif;
+  text-align: center;
+}
+
+.app-empty-state__icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #eef4ff;
+  color: #3973dc;
+  font-size: 18px;
+  place-items: center;
+}
+
+.app-empty-state__content {
+  display: flex;
+  max-width: 460px;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-empty-state__content strong {
+  color: var(--color-text, #172033);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.app-empty-state__content p {
+  margin: 0;
+  color: var(--color-muted, #667085);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.app-empty-state .btn {
+  min-height: 32px;
+  padding: 5px 12px;
+  font-size: 11px;
+}
+
+.app-empty-state--compact {
+  min-height: 116px;
+  padding: 18px 14px;
+}
+
+.app-empty-state--compact .app-empty-state__icon {
+  width: 36px;
+  height: 36px;
+  font-size: 15px;
+}
+
+.app-empty-state--error .app-empty-state__icon {
+  background: #fff0f1;
+  color: var(--color-danger, #dc3545);
+}
+
+@media (max-width: 575.98px) {
+  .app-empty-state {
+    min-height: 148px;
+    padding: 24px 14px;
+  }
+
+  .app-empty-state--compact {
+    min-height: 108px;
+    padding: 16px 12px;
+  }
+}

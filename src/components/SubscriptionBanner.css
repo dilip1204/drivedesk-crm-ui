@@ -1,0 +1,6 @@
+.subscription-banner { display:flex; align-items:center; gap:9px; padding:9px 24px; border-bottom:1px solid; font-size:12px; line-height:1.4; }
+.subscription-banner i { font-size:18px; flex:0 0 auto; }
+.subscription-banner.is-trial { color:#175cd3; background:#eff6ff; border-color:#bfdbfe; }
+.subscription-banner.is-grace { color:#92400e; background:#fffbeb; border-color:#fde68a; }
+.subscription-banner.is-limited { color:#991b1b; background:#fef2f2; border-color:#fecaca; }
+@media (max-width:767px) { .subscription-banner { padding:8px 12px; font-size:11px; } }

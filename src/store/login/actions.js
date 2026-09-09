@@ -1,4 +1,8 @@
-import { LOGIN_USER_DATA } from "./types";
+import {
+    LOGIN_USER_DATA,
+    REQUEST_LOGIN_OTP,
+    VERIFY_LOGIN_OTP,
+} from "./types";
 
 export function userLogin(param, fn) {
     return {
@@ -7,3 +11,20 @@ export function userLogin(param, fn) {
         fn,
     };
 }
+
+export function requestLoginOtp(mobileNumber, fn) {
+    return {
+        type: REQUEST_LOGIN_OTP,
+        param: mobileNumber,
+        fn,
+    };
+}
+
+export function verifyLoginOtp(mobileNumber, otp, fn) {
+    return {
+        type: VERIFY_LOGIN_OTP,
+        param: { mobileNumber, otp },
+        fn,
+    };
+}
+

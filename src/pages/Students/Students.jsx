@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useSearchParams } from "react-router-dom";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 
 import "../../assets/plugins/simplebar/simplebar.css";
 import "../../assets/plugins/nprogress/nprogress.css";
@@ -11,6 +11,8 @@ import "./Students.css";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import AddStudents from "./addStudents";
 import {
@@ -31,9 +33,41 @@ import Pagination from "./Pagenation";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 import schoolPrintLogo from "../../assets/logo/school_print_logo.png";
 import { getAdminPrintLogoSource, isDriveDeskAdmin } from "../../utils/printBranding";
+import { ensureTenantLogo, useTenantLogo } from "../../hooks/useTenantLogo";
+import { useSubscription } from "../../hooks/useSubscription";
+
+const formatStudentVehicleClasses = (student) => {
+  const value = student?.vehicle_classes ??
+    student?.vehicle_class ??
+    student?.class_of_vehicle ??
+    student?.vehicleClass ??
+    student?.student_details?.vehicle_classes ??
+    student?.student_details?.vehicle_class ??
+    student?.license_details?.license_classes;
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => typeof item === "object" ? item?.value ?? item?.name ?? item?.label : item)
+      .filter(Boolean)
+      .join(", ") || "-";
+  }
+
+  if (value && typeof value === "object") {
+    return String(value.value ?? value.name ?? value.label ?? "").trim() || "-";
+  }
+
+  const classes = String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return classes.join(", ") || "-";
+};
 
 const Students = () => {
   const dispatch = useDispatch();
+  const { isLimited } = useSubscription();
+  const { logoSrc: tenantLogo, hasTenantLogo } = useTenantLogo(null);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [studentsData, setStudentsData] = useState([]);
@@ -62,13 +96,12 @@ const Students = () => {
   // before your table rows
   const startIndex = (currentPage - 1) * pageSize;
 
-  const studentDataLists = useSelector(
-    (state) => state.studentsListInfo.studentsList
-  );
-
   const [searchParams] = useSearchParams();
   const initialMonth = searchParams.get("month") || "";
   const initialYear = searchParams.get("year") || "";
+  const initialMobileNumber = searchParams.get("mobile_number") || "";
+  const initialOpenMode = searchParams.get("mode") || "edit";
+  const hasOpenedLinkedStudent = useRef(false);
 
   const getOneStudentPaymentData = (flag, student) => {
     setShowPaymentModal(flag);
@@ -81,6 +114,7 @@ const Students = () => {
     status: "All",
     instructor_name: "",
     test_date: "",
+    llr_30_days_completed: "",
   });
 
   // Updated Validation: IF year is selected -> month is mandatory
@@ -108,6 +142,7 @@ const Students = () => {
     status: Yup.string().nullable(),
     instructor_name: Yup.string().nullable(),
     test_date: Yup.string().nullable(),
+    llr_30_days_completed: Yup.string().nullable(),
   });
 
   const openProfileModal = (student) => {
@@ -177,6 +212,33 @@ const Students = () => {
     // Ensure loader shows for initial fetch
     setLoading(true);
 
+    if (initialMobileNumber && hasOpenedLinkedStudent.current) return;
+
+    if (initialMobileNumber) {
+      hasOpenedLinkedStudent.current = true;
+      dispatch(
+        getStudentsFilterListInformation(
+          { mobile_number: initialMobileNumber, skip: 0, limit: 1 },
+          (res) => {
+            const { students, total } = normalizeStudentsResponse(res);
+            const linkedStudent = students[0];
+            setStudentsData(students);
+            setTotalCount(total);
+            setLoading(false);
+            if (!linkedStudent) {
+              setError("No students found.");
+              toast.error("The linked student could not be found.");
+              return;
+            }
+            setError(null);
+            if (initialOpenMode === "view") openProfileModal(linkedStudent);
+            else handleEditStudent(linkedStudent);
+          }
+        )
+      );
+      return;
+    }
+
     // If any initial query param is present (month, year, status, instructor_name, test_date)
     // apply filters; previously code required both month AND year which prevented year-only filters.
     const hasQueryFilters =
@@ -184,7 +246,8 @@ const Students = () => {
       (initialYear && initialYear !== "") ||
       (filters.status && filters.status !== "All") ||
       (filters.instructor_name && filters.instructor_name !== "") ||
-      (filters.test_date && filters.test_date !== "");
+      (filters.test_date && filters.test_date !== "") ||
+      filters.llr_30_days_completed === "true";
 
     if (hasQueryFilters) {
       // Build cleaned filter object from current filters (use initialMonth/year from URL first)
@@ -222,7 +285,7 @@ const Students = () => {
     }
     // include the variables that should trigger re-run when they change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, currentPage, pageSize, initialMonth, initialYear]);
+  }, [dispatch, currentPage, pageSize, initialMonth, initialYear, initialMobileNumber, initialOpenMode]);
 
   const onStudentData = (res, isEdit) => {
     setSelectedStudent(res.response);
@@ -270,8 +333,6 @@ const Students = () => {
     setShowDeleteModal(true);
     setSelectedStudentAppId(appId);
   };
-
-  const AddStudentsModal = () => setShowModal(true);
 
   const handleEditStudent = (student) => {
     setSelectedStudent(student);
@@ -423,28 +484,24 @@ const Students = () => {
           <thead>
             <tr>
               <th>#</th>
+              <th>Class of Vehicle</th>
+              <th>Plan</th>
               <th>Application No</th>
               <th>Name</th>
               <th>Mobile</th>
-              <th>DOB</th>
-              <th>Status</th>
-              <th>Plan</th>
               <th>Balance</th>
-              <th>Test Date</th>
             </tr>
           </thead>
           <tbody>
             {students.map((student, index) => (
               <tr key={student.application_number || index}>
                 <td>{index + 1}</td>
+                <td>{formatStudentVehicleClasses(student)}</td>
+                <td>{student.plan || "-"}</td>
                 <td>{student.application_number || "-"}</td>
                 <td>{student.name || "-"}</td>
                 <td>{student.mobile_number || "-"}</td>
-                <td>{student.dob ? formatDateDDMMYYYY(student.dob) : "-"}</td>
-                <td>{student.status || "-"}</td>
-                <td>{student.plan || "-"}</td>
                 <td>₹{student.balance || 0}</td>
-                <td>{formatDateDDMMYYYY(student.test_date)}</td>
               </tr>
             ))}
           </tbody>
@@ -453,11 +510,21 @@ const Students = () => {
     );
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    await ensureTenantLogo(dispatch);
+    await new Promise((resolve) => {
+      window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+    });
+
+    const printImages = Array.from(
+      document.querySelectorAll(".print-page-wrapper img")
+    );
+    await Promise.all(printImages.map((image) => (
+      typeof image.decode === "function" ? image.decode().catch(() => undefined) : Promise.resolve()
+    )));
+
     const originalTitle = document.title;
     document.title = "Filtered Students Report";
-
-    window.print();
 
     // Restore original title after printing (use afterprint if available)
     const restore = () => {
@@ -465,6 +532,7 @@ const Students = () => {
       window.removeEventListener("afterprint", restore);
     };
     window.addEventListener("afterprint", restore);
+    window.print();
 
     // Fallback restore in case afterprint isn't fired
     setTimeout(() => {
@@ -472,8 +540,6 @@ const Students = () => {
       window.removeEventListener("afterprint", restore);
     }, 2000);
   };
-
-  const totalPages = Math.ceil(totalCount / pageSize);
 
   let orgNameForPrint = "Students Test List";
   let tenantInfoForPrint = {};
@@ -496,9 +562,11 @@ const Students = () => {
     tenantInfoForPrint?.logo ||
     null;
   const driveDeskAdmin = isDriveDeskAdmin();
-  const schoolLogo = driveDeskAdmin
-    ? getAdminPrintLogoSource()
-    : apiLogo || (isCustomWatermarkOrg ? schoolPrintLogo : null);
+  const schoolLogo = hasTenantLogo
+    ? tenantLogo
+    : driveDeskAdmin
+      ? getAdminPrintLogoSource()
+      : apiLogo || (isCustomWatermarkOrg ? schoolPrintLogo : null);
 
   return (
     <>
@@ -512,24 +580,26 @@ const Students = () => {
             <Header />
             <div className="content-wrapper">
               <div className="content">
-                <div className="row">
+                <div className="row students-page-heading">
                   <div className="breadcrumb-wrapper col-xl-6">
                     <h1>Students</h1>
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
-                          <a href="#">
-                            <span className="mdi mdi-home"></span>
+                          <a href="#" className="students-breadcrumb-home" aria-label="Students home">
+                            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                              <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                            </svg>
                           </a>
                         </li>
                         <li className="breadcrumb-item">Students</li>
                         <li className="breadcrumb-item" aria-current="page">
-                          StudentList
+                          Student List
                         </li>
                       </ol>
                     </nav>
                   </div>
-                  <div className="col-xl-6 text-right">
+                  <div className="col-xl-6 text-right students-page-actions">
                     <button
                       type="button"
                       className="mb-1 btn btn-secondary mr-2"
@@ -544,6 +614,7 @@ const Students = () => {
                       type="button"
                       className="mb-1 btn btn-primary mr-2"
                       onClick={() => setShowModal(true)}
+                      style={isLimited ? { display: "none" } : undefined}
                     >
                       <i className="bi bi-plus-lg"></i> Add Students
                     </button>
@@ -560,8 +631,8 @@ const Students = () => {
                 </div>
 
                 {/* ---------- NEW: Search box (above table) ---------- */}
-                <div className="row mb-3" style={{justifyContent: "flex-end"}}>
-                  <div className="col-md-2">
+                <div className="row mb-3 students-search-toolbar">
+                  <div className="col-md-3 students-search-type">
                     <select
                       className="form-control students-select-arrow"
                       value={searchType}
@@ -579,7 +650,7 @@ const Students = () => {
                     </select>
                   </div>
 
-                  <div className="col-md-3">
+                  <div className="col-md-5 students-search-input">
                     <input
                       type={searchType === "month" ? "number" : "text"}
                       min={searchType === "month" ? 1 : undefined}
@@ -597,7 +668,7 @@ const Students = () => {
                     />
                   </div>
 
-                  <div className="col-md-2" style={{justifyContent: "flex-end", maxWidth: "13%"}}>
+                  <div className="col-md-2 students-search-clear">
                     <button
                       className="btn btn-outline-secondary"
                       onClick={() => {
@@ -614,7 +685,7 @@ const Students = () => {
                 </div>
 
                 {filtersVisible && (
-                  <div className="card p-3 mb-4">
+                  <div className="card p-3 mb-4 students-filter-card">
                     <Formik
                       initialValues={{
                         month: filters.month ?? "",
@@ -622,6 +693,7 @@ const Students = () => {
                         status: filters.status ?? "All",
                         instructor_name: filters.instructor_name ?? "",
                         test_date: filters.test_date ?? "",
+                        llr_30_days_completed: filters.llr_30_days_completed ?? "",
                       }}
                       validationSchema={FilterValidationSchema}
                       onSubmit={(values) => {
@@ -674,7 +746,7 @@ const Students = () => {
                     >
                       {({ handleSubmit }) => (
                         <Form onSubmit={handleSubmit}>
-                          <div className="row">
+                          <div className="row students-filter-grid">
                             <div className="col-md-2">
                               <label>Month</label>
                               <Field
@@ -769,7 +841,24 @@ const Students = () => {
                               />
                             </div>
 
-                            <div className="col-md-1 d-flex align-items-end">
+                            <div className="col-md-3">
+                              <label>LLR Eligibility</label>
+                              <Field
+                                as="select"
+                                name="llr_30_days_completed"
+                                className="form-control students-select-arrow"
+                              >
+                                <option value="">All LLR Dates</option>
+                                <option value="true">30 Days Completed</option>
+                              </Field>
+                              <ErrorMessage
+                                name="llr_30_days_completed"
+                                component="div"
+                                className="text-danger"
+                              />
+                            </div>
+
+                            <div className="col-md-2 d-flex align-items-end">
                               <button
                                 type="submit"
                                 className="btn btn-primary w-100"
@@ -787,13 +876,17 @@ const Students = () => {
                 {/* Student List */}
                 <div>
                   {loading ? (
-                    <p className="text-center my-5">Loading students...</p>
+                    <LoadingState label="Loading students" />
                   ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
+                    <EmptyState
+                      icon="bi bi-people"
+                      title="No students found"
+                      description="Students will appear here after they are added or when they match the selected filters."
+                    />
                   ) : (
                     <>
-                      <div className="table-responsive">
-                        <table className="table custom-table text-center align-middle">
+                      <div className="table-responsive students-table-wrap">
+                        <table className="table custom-table text-center align-middle students-table">
                           <thead className="table-light">
                             <tr>
                               <th>S.NO</th>
@@ -806,24 +899,40 @@ const Students = () => {
                           <tbody>
                             {studentsData.map((student, index) => (
                               <tr key={student.application_number || index}>
-                                <td>{startIndex + index + 1}</td>
-                                <td>{student.name || "Student Name"}</td>
-                                <td>{student.mobile_number || "N/A"}</td>
-                                <td className="status">
-                                  <i className="bi bi-check-circle"></i>{" "}
-                                  {student.plan}
+                                <td data-label="S.No">{startIndex + index + 1}</td>
+                                <td data-label="Student Name">{student.name || "Student Name"}</td>
+                                <td data-label="Mobile Number">{student.mobile_number || "N/A"}</td>
+                                <td data-label="Plan" className="status">
+                                  <span className="students-plan-value">
+                                    <i className="bi bi-check-circle" aria-hidden="true"></i>
+                                    <span>{student.plan || "No plan"}</span>
+                                  </span>
                                 </td>
-                                <td>
+                                <td data-label="Actions" className="students-row-actions">
                                   <button
-                                    className="btn btn-sm btn-warning"
+                                    className="btn btn-sm btn-warning students-action-icon"
                                     title="Edit Student"
+                                    data-tooltip="Edit Student"
+                                    aria-label="Edit Student"
                                     onClick={() => handleEditStudent(student)}
+                                    style={isLimited ? { display: "none" } : undefined}
                                   >
-                                    Edit
+                                    <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                                    <span className="students-action-label">Edit</span>
                                   </button>{" "}
                                   <button
-                                    className="btn btn-sm btn-success"
+                                    className="btn btn-sm btn-success students-action-icon"
                                     title={
+                                      Number(student.balance) <= 0
+                                        ? "No balance due"
+                                        : "Add Payment"
+                                    }
+                                    data-tooltip={
+                                      Number(student.balance) <= 0
+                                        ? "No balance due"
+                                        : "Add Payment"
+                                    }
+                                    aria-label={
                                       Number(student.balance) <= 0
                                         ? "No balance due"
                                         : "Add Payment"
@@ -832,24 +941,34 @@ const Students = () => {
                                       getOneStudentPaymentData(true, student)
                                     }
                                     disabled={Number(student.balance) <= 0}
+                                    style={isLimited ? { display: "none" } : undefined}
                                   >
-                                    Fee
+                                    <i className="bi bi-cash-coin" aria-hidden="true"></i>
+                                    <span className="students-action-label">Fee</span>
                                   </button>{" "}
                                   <button
                                     type="button"
                                     onClick={() => openProfileModal(student)}
-                                    className="btn btn-primary btn-sm"
+                                    className="btn btn-primary btn-sm students-action-icon"
+                                    title="View Student"
+                                    data-tooltip="View Student"
+                                    aria-label="View Student"
                                   >
-                                    View
+                                    <i className="bi bi-eye" aria-hidden="true"></i>
+                                    <span className="students-action-label">View</span>
                                   </button>{" "}
                                   <button
-                                    className="btn btn-sm btn-danger"
+                                    className="btn btn-sm btn-danger students-action-icon"
                                     title="Delete Student"
+                                    data-tooltip="Delete Student"
+                                    aria-label="Delete Student"
                                     onClick={() =>
                                       deleteUser(student.mobile_number)
                                     }
+                                    style={isLimited ? { display: "none" } : undefined}
                                   >
-                                    Delete
+                                    <i className="bi bi-trash" aria-hidden="true"></i>
+                                    <span className="students-action-label">Delete</span>
                                   </button>
                                 </td>
                               </tr>
@@ -931,15 +1050,33 @@ const Students = () => {
         <div className="print-foreground">
           {/* Header */}
           <div className="print-header-top">
+            {schoolLogo && (
+              <div className="print-logo-area">
+                <img src={schoolLogo} alt={`${orgNameForPrint} logo`} className="print-school-logo" />
+              </div>
+            )}
             <div className="print-title-area">
               <h2 className="print-org-name">{orgNameForPrint}</h2>
-              <h4 className="print-list-title">Student Test List</h4>
+              <h4 className="print-list-title">Test Date  {filters.test_date && ` : ${formatDateDDMMYYYY(filters.test_date)}`}</h4>
             </div>
+            <span className="print-header-spacer" aria-hidden="true" />
           </div>
           <hr className="print-divider" />
 
+          <section className="print-report-meta" aria-label="Report information">
+            <div><span>Report</span><strong>Student Test List</strong></div>
+            <div><span>Total records</span><strong>{studentsData.length}</strong></div>
+            {/* <div><span>Report period</span><strong>{initialMonth && initialYear ? `${String(initialMonth).padStart(2, "0")}/${initialYear}` : "All records"}</strong></div> */}
+            <div><span>Generated on</span><strong>{formatDateDDMMYYYY(new Date().toISOString())}</strong></div>
+          </section>
+
           {/* Student table */}
           <PrintableStudentTable students={studentsData} />
+
+          {/* <section className="print-signatures" aria-label="Report signatures">
+            <div><span>Prepared By</span><small>DriveDesk</small></div>
+            <div><span>Authorized Signature</span><small>{orgNameForPrint}</small></div>
+          </section> */}
         </div>
 
       </div>

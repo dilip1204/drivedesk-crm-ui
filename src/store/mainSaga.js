@@ -1,21 +1,30 @@
 import { all } from 'redux-saga/effects';
-import { watchLoginUser } from './login/saga';
+import {
+    watchLoginUser,
+    watchRequestLoginOtp,
+    watchVerifyLoginOtp,
+} from './login/saga';
 import { watchStudentListInformation, watchStudentFilterListInformation, watchStudentReceiptInformation } from './students/saga';
 import { watchAddStudent, watchEditStudent } from './addStudent/saga';
 import { watchDeleteStudent } from './deleteStudent/saga';
 import { watchAddTariff, watchEditTariff, watchTariffListInformation, watchDeleteTariff } from './tariff/saga';
 import { watchAddInstructor, watchDeleteInstructor, watchEditInstructor, watchInstructorListInformation, watchInstructorAvailListInformation } from './instructors/saga';
-import { watchAddEnquiries, watchDeleteEnquiries, watchEnquiriesListInformation, watchUpdateEnquiries, watchEnquiriesFilterListInformation } from './Enquiries/saga';
+import { watchAddEnquiries, watchDeleteEnquiries, watchEnquiriesListInformation, watchUpdateEnquiries, watchEnquiriesFilterListInformation, watchCreateEnquiryRenewal } from './Enquiries/saga';
 import { watchDashboardSummary, watchOutstandingFees, watchHistoricalPaymentAdjustment } from './dashboardSummary/saga'
 import { watchAddStudentPayment } from './addStudentPayment/saga';
 import { watchTrainingSessionListInformation, watchTrainingSessionFilterListInformation, watchEditTrainingSession, watchReschduleTrainingSession, watchStudentCompletedSession } from './trainingSession/saga';
 import { watchAddExpenses, watchEditExpenses, watchDeleteExpenses, watchGetExpenses } from './expenses/saga';
 import { watchAddSuperAdmin, watchUpdateSuperAdmin, watchGetSuperAdminList } from './superAdmin/saga';
+import { watchCreateFinanceTransaction, watchDeleteFinanceTransaction, watchFinanceDashboard, watchFinanceMonthlyReport, watchFinanceTransaction, watchFinanceTransactions, watchFinanceYearlyReport, watchUpdateFinanceTransaction } from './financeDashboard/saga';
+import { watchTenantUsageDashboard, watchTenantUsageList } from './tenantUsage/saga';
+import { watchSubscriptionActions } from './subscription/saga';
 
 
 export function* mainSaga() {
     yield all([
         watchLoginUser(),
+        watchRequestLoginOtp(),
+        watchVerifyLoginOtp(),
         watchStudentListInformation(),
         watchAddStudent(),
         watchDeleteStudent(),
@@ -39,6 +48,7 @@ export function* mainSaga() {
         watchStudentReceiptInformation(),
         watchAddStudentPayment(),
         watchEnquiriesFilterListInformation(),
+        watchCreateEnquiryRenewal(),
         watchTrainingSessionListInformation(),
         watchTrainingSessionFilterListInformation(),
         watchEditTrainingSession(),
@@ -52,5 +62,16 @@ export function* mainSaga() {
         watchAddSuperAdmin(),
         watchUpdateSuperAdmin(),
         watchGetSuperAdminList(),
+        watchFinanceDashboard(),
+        watchFinanceTransactions(),
+        watchCreateFinanceTransaction(),
+        watchFinanceTransaction(),
+        watchUpdateFinanceTransaction(),
+        watchDeleteFinanceTransaction(),
+        watchFinanceMonthlyReport(),
+        watchFinanceYearlyReport(),
+        watchTenantUsageDashboard(),
+        watchTenantUsageList(),
+        watchSubscriptionActions(),
     ])
 }

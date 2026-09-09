@@ -1,8 +1,14 @@
 // src/hooks/useAuth.js
 export const useAuth = () => {
-  const user = JSON.parse(localStorage.getItem("userRoleInfo"));
+  let user = {};
+  try {
+    user = JSON.parse(localStorage.getItem("userRoleInfo") || "{}");
+  } catch {
+    user = {};
+  }
+
   return {
-    role: user?.role,
+    role: String(user?.role || "").trim().toLowerCase(),
     email: user?.email,
     name: user?.name,
   };

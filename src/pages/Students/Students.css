@@ -216,7 +216,7 @@
 
 @media print {
   .print-page-wrapper {
-    padding: 16px 20px;
+    padding: 0;
     position: relative;
   }
   .print-watermark-layer {
@@ -233,7 +233,7 @@
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  @page { margin: 10mm; }
+  @page { size: A4 landscape; margin: 10mm; }
 
   .print-page-wrapper {
     color: #10233f;
@@ -296,7 +296,7 @@
     display: grid;
     grid-template-columns: 82px minmax(0, 1fr);
     gap: 7px;
-    font-size: 8px;
+    font-size: 11px;
   }
 
   .print-report-meta span { color: #52677e; font-weight: 700; }
@@ -308,12 +308,12 @@
     margin: 0;
     border-collapse: collapse;
     color: #10233f;
-    font-size: 8px;
+    font-size: 12px;
   }
 
   .printable-student-table .table th,
   .printable-student-table .table td {
-    padding: 6px 7px;
+    padding: 8px 9px;
     border: 1px solid #748ba4 !important;
     vertical-align: middle;
   }
@@ -321,7 +321,7 @@
   .printable-student-table .table th {
     background: #174c83 !important;
     color: #fff !important;
-    font-size: 7px;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: .25px;
     text-transform: uppercase;
@@ -377,7 +377,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    padding: 20px;
+    padding: 0;
     background: #fff;
   }
 
@@ -406,12 +406,13 @@
     top: 0;
     left: 0;
     width: 100%;
-    padding: 20px;
+    padding: 0;
     background: #fff;
   }
 
   /* Optional: Hide page margins and header/footer in browser print preview */
   @page {
+    size: A4 landscape;
     margin: 10mm;
   }
 }

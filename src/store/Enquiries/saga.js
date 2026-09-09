@@ -20,11 +20,28 @@ import {
   GET_ENQUIRIES_FILTER_LIST_ERROR,
   GET_ENQUIRIES_FILTER_LIST_PENDING,
   GET_ENQUIRIES_FILTER_LIST_SUCCESS,
+  CREATE_ENQUIRY_RENEWAL,
+  CREATE_ENQUIRY_RENEWAL_ERROR,
+  CREATE_ENQUIRY_RENEWAL_PENDING,
+  CREATE_ENQUIRY_RENEWAL_SUCCESS,
 } from './types';
 
 import {
   addEnquiriesList, editEnquiriesList, getAllEnquiriesService, deleteEnquiriesList
 } from '../../services/functional'; // Update service path accordingly
+import { createRenewal } from '../../services/functional/renewals/renewalService';
+
+function* createEnquiryRenewalData(action) {
+  try {
+    yield put({ type: CREATE_ENQUIRY_RENEWAL_PENDING });
+    const response = yield call(createRenewal, action.param);
+    yield put({ type: CREATE_ENQUIRY_RENEWAL_SUCCESS, data: response.data });
+    if (typeof action.fn === 'function') action.fn(response.data);
+  } catch (error) {
+    yield put({ type: CREATE_ENQUIRY_RENEWAL_ERROR, error });
+    if (typeof action.fn === 'function') action.fn(error.response);
+  }
+}
 
 function* addEnquiriesData(action) {
   try {
@@ -144,3 +161,6 @@ export function* watchEnquiriesFilterListInformation() {
     yield takeEvery(GET_ENQUIRIES_FILTER_LIST, getAllEnquiriesFilterInformation);
 }
 
+export function* watchCreateEnquiryRenewal() {
+  yield takeEvery(CREATE_ENQUIRY_RENEWAL, createEnquiryRenewalData);
+}

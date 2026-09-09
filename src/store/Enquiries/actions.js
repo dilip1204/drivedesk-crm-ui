@@ -3,7 +3,8 @@ import {
     UPDATE_ENQUIRIES_DATA,
     GET_ENQUIRIES_LIST,
     DELETE_ENQUIRIES_DATA,
-    GET_ENQUIRIES_FILTER_LIST
+    GET_ENQUIRIES_FILTER_LIST,
+    CREATE_ENQUIRY_RENEWAL
 } from "./types";
 
 export function addEnquiries(param, fn) {
@@ -44,4 +45,12 @@ export function getEnquiriesFilterListInformation(param, fn) {
         param,
         fn,
     }
+}
+
+export function createEnquiryRenewal(param, fn) {
+    return {
+        type: CREATE_ENQUIRY_RENEWAL,
+        param,
+        fn,
+    };
 }

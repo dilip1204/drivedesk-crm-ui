@@ -18,7 +18,7 @@ export default function MySubscription() {
     ["Current Subscription Status", <span className={`subscription-status is-${status.toLowerCase()}`}>{LABELS[status] || status}</span>],
     ["Trial Start Date", formatDateDDMMYYYY(subscription.trial_start_date)], ["Trial End Date", formatDateDDMMYYYY(subscription.trial_end_date)],
     ["Subscription Start Date", formatDateDDMMYYYY(subscription.subscription_start_date)], ["Subscription End Date", formatDateDDMMYYYY(subscription.subscription_end_date)],
-    ["Grace End Date", formatDateDDMMYYYY(subscription.grace_end_date)], ["Limited Mode Start Date", formatDateDDMMYYYY(subscription.limited_mode_start_date)],
+    ["Limited Mode Start Date", formatDateDDMMYYYY(subscription.limited_mode_start_date)],
     ["Suspended Date", formatDateDDMMYYYY(subscription.suspended_date)], ["Subscription Amount", money(subscription.subscription_amount)],
     ["Last Payment Date", formatDateDDMMYYYY(subscription.last_payment_date)], ["Last Payment Remarks", subscription.last_payment_remarks || "—"],
   ] : [];

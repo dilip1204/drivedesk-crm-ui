@@ -11,6 +11,12 @@ import LoadingState from "../../components/LoadingState";
 import EmptyState from "../../components/EmptyState";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import Pagination from "../Students/Pagenation";
+import ExternalRenewalFields, {
+  EMPTY_EXTERNAL_RENEWAL_FORM,
+  normalizeExternalRenewalForm,
+  toExternalRenewalPayload,
+  validateExternalRenewal,
+} from "../../components/ExternalRenewalFields";
 import { useAuth } from "../../hooks/useAuth";
 import { useSubscription } from "../../hooks/useSubscription";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
@@ -24,12 +30,6 @@ import {
 import "./Renewals.css";
 
 const EMPTY_FILTERS = { renewal_type: "", expiry_from: "", expiry_to: "", expiry_status: "", search: "" };
-const EMPTY_FORM = {
-  renewal_type: "DL", name: "", mobile_number: "", document_number: "",
-  license_classes: "", badge_number: "", issue_date: "", expiry_date: "",
-  rto: "", enrollment_number: "", remarks: "",
-};
-
 const STATUS_LABELS = {
   EXPIRED: "Expired", EXPIRING_7_DAYS: "Expiring in 7 days",
   EXPIRING_30_DAYS: "Expiring in 30 days", EXPIRING_60_DAYS: "Expiring in 60 days", VALID: "Valid",
@@ -49,30 +49,6 @@ const getRequestError = (error) => {
   return typeof message === "string" ? message : "The request could not be completed.";
 };
 
-const normalizeForm = (item = {}) => ({
-  ...EMPTY_FORM,
-  ...item,
-  license_classes: Array.isArray(item.license_classes) ? item.license_classes.join(", ") : item.license_classes || "",
-  badge_number: item.badge_number || "",
-  remarks: item.remarks || "",
-});
-
-const toPayload = (form) => ({
-  renewal_type: form.renewal_type,
-  name: form.name.trim(),
-  mobile_number: form.mobile_number.trim(),
-  document_number: form.document_number.trim(),
-  license_classes: form.renewal_type === "DL"
-    ? form.license_classes.split(",").map((value) => value.trim().toUpperCase()).filter((value, index, values) => value && values.indexOf(value) === index)
-    : [],
-  badge_number: form.renewal_type === "CL" ? form.badge_number.trim() || null : null,
-  issue_date: form.issue_date,
-  expiry_date: form.expiry_date,
-  rto: form.rto.trim(),
-  enrollment_number: form.enrollment_number.trim(),
-  remarks: form.remarks.trim() || null,
-});
-
 export default function ExternalRenewals() {
   const { role } = useAuth();
   const { isLimited } = useSubscription();
@@ -90,7 +66,7 @@ export default function ExternalRenewals() {
   const [filterError, setFilterError] = useState("");
   const [modalMode, setModalMode] = useState(null);
   const [selected, setSelected] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState(EMPTY_EXTERNAL_RENEWAL_FORM);
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -139,15 +115,15 @@ export default function ExternalRenewals() {
 
   const openCreate = () => {
     if (!isAdmin) return;
-    setSelected(null); setForm(EMPTY_FORM); setFormError(""); setModalMode("edit");
+    setSelected(null); setForm(EMPTY_EXTERNAL_RENEWAL_FORM); setFormError(""); setModalMode("edit");
   };
 
   const openRecord = async (item, mode) => {
     const allowedMode = mode === "edit" && !isAdmin ? "view" : mode;
-    setSelected(item); setForm(normalizeForm(item)); setFormError(""); setModalMode(allowedMode); setDetailLoading(true);
+    setSelected(item); setForm(normalizeExternalRenewalForm(item)); setFormError(""); setModalMode(allowedMode); setDetailLoading(true);
     try {
       const detail = unwrap(await getRenewal(item.id));
-      setSelected(detail); setForm(normalizeForm(detail));
+      setSelected(detail); setForm(normalizeExternalRenewalForm(detail));
     } catch (requestError) {
       setFormError(getRequestError(requestError));
     } finally {
@@ -175,26 +151,17 @@ export default function ExternalRenewals() {
     setForm((current) => ({ ...current, [name]: value })); setFormError("");
   };
 
-  const validateForm = () => {
-    if (!form.name.trim() || !form.mobile_number.trim() || !form.document_number.trim() || !form.issue_date || !form.expiry_date) {
-      return "Name, mobile number, document number, issue date and expiry date are required.";
-    }
-    if (!/^\d{10}$/.test(form.mobile_number.trim())) return "Mobile number must contain exactly 10 digits.";
-    if (form.expiry_date < form.issue_date) return "Expiry date cannot be before issue date.";
-    return "";
-  };
-
   const saveRecord = async (event) => {
     event.preventDefault();
     if (!isAdmin) { setFormError("Admin permission is required to modify renewal records."); return; }
-    const validationError = validateForm();
+    const payload = toExternalRenewalPayload(form);
+    const validationError = validateExternalRenewal(payload);
     if (validationError) { setFormError(validationError); return; }
-    const payload = toPayload(form);
     setSaving(true); setFormError("");
     try {
       if (selected?.id) {
         const changed = {};
-        const original = toPayload(normalizeForm(selected));
+        const original = toExternalRenewalPayload(normalizeExternalRenewalForm(selected));
         Object.entries(payload).forEach(([key, value]) => {
           if (JSON.stringify(value) !== JSON.stringify(original[key])) changed[key] = value;
         });
@@ -265,12 +232,7 @@ export default function ExternalRenewals() {
 
       <Modal show={Boolean(modalMode)} onHide={closeModal} centered size="lg" dialogClassName="renewals-modal">
         <Modal.Header closeButton><Modal.Title>{modalMode === "view" ? "Renewal Details" : selected ? "Edit External Customer" : "Add External Customer"}</Modal.Title></Modal.Header>
-        {modalMode === "view" ? <Modal.Body>{detailLoading ? <LoadingState label="Loading renewal details" variant="compact" /> : <div className="renewals-detail-grid">{[["Customer", selected?.name], ["Mobile", selected?.mobile_number], ["Renewal type", selected?.renewal_type], ["Document number", selected?.document_number], ["Licence classes", Array.isArray(selected?.license_classes) ? selected.license_classes.join(", ") : selected?.license_classes], ["Badge number", selected?.badge_number], ["Issue date", formatDateDDMMYYYY(selected?.issue_date)], ["Expiry date", formatDateDDMMYYYY(selected?.expiry_date)], ["Expiry status", STATUS_LABELS[selected?.expiry_status] || selected?.expiry_status], ["RTO", selected?.rto], ["Enrollment number", selected?.enrollment_number], ["Remarks", selected?.remarks]].map(([label, value]) => <div key={label}><span>{label}</span><strong>{value || "—"}</strong></div>)}</div>}{formError && <p className="renewals-error">{formError}</p>}</Modal.Body> : <form onSubmit={saveRecord}><Modal.Body>{detailLoading ? <LoadingState label="Loading renewal details" variant="compact" /> : <div className="renewals-form-grid">
-          <div className="renewals-field"><label htmlFor="renewal_type">Renewal type *</label><select id="renewal_type" name="renewal_type" value={form.renewal_type} onChange={changeForm}><option value="DL">Driving Licence (DL)</option><option value="CL">Conductor Licence (CL)</option></select></div>
-          {[["name", "Customer name *", "text"], ["mobile_number", "Mobile number *", "tel"], ["document_number", "Document / licence number *", "text"], ["issue_date", "Issue date *", "date"], ["expiry_date", "Expiry date *", "date"], ["rto", "RTO", "text"], ["enrollment_number", "Enrollment number", "text"]].map(([name, label, type]) => <div className="renewals-field" key={name}><label htmlFor={name}>{label}</label><input id={name} name={name} type={type} value={form[name]} onChange={changeForm} maxLength={name === "mobile_number" ? 10 : undefined} /></div>)}
-          {form.renewal_type === "DL" ? <div className="renewals-field renewals-field-wide"><label htmlFor="license_classes">Licence classes</label><input id="license_classes" name="license_classes" value={form.license_classes} onChange={changeForm} placeholder="MCWG, LMV" /><small>Separate multiple classes with commas.</small></div> : <div className="renewals-field renewals-field-wide"><label htmlFor="badge_number">Badge number</label><input id="badge_number" name="badge_number" value={form.badge_number} onChange={changeForm} /></div>}
-          <div className="renewals-field renewals-field-wide"><label htmlFor="remarks">Remarks</label><textarea id="remarks" name="remarks" rows="3" value={form.remarks} onChange={changeForm} /></div>
-        </div>}{formError && <p className="renewals-error" role="alert">{formError}</p>}</Modal.Body><Modal.Footer><Button type="button" variant="light" onClick={closeModal} disabled={saving}>Cancel</Button><Button type="submit" disabled={saving || detailLoading}>{saving ? "Saving..." : selected ? "Save Changes" : "Create Customer"}</Button></Modal.Footer></form>}
+        {modalMode === "view" ? <Modal.Body>{detailLoading ? <LoadingState label="Loading renewal details" variant="compact" /> : <div className="renewals-detail-grid">{[["Customer", selected?.name], ["Mobile", selected?.mobile_number], ["Renewal type", selected?.renewal_type], ["Document number", selected?.document_number], ["Licence classes", Array.isArray(selected?.license_classes) ? selected.license_classes.join(", ") : selected?.license_classes], ["Badge number", selected?.badge_number], ["Issue date", formatDateDDMMYYYY(selected?.issue_date)], ["Expiry date", formatDateDDMMYYYY(selected?.expiry_date)], ["Expiry status", STATUS_LABELS[selected?.expiry_status] || selected?.expiry_status], ["RTO", selected?.rto], ["Enrollment number", selected?.enrollment_number], ["Remarks", selected?.remarks]].map(([label, value]) => <div key={label}><span>{label}</span><strong>{value || "—"}</strong></div>)}</div>}{formError && <p className="renewals-error">{formError}</p>}</Modal.Body> : <form onSubmit={saveRecord}><Modal.Body>{detailLoading ? <LoadingState label="Loading renewal details" variant="compact" /> : <ExternalRenewalFields values={form} onChange={changeForm} />}{formError && <p className="renewals-error" role="alert">{formError}</p>}</Modal.Body><Modal.Footer><Button type="button" variant="light" onClick={closeModal} disabled={saving}>Cancel</Button><Button type="submit" disabled={saving || detailLoading}>{saving ? "Saving..." : selected ? "Save Changes" : "Create Customer"}</Button></Modal.Footer></form>}
         {modalMode === "view" && <Modal.Footer><Button variant="secondary" onClick={closeModal}>Close</Button></Modal.Footer>}
       </Modal>
       <DeleteConfirmation showDeleteModal={Boolean(deleteId)} hideDeleteModal={() => setDeleteId(null)} confirmModal={confirmDelete} id={deleteId} message="Are you sure you want to delete this external renewal customer?" />

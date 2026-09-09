@@ -2,8 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Modal, Button, Alert } from "react-bootstrap";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useDispatch } from "react-redux";
-import { addEnquiries, updateEnquiries } from "../../store/Enquiries/actions"; // Update path as needed
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addEnquiries,
+  createEnquiryRenewal,
+  updateEnquiries,
+} from "../../store/Enquiries/actions";
 import { addStudent } from "../../store/addStudent/actions";
 import { getTariffsListInformation } from "../../store/tariff/actions";
 import {
@@ -12,6 +16,10 @@ import {
 } from "../../store/instructors/actions";
 import LoadingState from "../../components/LoadingState";
 import EmptyState from "../../components/EmptyState";
+import ExternalRenewalFields, {
+  createExternalRenewalFields,
+  toExternalRenewalPayload,
+} from "../../components/ExternalRenewalFields";
 import { IoClose } from "react-icons/io5";
 import "./addEnquiries.css";
 
@@ -42,6 +50,9 @@ export default function AddEnquiries({
   enquiriesData,
 }) {
   const dispatch = useDispatch();
+  const renewalCreating = useSelector(
+    (state) => state?.enquiriesInfo?.createEnquiryRenewalLoader
+  );
   const [tariffsData, setTariffsData] = useState([]);
   const [instructorsData, setInstructorsData] = useState([]);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
@@ -223,6 +234,7 @@ export default function AddEnquiries({
     training_time: id?.training_time || "",
     test_date: formatDateInput(id?.test_date),
     remarks: id?.remarks || "",
+    ...createExternalRenewalFields(id, "renewal_"),
   };
 
   const validationSchema = Yup.object({
@@ -237,7 +249,11 @@ export default function AddEnquiries({
     vehicle_classes: Yup.array().of(Yup.string()).nullable(),
     //referred_by: Yup.string().required("Referred by is required"),
     //email: Yup.string().email("Invalid email").required("Email is required"),
-    course_interest: Yup.string().required("Course interest is required"),
+    course_interest: Yup.string().when("follow_up_status", {
+      is: (status) => !isRenewalEnrollmentStatus(status),
+      then: (schema) => schema.required("Course interest is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
     //enquiry_date: Yup.date().required("Enquiry date is required"),
     follow_up_status: Yup.string().required("Follow-up status is required"),
     paid_amount: Yup.number()
@@ -349,6 +365,37 @@ export default function AddEnquiries({
           .required("Training time is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
+    renewal_type: Yup.string().when("follow_up_status", {
+      is: (status) => isRenewalEnrollmentStatus(status),
+      then: (schema) =>
+        schema.oneOf(["DL", "CL"], "Select a valid renewal type").required("Renewal type is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    renewal_document_number: Yup.string().when("follow_up_status", {
+      is: (status) => isRenewalEnrollmentStatus(status),
+      then: (schema) => schema.trim().required("Document / licence number is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    renewal_issue_date: Yup.string().when("follow_up_status", {
+      is: (status) => isRenewalEnrollmentStatus(status),
+      then: (schema) => schema.required("Issue date is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    renewal_expiry_date: Yup.string().when("follow_up_status", {
+      is: (status) => isRenewalEnrollmentStatus(status),
+      then: (schema) =>
+        schema
+          .required("Expiry date is required")
+          .test(
+            "after-issue-date",
+            "Expiry date cannot be before issue date",
+            function validateExpiry(value) {
+              const issueDate = this.parent?.renewal_issue_date;
+              return !value || !issueDate || value >= issueDate;
+            }
+          ),
+      otherwise: (schema) => schema.notRequired(),
+    }),
     //remarks: Yup.string().required("Remarks are required")
   });
 
@@ -368,6 +415,16 @@ export default function AddEnquiries({
         normalizedValues.course_interest
       );
       const enrollingStudent = isEnrolledStatus(normalizedValues.follow_up_status);
+      const enrollingRenewal = isRenewalEnrollmentStatus(
+        normalizedValues.follow_up_status
+      );
+      const renewalPayload = enrollingRenewal
+        ? toExternalRenewalPayload(normalizedValues, {
+            prefix: "renewal_",
+            name: normalizedValues.name,
+            mobileNumber: normalizedValues.mobile_number,
+          })
+        : null;
 
       if (enrollingStudent) {
         normalizedValues.training_days = getTariffTrainingDaysByCourse(
@@ -388,10 +445,24 @@ export default function AddEnquiries({
         normalizedValues.dob = normalizedValues.dob || id?.dob || getDefaultDob();
       }
 
+      const enquiryValues = {
+        name: normalizedValues.name,
+        mobile_number: normalizedValues.mobile_number,
+        referred_by: normalizedValues.referred_by,
+        follow_up_status: normalizedValues.follow_up_status,
+        remarks: normalizedValues.remarks,
+        ...(!enrollingRenewal
+          ? { course_interest: normalizedValues.course_interest }
+          : {}),
+        ...(!enrollingStudent && !enrollingRenewal
+          ? { follow_up_date: normalizedValues.follow_up_date }
+          : {}),
+      };
+
       if (isEdit) {
-        const changedFields = Object.keys(normalizedValues).reduce((diff, key) => {
-          if (normalizedValues[key] !== id?.[key]) {
-            diff[key] = normalizedValues[key];
+        const changedFields = Object.keys(enquiryValues).reduce((diff, key) => {
+          if (enquiryValues[key] !== id?.[key]) {
+            diff[key] = enquiryValues[key];
           }
           return diff;
         }, {});
@@ -401,21 +472,32 @@ export default function AddEnquiries({
           ...changedFields,
         };
       } else {
-        payload = { ...normalizedValues };
+        payload = { ...enquiryValues };
       }
 
       const action = isEdit ? updateEnquiries : addEnquiries;
       const wasPreviouslyEnrolled = isEnrolledStatus(id?.follow_up_status);
       const shouldCreateStudent =
         enrollingStudent && (!isEdit || !wasPreviouslyEnrolled);
+      const wasPreviouslyRenewal = isRenewalEnrollmentStatus(
+        id?.follow_up_status
+      );
+      const shouldCreateRenewal =
+        enrollingRenewal && (!isEdit || !wasPreviouslyRenewal);
 
       const applyApiFieldErrors = (responseData) => {
         if (!Array.isArray(responseData?.detail)) return;
 
         responseData.detail.forEach((errorItem) => {
           const location = Array.isArray(errorItem?.loc) ? errorItem.loc : [];
-          const field = location[location.length - 1];
-          if (field && Object.prototype.hasOwnProperty.call(formik.values, field)) {
+          const responseField = location[location.length - 1];
+          const field = Object.prototype.hasOwnProperty.call(
+            formik.values,
+            responseField
+          )
+            ? responseField
+            : `renewal_${responseField}`;
+          if (responseField && Object.prototype.hasOwnProperty.call(formik.values, field)) {
             formik.setFieldTouched(field, true, false);
             formik.setFieldError(
               field,
@@ -425,7 +507,7 @@ export default function AddEnquiries({
         });
       };
 
-      const saveEnquiry = (studentMeta = null) => {
+      const saveEnquiry = (flowMeta = {}) => {
         dispatch(action(payload, (response) => {
           const responseData = response?.data || response || {};
           const hasError =
@@ -440,9 +522,12 @@ export default function AddEnquiries({
             }
             if (typeof enquiriesData === "function") {
               enquiriesData(responseData, isEdit, {
-                enrolledFlow: Boolean(studentMeta),
-                studentCreated: Boolean(studentMeta?.studentCreated),
-                studentResponse: studentMeta?.studentResponse,
+                enrolledFlow: flowMeta.type === "student",
+                studentCreated: Boolean(flowMeta.studentCreated),
+                studentResponse: flowMeta.studentResponse,
+                renewalFlow: flowMeta.type === "renewal",
+                renewalCreated: Boolean(flowMeta.renewalCreated),
+                renewalResponse: flowMeta.renewalResponse,
               });
             }
             hideModal();
@@ -452,12 +537,51 @@ export default function AddEnquiries({
 
           if (hasError && typeof enquiriesData === "function") {
             enquiriesData(responseData, isEdit, {
-              enrolledFlow: false,
-              studentCreated: false,
+              enrolledFlow: flowMeta.type === "student",
+              studentCreated: Boolean(flowMeta.studentCreated),
+              renewalFlow: flowMeta.type === "renewal",
+              renewalCreated: Boolean(flowMeta.renewalCreated),
             });
           }
         }));
       };
+
+      if (shouldCreateRenewal) {
+        dispatch(
+          createEnquiryRenewal(renewalPayload, (renewalResponse) => {
+            const renewalResponseData =
+              renewalResponse?.data || renewalResponse || {};
+            const renewalHasError =
+              !renewalResponse ||
+              renewalResponseData?.isError === true ||
+              Number(renewalResponseData?.statusCode) >= 400 ||
+              Number(renewalResponse?.status) >= 400;
+
+            if (renewalHasError) {
+              applyApiFieldErrors(renewalResponseData);
+              if (typeof enquiriesData === "function") {
+                enquiriesData(
+                  { ...renewalResponseData, isError: true },
+                  isEdit,
+                  {
+                    renewalFlow: true,
+                    renewalCreated: false,
+                    renewalResponse: renewalResponseData,
+                  }
+                );
+              }
+              return;
+            }
+
+            saveEnquiry({
+              type: "renewal",
+              renewalCreated: true,
+              renewalResponse: renewalResponseData,
+            });
+          })
+        );
+        return;
+      }
 
       if (!shouldCreateStudent) {
         saveEnquiry();
@@ -490,6 +614,7 @@ export default function AddEnquiries({
           }
 
           saveEnquiry({
+            type: "student",
             studentCreated: true,
             studentResponse: studentResponseData,
           });
@@ -700,41 +825,43 @@ export default function AddEnquiries({
               </div>
             ))}
 
-            <div className="col-md-6">
-              <div className="form-group enquiry-form-group">
-                <label>
-                  {isEnrolledStatus(formik.values.follow_up_status)
-                    ? "Plan"
-                    : "Course Interest"}{" "}
-                  <span style={{ color: "red" }}>*</span>
-                </label>
-                <select
-                  name="course_interest"
-                  className={`form-control${
-                    formik.touched.course_interest && formik.errors.course_interest
-                      ? " is-invalid"
-                      : ""
-                  }`}
-                  value={formik.values.course_interest}
-                  onChange={handleCourseInterestChange}
-                  onBlur={formik.handleBlur}
-                >
-                  <option value="">
+            {!isRenewalEnrollmentStatus(formik.values.follow_up_status) && (
+              <div className="col-md-6">
+                <div className="form-group enquiry-form-group">
+                  <label>
                     {isEnrolledStatus(formik.values.follow_up_status)
-                      ? "Select plan"
-                      : "Select course interest"}
-                  </option>
-                  {courseOptions.map((plan) => (
-                    <option key={plan} value={plan}>
-                      {plan}
+                      ? "Plan"
+                      : "Course Interest"}{" "}
+                    <span style={{ color: "red" }}>*</span>
+                  </label>
+                  <select
+                    name="course_interest"
+                    className={`form-control${
+                      formik.touched.course_interest && formik.errors.course_interest
+                        ? " is-invalid"
+                        : ""
+                    }`}
+                    value={formik.values.course_interest}
+                    onChange={handleCourseInterestChange}
+                    onBlur={formik.handleBlur}
+                  >
+                    <option value="">
+                      {isEnrolledStatus(formik.values.follow_up_status)
+                        ? "Select plan"
+                        : "Select course interest"}
                     </option>
-                  ))}
-                </select>
-                {formik.touched.course_interest && formik.errors.course_interest && (
-                  <div className="text-danger">{formik.errors.course_interest}</div>
-                )}
+                    {courseOptions.map((plan) => (
+                      <option key={plan} value={plan}>
+                        {plan}
+                      </option>
+                    ))}
+                  </select>
+                  {formik.touched.course_interest && formik.errors.course_interest && (
+                    <div className="text-danger">{formik.errors.course_interest}</div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="col-md-6">
               <div className="form-group enquiry-form-group">
@@ -777,6 +904,37 @@ export default function AddEnquiries({
                     onBlur={formik.handleBlur}
                   />
                 </div>
+              </div>
+            )}
+
+            {isRenewalEnrollmentStatus(formik.values.follow_up_status) && (
+              <div className="col-12">
+                <section
+                  className="enquiry-enrollment-panel enquiry-renewal-panel"
+                  aria-labelledby="enquiry-renewal-title"
+                >
+                  <div className="enquiry-enrollment-heading">
+                    <span className="enquiry-enrollment-icon" aria-hidden="true">
+                      <i className="bi bi-arrow-repeat" />
+                    </span>
+                    <div>
+                      <h3 id="enquiry-renewal-title">External renewal details</h3>
+                      <p>
+                        Complete these details to create the external renewal record.
+                      </p>
+                    </div>
+                  </div>
+                  <ExternalRenewalFields
+                    values={formik.values}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    errors={formik.errors}
+                    touched={formik.touched}
+                    fieldPrefix="renewal_"
+                    includeCustomerFields={false}
+                    disabled={renewalCreating}
+                  />
+                </section>
               </div>
             )}
 
@@ -1228,21 +1386,26 @@ export default function AddEnquiries({
               type="submit"
               variant="primary"
               disabled={
-                isEnrolledStatus(formik.values.follow_up_status) &&
-                Boolean(
-                  formik.values.instructor_name &&
-                    formik.values.training_start_date
-                ) &&
-                (availabilityLoading ||
-                  Boolean(availabilityError) ||
-                  !availabilityDay ||
-                  availabilityDay?.is_working_day === false ||
-                  !selectedTrainingTime ||
-                  hasTimeConflict)
+                renewalCreating ||
+                (isEnrolledStatus(formik.values.follow_up_status) &&
+                  Boolean(
+                    formik.values.instructor_name &&
+                      formik.values.training_start_date
+                  ) &&
+                  (availabilityLoading ||
+                    Boolean(availabilityError) ||
+                    !availabilityDay ||
+                    availabilityDay?.is_working_day === false ||
+                    !selectedTrainingTime ||
+                    hasTimeConflict))
               }
             >
               {isEnrolledStatus(formik.values.follow_up_status)
                 ? "Enroll Student"
+                : isRenewalEnrollmentStatus(formik.values.follow_up_status)
+                ? renewalCreating
+                  ? "Creating Renewal..."
+                  : "Create Renewal"
                 : isEdit
                 ? "Update"
                 : "Add"}

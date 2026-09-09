@@ -264,7 +264,22 @@ const Enquiries = () => {
   const onEnquiriesData = (res, isEdit, meta = {}) => {
     if (!res.isError) {
       getEnquiriesList();
-      if (meta?.enrolledFlow) {
+      if (meta?.renewalFlow) {
+        if (meta?.renewalCreated) {
+          toast.success(
+            isEdit
+              ? "Enquiry updated and external renewal created successfully!"
+              : "Enquiry and external renewal created successfully!"
+          );
+        } else {
+          const renewalError = meta?.renewalResponse || {};
+          const renewalMessage =
+            (typeof renewalError?.response === "string" && renewalError.response) ||
+            renewalError?.message ||
+            "Failed to create the external renewal customer.";
+          toast.error(renewalMessage);
+        }
+      } else if (meta?.enrolledFlow) {
         if (meta?.studentCreated) {
           toast.success(
             isEdit
@@ -308,8 +323,14 @@ const Enquiries = () => {
         (typeof res?.response === "string" && res.response) ||
         res?.message ||
         res?.response?.message ||
-        "Failed....!";
-      toast.error(msg);
+        (meta?.renewalFlow
+          ? "Failed to create the external renewal customer."
+          : "Failed to save the enquiry.");
+      toast.error(
+        meta?.renewalFlow && meta?.renewalCreated
+          ? `External renewal created, but enquiry save failed: ${msg}`
+          : msg
+      );
     }
   };
 

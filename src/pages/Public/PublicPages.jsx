@@ -1,6 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import heroImage from "../../assets/img/bg_login.png";
+import rainbowLogo from "../../assets/logo/rainbow-driving-school.png";
+import surryaLogo from "../../assets/logo/surrya-driving-schools.png";
+import sriRagavendraLogo from "../../assets/logo/srds-logo.png";
+import {
+  DRIVE_DESK_CONTACT_EMAIL,
+  DRIVE_DESK_WHATSAPP_DISPLAY,
+  DRIVE_DESK_WHATSAPP_URL,
+} from "../../shared/constants/contactDetails";
+import { formatLeadAttribution, trackLeadEvent } from "../../utils/leadTracking";
 import "./PublicPages.css";
 
 const features = [
@@ -17,6 +26,34 @@ const workflow = [
   ["02", "Plan the training", "Assign instructors, choose a plan, and schedule sessions."],
   ["03", "Track every payment", "Record fees, print receipts, and follow outstanding balances."],
   ["04", "Complete and report", "Monitor progress and issue professional completion reports."],
+];
+
+const clients = [
+  { name: "Rainbow Driving School", mark: "rainbow", logo: rainbowLogo },
+  { name: "Surrya Driving Schools", mark: "surrya", logo: surryaLogo },
+  { name: "Sri Ragavendra Heavy Driving School", mark: "ragavendra", logo: sriRagavendraLogo },
+];
+
+const businessBenefits = [
+  { icon: "bi-clock-history", title: "Spend less time on admin", text: "Keep student records, schedules, payments and documents together instead of updating separate registers." },
+  { icon: "bi-wallet2", title: "Follow every pending fee", text: "See balances clearly, record collections and produce professional receipts for students." },
+  { icon: "bi-bell", title: "Stay ahead of renewals", text: "Track licence and vehicle-document dates so your team knows what needs attention." },
+  { icon: "bi-graph-up-arrow", title: "Make informed decisions", text: "Use operational and financial summaries to understand how the school is performing." },
+];
+
+const onboardingSteps = [
+  ["01", "Tell us about your school", "We learn how you currently manage students, instructors, fees and training."],
+  ["02", "See a tailored demo", "We demonstrate the DriveDesk workflows that are most relevant to your team."],
+  ["03", "Choose the right setup", "Select an option based on your school size, users and operational requirements."],
+];
+
+const frequentlyAskedQuestions = [
+  ["Does DriveDesk work on mobile?", "Yes. DriveDesk provides a responsive experience across supported desktop, tablet and mobile browsers."],
+  ["Can we manage students and instructors separately?", "Yes. Student records, instructor profiles, availability and assigned training activity are managed through dedicated workflows."],
+  ["Can DriveDesk track fees and pending balances?", "Yes. Teams can record payments, review outstanding balances and produce receipts and reports."],
+  ["Does it support renewals and document dates?", "Yes. DriveDesk includes workflows for licence, vehicle-document and external-customer renewal tracking."],
+  ["How is pricing decided?", "Plans are discussed based on school size and required capabilities. Contact us for a suitable option and a tailored demonstration."],
+  ["How do we get started?", "Book a free demo and tell us about your current workflow. We will show the relevant features and discuss an appropriate setup."],
 ];
 
 function SectionHeading({ eyebrow, title, text, align = "center" }) {
@@ -55,7 +92,7 @@ export function HomePage() {
             <h1>Run your driving school from one clear dashboard.</h1>
             <p>DriveDesk helps teams manage students, instructors, sessions, fees, expenses, and reports without scattered registers or spreadsheets.</p>
             <div className="public-hero-actions">
-              <Link className="public-button is-primary" to="/demo">Explore the demo <i className="bi bi-arrow-right" /></Link>
+              <Link className="public-button is-primary" to="/contact" onClick={() => trackLeadEvent("demo_cta_click", { placement: "home_hero" })}>Book a free demo <i className="bi bi-arrow-right" /></Link>
               <Link className="public-button is-secondary" to="/login">Customer sign in</Link>
             </div>
             <div className="public-trust-row">
@@ -81,6 +118,30 @@ export function HomePage() {
         </div>
       </section>
 
+      <section className="public-clients" aria-labelledby="public-clients-title">
+        <div className="public-container">
+          <div className="public-clients-heading">
+            <span>Trusted by driving schools</span>
+            <h2 id="public-clients-title">Helping our clients run smoother every day</h2>
+          </div>
+          <div className="public-client-grid">
+            {clients.map((client) => (
+              <article className="public-client-card" key={client.name}>
+                <div className={`public-client-logo is-${client.mark}`} aria-hidden="true">
+                  {client.logo ? (
+                    <img src={client.logo} alt="" />
+                  ) : (
+                    <span>{client.initials}</span>
+                  )}
+                </div>
+                <strong>{client.name}</strong>
+                <small>DriveDesk client</small>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="public-section public-container">
         <SectionHeading eyebrow="Everything connected" title="The tools your team uses every day" text="A focused workspace designed around the real workflow of a driving school." />
         <div className="public-feature-grid">
@@ -94,6 +155,20 @@ export function HomePage() {
         </div>
       </section>
 
+      <section className="public-section public-business-section">
+        <div className="public-container">
+          <SectionHeading eyebrow="Built for better operations" title="Turn daily administration into a clear business process" text="DriveDesk helps owners and teams spend less time finding information and more time serving students." />
+          <div className="public-benefit-grid">
+            {businessBenefits.map((benefit) => (
+              <article key={benefit.title}>
+                <i className={`bi ${benefit.icon}`} aria-hidden="true" />
+                <div><h3>{benefit.title}</h3><p>{benefit.text}</p></div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="public-section public-section-muted">
         <div className="public-container">
           <SectionHeading eyebrow="A simple workflow" title="From first enquiry to completed training" text="Keep every handoff visible so students receive a consistent experience." />
@@ -104,6 +179,46 @@ export function HomePage() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="public-section public-container public-onboarding-section">
+        <div className="public-onboarding-copy">
+          <SectionHeading eyebrow="Simple onboarding" title="A practical way to get started" text="No complicated buying process. Start with a conversation and see whether DriveDesk fits your school." align="left" />
+          <div className="public-onboarding-actions">
+            <Link className="public-button is-primary" to="/contact">Book a free demo <i className="bi bi-arrow-right" /></Link>
+            <a className="public-button is-secondary" href={`${DRIVE_DESK_WHATSAPP_URL}?text=${encodeURIComponent("Hello DriveDesk, I would like to discuss a plan for my driving school.")}`} target="_blank" rel="noopener noreferrer"><i className="bi bi-whatsapp" /> Ask about plans</a>
+          </div>
+        </div>
+        <div className="public-onboarding-card">
+          {onboardingSteps.map(([number, title, text]) => (
+            <article key={number}><span>{number}</span><div><h3>{title}</h3><p>{text}</p></div></article>
+          ))}
+          <div className="public-plan-note"><i className="bi bi-building-check" /><span><strong>Flexible plans</strong><small>Pricing is based on school size and required capabilities. Contact us for a suitable option.</small></span></div>
+        </div>
+      </section>
+
+      <section className="public-section public-section-muted public-comparison-section">
+        <div className="public-container">
+          <SectionHeading eyebrow="A clearer way to work" title="Move beyond scattered registers and spreadsheets" text="Bring the information your team uses every day into one connected workflow." />
+          <div className="public-comparison-table" role="table" aria-label="Manual administration compared with DriveDesk">
+            <div className="public-comparison-head" role="row"><strong role="columnheader">Manual administration</strong><strong role="columnheader">With DriveDesk</strong></div>
+            {[
+              ["Records kept in different places", "Students, instructors and activity in one workspace"],
+              ["Balances checked manually", "Pending fees and payment history remain visible"],
+              ["Important dates depend on reminders", "Renewal and document dates can be tracked"],
+              ["Reports assembled by hand", "Branded operational and financial reports"],
+            ].map(([before, after]) => <div className="public-comparison-row" role="row" key={before}><span role="cell"><i className="bi bi-dash-circle" />{before}</span><span role="cell"><i className="bi bi-check-circle-fill" />{after}</span></div>)}
+          </div>
+        </div>
+      </section>
+
+      <section className="public-section public-container public-faq-section">
+        <SectionHeading eyebrow="Frequently asked questions" title="What driving schools ask before a demo" />
+        <div className="public-faq-list">
+          {frequentlyAskedQuestions.map(([question, answer], index) => (
+            <details key={question} open={index === 0}><summary>{question}<i className="bi bi-plus-lg" /></summary><p>{answer}</p></details>
+          ))}
         </div>
       </section>
 
@@ -206,6 +321,24 @@ export function DemoPage() {
 }
 
 export function ContactPage() {
+  const handleDemoRequest = (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const message = [
+      "Hello DriveDesk, I would like to book a free demo.",
+      `Name: ${data.get("name")}`,
+      `Driving school: ${data.get("school")}`,
+      `Phone: ${data.get("phone")}`,
+      `Location: ${data.get("location") || "Not provided"}`,
+      `Instructors: ${data.get("instructors") || "Not provided"}`,
+      "",
+      ...formatLeadAttribution(),
+    ].join("\n");
+
+    trackLeadEvent("demo_form_submit", { placement: "contact_page" });
+    window.open(`${DRIVE_DESK_WHATSAPP_URL}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <>
       <section className="public-page-hero">
@@ -214,6 +347,35 @@ export function ContactPage() {
           <h1>Let’s talk about your driving school workflow.</h1>
           <p>Choose the right next step for product questions, a guided demo, or help with an existing DriveDesk account.</p>
         </div>
+      </section>
+
+      <section className="public-section public-container public-lead-section">
+        <div className="public-lead-copy">
+          <SectionHeading
+            eyebrow="Free product demo"
+            title="See DriveDesk with your school’s workflow"
+            text="Share a few details and continue on WhatsApp. Our team can then arrange a suitable demonstration time."
+            align="left"
+          />
+          <div className="public-direct-contact">
+            <a href={`${DRIVE_DESK_WHATSAPP_URL}?text=${encodeURIComponent("Hello DriveDesk, I would like to book a demo.")}`} target="_blank" rel="noopener noreferrer">
+              <i className="bi bi-whatsapp" /><span><small>WhatsApp</small><strong>{DRIVE_DESK_WHATSAPP_DISPLAY}</strong></span>
+            </a>
+            <a href={`mailto:${DRIVE_DESK_CONTACT_EMAIL}`}>
+              <i className="bi bi-envelope" /><span><small>Email</small><strong>{DRIVE_DESK_CONTACT_EMAIL}</strong></span>
+            </a>
+          </div>
+        </div>
+
+        <form className="public-lead-form" onSubmit={handleDemoRequest}>
+          <div className="public-form-field"><label htmlFor="demo-name">Your name</label><input id="demo-name" name="name" type="text" autoComplete="name" required /></div>
+          <div className="public-form-field"><label htmlFor="demo-school">Driving school name</label><input id="demo-school" name="school" type="text" autoComplete="organization" required /></div>
+          <div className="public-form-field"><label htmlFor="demo-phone">Phone / WhatsApp</label><input id="demo-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" required /></div>
+          <div className="public-form-field"><label htmlFor="demo-location">Location</label><input id="demo-location" name="location" type="text" autoComplete="address-level2" /></div>
+          <div className="public-form-field is-full"><label htmlFor="demo-instructors">Number of instructors</label><select id="demo-instructors" name="instructors" defaultValue=""><option value="">Select school size</option><option value="1–3">1–3 instructors</option><option value="4–10">4–10 instructors</option><option value="11+">11+ instructors</option></select></div>
+          <button type="submit" className="public-button is-whatsapp"><i className="bi bi-whatsapp" /> Continue on WhatsApp</button>
+          <p>Submitting opens WhatsApp with your details. Nothing is sent until you choose to send the message.</p>
+        </form>
       </section>
 
       <section className="public-section public-container">

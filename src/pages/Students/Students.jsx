@@ -115,6 +115,7 @@ const Students = () => {
     instructor_name: "",
     test_date: "",
     llr_30_days_completed: "",
+    llr_60_days_completed: "",
   });
 
   // Updated Validation: IF year is selected -> month is mandatory
@@ -142,7 +143,7 @@ const Students = () => {
     status: Yup.string().nullable(),
     instructor_name: Yup.string().nullable(),
     test_date: Yup.string().nullable(),
-    llr_30_days_completed: Yup.string().nullable(),
+    llr_days_completed: Yup.string().nullable(),
   });
 
   const openProfileModal = (student) => {
@@ -247,7 +248,8 @@ const Students = () => {
       (filters.status && filters.status !== "All") ||
       (filters.instructor_name && filters.instructor_name !== "") ||
       (filters.test_date && filters.test_date !== "") ||
-      filters.llr_30_days_completed === "true";
+      filters.llr_30_days_completed === "true" ||
+      filters.llr_60_days_completed === "true";
 
     if (hasQueryFilters) {
       // Build cleaned filter object from current filters (use initialMonth/year from URL first)
@@ -693,15 +695,28 @@ const Students = () => {
                         status: filters.status ?? "All",
                         instructor_name: filters.instructor_name ?? "",
                         test_date: filters.test_date ?? "",
-                        llr_30_days_completed: filters.llr_30_days_completed ?? "",
+                        llr_days_completed:
+                          filters.llr_60_days_completed === "true"
+                            ? "60"
+                            : filters.llr_30_days_completed === "true"
+                              ? "30"
+                              : "",
                       }}
                       validationSchema={FilterValidationSchema}
                       onSubmit={(values) => {
                         setFilterApplied(true);
                         setCurrentPage(1);
 
+                        const { llr_days_completed, ...otherValues } = values;
+                        const requestValues = { ...otherValues };
+                        if (llr_days_completed === "30") {
+                          requestValues.llr_30_days_completed = "true";
+                        } else if (llr_days_completed === "60") {
+                          requestValues.llr_60_days_completed = "true";
+                        }
+
                         const cleanedValues = Object.fromEntries(
-                          Object.entries(values).filter(
+                          Object.entries(requestValues).filter(
                             ([, v]) => v !== "" && v !== null && v !== undefined
                           )
                         );
@@ -845,14 +860,15 @@ const Students = () => {
                               <label>LLR Eligibility</label>
                               <Field
                                 as="select"
-                                name="llr_30_days_completed"
+                                name="llr_days_completed"
                                 className="form-control students-select-arrow"
                               >
                                 <option value="">All LLR Dates</option>
-                                <option value="true">30 Days Completed</option>
+                                <option value="30">30 Days Completed</option>
+                                <option value="60">60 Days Completed</option>
                               </Field>
                               <ErrorMessage
-                                name="llr_30_days_completed"
+                                name="llr_days_completed"
                                 component="div"
                                 className="text-danger"
                               />

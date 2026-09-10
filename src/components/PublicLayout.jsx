@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import logoIcon from "../assets/logo/logo_icon_white.png";
+import { DRIVE_DESK_WHATSAPP_URL } from "../shared/constants/contactDetails";
+import { captureLeadAttribution, trackLeadEvent } from "../utils/leadTracking";
 import "./PublicLayout.css";
 
 const publicLinks = [
@@ -25,6 +27,8 @@ export function PublicHeader() {
 
   useEffect(() => {
     setMenuOpen(false);
+    captureLeadAttribution();
+    trackLeadEvent("public_page_view", { page_path: location.pathname });
   }, [location.pathname]);
 
   return (
@@ -102,6 +106,18 @@ export default function PublicLayout() {
     <div className="public-site">
       <PublicHeader />
       <main className="public-main"><Outlet /></main>
+      <a
+        className="public-whatsapp-float"
+        href={`${DRIVE_DESK_WHATSAPP_URL}?text=${encodeURIComponent("Hello DriveDesk, I would like to know more about your driving school management software.")}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => trackLeadEvent("whatsapp_click", { placement: "floating_button" })}
+        aria-label="Chat with DriveDesk on WhatsApp"
+        title="Chat with us on WhatsApp"
+      >
+        <i className="bi bi-whatsapp" aria-hidden="true" />
+        <span>Chat with us</span>
+      </a>
       <PublicFooter />
     </div>
   );

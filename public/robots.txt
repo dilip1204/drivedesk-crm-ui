@@ -1,3 +1,13 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /dashboard
+Disallow: /students
+Disallow: /instructors
+Disallow: /enquiries
+Disallow: /trainingsession
+Disallow: /attendance
+Disallow: /outstandingfees
+Disallow: /superadmin
+Disallow: /subscription
+
+Sitemap: https://drivedesk.in/sitemap.xml

@@ -1,9 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import heroImage from "../../assets/img/bg_login.png";
 import rainbowLogo from "../../assets/logo/rainbow-driving-school.png";
 import surryaLogo from "../../assets/logo/surrya-driving-schools.png";
 import sriRagavendraLogo from "../../assets/logo/srds-logo.png";
+import dashboardPreview from "../../assets/img/marketing/dashboard-masked.png";
+import enquiriesPreview from "../../assets/img/marketing/enquiries-masked.png";
+import paymentDuesPreview from "../../assets/img/marketing/payment-dues-masked.png";
+import trainingSessionsPreview from "../../assets/img/marketing/training-sessions-masked.png";
 import {
   DRIVE_DESK_CONTACT_EMAIL,
   DRIVE_DESK_WHATSAPP_DISPLAY,
@@ -19,6 +22,7 @@ const features = [
   { icon: "bi-file-earmark-bar-graph", title: "Professional reports", text: "Generate branded receipts, progress reports, and operational summaries." },
   { icon: "bi-person-check", title: "Instructor workspace", text: "Manage instructor profiles, working hours, availability, and assigned students." },
   { icon: "bi-phone", title: "Works everywhere", text: "Use a responsive, installable experience across desktop, tablet, and mobile." },
+  { icon: "bi-whatsapp", title: "WhatsApp communication", text: "Use secure WhatsApp OTP login, start enquiry conversations, and send payment reminders from the relevant workflow." },
 ];
 
 const workflow = [
@@ -29,9 +33,9 @@ const workflow = [
 ];
 
 const clients = [
+  { name: "Sri Ragavendra Heavy Driving School", mark: "ragavendra", logo: sriRagavendraLogo },
   { name: "Rainbow Driving School", mark: "rainbow", logo: rainbowLogo },
   { name: "Surrya Driving Schools", mark: "surrya", logo: surryaLogo },
-  { name: "Sri Ragavendra Heavy Driving School", mark: "ragavendra", logo: sriRagavendraLogo },
 ];
 
 const businessBenefits = [
@@ -47,11 +51,47 @@ const onboardingSteps = [
   ["03", "Choose the right setup", "Select an option based on your school size, users and operational requirements."],
 ];
 
+const pricingPlans = [
+  {
+    name: "Starter",
+    audience: "For independent and growing driving schools",
+    price: "₹16,000",
+    period: "/ year in India",
+    note: "Start with a 60-day free trial",
+    features: ["Student and enquiry management", "Instructor and training schedules", "Fee tracking and receipts", "Operational reports", "WhatsApp workflow tools", "Setup help and ongoing support"],
+  },
+  {
+    name: "Growth",
+    audience: "For established schools with larger teams",
+    price: "Contact us",
+    period: "Tailored to your school",
+    note: "60-day trial available",
+    featured: true,
+    features: ["Everything in Starter", "More users and instructors", "Advanced financial visibility", "Renewal management", "Priority onboarding", "Priority product support"],
+  },
+  {
+    name: "Business",
+    audience: "For multi-branch and high-volume operations",
+    price: "Contact us",
+    period: "Custom business plan",
+    note: "Guided evaluation included",
+    features: ["Everything in Growth", "Multi-branch requirements", "Higher operational capacity", "Management-level reporting", "Tailored implementation", "Dedicated support coordination"],
+  },
+];
+
+const productTour = [
+  { eyebrow: "Lead management", title: "Turn enquiries into enrolled students", text: "Keep each prospect, contact detail, follow-up status, and next action visible so promising enquiries do not get lost.", image: enquiriesPreview, alt: "DriveDesk enquiries workspace with customer details masked", points: ["One enquiry pipeline", "Faster WhatsApp follow-up", "Clear status ownership"] },
+  { eyebrow: "Training operations", title: "Keep instructors and sessions coordinated", text: "Plan the day from a shared schedule and see the students, instructors, vehicles, and session status in one operational view.", image: trainingSessionsPreview, alt: "DriveDesk training session schedule with customer details masked", points: ["Daily schedule visibility", "Instructor coordination", "Progress updates"] },
+  { eyebrow: "Fee collection", title: "Follow every outstanding payment", text: "Give the team a clear list of pending balances, payment history, and direct reminder actions without checking separate books.", image: paymentDuesPreview, alt: "DriveDesk outstanding fees workspace with customer details masked", points: ["Outstanding balance view", "Payment history", "WhatsApp reminders"] },
+];
+
 const frequentlyAskedQuestions = [
+  ["Is DriveDesk available outside India?", "Yes. DriveDesk is a web-based product available to driving schools worldwide, with remote demos, onboarding, and support. Regional pricing, currency, tax, and payment arrangements are confirmed with our team."],
   ["Does DriveDesk work on mobile?", "Yes. DriveDesk provides a responsive experience across supported desktop, tablet and mobile browsers."],
   ["Can we manage students and instructors separately?", "Yes. Student records, instructor profiles, availability and assigned training activity are managed through dedicated workflows."],
   ["Can DriveDesk track fees and pending balances?", "Yes. Teams can record payments, review outstanding balances and produce receipts and reports."],
   ["Does it support renewals and document dates?", "Yes. DriveDesk includes workflows for licence, vehicle-document and external-customer renewal tracking."],
+  ["What WhatsApp features are included?", "DriveDesk supports secure WhatsApp OTP login, direct WhatsApp conversations from enquiries, and payment-reminder messages from outstanding-fee workflows. Availability can depend on the school’s configured plan."],
   ["How is pricing decided?", "Plans are discussed based on school size and required capabilities. Contact us for a suitable option and a tailored demonstration."],
   ["How do we get started?", "Book a free demo and tell us about your current workflow. We will show the relevant features and discuss an appropriate setup."],
 ];
@@ -88,23 +128,29 @@ export function HomePage() {
       <section className="public-hero">
         <div className="public-container public-hero-grid">
           <div className="public-hero-copy">
-            <span className="public-pill"><i className="bi bi-stars" /> Driving school management, simplified</span>
-            <h1>Run your driving school from one clear dashboard.</h1>
-            <p>DriveDesk helps teams manage students, instructors, sessions, fees, expenses, and reports without scattered registers or spreadsheets.</p>
+            <span className="public-pill"><i className="bi bi-globe2" /> Driving school software with worldwide support</span>
+            <h1>Run your entire driving school from one simple system.</h1>
+            <p>Turn enquiries into students, coordinate instructors and training, collect fees, follow renewals, and understand your business without scattered registers or spreadsheets.</p>
+            <div className="public-hero-offer">
+              <span><i className="bi bi-gift" /> 60-day free trial</span>
+              <span><i className="bi bi-tag" /> From ₹16,000/year in India</span>
+              <span><i className="bi bi-headset" /> Worldwide onboarding and support</span>
+            </div>
             <div className="public-hero-actions">
-              <Link className="public-button is-primary" to="/contact" onClick={() => trackLeadEvent("demo_cta_click", { placement: "home_hero" })}>Book a free demo <i className="bi bi-arrow-right" /></Link>
-              <Link className="public-button is-secondary" to="/login">Customer sign in</Link>
+              <Link className="public-button is-primary" to="/contact?plan=starter" onClick={() => trackLeadEvent("trial_cta_click", { placement: "home_hero", plan: "Starter" })}>Start your 60-day free trial <i className="bi bi-arrow-right" /></Link>
+              <Link className="public-button is-secondary" to="/demo" onClick={() => trackLeadEvent("demo_cta_click", { placement: "home_hero" })}><i className="bi bi-play-circle" /> View product demo</Link>
             </div>
             <div className="public-trust-row">
-              <span><i className="bi bi-check-circle-fill" /> Responsive</span>
-              <span><i className="bi bi-check-circle-fill" /> Installable PWA</span>
-              <span><i className="bi bi-check-circle-fill" /> Role based</span>
+              <span><i className="bi bi-check-circle-fill" /> No payment to start</span>
+              <span><i className="bi bi-check-circle-fill" /> Guided setup</span>
+              <span><i className="bi bi-check-circle-fill" /> Mobile and desktop</span>
             </div>
           </div>
 
           <div className="public-hero-visual">
             <div className="public-hero-image-wrap">
-              <img src={heroImage} alt="Driving instructor guiding a student in a simulator" />
+              <div className="public-hero-product-bar"><span /><small>DriveDesk business dashboard</small><i className="bi bi-shield-check" /></div>
+              <img src={dashboardPreview} alt="DriveDesk driving school business dashboard with customer details masked" />
               <div className="public-floating-card is-top">
                 <span className="public-floating-icon is-success"><i className="bi bi-check2-circle" /></span>
                 <div><strong>Training progress</strong><span>Sessions stay organised</span></div>
@@ -142,16 +188,40 @@ export function HomePage() {
         </div>
       </section>
 
+      <section className="public-global-strip">
+        <div className="public-container">
+          <i className="bi bi-globe2" aria-hidden="true" />
+          <div><strong>Built for driving schools worldwide</strong><span>Remote demos, guided onboarding, and ongoing support wherever your school operates.</span></div>
+          <Link to="/contact" onClick={() => trackLeadEvent("demo_cta_click", { placement: "global_strip" })}>Talk to our team <i className="bi bi-arrow-right" /></Link>
+        </div>
+      </section>
+
       <section className="public-section public-container">
         <SectionHeading eyebrow="Everything connected" title="The tools your team uses every day" text="A focused workspace designed around the real workflow of a driving school." />
         <div className="public-feature-grid">
           {features.map((feature) => (
-            <article className="public-feature-card" key={feature.title}>
+            <article className={`public-feature-card${feature.icon === "bi-whatsapp" ? " is-whatsapp" : ""}`} key={feature.title}>
               <span><i className={`bi ${feature.icon}`} /></span>
               <h3>{feature.title}</h3>
               <p>{feature.text}</p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="public-section public-whatsapp-product-section">
+        <div className="public-container public-whatsapp-product-grid">
+          <div className="public-whatsapp-product-copy">
+            <span className="public-whatsapp-badge"><i className="bi bi-whatsapp" /> WhatsApp integration</span>
+            <h2>Keep important customer conversations close to the work.</h2>
+            <p>DriveDesk connects everyday school workflows with WhatsApp, helping your team sign in securely and follow up with customers from the records already on screen.</p>
+            <Link className="public-button is-whatsapp" to="/contact" onClick={() => trackLeadEvent("demo_cta_click", { placement: "whatsapp_feature" })}>See WhatsApp features in a demo <i className="bi bi-arrow-right" /></Link>
+          </div>
+          <div className="public-whatsapp-capabilities">
+            <article><i className="bi bi-shield-lock" /><div><h3>Secure WhatsApp OTP</h3><p>Registered users can receive an OTP on WhatsApp for secure account access.</p></div></article>
+            <article><i className="bi bi-chat-dots" /><div><h3>Enquiry conversations</h3><p>Open a WhatsApp conversation directly from an enquiry record for faster follow-up.</p></div></article>
+            <article><i className="bi bi-receipt" /><div><h3>Payment reminders</h3><p>Contact students about pending balances from the outstanding-fees workflow.</p></div></article>
+          </div>
         </div>
       </section>
 
@@ -195,6 +265,27 @@ export function HomePage() {
             <article key={number}><span>{number}</span><div><h3>{title}</h3><p>{text}</p></div></article>
           ))}
           <div className="public-plan-note"><i className="bi bi-building-check" /><span><strong>Flexible plans</strong><small>Pricing is based on school size and required capabilities. Contact us for a suitable option.</small></span></div>
+        </div>
+      </section>
+
+      <section className="public-section public-pricing-section" id="pricing">
+        <div className="public-container">
+          <SectionHeading eyebrow="Simple pricing guidance" title="Choose a plan that fits your school" text="Try DriveDesk for 60 days before committing. We will help you choose the right setup for your team and workflow." />
+          <div className="public-pricing-grid">
+            {pricingPlans.map((plan) => (
+              <article className={`public-pricing-card${plan.featured ? " is-featured" : ""}`} key={plan.name}>
+                {plan.featured && <span className="public-pricing-popular">Recommended</span>}
+                <div className="public-pricing-head">
+                  <h3>{plan.name}</h3><p>{plan.audience}</p>
+                  <strong>{plan.price}</strong><small>{plan.period}</small>
+                </div>
+                <div className="public-trial-note"><i className="bi bi-gift" /><span>{plan.note}</span></div>
+                <ul>{plan.features.map((feature) => <li key={feature}><i className="bi bi-check-circle-fill" />{feature}</li>)}</ul>
+                <Link className={`public-button ${plan.featured ? "is-primary" : "is-secondary"}`} to={`/contact?plan=${plan.name.toLowerCase()}`} onClick={() => trackLeadEvent("pricing_cta_click", { plan: plan.name })}>{plan.name === "Starter" ? "Start your free trial" : "Discuss this plan"} <i className="bi bi-arrow-right" /></Link>
+              </article>
+            ))}
+          </div>
+          <p className="public-pricing-footnote">₹16,000/year is the India Starter price. International pricing is quoted in an appropriate supported currency. All plans include onboarding assistance, product updates, and support; final scope may vary by users, branches, region, taxes, and required capabilities.</p>
         </div>
       </section>
 
@@ -275,8 +366,12 @@ export function DemoPage() {
       <section className="public-page-hero">
         <div className="public-container">
           <span>Product demo</span>
-          <h1>See how DriveDesk keeps the whole school in view.</h1>
-          <p>Explore the core workflow, from new registrations and training sessions to payments and completion reports.</p>
+          <h1>See the work that matters, all in one place.</h1>
+          <p>Explore how DriveDesk helps a driving school capture leads, coordinate training, collect fees, and understand daily performance.</p>
+          <div className="public-page-hero-actions">
+            <Link className="public-button is-primary" to="/contact" onClick={() => trackLeadEvent("demo_cta_click", { placement: "demo_hero" })}>Book your free demo <i className="bi bi-arrow-right" /></Link>
+            <a className="public-button is-secondary" href={`${DRIVE_DESK_WHATSAPP_URL}?text=${encodeURIComponent("Hello DriveDesk, I would like a product demo for my driving school.")}`} target="_blank" rel="noopener noreferrer" onClick={() => trackLeadEvent("whatsapp_click", { placement: "demo_hero" })}><i className="bi bi-whatsapp" /> Ask on WhatsApp</a>
+          </div>
         </div>
       </section>
 
@@ -287,26 +382,35 @@ export function DemoPage() {
             <li><i className="bi bi-check2" /> New registrations and pending students</li>
             <li><i className="bi bi-check2" /> Completed and outstanding payments</li>
             <li><i className="bi bi-check2" /> Income, expenses, and net position</li>
+            <li><i className="bi bi-check2" /> WhatsApp OTP, enquiry follow-up, and payment reminders</li>
             <li><i className="bi bi-check2" /> Quick links to the underlying records</li>
           </ul>
         </div>
 
-        <div className="public-dashboard-mock" aria-label="DriveDesk dashboard preview">
-          <div className="public-mock-toolbar"><span /><span>Dashboard</span><i className="bi bi-person-circle" /></div>
-          <div className="public-mock-body">
-            <div className="public-mock-heading"><div><strong>Monthly snapshot</strong><small>Business performance</small></div><span>August 2026</span></div>
-            <div className="public-mock-kpis">
-              <div><i className="bi bi-person-plus" /><span>New students</span><strong>68</strong></div>
-              <div><i className="bi bi-check-circle" /><span>Completed</span><strong>42</strong></div>
-              <div><i className="bi bi-wallet2" /><span>Collected</span><strong>₹1.56L</strong></div>
-              <div><i className="bi bi-exclamation-circle" /><span>Outstanding</span><strong>₹7.27L</strong></div>
-            </div>
-            <div className="public-mock-lower"><div><strong>Operational health</strong><span><i style={{ width: "72%" }} /></span><small>72% collection progress</small></div><div><strong>Quick access</strong><button>Students</button><button>Sessions</button></div></div>
+        <div className="public-product-window">
+          <div className="public-product-window-bar"><span /><small>DriveDesk dashboard</small><i className="bi bi-shield-check" /></div>
+          <img src={dashboardPreview} alt="DriveDesk business dashboard with customer details masked" />
+        </div>
+      </section>
+
+      <section className="public-section public-section-muted public-tour-section">
+        <div className="public-container">
+          <SectionHeading eyebrow="Inside DriveDesk" title="A practical workflow your team can use every day" text="Real product views, with customer information masked for privacy." />
+          <div className="public-tour-list">
+            {productTour.map((item, index) => (
+              <article className={`public-tour-item${index % 2 ? " is-reversed" : ""}`} key={item.title}>
+                <div className="public-tour-image"><img src={item.image} alt={item.alt} loading="lazy" /></div>
+                <div className="public-tour-copy">
+                  <span>{item.eyebrow}</span><h2>{item.title}</h2><p>{item.text}</p>
+                  <ul>{item.points.map((point) => <li key={point}><i className="bi bi-check-circle-fill" /> {point}</li>)}</ul>
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="public-section public-section-muted">
+      <section className="public-section">
         <div className="public-container">
           <SectionHeading eyebrow="What the demo covers" title="Follow a complete student journey" />
           <div className="public-demo-step-grid">
@@ -321,6 +425,8 @@ export function DemoPage() {
 }
 
 export function ContactPage() {
+  const requestedPlan = new URLSearchParams(window.location.search).get("plan") || "";
+
   const handleDemoRequest = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -331,6 +437,7 @@ export function ContactPage() {
       `Phone: ${data.get("phone")}`,
       `Location: ${data.get("location") || "Not provided"}`,
       `Instructors: ${data.get("instructors") || "Not provided"}`,
+      `Plan interest: ${data.get("plan") || "Not decided"}`,
       "",
       ...formatLeadAttribution(),
     ].join("\n");
@@ -371,8 +478,9 @@ export function ContactPage() {
           <div className="public-form-field"><label htmlFor="demo-name">Your name</label><input id="demo-name" name="name" type="text" autoComplete="name" required /></div>
           <div className="public-form-field"><label htmlFor="demo-school">Driving school name</label><input id="demo-school" name="school" type="text" autoComplete="organization" required /></div>
           <div className="public-form-field"><label htmlFor="demo-phone">Phone / WhatsApp</label><input id="demo-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" required /></div>
-          <div className="public-form-field"><label htmlFor="demo-location">Location</label><input id="demo-location" name="location" type="text" autoComplete="address-level2" /></div>
-          <div className="public-form-field is-full"><label htmlFor="demo-instructors">Number of instructors</label><select id="demo-instructors" name="instructors" defaultValue=""><option value="">Select school size</option><option value="1–3">1–3 instructors</option><option value="4–10">4–10 instructors</option><option value="11+">11+ instructors</option></select></div>
+          <div className="public-form-field"><label htmlFor="demo-location">Country and city</label><input id="demo-location" name="location" type="text" autoComplete="address-level2" placeholder="e.g. Sri Lanka, Colombo" /></div>
+          <div className="public-form-field"><label htmlFor="demo-instructors">Number of instructors</label><select id="demo-instructors" name="instructors" defaultValue=""><option value="">Select school size</option><option value="1–3">1–3 instructors</option><option value="4–10">4–10 instructors</option><option value="11+">11+ instructors</option></select></div>
+          <div className="public-form-field"><label htmlFor="demo-plan">Plan interest</label><select id="demo-plan" name="plan" defaultValue={requestedPlan}><option value="">Help me choose</option><option value="starter">Starter — ₹16,000/year in India</option><option value="growth">Growth</option><option value="business">Business</option></select></div>
           <button type="submit" className="public-button is-whatsapp"><i className="bi bi-whatsapp" /> Continue on WhatsApp</button>
           <p>Submitting opens WhatsApp with your details. Nothing is sent until you choose to send the message.</p>
         </form>

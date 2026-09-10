@@ -60,6 +60,10 @@
   line-height: 1.75;
 }
 
+.public-hero-offer { display: grid; gap: 7px; margin-top: 20px; }
+.public-hero-offer span { display: flex; align-items: center; gap: 8px; color: #344054; font-size: 10px; font-weight: 650; }
+.public-hero-offer i { display: grid; width: 22px; height: 22px; border-radius: 6px; background: #eaf8f1; color: #16a34a; font-size: 11px; place-items: center; }
+
 .public-hero-actions,
 .public-cta-actions {
   display: flex;
@@ -131,10 +135,14 @@
 .public-hero-image-wrap > img {
   display: block;
   width: 100%;
-  aspect-ratio: 1.52;
-  border-radius: 12px;
-  object-fit: cover;
+  height: auto;
+  border-radius: 0 0 12px 12px;
 }
+
+.public-hero-product-bar { display: flex; min-height: 38px; align-items: center; justify-content: space-between; padding: 0 12px; border-bottom: 1px solid #e4e9f0; color: #667085; }
+.public-hero-product-bar > span { width: 7px; height: 7px; border-radius: 50%; background: #f04438; box-shadow: 13px 0 #f79009, 26px 0 #12b76a; }
+.public-hero-product-bar small { font-size: 8px; font-weight: 650; }
+.public-hero-product-bar i { color: #12b76a; }
 
 .public-clients {
   padding: 42px 0;
@@ -245,6 +253,15 @@
   font-size: 9px;
 }
 
+.public-global-strip { border-bottom: 1px solid #d9e4f2; background: #edf4ff; }
+.public-global-strip .public-container { display: flex; min-height: 88px; align-items: center; gap: 15px; }
+.public-global-strip > .public-container > i { display: grid; flex: 0 0 42px; width: 42px; height: 42px; border-radius: 11px; background: #356fe8; color: #fff; font-size: 19px; place-items: center; }
+.public-global-strip div div { flex: 1 1 auto; }
+.public-global-strip strong, .public-global-strip span { display: block; }
+.public-global-strip strong { color: #172033; font-size: 12px; }
+.public-global-strip span { margin-top: 4px; color: #667085; font-size: 10px; line-height: 1.5; }
+.public-global-strip a { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 7px; color: #285fcf; font-size: 10px; font-weight: 700; text-decoration: none; }
+
 .public-floating-card {
   position: absolute;
   display: flex;
@@ -347,6 +364,22 @@
   line-height: 1.65;
 }
 
+.public-feature-card.is-whatsapp { grid-column: 1 / -1; display: grid; grid-template-columns: 38px minmax(150px, .35fr) minmax(260px, 1fr); align-items: center; gap: 15px; border-color: #bfe7cf; background: #f4fcf7; }
+.public-feature-card.is-whatsapp > span { background: #dcf7e7; color: #16a34a; }
+.public-feature-card.is-whatsapp h3 { margin: 0; }
+
+.public-whatsapp-product-section { border-top: 1px solid #d6eadf; border-bottom: 1px solid #d6eadf; background: linear-gradient(135deg, #f4fcf7, #edf8f2); }
+.public-whatsapp-product-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(450px, 1.1fr); align-items: center; gap: 65px; }
+.public-whatsapp-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border-radius: 999px; background: #dcf7e7; color: #12813c; font-size: 10px; font-weight: 750; letter-spacing: .25px; text-transform: uppercase; }
+.public-whatsapp-product-copy h2 { max-width: 520px; margin: 15px 0 12px; color: #101828; font-size: clamp(25px, 3vw, 35px); font-weight: 710; letter-spacing: -1px; line-height: 1.15; }
+.public-whatsapp-product-copy > p { max-width: 540px; margin: 0; color: #667085; font-size: 12px; line-height: 1.7; }
+.public-whatsapp-product-copy .public-button { display: inline-flex; width: auto; margin-top: 21px; }
+.public-whatsapp-capabilities { display: grid; gap: 10px; }
+.public-whatsapp-capabilities article { display: flex; align-items: flex-start; gap: 12px; padding: 16px 17px; border: 1px solid #cfe6d8; border-radius: 11px; background: rgba(255, 255, 255, .86); box-shadow: 0 5px 16px rgba(16, 24, 40, .04); }
+.public-whatsapp-capabilities article > i { display: grid; flex: 0 0 36px; width: 36px; height: 36px; border-radius: 9px; background: #dcf7e7; color: #16a34a; font-size: 16px; place-items: center; }
+.public-whatsapp-capabilities h3 { margin: 1px 0 4px; color: #172033; font-size: 12px; }
+.public-whatsapp-capabilities p { margin: 0; color: #667085; font-size: 10px; line-height: 1.55; }
+
 .public-business-section {
   border-top: 1px solid #dfe6ef;
   border-bottom: 1px solid #dfe6ef;
@@ -380,6 +413,23 @@
 .public-plan-note span, .public-plan-note strong, .public-plan-note small { display: block; }
 .public-plan-note strong { color: #172033; font-size: 11px; }
 .public-plan-note small { margin-top: 3px; color: #667085; font-size: 9px; line-height: 1.5; }
+
+.public-pricing-section { border-top: 1px solid #dfe6ef; background: #f7f9fc; }
+.public-pricing-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; gap: 16px; margin-top: 38px; }
+.public-pricing-card { position: relative; display: flex; flex-direction: column; padding: 25px; border: 1px solid #d9e0e8; border-radius: 14px; background: #fff; box-shadow: 0 10px 28px rgba(16, 24, 40, .06); }
+.public-pricing-card.is-featured { border-color: #356fe8; box-shadow: 0 18px 42px rgba(53, 111, 232, .15); }
+.public-pricing-popular { position: absolute; top: 0; right: 20px; padding: 6px 10px; border-radius: 0 0 7px 7px; background: #356fe8; color: #fff; font-size: 8px; font-weight: 750; letter-spacing: .4px; text-transform: uppercase; }
+.public-pricing-head h3 { margin: 0; color: #172033; font-size: 17px; font-weight: 700; }
+.public-pricing-head p { min-height: 39px; margin: 7px 0 20px; color: #667085; font-size: 10px; line-height: 1.55; }
+.public-pricing-head strong { display: block; color: #101828; font-size: 27px; font-weight: 740; letter-spacing: -.8px; }
+.public-pricing-head small { display: block; min-height: 18px; margin-top: 3px; color: #667085; font-size: 9px; }
+.public-trial-note { display: flex; align-items: center; gap: 8px; margin: 18px 0; padding: 10px 11px; border-radius: 8px; background: #edf3ff; color: #285fcf; font-size: 9px; font-weight: 650; }
+.public-trial-note i { font-size: 13px; }
+.public-pricing-card ul { display: grid; flex: 1 1 auto; gap: 10px; margin: 0 0 23px; padding: 0; list-style: none; }
+.public-pricing-card li { display: flex; align-items: flex-start; gap: 8px; color: #475467; font-size: 10px; line-height: 1.45; }
+.public-pricing-card li i { margin-top: 1px; color: #16a34a; }
+.public-pricing-card .public-button { width: 100%; }
+.public-pricing-footnote { max-width: 720px; margin: 20px auto 0; color: #667085; font-size: 9px; line-height: 1.6; text-align: center; }
 
 .public-comparison-section { border-top: 0; }
 .public-comparison-table { max-width: 850px; margin: 0 auto; overflow: hidden; border: 1px solid #d4deea; border-radius: 14px; background: #fff; box-shadow: 0 10px 30px rgba(16, 24, 40, .07); }
@@ -430,6 +480,7 @@
 .public-page-hero .public-container { max-width: 780px; }
 .public-page-hero h1 { margin: 0; color: #101828; font-size: clamp(32px, 4.2vw, 48px); font-weight: 710; letter-spacing: -1.8px; line-height: 1.08; }
 .public-page-hero p { max-width: 650px; margin: 16px auto 0; color: #667085; font-size: 13px; line-height: 1.7; }
+.public-page-hero-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 25px; }
 
 .public-page-hero .public-ownership-statement {
   max-width: 720px;
@@ -464,6 +515,26 @@
 .public-check-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .public-check-list li { display: flex; align-items: center; gap: 8px; color: #475467; font-size: 11px; }
 .public-check-list i { display: grid; width: 21px; height: 21px; border-radius: 50%; background: #eaf8f1; color: #198754; place-items: center; }
+
+.public-product-window { overflow: hidden; border: 1px solid #cfd8e6; border-radius: 15px; background: #fff; box-shadow: 0 24px 55px rgba(16, 24, 40, .16); }
+.public-product-window-bar { display: flex; min-height: 42px; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid #e4e9f0; color: #667085; }
+.public-product-window-bar > span { width: 8px; height: 8px; border-radius: 50%; background: #f04438; box-shadow: 14px 0 #f79009, 28px 0 #12b76a; }
+.public-product-window-bar small { font-size: 9px; font-weight: 650; }
+.public-product-window-bar i { color: #12b76a; }
+.public-product-window > img { display: block; width: 100%; height: auto; }
+
+.public-tour-section { border-top: 1px solid #e1e7ef; border-bottom: 1px solid #e1e7ef; }
+.public-tour-list { display: grid; gap: 68px; margin-top: 42px; }
+.public-tour-item { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); align-items: center; gap: 52px; }
+.public-tour-item.is-reversed .public-tour-image { order: 2; }
+.public-tour-image { overflow: hidden; padding: 7px; border: 1px solid #d5deea; border-radius: 14px; background: #fff; box-shadow: 0 18px 42px rgba(16, 24, 40, .12); }
+.public-tour-image img { display: block; width: 100%; height: auto; border-radius: 8px; }
+.public-tour-copy > span { color: #356fe8; font-size: 9px; font-weight: 750; letter-spacing: .65px; text-transform: uppercase; }
+.public-tour-copy h2 { margin: 9px 0 12px; color: #101828; font-size: clamp(23px, 2.6vw, 31px); font-weight: 710; letter-spacing: -.8px; line-height: 1.15; }
+.public-tour-copy > p { margin: 0; color: #667085; font-size: 11px; line-height: 1.7; }
+.public-tour-copy ul { display: grid; gap: 9px; margin: 19px 0 0; padding: 0; list-style: none; }
+.public-tour-copy li { color: #344054; font-size: 10px; font-weight: 600; }
+.public-tour-copy li i { margin-right: 6px; color: #16a34a; }
 
 .public-dashboard-mock { overflow: hidden; border: 1px solid #d5deea; border-radius: 14px; background: #eef2f7; box-shadow: 0 22px 50px rgba(16, 24, 40, .15); }
 .public-mock-toolbar { display: flex; min-height: 40px; align-items: center; justify-content: space-between; padding: 0 13px; background: #fff; color: #344054; font-size: 10px; font-weight: 650; }
@@ -527,9 +598,12 @@
   .public-story-grid { grid-template-columns: 1fr 1fr; gap: 35px; }
   .public-demo-grid { grid-template-columns: 1fr; gap: 35px; }
   .public-demo-copy { max-width: 650px; }
+  .public-tour-item { gap: 30px; }
   .public-lead-section { grid-template-columns: 1fr; gap: 30px; }
   .public-lead-copy { max-width: 650px; }
   .public-onboarding-section { grid-template-columns: 1fr; gap: 30px; }
+  .public-whatsapp-product-grid { grid-template-columns: 1fr; gap: 30px; }
+  .public-pricing-grid { grid-template-columns: 1fr; max-width: 620px; margin-right: auto; margin-left: auto; }
 }
 
 @media (max-width: 767.98px) {
@@ -543,21 +617,29 @@
   .public-floating-card { min-width: 190px; }
   .public-section, .public-section-muted { padding-top: 54px; padding-bottom: 54px; }
   .public-feature-grid, .public-role-grid, .public-contact-grid { grid-template-columns: 1fr; }
+  .public-feature-card.is-whatsapp { grid-column: auto; grid-template-columns: 38px 1fr; }
+  .public-feature-card.is-whatsapp p { grid-column: 1 / -1; }
   .public-benefit-grid { grid-template-columns: 1fr; }
   .public-client-grid { grid-template-columns: 1fr; }
   .public-client-card { min-height: 145px; }
+  .public-global-strip .public-container { align-items: flex-start; flex-wrap: wrap; padding-top: 20px; padding-bottom: 20px; }
+  .public-global-strip div div { min-width: calc(100% - 60px); }
+  .public-global-strip a { margin-left: 57px; }
   .public-story-grid { grid-template-columns: 1fr; gap: 28px; }
   .public-cta { align-items: flex-start; flex-direction: column; margin-top: 54px; margin-bottom: 54px; padding: 26px 23px; }
   .public-cta-actions { width: 100%; }
   .public-cta-actions .public-button { flex: 1 1 140px; }
   .public-page-hero { padding: 48px 0 44px; }
   .public-page-hero h1 { font-size: 34px; }
+  .public-tour-item { grid-template-columns: 1fr; gap: 24px; }
+  .public-tour-item.is-reversed .public-tour-image { order: 0; }
   .public-mock-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 480px) {
   .public-hero-copy h1 { font-size: 34px; }
   .public-hero-actions .public-button { width: 100%; }
+  .public-page-hero-actions .public-button { width: 100%; }
   .public-floating-card { position: static; min-width: 0; margin-top: 8px; box-shadow: none; }
   .public-hero-image-wrap { padding: 7px; }
   .public-workflow-grid, .public-demo-step-grid { grid-template-columns: 1fr; }

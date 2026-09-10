@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import logoIcon from "../assets/logo/logo_icon_white.png";
 import { DRIVE_DESK_WHATSAPP_URL } from "../shared/constants/contactDetails";
 import { captureLeadAttribution, trackLeadEvent } from "../utils/leadTracking";
+import PublicSeo from "./PublicSeo";
 import "./PublicLayout.css";
 
 const publicLinks = [
@@ -104,6 +105,7 @@ export function PublicFooter() {
 export default function PublicLayout() {
   return (
     <div className="public-site">
+      <PublicSeo />
       <PublicHeader />
       <main className="public-main"><Outlet /></main>
       <a

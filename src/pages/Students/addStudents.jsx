@@ -20,12 +20,16 @@ const VEHICLE_CLASS_OPTIONS = [
   { value: "LMV", label: "LMV" },
   { value: "LMV Transport", label: "LMV Transport" },
   { value: "HMV / Transport Vehicle", label: "HMV / Transport Vehicle" },
+  { value: "Renewal", label: "Renewal" },
 ];
 
 const normalizeVehicleClasses = (value) => {
   if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
   return String(value || "").split(",").map((item) => item.trim()).filter(Boolean);
 };
+
+const getStudentProfilePicture = (student) =>
+  student?.profile_picture_url || student?.profile_picture || student?.profile_image_url || "";
 
 export default function AddStudents({
   showModal,
@@ -46,6 +50,9 @@ export default function AddStudents({
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState("");
   const [availabilityDay, setAvailabilityDay] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState("");
+  const [profilePictureError, setProfilePictureError] = useState("");
   const [licenceForm, setLicenceForm] = useState({
     test_status: "NOT_ATTEMPTED",
     license_number: "",
@@ -65,6 +72,52 @@ export default function AddStudents({
   };
 
   const todayISO = getLocalISODate();
+
+  useEffect(() => {
+    if (!profilePicture) {
+      setProfilePicturePreview("");
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(profilePicture);
+    setProfilePicturePreview(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [profilePicture]);
+
+  useEffect(() => {
+    if (showModal) {
+      setProfilePicture(null);
+      setProfilePictureError("");
+    }
+  }, [id, showModal]);
+
+  const handleProfilePictureChange = (event) => {
+    const file = event.target.files?.[0] || null;
+    if (!file) {
+      setProfilePicture(null);
+      setProfilePictureError("");
+      return;
+    }
+
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      event.target.value = "";
+      setProfilePicture(null);
+      setProfilePictureError("Please select a PNG or JPEG image.");
+      return;
+    }
+
+    setProfilePicture(file);
+    setProfilePictureError("");
+  };
+
+  const createStudentRequestData = (studentValues) => {
+    if (!profilePicture) return studentValues;
+
+    const formData = new FormData();
+    formData.append("student_data", JSON.stringify(studentValues));
+    formData.append("profile_picture", profilePicture);
+    return formData;
+  };
 
   const normalizeDateForInput = (value) => {
     if (!value) return "";
@@ -420,7 +473,7 @@ export default function AddStudents({
 
         const payload = {
           application_number: id?.application_number,
-          studentData: updatedValues,
+          studentData: createStudentRequestData(updatedValues),
           mobile_number: id?.mobile_number,
         };
 
@@ -444,7 +497,7 @@ export default function AddStudents({
         }
 
         dispatch(
-          addStudent({ studentData: updatedValues }, (response) => {
+          addStudent({ studentData: createStudentRequestData(updatedValues) }, (response) => {
             handleResponse(response);
           })
         );
@@ -793,6 +846,29 @@ export default function AddStudents({
       </Modal.Header>
       <Modal.Body className="student-form-body">
         <form onSubmit={formik.handleSubmit} className="student-form">
+          <div className="student-profile-picture-field">
+            <div className="student-profile-picture-preview" aria-hidden="true">
+              {profilePicturePreview || getStudentProfilePicture(id) ? (
+                <img src={profilePicturePreview || getStudentProfilePicture(id)} alt="Student profile preview" />
+              ) : (
+                <i className="bi bi-person" />
+              )}
+            </div>
+            <div className="student-profile-picture-control">
+              <label htmlFor="student-profile-picture">
+                Profile Picture <span className="optional-mark">Optional</span>
+              </label>
+              <input
+                id="student-profile-picture"
+                type="file"
+                className={`form-control${profilePictureError ? " is-invalid" : ""}`}
+                accept="image/png,image/jpeg,.png,.jpg,.jpeg"
+                onChange={handleProfilePictureChange}
+              />
+              <small>PNG or JPEG. Selecting a new image replaces the current profile picture.</small>
+              {profilePictureError && <div className="text-danger">{profilePictureError}</div>}
+            </div>
+          </div>
           {showBalanceWarning && (
             <Alert variant="warning">
               Warning: Balance is negative. Please verify paid and total amounts.

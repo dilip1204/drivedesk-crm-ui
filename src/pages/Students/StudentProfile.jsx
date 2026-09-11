@@ -32,6 +32,9 @@ const getPaymentStatusClass = (value) => {
   return "is-neutral";
 };
 
+const getStudentProfilePicture = (student) =>
+  student?.profile_picture_url || student?.profile_picture || student?.profile_image_url || avatar;
+
 export default function StudentProfileModal({ show, onClose, student }) {
 
   const dispatch = useDispatch();
@@ -203,9 +206,13 @@ export default function StudentProfileModal({ show, onClose, student }) {
         {/* Profile Header */}
         <div className="student-profile-summary">
           <img
-            src={avatar}
-            alt="Student Avatar"
+            src={getStudentProfilePicture(student)}
+            alt={`${student.name || "Student"} profile`}
             className="student-profile-avatar"
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = avatar;
+            }}
           />
           <div className="student-profile-summary-copy">
             <h4>{student.name}</h4>

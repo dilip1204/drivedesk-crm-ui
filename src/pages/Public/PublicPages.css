@@ -596,6 +596,7 @@
   .public-feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .public-workflow-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .public-story-grid { grid-template-columns: 1fr 1fr; gap: 35px; }
+  .public-legal-layout { grid-template-columns: 190px minmax(0, 1fr); gap: 30px; }
   .public-demo-grid { grid-template-columns: 1fr; gap: 35px; }
   .public-demo-copy { max-width: 650px; }
   .public-tour-item { gap: 30px; }
@@ -605,6 +606,19 @@
   .public-whatsapp-product-grid { grid-template-columns: 1fr; gap: 30px; }
   .public-pricing-grid { grid-template-columns: 1fr; max-width: 620px; margin-right: auto; margin-left: auto; }
 }
+
+.public-legal-hero small { display: block; margin-top: 18px; color: #667085; font-size: 10px; }
+.public-legal-layout { display: grid; grid-template-columns: 220px minmax(0, 760px); align-items: start; justify-content: center; gap: 54px; }
+.public-legal-layout aside { position: sticky; top: 86px; display: grid; overflow: hidden; border: 1px solid #d9e0e8; border-radius: 11px; background: #fff; }
+.public-legal-layout aside strong { padding: 13px 15px; background: #172b4d; color: #fff; font-size: 10px; text-transform: uppercase; }
+.public-legal-layout aside a { padding: 11px 15px; border-top: 1px solid #edf0f4; color: #475467; font-size: 10px; line-height: 1.4; text-decoration: none; }
+.public-legal-layout aside a:hover { background: #f5f8fc; color: #285fcf; }
+.public-legal-content { color: #475467; font-size: 11px; line-height: 1.75; }
+.public-legal-content h2 { margin: 31px 0 9px; color: #172033; font-size: 17px; font-weight: 700; letter-spacing: -.2px; }
+.public-legal-content h2:first-child { margin-top: 0; }
+.public-legal-content p { margin: 0 0 13px; }
+.public-legal-content ul { display: grid; gap: 7px; margin: 0 0 15px; padding-left: 20px; }
+.public-legal-content a { color: #285fcf; overflow-wrap: anywhere; }
 
 @media (max-width: 767.98px) {
   .public-hero { padding: 48px 0 54px; }
@@ -626,6 +640,8 @@
   .public-global-strip div div { min-width: calc(100% - 60px); }
   .public-global-strip a { margin-left: 57px; }
   .public-story-grid { grid-template-columns: 1fr; gap: 28px; }
+  .public-legal-layout { grid-template-columns: 1fr; gap: 28px; }
+  .public-legal-layout aside { position: static; }
   .public-cta { align-items: flex-start; flex-direction: column; margin-top: 54px; margin-bottom: 54px; padding: 26px 23px; }
   .public-cta-actions { width: 100%; }
   .public-cta-actions .public-button { flex: 1 1 140px; }
@@ -650,4 +666,77 @@
   .public-comparison-head strong, .public-comparison-row span { padding: 12px 10px; }
   .public-comparison-head strong { font-size: 10px; }
   .public-comparison-row span { align-items: flex-start; font-size: 9px; }
+}
+
+/* Legal pages only */
+.public-legal-hero {
+  padding-top: 58px;
+  padding-bottom: 52px;
+  background: radial-gradient(circle at 85% 10%, rgba(53, 111, 232, .16), transparent 34%), linear-gradient(180deg, #fff, #f2f6fc);
+}
+
+.public-legal-hero .public-container { max-width: 760px; }
+.public-legal-hero h1 { margin-top: 8px; }
+.public-legal-hero p { max-width: 680px; font-size: 14px; }
+.public-legal-hero small { display: inline-flex; margin-top: 20px; padding: 7px 11px; border: 1px solid #d7e2f1; border-radius: 999px; background: #fff; color: #667085; font-size: 11px; font-weight: 600; }
+
+.public-legal-layout {
+  display: grid;
+  width: min(1080px, calc(100% - 40px));
+  grid-template-columns: 230px minmax(0, 800px);
+  align-items: start;
+  justify-content: center;
+  gap: 34px;
+  padding-top: 56px;
+  padding-bottom: 72px;
+}
+
+.public-legal-layout aside {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  overflow: hidden;
+  border: 1px solid #d9e2ee;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, .06);
+}
+
+.public-legal-layout aside strong { padding: 15px 17px; background: #172b4d; color: #fff; font-size: 11px; letter-spacing: .4px; text-transform: uppercase; }
+.public-legal-layout aside a { padding: 13px 17px; border-top: 1px solid #edf0f4; color: #475467; font-size: 12px; font-weight: 600; line-height: 1.45; text-decoration: none; }
+.public-legal-layout aside a:hover { padding-left: 20px; background: #f4f7fc; color: #285fcf; }
+
+.public-legal-content {
+  padding: 42px 46px 48px;
+  border: 1px solid #dfe5ed;
+  border-radius: 15px;
+  background: #fff;
+  color: #475467;
+  font-family: "Poppins", "Roboto", "Segoe UI", Arial, sans-serif;
+  box-shadow: 0 14px 38px rgba(16, 24, 40, .07);
+}
+
+.public-legal-content h2 { margin: 34px 0 12px; padding-top: 4px; color: #081a35; font-family: "Poppins", "Roboto", "Segoe UI", Arial, sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0; line-height: 1.45; }
+.public-legal-content h2:first-child { margin-top: 0; padding-top: 0; }
+.public-legal-content p { max-width: 82ch; margin: 0 0 14px; font-size: 12px; line-height: 1.5; }
+.public-legal-content ul { display: grid; max-width: 82ch; gap: 12px; margin: 5px 0 19px; padding-left: 16px; list-style: none; }
+.public-legal-content li { padding: 0; }
+.public-legal-content a { color: #285fcf; font-weight: 600; overflow-wrap: anywhere; }
+
+@media (max-width: 991.98px) {
+  .public-legal-layout { grid-template-columns: minmax(0, 750px); gap: 22px; }
+  .public-legal-layout aside { position: static; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .public-legal-layout aside strong { grid-column: 1 / -1; }
+  .public-legal-layout aside a { display: flex; align-items: center; border-top: 1px solid #edf0f4; border-right: 1px solid #edf0f4; }
+  .public-legal-layout aside a:last-child { border-right: 0; }
+  .public-legal-layout aside a:hover { padding-left: 17px; }
+}
+
+@media (max-width: 767.98px) {
+  .public-legal-hero { padding-top: 44px; padding-bottom: 42px; }
+  .public-legal-layout { width: min(100% - 24px, 750px); padding-top: 32px; padding-bottom: 52px; }
+  .public-legal-layout aside { grid-template-columns: 1fr; }
+  .public-legal-layout aside a { border-right: 0; }
+  .public-legal-content { padding: 28px 22px 34px; }
+  .public-legal-content h2 { margin-top: 30px; font-size: 15px; }
 }

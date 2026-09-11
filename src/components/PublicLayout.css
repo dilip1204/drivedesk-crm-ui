@@ -158,7 +158,7 @@
 
 .public-footer-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) repeat(2, minmax(130px, .6fr));
+  grid-template-columns: minmax(0, 1.7fr) repeat(3, minmax(125px, .6fr));
   gap: 40px;
 }
 

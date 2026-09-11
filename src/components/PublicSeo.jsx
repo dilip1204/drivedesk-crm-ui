@@ -20,6 +20,9 @@ const pageSeo = {
     title: "Book a Free DriveDesk Demo | Contact Us",
     description: "Book a free DriveDesk product demo for your driving school. Share your requirements and continue directly with our team on WhatsApp.",
   },
+  "/privacy-policy": { title: "Privacy Policy | DriveDesk", description: "Read how DriveDesk collects, uses, stores, and protects information when providing its website and driving school management service." },
+  "/terms": { title: "Terms & Conditions | DriveDesk", description: "Read the terms governing DriveDesk website access, free trials, subscriptions, accounts, and driving school management services." },
+  "/cancellation-refund-policy": { title: "Cancellation & Refund Policy | DriveDesk", description: "Read the DriveDesk policy for free-trial cancellation, subscription cancellation, and refund requests." },
 };
 
 function setMeta(selector, attributes) {

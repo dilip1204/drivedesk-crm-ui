@@ -856,44 +856,69 @@ export default function AddStudents({
       </Modal.Header>
       <Modal.Body className="student-form-body">
         <form onSubmit={formik.handleSubmit} className="student-form">
-          <div className="student-profile-picture-field">
-            <div className="student-profile-picture-preview" aria-hidden="true">
-              {profilePicturePreview || (!removeProfilePicture && getStudentProfilePicture(id)) ? (
-                <img src={profilePicturePreview || getStudentProfilePicture(id)} alt="Student profile preview" />
-              ) : (
-                <i className="bi bi-person" />
-              )}
+          <div className="student-photo-card">
+            <div className="student-photo-card-header">
+              <div>
+                <div className="student-photo-title">Student Photo</div>
+                <div className="student-photo-subtitle">Add a photo to easily identify the student.</div>
+              </div>
+              <span className="student-photo-optional">Optional</span>
             </div>
-            <div className="student-profile-picture-control">
-              <label htmlFor="student-profile-picture">
-                Profile Picture <span className="optional-mark">Optional</span>
-              </label>
-              <input
-                id="student-profile-picture"
-                type="file"
-                className={`form-control${profilePictureError ? " is-invalid" : ""}`}
-                accept="image/png,image/jpeg,.png,.jpg,.jpeg"
-                onChange={handleProfilePictureChange}
-              />
-              <small>PNG or JPEG. Selecting a new image replaces the current profile picture.</small>
-              {profilePictureError && <div className="text-danger">{profilePictureError}</div>}
-              <div className="student-profile-picture-actions">
-                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => setShowCamera(true)}>
-                  <i className="bi bi-camera" aria-hidden="true" /> Capture Photo
-                </button>
-                {isEdit && (profilePicture || (!removeProfilePicture && getStudentProfilePicture(id))) && (
+
+            <div className="student-photo-content">
+              <div className="student-profile-picture-preview" aria-hidden="true">
+                {profilePicturePreview || (!removeProfilePicture && getStudentProfilePicture(id)) ? (
+                  <img src={profilePicturePreview || getStudentProfilePicture(id)} alt="Student profile preview" />
+                ) : (
+                  <i className="bi bi-person" />
+                )}
+              </div>
+
+              <div className="student-profile-picture-control">
+                <input
+                  id="student-profile-picture"
+                  type="file"
+                  className="student-photo-file-input"
+                  accept="image/png,image/jpeg,.png,.jpg,.jpeg"
+                  onChange={handleProfilePictureChange}
+                />
+
+                <div className="student-profile-picture-actions">
                   <button
                     type="button"
-                    className="btn btn-outline-danger btn-sm"
-                    onClick={() => {
-                      setProfilePicture(null);
-                      setRemoveProfilePicture(true);
-                      setProfilePictureError("");
-                    }}
+                    className="btn btn-primary btn-sm student-photo-primary-action"
+                    onClick={() => setShowCamera(true)}
                   >
-                    Delete Photo
+                    <i className="bi bi-camera" aria-hidden="true" />
+                    {profilePicture || (!removeProfilePicture && getStudentProfilePicture(id))
+                      ? "Retake Photo"
+                      : "Take Photo"}
                   </button>
-                )}
+
+                  <label htmlFor="student-profile-picture" className="btn btn-outline-primary btn-sm student-photo-upload-action">
+                    <i className="bi bi-upload" aria-hidden="true" />
+                    {profilePicture || (!removeProfilePicture && getStudentProfilePicture(id))
+                      ? "Replace Photo"
+                      : "Upload Photo"}
+                  </label>
+
+                  {(profilePicture || (!removeProfilePicture && getStudentProfilePicture(id))) && (
+                    <button
+                      type="button"
+                      className="btn btn-link btn-sm student-photo-remove-action"
+                      onClick={() => {
+                        setProfilePicture(null);
+                        setRemoveProfilePicture(true);
+                        setProfilePictureError("");
+                      }}
+                    >
+                      <i className="bi bi-trash" aria-hidden="true" /> Remove
+                    </button>
+                  )}
+                </div>
+
+                <small className="student-photo-help">JPG or PNG · Use a clear, front-facing photo.</small>
+                {profilePictureError && <div className="text-danger">{profilePictureError}</div>}
               </div>
             </div>
           </div>

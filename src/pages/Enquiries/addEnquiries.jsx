@@ -163,15 +163,6 @@ export default function AddEnquiries({
     return Number.isFinite(amount) ? amount : 0;
   };
 
-  const getTariffTrainingDaysByCourse = (courseInterest) => {
-    const selectedPlan = String(courseInterest || "").trim().toLowerCase();
-    const matchedTariff = (tariffsData || []).find(
-      (tariff) =>
-        String(tariff?.plan_name || "").trim().toLowerCase() === selectedPlan
-    );
-    return matchedTariff?.training_days ?? "";
-  };
-
   const buildStudentPayloadFromEnquiry = (values) => {
     const totalAmount = Number(values?.total_amount || 0);
     const paidAmount = Number(values?.paid_amount || 0);
@@ -229,7 +220,7 @@ export default function AddEnquiries({
     instructor_name: id?.instructor_name || "",
     instructor_id: id?.instructor_id || "",
     instructor_mobile: id?.instructor_mobile || "",
-    training_days: getTariffTrainingDaysByCourse(id?.course_interest),
+    training_days: Number(id?.training_days || 0),
     training_start_date: formatDateInput(id?.training_start_date) || getLocalISODate(),
     training_time: id?.training_time || "",
     test_date: formatDateInput(id?.test_date),
@@ -336,17 +327,11 @@ export default function AddEnquiries({
     }),
     training_days: Yup.number()
       .transform((value, originalValue) =>
-        originalValue === "" || originalValue === null ? undefined : value
+        originalValue === "" || originalValue === null ? 0 : value
       )
-      .when("follow_up_status", {
-        is: (status) => isEnrolledStatus(status),
-        then: (schema) =>
-          schema
-            .typeError("Training days must be a valid number")
-            .moreThan(0, "Training days must be greater than zero")
-            .required("Training days are required"),
-        otherwise: (schema) => schema.notRequired(),
-      }),
+      .typeError("Training days must be a valid number")
+      .min(0, "Training days cannot be negative")
+      .notRequired(),
     training_start_date: Yup.date()
       .nullable()
       .when("follow_up_status", {
@@ -427,9 +412,7 @@ export default function AddEnquiries({
         : null;
 
       if (enrollingStudent) {
-        normalizedValues.training_days = getTariffTrainingDaysByCourse(
-          normalizedValues.course_interest
-        );
+        normalizedValues.training_days = Number(normalizedValues.training_days || 0);
         const selectedInstructor = instructorsData.find(
           (instructor) => instructor?.name === normalizedValues.instructor_name
         );
@@ -630,10 +613,6 @@ export default function AddEnquiries({
     formik.setFieldValue(
       "total_amount",
       getTariffAmountByCourse(courseInterest)
-    );
-    formik.setFieldValue(
-      "training_days",
-      getTariffTrainingDaysByCourse(courseInterest)
     );
   };
 
@@ -1173,14 +1152,15 @@ export default function AddEnquiries({
 
                     <div className="col-md-6">
                       <div className="form-group enquiry-form-group">
-                        <label>Training Days <span className="required-mark">*</span></label>
+                        <label>Training Days <span className="optional-mark">Optional</span></label>
                         <input
                           type="number"
                           name="training_days"
                           className={`form-control${formik.touched.training_days && formik.errors.training_days ? " is-invalid" : ""}`}
-                          value={getTariffTrainingDaysByCourse(formik.values.course_interest)}
-                          readOnly
-                          aria-readonly="true"
+                          value={formik.values.training_days ?? 0}
+                          min="0"
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
                         />
                         {formik.touched.training_days && formik.errors.training_days && (
                           <div className="text-danger">{formik.errors.training_days}</div>

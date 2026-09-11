@@ -8,4 +8,23 @@ export const userLogin = (param) => { console.info('post....', param)
         ENDPOINTS.userLogin,
         param
     )
-} 
+}
+
+export const requestLoginOtp = (mobileNumber) => {
+    return request(
+        METHOD_TYPES.POST,
+        ENDPOINTS.requestLoginOtp,
+        { mobile_number: String(mobileNumber) }
+    );
+};
+
+export const verifyLoginOtp = (mobileNumber, otp) => {
+    return request(
+        METHOD_TYPES.POST,
+        ENDPOINTS.verifyLoginOtp,
+        {
+            mobile_number: String(mobileNumber),
+            otp: String(otp),
+        }
+    );
+};

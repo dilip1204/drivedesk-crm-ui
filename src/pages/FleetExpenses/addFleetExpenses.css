@@ -1,0 +1,192 @@
+.fleet-expense-form-dialog {
+  width: min(760px, calc(100vw - 32px));
+  max-width: 760px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.fleet-expense-form-dialog .modal-content {
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  color: var(--color-text, #172033);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+  box-shadow: 0 16px 44px rgba(16, 24, 40, .18);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fleet-expense-form-header {
+  min-height: 48px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--color-border, #d9e0e8);
+  background: #f8fafc;
+}
+
+.fleet-expense-form-header .modal-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.fleet-expense-form-header .close {
+  margin: -5px -4px -5px auto;
+  padding: 8px;
+  color: var(--color-muted, #667085);
+  font-size: 22px;
+  opacity: 1;
+}
+
+.fleet-expense-form-body {
+  overflow-y: auto;
+  padding: 14px 16px 16px;
+  overscroll-behavior: contain;
+}
+
+.fleet-expense-form {
+  color: var(--color-text, #172033);
+  font-size: 12px;
+}
+
+.fleet-expense-form .row {
+  margin-right: -6px;
+  margin-left: -6px;
+}
+
+.fleet-expense-form .row > [class*="col-"] {
+  padding-right: 6px;
+  padding-left: 6px;
+}
+
+.fleet-expense-form .mb-3 {
+  margin-bottom: 10px !important;
+}
+
+.fleet-expense-form label {
+  display: block;
+  margin-bottom: 4px;
+  color: #344054;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.fleet-expense-form .form-control,
+.fleet-expense-form select.form-control {
+  height: 34px;
+  min-height: 34px;
+  padding: 5px 9px;
+  border-color: var(--color-border, #d9e0e8);
+  border-radius: 6px;
+  color: var(--color-text, #172033);
+  background-color: #fff;
+  font-size: 12px;
+  line-height: 1.3;
+  box-shadow: none;
+}
+
+.fleet-expense-form .form-control::placeholder {
+  color: #98a2b3;
+  opacity: 1;
+}
+
+.fleet-expense-form .form-control:focus {
+  border-color: #8fb1ed;
+  box-shadow: 0 0 0 3px rgba(53, 111, 232, .12);
+}
+
+.fleet-expense-form .invalid-feedback {
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+.fleet-expense-form input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary, #1f4e78);
+}
+
+.fleet-expense-form-actions {
+  position: sticky;
+  z-index: 2;
+  bottom: -16px;
+  gap: 8px;
+  margin: 4px -16px -16px !important;
+  padding: 10px 16px;
+  border-top: 1px solid var(--color-border, #d9e0e8);
+  background: rgba(255, 255, 255, .97);
+}
+
+.fleet-expense-form-actions .btn {
+  min-width: 82px;
+  height: 34px;
+  min-height: 34px;
+  padding: 5px 12px;
+  margin: 0 !important;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 767.98px) {
+  .fleet-expense-form-dialog {
+    width: calc(100vw - 16px);
+    max-width: none;
+    margin: 8px auto;
+  }
+
+  .fleet-expense-form-dialog .modal-content {
+    max-height: calc(100dvh - 16px);
+    border-radius: 9px;
+  }
+
+  .fleet-expense-form-header {
+    min-height: 50px;
+    padding: 11px 14px;
+  }
+
+  .fleet-expense-form-header .modal-title {
+    font-size: 16px;
+  }
+
+  .fleet-expense-form-body {
+    padding: 12px 14px 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .fleet-expense-form .row > [class*="col-"] {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+
+  .fleet-expense-form .mb-3 {
+    margin-bottom: 12px !important;
+  }
+
+  .fleet-expense-form label {
+    font-size: 12px;
+  }
+
+  .fleet-expense-form .form-control,
+  .fleet-expense-form select.form-control {
+    height: 40px;
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  .fleet-expense-form-actions {
+    bottom: -14px;
+    margin: 2px -14px -14px !important;
+    padding: 10px 14px;
+  }
+
+  .fleet-expense-form-actions .btn {
+    flex: 1 1 0;
+    height: 40px;
+    min-height: 40px;
+    font-size: 13px;
+  }
+}

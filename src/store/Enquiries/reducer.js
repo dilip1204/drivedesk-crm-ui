@@ -19,6 +19,9 @@ import {
   GET_ENQUIRIES_FILTER_LIST_ERROR,
   GET_ENQUIRIES_FILTER_LIST_PENDING,
   GET_ENQUIRIES_FILTER_LIST_SUCCESS,
+  CREATE_ENQUIRY_RENEWAL_ERROR,
+  CREATE_ENQUIRY_RENEWAL_PENDING,
+  CREATE_ENQUIRY_RENEWAL_SUCCESS,
 } from './types';
 
 const initialState = {
@@ -38,6 +41,9 @@ const initialState = {
   enquiriesFilterList: [],
   enquiriesFilterListLoader: false,
   enquiriesFilterListError: [],
+  createEnquiryRenewalResponse: null,
+  createEnquiryRenewalLoader: false,
+  createEnquiryRenewalError: null,
 };
 
 export default function EnquiriesReducer(state = initialState, action) {
@@ -131,6 +137,26 @@ export default function EnquiriesReducer(state = initialState, action) {
               enquiriesFilterListError: action.error,
               enquiriesFilterListLoader: false
           }
+
+      case CREATE_ENQUIRY_RENEWAL_SUCCESS:
+          return {
+              ...state,
+              createEnquiryRenewalResponse: action.data,
+              createEnquiryRenewalError: null,
+              createEnquiryRenewalLoader: false,
+          };
+      case CREATE_ENQUIRY_RENEWAL_PENDING:
+          return {
+              ...state,
+              createEnquiryRenewalError: null,
+              createEnquiryRenewalLoader: true,
+          };
+      case CREATE_ENQUIRY_RENEWAL_ERROR:
+          return {
+              ...state,
+              createEnquiryRenewalError: action.error,
+              createEnquiryRenewalLoader: false,
+          };
 
     default:
       return state;

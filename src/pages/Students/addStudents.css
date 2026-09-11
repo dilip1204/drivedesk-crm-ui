@@ -1,0 +1,1356 @@
+.student-form-dialog {
+  width: calc(100% - 32px);
+  max-width: 900px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.student-form-dialog .modal-content {
+  overflow: hidden;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 18px 55px rgba(16, 24, 40, 0.2);
+  color: #172033;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.student-form-header {
+  align-items: center;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--color-border, #d9e0e8);
+  background: #f8fafc;
+}
+
+.student-form-header .modal-title {
+  color: var(--color-text, #172033);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+.student-form-body {
+  max-height: calc(100vh - 100px);
+  max-height: calc(100dvh - 100px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 14px 18px 0;
+}
+
+.student-photo-card {
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.student-photo-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.student-photo-title {
+  color: #172033;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-photo-subtitle {
+  margin-top: 2px;
+  color: #667085;
+  font-size: 10px;
+}
+
+.student-photo-optional {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #667085;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.student-photo-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.student-profile-picture-preview {
+  display: grid;
+  flex: 0 0 84px;
+  width: 84px;
+  height: 84px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #d9e0e8;
+  border-radius: 50%;
+  background: #f8fafc;
+  color: #667085;
+  font-size: 34px;
+}
+
+.student-profile-picture-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.student-profile-picture-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.student-photo-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.student-profile-picture-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-photo-primary-action,
+.student-photo-upload-action {
+  display: inline-flex !important;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 5px 11px;
+  border-radius: 6px;
+  font-size: 11px !important;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.student-photo-remove-action {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 4px !important;
+  color: #b42318 !important;
+  font-size: 11px !important;
+  font-weight: 600;
+  text-decoration: none !important;
+}
+
+.student-photo-help {
+  display: block;
+  margin-top: 7px;
+  color: #667085;
+  font-size: 10px;
+}
+
+.student-profile-picture-control .text-danger {
+  margin-top: 4px;
+  font-size: 10px;
+}
+
+.student-form-row {
+  margin-right: -6px;
+  margin-left: -6px;
+}
+
+.student-form-row > [class*="col-"] {
+  padding-right: 6px;
+  padding-left: 6px;
+}
+
+.student-form-group {
+  margin-bottom: 11px;
+}
+
+.student-form-group label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-text, #172033);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.student-form-group .form-control {
+  height: 34px;
+  min-height: 34px;
+  padding: 5px 9px;
+  border-color: var(--color-border, #d9e0e8);
+  border-radius: 6px;
+  color: #344054;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 13px !important;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.student-form-group .form-control:focus {
+  border-color: var(--color-primary, #1f4e78);
+  box-shadow: 0 0 0 2px rgba(31, 78, 120, .12);
+}
+
+.student-form-group .form-control[readonly] {
+  background: #f5f7fa;
+  color: var(--color-muted, #667085);
+}
+
+.student-form-group .text-danger {
+  margin-top: 3px;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.student-availability-panel {
+  border-color: var(--color-border, #d9e0e8) !important;
+  border-radius: 8px !important;
+  background: #f8fafc;
+}
+
+.student-availability-panel .btn-sm {
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.student-form-footer {
+  position: static;
+  gap: 8px;
+  margin: 8px -18px 0;
+  padding: 11px 18px;
+  border-top: 1px solid var(--color-border, #d9e0e8);
+  background: #fff;
+}
+
+.student-form-footer .btn {
+  min-width: 82px;
+  min-height: 34px;
+  padding: 5px 12px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.student-licence-section {
+  margin: 4px 0 14px;
+  padding: 13px;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.student-licence-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.student-licence-heading h6,
+.student-licence-heading p {
+  margin: 0;
+}
+
+.student-licence-heading p {
+  margin-top: 3px;
+  color: #667085;
+  font-size: 11px;
+}
+
+.student-test-status {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef2f6;
+  color: #475467;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.student-test-status.is-passed { background: #eaf8f1; color: #157347; }
+.student-test-status.is-failed { background: #fff0f1; color: #b42318; }
+
+.student-vehicle-class-fieldset {
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid #d9e0e8;
+  border-radius: 9px;
+  background: #f9fbfd;
+}
+
+.student-vehicle-class-fieldset legend {
+  width: auto;
+  margin: 0 0 8px;
+  color: #172033;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.student-vehicle-class-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.student-vehicle-class-options label {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid #d7e0eb;
+  border-radius: 7px;
+  background: #fff;
+  color: #475467;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.student-vehicle-class-options label.is-selected {
+  border-color: #356fe8;
+  background: #eef4ff;
+  color: #175cd3;
+}
+
+.student-vehicle-class-options input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #356fe8;
+}
+
+.student-vehicle-class-fieldset small {
+  display: block;
+  margin-top: 7px;
+  color: #667085;
+  font-size: 10px;
+}
+
+.student-licence-section .form-control:disabled {
+  cursor: not-allowed;
+  background: #eef1f5;
+  color: #98a2b3;
+}
+
+@media (max-width: 767.98px) {
+  .student-form-dialog {
+    width: calc(100% - 16px);
+    margin: 8px auto;
+  }
+
+  .student-form-header {
+    padding: 12px 14px;
+  }
+
+  .student-form-header .modal-title {
+    font-size: 17px;
+  }
+
+  .student-form-body {
+    max-height: calc(100vh - 76px);
+    max-height: calc(100dvh - 76px);
+    padding: 12px 14px 0;
+  }
+
+  .student-form-group {
+    margin-bottom: 12px;
+  }
+
+  .student-form-group label {
+    font-size: 12px;
+  }
+
+  .student-form-group .form-control {
+    height: 40px;
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  .student-availability-header {
+    align-items: stretch !important;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .student-availability-header .btn {
+    width: 100%;
+  }
+
+  .student-form-footer {
+    margin-right: -14px;
+    margin-left: -14px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .student-form-footer .btn {
+    flex: 1 1 0;
+    min-height: 40px;
+    font-size: 13px;
+  }
+}
+.student-test-status-panel {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 11px 12px;
+  border: 1px solid #cddcf2;
+  border-radius: 9px;
+  background: #f5f9ff;
+}
+
+.student-test-status-panel label {
+  display: block;
+  margin-bottom: 5px;
+  color: #172033;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.student-test-status-panel .form-control {
+  max-width: 260px;
+}
+
+.student-test-status-panel .student-test-status {
+  align-self: center;
+}
+
+.student-test-status-feedback {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.student-test-status-help {
+  grid-column: 1 / -1;
+  color: #667085;
+  font-size: 10px;
+}
+
+@media (max-width: 767.98px) {
+  .student-test-status-panel {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+
+}
+
+.student-form-dialog {
+  width: calc(100% - 32px);
+  max-width: 900px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.student-form-dialog .modal-content {
+  overflow: hidden;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 18px 55px rgba(16, 24, 40, 0.2);
+  color: #172033;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.student-form-header {
+  align-items: center;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--color-border, #d9e0e8);
+  background: #f8fafc;
+}
+
+.student-form-header .modal-title {
+  color: var(--color-text, #172033);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+.student-form-body {
+  max-height: calc(100vh - 100px);
+  max-height: calc(100dvh - 100px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 14px 18px 0;
+}
+
+.student-profile-picture-field {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.student-profile-picture-preview {
+  display: grid;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #d9e0e8;
+  border-radius: 50%;
+  background: #fff;
+  color: #667085;
+  font-size: 28px;
+}
+
+.student-profile-picture-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.student-profile-picture-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.student-profile-picture-control label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.student-profile-picture-control .form-control {
+  height: auto;
+  padding: 5px 9px;
+  font-size: 12px;
+}
+
+.student-profile-picture-control small {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+  font-size: 10px;
+}
+
+.student-profile-picture-control .text-danger {
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+.student-profile-picture-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.student-camera {
+  position: fixed;
+  z-index: 1080;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, .72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.student-camera-card--modern {
+  width: min(100%, 470px);
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .5);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, .35);
+}
+
+.student-camera-header--modern {
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e8edf3;
+  background: #fff;
+}
+
+.student-camera-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+}
+
+.student-camera-heading-icon {
+  display: grid;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 11px;
+  background: #eef4ff;
+  color: #356fe8;
+  font-size: 16px;
+}
+
+.student-camera-heading h5 {
+  margin: 0;
+  color: #172033;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.student-camera-heading p {
+  margin: 3px 0 0;
+  color: #667085;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.student-camera-close {
+  display: grid;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: #f5f7fa;
+  color: #667085;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+
+.student-camera-close:hover {
+  background: #edf0f4;
+  color: #172033;
+}
+
+.student-camera-close:active {
+  transform: scale(.96);
+}
+
+.student-camera-stage--modern {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 4.3;
+  overflow: hidden;
+  background: #111827;
+}
+
+.student-camera-stage--modern video,
+.student-camera-stage--modern img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.student-camera-stage--modern video.is-front-camera {
+  transform: scaleX(-1);
+}
+
+.student-camera-preview-image {
+  display: block;
+}
+
+.student-camera-auto-badge {
+  position: absolute;
+  z-index: 4;
+  top: 14px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, .62);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  backdrop-filter: blur(8px);
+}
+
+.student-camera-auto-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #38d996;
+  box-shadow: 0 0 0 4px rgba(56, 217, 150, .15);
+}
+
+.student-camera-switch-fab {
+  position: absolute;
+  z-index: 4;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  height: 34px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, .62);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.student-camera-switch-fab:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.student-camera-face-frame {
+  position: absolute;
+  z-index: 2;
+  top: 17%;
+  right: 20%;
+  bottom: 13%;
+  left: 20%;
+  pointer-events: none;
+}
+
+.student-camera-face-frame .corner {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-color: rgba(255, 255, 255, .96);
+  border-style: solid;
+  transition:
+    border-color 180ms ease,
+    filter 180ms ease,
+    transform 180ms ease;
+}
+
+.student-camera-face-frame .corner-tl {
+  top: -3px;
+  left: -3px;
+  border-width: 3px 0 0 3px;
+  border-radius: 14px 0 0 0;
+}
+
+.student-camera-face-frame .corner-tr {
+  top: -3px;
+  right: -3px;
+  border-width: 3px 3px 0 0;
+  border-radius: 0 14px 0 0;
+}
+
+.student-camera-face-frame .corner-bl {
+  bottom: -3px;
+  left: -3px;
+  border-width: 0 0 3px 3px;
+  border-radius: 0 0 0 14px;
+}
+
+.student-camera-face-frame .corner-br {
+  right: -3px;
+  bottom: -3px;
+  border-width: 0 3px 3px 0;
+  border-radius: 0 0 14px 0;
+}
+
+.student-camera-loading {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, .28);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.student-camera-error-overlay {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 30px;
+  background: #f8fafc;
+  color: #344054;
+  text-align: center;
+}
+
+.student-camera-error-overlay strong {
+  color: #172033;
+  font-size: 14px;
+}
+
+.student-camera-error-overlay span {
+  max-width: 330px;
+  color: #667085;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.student-camera-error-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 2px;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff0ee;
+  color: #c4322c;
+  font-size: 20px;
+}
+
+.student-camera-content {
+  padding: 13px 16px 16px;
+  background: #fff;
+}
+
+.student-camera-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid #dce8fb;
+  border-radius: 10px;
+  background: #f5f9ff;
+}
+
+.student-camera-status.is-success {
+  border-color: #caeadb;
+  background: #f2fbf6;
+}
+
+.student-camera-status.is-error {
+  border-color: #f2ccc8;
+  background: #fff5f4;
+}
+
+.student-camera-status-icon {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #356fe8;
+  font-size: 15px;
+}
+
+.student-camera-status.is-success .student-camera-status-icon {
+  color: #1f8a58;
+}
+
+.student-camera-status.is-error .student-camera-status-icon {
+  color: #c4322c;
+}
+
+.student-camera-status strong,
+.student-camera-status span {
+  display: block;
+}
+
+.student-camera-status strong {
+  margin-bottom: 2px;
+  color: #172033;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.student-camera-status span {
+  color: #536174;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.student-camera-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 9px;
+  color: #667085;
+  font-size: 9.5px;
+  line-height: 1.4;
+}
+
+.student-camera-tip i {
+  margin-top: 1px;
+  color: #8a96a8;
+}
+
+.student-camera-actions--modern {
+  display: grid;
+  grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr);
+  gap: 9px;
+  margin-top: 13px;
+  padding: 0;
+}
+
+.student-camera-actions--modern .btn {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 0;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.student-camera-secondary-btn {
+  border: 1px solid #d0d7e2;
+  background: #fff;
+  color: #344054;
+}
+
+.student-camera-secondary-btn:hover {
+  border-color: #b9c3d0;
+  background: #f8fafc;
+  color: #172033;
+}
+
+.student-camera-primary-btn {
+  border-color: #356fe8;
+  background: #356fe8;
+  box-shadow: 0 5px 14px rgba(53, 111, 232, .18);
+}
+
+.student-camera-primary-btn:hover {
+  border-color: #2d61cb;
+  background: #2d61cb;
+}
+
+@media (max-width: 575.98px) {
+  .student-profile-picture-field {
+    align-items: flex-start;
+  }
+
+  .student-camera {
+    align-items: end;
+    padding: 0;
+    background: rgba(15, 23, 42, .78);
+  }
+
+  .student-camera-card--modern {
+    display: flex;
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    flex-direction: column;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .student-camera-header--modern {
+    flex: 0 0 auto;
+    min-height: 60px;
+    padding: 10px 12px;
+  }
+
+  .student-camera-stage--modern {
+    flex: 1 1 auto;
+    min-height: 300px;
+    aspect-ratio: auto;
+  }
+
+  .student-camera-content {
+    flex: 0 0 auto;
+  }
+
+  .student-camera-heading p {
+    display: none;
+  }
+
+  .student-camera-face-frame {
+    top: 15%;
+    right: 18%;
+    bottom: 12%;
+    left: 18%;
+  }
+
+  .student-camera-content {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+}
+
+.student-form-row {
+  margin-right: -6px;
+  margin-left: -6px;
+}
+
+.student-form-row > [class*="col-"] {
+  padding-right: 6px;
+  padding-left: 6px;
+}
+
+.student-form-group {
+  margin-bottom: 11px;
+}
+
+.student-form-group label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-text, #172033);
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0;
+  line-height: 1.3;
+}
+
+.student-form-group .form-control {
+  height: 34px;
+  min-height: 34px;
+  padding: 5px 9px;
+  border-color: var(--color-border, #d9e0e8);
+  border-radius: 6px;
+  color: #344054;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 13px !important;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.student-form-group .form-control:focus {
+  border-color: var(--color-primary, #1f4e78);
+  box-shadow: 0 0 0 2px rgba(31, 78, 120, .12);
+}
+
+.student-form-group .form-control[readonly] {
+  background: #f5f7fa;
+  color: var(--color-muted, #667085);
+}
+
+.student-form-group .text-danger {
+  margin-top: 3px;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.student-availability-panel {
+  border-color: var(--color-border, #d9e0e8) !important;
+  border-radius: 8px !important;
+  background: #f8fafc;
+}
+
+.student-availability-panel .btn-sm {
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.student-form-footer {
+  position: static;
+  gap: 8px;
+  margin: 8px -18px 0;
+  padding: 11px 18px;
+  border-top: 1px solid var(--color-border, #d9e0e8);
+  background: #fff;
+}
+
+.student-form-footer .btn {
+  min-width: 82px;
+  min-height: 34px;
+  padding: 5px 12px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.student-licence-section {
+  margin: 4px 0 14px;
+  padding: 13px;
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.student-licence-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.student-licence-heading h6,
+.student-licence-heading p {
+  margin: 0;
+}
+
+.student-licence-heading p {
+  margin-top: 3px;
+  color: #667085;
+  font-size: 11px;
+}
+
+.student-test-status {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef2f6;
+  color: #475467;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.student-test-status.is-passed { background: #eaf8f1; color: #157347; }
+.student-test-status.is-failed { background: #fff0f1; color: #b42318; }
+
+.student-vehicle-class-fieldset {
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid #d9e0e8;
+  border-radius: 9px;
+  background: #f9fbfd;
+}
+
+.student-vehicle-class-fieldset legend {
+  width: auto;
+  margin: 0 0 8px;
+  color: #172033;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.student-vehicle-class-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.student-vehicle-class-options label {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid #d7e0eb;
+  border-radius: 7px;
+  background: #fff;
+  color: #475467;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.student-vehicle-class-options label.is-selected {
+  border-color: #356fe8;
+  background: #eef4ff;
+  color: #175cd3;
+}
+
+.student-vehicle-class-options input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #356fe8;
+}
+
+.student-vehicle-class-fieldset small {
+  display: block;
+  margin-top: 7px;
+  color: #667085;
+  font-size: 10px;
+}
+
+.student-licence-section .form-control:disabled {
+  cursor: not-allowed;
+  background: #eef1f5;
+  color: #98a2b3;
+}
+
+@media (max-width: 767.98px) {
+  .student-form-dialog {
+    width: calc(100% - 16px);
+    margin: 8px auto;
+  }
+
+  .student-form-header {
+    padding: 12px 14px;
+  }
+
+  .student-form-header .modal-title {
+    font-size: 17px;
+  }
+
+  .student-form-body {
+    max-height: calc(100vh - 76px);
+    max-height: calc(100dvh - 76px);
+    padding: 12px 14px 0;
+  }
+
+  .student-form-group {
+    margin-bottom: 12px;
+  }
+
+  .student-form-group label {
+    font-size: 12px;
+  }
+
+  .student-form-group .form-control {
+    height: 40px;
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  .student-availability-header {
+    align-items: stretch !important;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .student-availability-header .btn {
+    width: 100%;
+  }
+
+  .student-form-footer {
+    margin-right: -14px;
+    margin-left: -14px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .student-form-footer .btn {
+    flex: 1 1 0;
+    min-height: 40px;
+    font-size: 13px;
+  }
+}
+.student-test-status-panel {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 11px 12px;
+  border: 1px solid #cddcf2;
+  border-radius: 9px;
+  background: #f5f9ff;
+}
+
+.student-test-status-panel label {
+  display: block;
+  margin-bottom: 5px;
+  color: #172033;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.student-test-status-panel .form-control {
+  max-width: 260px;
+}
+
+.student-test-status-panel .student-test-status {
+  align-self: center;
+}
+
+.student-test-status-feedback {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.student-test-status-help {
+  grid-column: 1 / -1;
+  color: #667085;
+  font-size: 10px;
+}
+
+@media (max-width: 767.98px) {
+  .student-test-status-panel {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+
+}
+
+/* Camera readiness and quality states */
+.student-camera-face-frame.is-ready .corner {
+  border-color: #38d996;
+  filter: drop-shadow(0 0 5px rgba(56, 217, 150, .55));
+}
+
+.student-camera-auto-badge {
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.student-camera-auto-badge.is-ready {
+  background: rgba(25, 135, 84, 0.92);
+  color: #fff;
+}
+
+.student-camera-status.is-warning {
+  background: #fff8e6;
+  border-color: #f4c95d;
+}
+
+.student-camera-status.is-warning .student-camera-status-icon {
+  color: #a66a00;
+}
+
+@media (max-width: 575.98px) {
+  .student-camera-content {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+}
+
+
+.student-camera-face-frame:not(.is-ready) .corner {
+  opacity: .92;
+}
+
+@media (max-width: 575.98px) {
+  .student-camera-auto-badge,
+  .student-camera-switch-fab {
+    top: 10px;
+  }
+
+  .student-camera-auto-badge {
+    left: 10px;
+  }
+
+  .student-camera-switch-fab {
+    right: 10px;
+  }
+
+  .student-camera-actions--modern .btn {
+    min-height: 48px;
+    font-size: 13px;
+  }
+}

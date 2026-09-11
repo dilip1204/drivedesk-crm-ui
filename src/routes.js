@@ -1,6 +1,9 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login/Login";
+import PublicLayout from "./components/PublicLayout";
+import { HomePage, AboutPage, DemoPage, ContactPage } from "./pages/Public/PublicPages";
+import { PrivacyPolicyPage, TermsPage, CancellationRefundPolicyPage } from "./pages/Public/LegalPages";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Instructors from "./pages/Instructors/Instructors";
 import Students from "./pages/Students/Students";
@@ -12,12 +15,33 @@ import InstructorAvailabilityDashboard from "./pages/Instructors/InstructorAvail
 import FleetExpenses from "./pages/FleetExpenses/FleetExpenses";
 import OutstandingFees from "./pages/OutstandingFees/outstandingFees";
 import SuperAdmin from "./pages/SuperAdmin/SuperAdmin";
+import WhatsAppUsage from "./pages/SuperAdmin/WhatsAppUsage";
 import Tutorials from "./pages/Tutorials/Tutorials";
+import ExpenseReport from "./pages/FleetExpenses/ExpenseReport";
+import IncomeReport from "./pages/IncomeReport/IncomeReport";
+import Attendance from "./pages/Attendance/Attendance";
+import FinanceDashboard from "./pages/FinanceDashboard/FinanceDashboard";
+import TenantUsage from "./pages/TenantUsage/TenantUsage";
+import ExternalRenewals from "./pages/Renewals/ExternalRenewals";
+import LicenceExpiries from "./pages/Renewals/LicenceExpiries";
+import VehicleDocuments from "./pages/Renewals/VehicleDocuments";
+import VehicleDocumentExpiries from "./pages/Renewals/VehicleDocumentExpiries";
+import RenewalDashboard from "./pages/Renewals/RenewalDashboard";
+import SubscriptionManagement from "./pages/Subscriptions/SubscriptionManagement";
+import MySubscription from "./pages/Subscriptions/MySubscription";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" />} />
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/demo" element={<DemoPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/cancellation-refund-policy" element={<CancellationRefundPolicyPage />} />
+      </Route>
       <Route path="/login" element={<Login />} />
 
       <Route
@@ -43,6 +67,51 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["admin", "instructor"]}>
             <Students />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/renewals/external-customers"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
+            <ExternalRenewals />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/renewals/licence-expiries"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
+            <LicenceExpiries />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/renewals/vehicles"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
+            <VehicleDocuments />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/renewals/vehicle-document-expiries"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
+            <VehicleDocumentExpiries />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/renewals/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
+            <RenewalDashboard />
           </ProtectedRoute>
         }
       />
@@ -74,6 +143,15 @@ export default function AppRoutes() {
         }
       />
 
+      <Route
+        path="/attendance"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
+            <Attendance />
+          </ProtectedRoute>
+        }
+      />
+
        <Route
         path="/fleetexpenses"
         element={
@@ -93,6 +171,24 @@ export default function AppRoutes() {
       />
 
       <Route
+        path="/expense-report"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <ExpenseReport />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/income-report"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <IncomeReport />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/tutorials"
         element={
           <ProtectedRoute allowedRoles={["admin", "instructor"]}>
@@ -106,6 +202,69 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["super_admin"]}>
             <SuperAdmin />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/finance-dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <FinanceDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin/whatsapp-usage"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <WhatsAppUsage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/subscription"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "instructor"]}>
+            <MySubscription />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin/subscriptions"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <SubscriptionManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin/subscriptions/tenants"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <SubscriptionManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/superadmin/subscriptions/settings"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <SubscriptionManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/super-admin/usage"
+        element={
+          <ProtectedRoute allowedRoles={["super_admin"]}>
+            <TenantUsage />
           </ProtectedRoute>
         }
       />

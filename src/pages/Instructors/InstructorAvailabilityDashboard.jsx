@@ -3,11 +3,14 @@ import { useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Instructors.css";
+import "./InstructorAvailabilityDashboard.css";
 
 import { getInstructorAvailInformation } from "../../store/instructors/actions"; // <-- adjust path
 import Sidebar from "../../components/Sidebar"; // <-- adjust path
 import Header from "../../components/Header"; // <-- adjust path
 import Footer from "../../components/Footer"; // <-- adjust path
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import { formatDateDDMMYYYY } from "../../utils/dateFormat";
 
 /********************
@@ -44,6 +47,19 @@ function toISODate(d) {
   const m = `${d.getMonth() + 1}`.padStart(2, "0");
   const day = `${d.getDate()}`.padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+const DAY_CODES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+function isInstructorWorkingDay(day, date, workingDaySet) {
+  if (typeof day?.is_working_day === "boolean") {
+    return day.is_working_day;
+  }
+
+  if (workingDaySet.size > 0) {
+    return workingDaySet.has(DAY_CODES[date.getDay()]);
+  }
+
+  return Boolean(day);
 }
 function badgeColorByStatus(status) {
   switch ((status || "").toLowerCase()) {
@@ -102,7 +118,12 @@ function Donut({
 /********************
  * CalendarGrid (aligned 7-column grid)
  ********************/
-function CalendarGrid({ weeks, dayMap, onSelect }) {
+function CalendarGrid({ weeks, dayMap, workingDays, onSelect }) {
+  const workingDaySet = useMemo(
+    () => new Set((workingDays || []).map((day) => String(day).toUpperCase())),
+    [workingDays]
+  );
+
   return (
     <div className="calendar">
       <div className="calendar__head">
@@ -127,7 +148,11 @@ function CalendarGrid({ weeks, dayMap, onSelect }) {
 
             const iso = toISODate(cell);
             const d = dayMap.get(iso);
-            const isSunday = cell.getDay() === 0;
+            const isWorkingDay = isInstructorWorkingDay(
+              d,
+              cell,
+              workingDaySet
+            );
 
             const totalCount =
               (d?.available_slots?.length || 0) +
@@ -136,7 +161,7 @@ function CalendarGrid({ weeks, dayMap, onSelect }) {
 
             // tint by utilization (Bootstrap-only colors)
             let tint = "";
-            if (!isSunday) {
+            if (isWorkingDay) {
               const pct = totalCount ? bookedCount / totalCount : 0;
               if (pct === 0) tint = "bg-success-subtle";
               else if (pct < 0.33) tint = "bg-success-subtle";
@@ -152,28 +177,28 @@ function CalendarGrid({ weeks, dayMap, onSelect }) {
                 className={clsx(
                   "calendar__cell",
                   tint,
-                  isSunday && "calendar__cell--sunday"
+                  !isWorkingDay && "calendar__cell--sunday"
                 )}
-                onClick={() => !isSunday && onSelect?.(iso)}
-                disabled={isSunday}
-                aria-label={iso}
+                onClick={() => isWorkingDay && onSelect?.(iso)}
+                disabled={!isWorkingDay}
+                aria-label={`${iso}${isWorkingDay ? "" : " - non-working day"}`}
               >
                 <div className="calendar__celltop">
                   <div className="calendar__date">{cell.getDate()}</div>
-                  {d?.is_sunday && (
-                    <span className="calendar__sunday">Sunday</span>
+                  {!isWorkingDay && (
+                    <span className="calendar__sunday">Off</span>
                   )}
                 </div>
 
                 <div className="calendar__counts">
-                  <div>
-                    Avail:{" "}
+                  <div className="calendar__count-row">
+                    <span>Available</span>
                     <span className="fw-semibold text-success">
                       {d?.available_slots?.length || 0}
                     </span>
                   </div>
-                  <div>
-                    Booked:{" "}
+                  <div className="calendar__count-row">
+                    <span>Booked</span>
                     <span className="fw-semibold text-primary">
                       {d?.booked_slots?.length || 0}
                     </span>
@@ -181,7 +206,7 @@ function CalendarGrid({ weeks, dayMap, onSelect }) {
                 </div>
 
                 {totalCount > 0 && (
-                  <div className="progress mt-2" style={{ height: 6 }}>
+                  <div className="progress calendar__progress">
                     <div
                       className="progress-bar bg-primary"
                       role="progressbar"
@@ -211,17 +236,17 @@ function DayDetailDrawer({ day, onClose }) {
   const available = day.available_slots || [];
 
   return (
-    <div className="modal d-block" tabIndex="-1" role="dialog">
+    <div className="modal d-block availability-detail-modal" tabIndex="-1" role="dialog">
       <div
-        className="modal-dialog modal-dialog-slideout modal-lg"
+        className="modal-dialog modal-dialog-slideout modal-lg availability-detail-dialog"
         role="document"
-        style={{ zIndex: "99999999" }}
       >
-        <div className="modal-content" style={{ zIndex: "99999999" }}>
-          <div className="modal-header">
-            <h5 className="modal-title">
-              {formatDateDDMMYYYY(day.date)}
-            </h5>
+        <div className="modal-content">
+          <div className="modal-header availability-detail-header">
+            <div>
+              <span className="availability-detail-eyebrow">Daily schedule</span>
+              <h5 className="modal-title">{formatDateDDMMYYYY(day.date)}</h5>
+            </div>
             <button
               type="button"
               className="btn-close"
@@ -230,24 +255,27 @@ function DayDetailDrawer({ day, onClose }) {
             />
           </div>
 
-          <div className="modal-body">
+          <div className="modal-body availability-detail-body">
             {day.window && (
-              <div className="mb-3 small text-secondary">
-                Window: {day.window.from} – {day.window.to} ·{" "}
-                {day.window.slot_minutes}m/slot
+              <div className="availability-window-summary">
+                <i className="bi bi-clock" aria-hidden="true" />
+                <span>{day.window.from} – {day.window.to}</span>
+                <span className="availability-window-divider" aria-hidden="true" />
+                <span>{day.window.slot_minutes} minutes per slot</span>
               </div>
             )}
 
-            <div className="row g-3">
+            <div className="row g-3 availability-slot-columns">
               <div className="col-12 col-md-6">
-                <div className="fw-semibold mb-2">Available Slots</div>
-                <div className="d-flex flex-wrap gap-2">
+                <div className="availability-slot-heading"><span>Available Slots</span><strong>{available.length}</strong></div>
+                <div className="availability-slot-list">
                   {available.length ? (
                     available.map((t) => (
                       <span
                         key={t}
-                        className="badge rounded-pill text-bg-success"
+                        className="availability-time-slot"
                       >
+                        <i className="bi bi-check-circle" aria-hidden="true" />
                         {formatTimeLabel(t)}
                       </span>
                     ))
@@ -260,19 +288,19 @@ function DayDetailDrawer({ day, onClose }) {
               </div>
 
               <div className="col-12 col-md-6">
-                <div className="fw-semibold mb-2">Booked Slots</div>
-                <div className="d-flex flex-column gap-2">
+                <div className="availability-slot-heading"><span>Booked Slots</span><strong>{booked.length}</strong></div>
+                <div className="availability-booked-list">
                   {booked.length ? (
                     booked.map((b) => (
                       <div
                         key={b.id}
-                        className="d-flex align-items-center justify-content-between border rounded p-2 bg-danger-subtle border-danger"
+                        className="availability-booked-item"
                       >
                         <div>
-                          <div className="fw-semibold text-danger">
+                          <div className="availability-booked-time">
                             {formatTimeLabel(b.time)}
                           </div>
-                          <div className="small text-danger-emphasis">
+                          <div className="availability-booked-student">
                             {b.student}
                           </div>
                         </div>
@@ -294,11 +322,11 @@ function DayDetailDrawer({ day, onClose }) {
             </div>
 
             {day.note && (
-              <div className="mt-3 small text-secondary">Note: {day.note}</div>
+              <div className="availability-day-note"><i className="bi bi-info-circle" aria-hidden="true" /><span>{day.note}</span></div>
             )}
           </div>
 
-          <div className="modal-footer">
+          <div className="modal-footer availability-detail-footer">
             <button
               type="button"
               className="btn btn-secondary"
@@ -309,7 +337,7 @@ function DayDetailDrawer({ day, onClose }) {
           </div>
         </div>
       </div>
-      <div className="modal-backdrop show" onClick={onClose}></div>
+      <div className="modal-backdrop show availability-detail-backdrop" onClick={onClose}></div>
     </div>
   );
 }
@@ -359,34 +387,28 @@ export function InstructorAvailabilityDashboard({ data }) {
 
   return (
     <>
-      <div>
+      <div className="availability-dashboard">
         {/* Header section */}
-        <section className="mb-4">
-          <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-md-between">
-            <div className="d-flex align-items-center gap-3">
-              {/* <div
-                          className="rounded-circle bg-light d-grid place-items-center"
-                          style={{ width: 56, height: 56, display: "grid" }}
-                        >
-                          <span className="text-secondary fw-semibold">
-                            {instructor?.name?.charAt(0) || "?"}
-                          </span>
-                        </div> */}
-              <div>
-                <h1 className="h4 m-0">{instructor?.name}</h1>
-                <div className="small text-secondary mt-1 d-flex flex-wrap gap-3">
-                  <span>📞 {instructor?.mobile_number}</span>
-                  <span>✉️ {instructor?.email}</span>
-                  <span>
-                    ⏰ {instructor?.available_from} – {instructor?.available_to}
-                  </span>
+        <section className="availability-profile-card">
+          <div className="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-md-between availability-profile-layout">
+            <div className="d-flex align-items-center gap-3 availability-profile-identity">
+              <div className="availability-profile-avatar" aria-hidden="true">
+                {instructor?.name?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+              <div className="availability-profile-copy">
+                <span className="availability-profile-eyebrow">Instructor schedule</span>
+                <h2>{instructor?.name || "Instructor"}</h2>
+                <div className="availability-contact-details">
+                  <span><i className="bi bi-telephone" aria-hidden="true" />{instructor?.mobile_number || "Not provided"}</span>
+                  <span><i className="bi bi-envelope" aria-hidden="true" />{instructor?.email || "Not provided"}</span>
+                  <span><i className="bi bi-clock" aria-hidden="true" />{instructor?.available_from || "--:--"} – {instructor?.available_to || "--:--"}</span>
                 </div>
               </div>
             </div>
-            <div className="d-flex align-items-center gap-2">
+            <div className="d-flex align-items-center gap-2 availability-status-legend">
               <span
                 className={clsx(
-                  "badge rounded-pill px-3 py-2",
+                  "availability-active-status",
                   instructor?.is_active
                     ? "text-bg-success"
                     : "text-bg-secondary"
@@ -394,17 +416,17 @@ export function InstructorAvailabilityDashboard({ data }) {
               >
                 {instructor?.is_active ? "ACTIVE" : "INACTIVE"}
               </span>
-              <div className="d-none d-sm-flex align-items-center gap-3 small text-secondary">
-                <span className="badge rounded-pill text-bg-success">
+              <div className="availability-legend">
+                <span className="availability-legend-item is-available">
                   Available
                 </span>
-                <span className="badge rounded-pill text-bg-primary">
+                <span className="availability-legend-item is-scheduled">
                   Scheduled
                 </span>
-                <span className="badge rounded-pill text-bg-success">
+                <span className="availability-legend-item is-completed">
                   Completed
                 </span>
-                <span className="badge rounded-pill text-bg-danger">
+                <span className="availability-legend-item is-missed">
                   Missed
                 </span>
               </div>
@@ -413,53 +435,52 @@ export function InstructorAvailabilityDashboard({ data }) {
         </section>
 
         {/* Summary cards */}
-        <section className="row g-3 mb-4">
+        <section className="row g-3 availability-summary-grid">
           <div className="col-12 col-sm-6 col-lg-2">
-            <div className="card h-100">
+            <div className="card h-100 availability-metric-card">
               <div className="card-body">
-                <div className="text-secondary small">Working Days</div>
-                <div className="display-6 fw-semibold">
-                  {summary.working_days}
-                </div>
+                <span className="availability-metric-icon"><i className="bi bi-calendar-week" /></span>
+                <div><span className="availability-metric-label">Working Days</span><strong>{summary.working_days ?? 0}</strong></div>
               </div>
             </div>
           </div>
           <div className="col-12 col-sm-6 col-lg-2">
-            <div className="card h-100">
+            <div className="card h-100 availability-metric-card">
               <div className="card-body">
-                <div className="text-secondary small">Daily Slots</div>
-                <div className="display-6 fw-semibold">
-                  {summary.daily_slot_count}
-                </div>
+                <span className="availability-metric-icon"><i className="bi bi-clock-history" /></span>
+                <div><span className="availability-metric-label">Daily Slots</span><strong>{summary.daily_slot_count ?? 0}</strong></div>
               </div>
             </div>
           </div>
           <div className="col-12 col-sm-6 col-lg-2">
-            <div className="card h-100">
+            <div className="card h-100 availability-metric-card">
               <div className="card-body">
-                <div className="text-secondary small">Total Slots</div>
-                <div className="display-6 fw-semibold">
-                  {summary.total_slots}
-                </div>
+                <span className="availability-metric-icon"><i className="bi bi-grid-3x3-gap" /></span>
+                <div><span className="availability-metric-label">Total Slots</span><strong>{summary.total_slots ?? 0}</strong></div>
               </div>
             </div>
           </div>
           <div className="col-12 col-sm-6 col-lg-2">
-            <div className="card h-100">
+            <div className="card h-100 availability-metric-card is-success">
               <div className="card-body">
-                <div className="text-secondary small">Total Available</div>
-                <div className="display-6 fw-semibold">
-                  {summary.total_available}
-                </div>
+                <span className="availability-metric-icon"><i className="bi bi-check2-circle" /></span>
+                <div><span className="availability-metric-label">Available</span><strong>{summary.total_available ?? 0}</strong></div>
               </div>
             </div>
           </div>
           <div className="col-12 col-lg-4">
-            <div className="card h-100">
-              <div className="card-body d-flex justify-content-center align-items-center">
+            <div className="card h-100 availability-utilization-card">
+              <div className="card-body">
+                <div className="availability-utilization-copy">
+                  <span>Slot Utilization</span>
+                  <strong>{summary.utilization_pct ?? 0}%</strong>
+                  <small>{summary.total_slots ?? 0} total slots this month</small>
+                </div>
                 <Donut
                   value={summary.utilization_pct}
                   max={100}
+                  size={90}
+                  stroke={9}
                   labelTop={`${summary.utilization_pct ?? 0}%`}
                   labelBottom="Utilization"
                 />
@@ -469,49 +490,44 @@ export function InstructorAvailabilityDashboard({ data }) {
         </section>
 
         {/* Availability donut + status counts */}
-        <section className="row g-4">
+        <section className="row availability-overview-section">
           <div className="col-12">
             <div className="card h-100">
               <div className="card-body">
-                <div className="d-flex align-items-center justify-content-between mb-2">
-                  <h2 className="h6 m-0">
+                <div className="availability-section-header">
+                  <div>
+                    <span className="availability-section-eyebrow">Booking summary</span>
+                    <h2>
                     {new Date(year, monthIndex).toLocaleString(undefined, {
                       month: "long",
                       year: "numeric",
                     })}
-                  </h2>
+                    </h2>
+                  </div>
                 </div>
-                <div className="d-flex justify-content-center">
+                <div className="availability-overview-content">
+                  <div className="availability-overview-donut">
                   <Donut
                     value={summary.total_available}
                     max={summary.total_slots || 1}
+                    size={112}
+                    stroke={10}
                     labelTop={summary.total_available ?? 0}
                     labelBottom="Available"
                   />
-                </div>
-                <div className="row row-cols-3 g-2 text-center mt-3">
-                  <div className="col">
-                    <div className="p-2 rounded bg-success-subtle text-success fw-semibold">
-                      {statusCounts.completed}
-                      <div className="small fw-normal text-secondary">
-                        Completed
-                      </div>
-                    </div>
                   </div>
-                  <div className="col">
-                    <div className="p-2 rounded bg-primary-subtle text-primary fw-semibold">
-                      {statusCounts.scheduled}
-                      <div className="small fw-normal text-secondary">
-                        Scheduled
-                      </div>
+                  <div className="availability-status-grid">
+                    <div className="availability-status-card is-completed">
+                      <span>Completed</span>
+                      <strong>{statusCounts.completed}</strong>
                     </div>
-                  </div>
-                  <div className="col">
-                    <div className="p-2 rounded bg-danger-subtle text-danger fw-semibold">
-                      {statusCounts.missed}
-                      <div className="small fw-normal text-secondary">
-                        Missed
-                      </div>
+                    <div className="availability-status-card is-scheduled">
+                      <span>Scheduled</span>
+                      <strong>{statusCounts.scheduled}</strong>
+                    </div>
+                    <div className="availability-status-card is-missed">
+                      <span>Missed</span>
+                      <strong>{statusCounts.missed}</strong>
                     </div>
                   </div>
                 </div>
@@ -521,23 +537,27 @@ export function InstructorAvailabilityDashboard({ data }) {
         </section>
 
         {/* Calendar grid */}
-        <section className="row g-4">
+        <section className="row availability-calendar-section">
           <div className="col-12">
             <div className="card">
               <div className="card-body">
-                <div className="d-flex align-items-center justify-content-between">
-                  <h2 className="h6 m-0">
+                <div className="availability-section-header availability-calendar-header">
+                  <div>
+                    <span className="availability-section-eyebrow">Monthly calendar</span>
+                    <h2>
                     {new Date(year, monthIndex).toLocaleString(undefined, {
                       month: "long",
                       year: "numeric",
                     })}
-                  </h2>
-                  <div className="small text-secondary">{summary.month}</div>
+                    </h2>
+                  </div>
+                  <div className="availability-calendar-help"><i className="bi bi-hand-index-thumb" /> Select a day to view its slots</div>
                 </div>
 
                 <CalendarGrid
                   weeks={weeks}
                   dayMap={dayMap}
+                  workingDays={instructor.working_days}
                   onSelect={(iso) => setSelectedISO(iso)}
                 />
               </div>
@@ -668,7 +688,7 @@ export default function InstructorAvailability() {
 
   return (
     <div
-      className="header-fixed sidebar-fixed sidebar-dark header-light"
+      className="header-fixed sidebar-fixed sidebar-dark header-light instructor-availability-page"
       id="body"
     >
       <div className="wrapper">
@@ -678,32 +698,39 @@ export default function InstructorAvailability() {
 
           <div className="content-wrapper">
             <div className="content">
-              <div className="row">
+              <div className="row availability-page-heading">
                 <div className="breadcrumb-wrapper col-xl-6">
-                  <h1>Instructor</h1>
+                  <h1>Instructor Availability</h1>
                   <nav aria-label="breadcrumb">
                     <ol className="breadcrumb p-0">
                       <li className="breadcrumb-item">
-                        <a href="#!" aria-label="home">
-                          <span className="mdi mdi-home"></span>
+                        <a
+                          href="#!"
+                          className="availability-breadcrumb-home"
+                          aria-label="Instructor availability home"
+                        >
+                          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                            <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                          </svg>
                         </a>
                       </li>
-                      <li className="breadcrumb-item">Instructor</li>
+                      <li className="breadcrumb-item">Instructors</li>
                       <li className="breadcrumb-item" aria-current="page">
-                        Instructor Schedule
+                        Availability
                       </li>
                     </ol>
                   </nav>
                 </div>
-                <div className="col-xl-6 text-end">
+                <div className="col-xl-6 text-end availability-month-column">
                   {/* NEW: Month selector UI */}
-                  <div className="d-flex align-items-center justify-content-end mb-3">
-                    <label className="me-2 text-secondary small mb-0">
+                  <div className="availability-month-control">
+                    <label htmlFor="availability-month">
+                      <i className="bi bi-calendar3" aria-hidden="true" />
                       Month
                     </label>
                     <select
-                      className="form-select form-select-sm"
-                      style={{ maxWidth: 240 }}
+                      id="availability-month"
+                      className="form-select form-select-sm availability-month-select"
                       value={selectedMonth}
                       onChange={(e) => {
                         setSelectedMonth(e.target.value);
@@ -745,24 +772,29 @@ export default function InstructorAvailability() {
 
               {/* Dashboard area */}
               {loading ? (
-                <div className="card">
-                  <div className="card-body py-5 text-center text-secondary">
-                    Loading instructor availability…
+                <div className="card availability-state-card">
+                  <div className="card-body">
+                    <LoadingState label="Loading instructor availability" />
                   </div>
                 </div>
               ) : instructorsData ? (
                 <InstructorAvailabilityDashboard data={instructorsData} />
               ) : (
-                <div className="card">
-                  <div className="card-body py-5 text-center text-muted">
-                    No data found.
+                <div className="card availability-state-card">
+                  <div className="card-body">
+                    <EmptyState
+                      icon={error ? "bi bi-exclamation-circle" : "bi bi-calendar-x"}
+                      title={error ? "Unable to load availability" : "No availability found"}
+                      description={error || "No instructor availability is configured for this month."}
+                      variant={error ? "error" : "default"}
+                    />
                   </div>
                 </div>
               )}
 
-              <Footer />
             </div>
           </div>
+          <Footer />
         </div>
       </div>
     </div>

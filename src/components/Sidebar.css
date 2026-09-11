@@ -1,0 +1,375 @@
+.drivedesk-sidebar {
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, .06);
+  background: linear-gradient(180deg, #172033 0%, #1d2939 100%) !important;
+  box-shadow: 4px 0 18px rgba(16, 24, 40, .08);
+  color: #d0d5dd;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.drivedesk-sidebar-backdrop {
+  display: none;
+}
+
+.drivedesk-sidebar .sidebar {
+  height: 100vh;
+  min-height: 100vh;
+  padding-bottom: 0;
+  background: transparent;
+}
+
+.drivedesk-sidebar .app-brand {
+  flex: 0 0 75px;
+  height: 75px;
+  border-bottom: 1px solid rgba(255, 255, 255, .09);
+  background: linear-gradient(135deg, var(--color-primary, #1f4e78), #356fe8);
+}
+
+.drivedesk-sidebar .app-brand a {
+  height: 75px;
+  padding: 0 18px;
+  text-decoration: none;
+}
+
+.drivedesk-sidebar .app-brand .brand-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  max-width: 36px;
+  padding: 4px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(16, 24, 40, .18);
+}
+
+.drivedesk-sidebar .app-brand .brand-icon.tenant-brand-icon {
+  padding: 2px;
+  object-fit: contain;
+}
+
+.drivedesk-sidebar .app-brand .brand-name {
+  margin-left: 10px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: .1px;
+  text-transform: none;
+}
+
+.drivedesk-sidebar .sidebar-scroll-area {
+  height: calc(100vh - 75px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(152, 162, 179, .45) transparent;
+  scrollbar-width: thin;
+}
+
+.drivedesk-sidebar .sidebar-scroll-area::-webkit-scrollbar {
+  width: 5px;
+}
+
+.drivedesk-sidebar .sidebar-scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.drivedesk-sidebar .sidebar-scroll-area::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(152, 162, 179, .4);
+}
+
+.drivedesk-sidebar .sidebar-inner {
+  gap: 3px;
+  margin: 0 !important;
+  padding: 14px 10px 22px;
+}
+
+.drivedesk-sidebar .sidebar-inner > li {
+  width: 100%;
+}
+
+.drivedesk-sidebar .sidebar-inner > li > .sidenav-item-link {
+  position: relative;
+  display: flex !important;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  padding: 0 12px;
+  overflow: hidden;
+  border-radius: 8px;
+  color: #b8c0cc;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-transform: none;
+  transition: background-color .16s ease, color .16s ease, transform .16s ease;
+}
+
+.drivedesk-sidebar .sidebar-inner > li > .sidenav-item-link::before {
+  top: 9px;
+  right: auto;
+  bottom: 9px;
+  left: 0;
+  width: 3px;
+  height: auto;
+  border-radius: 0 3px 3px 0;
+  background: #78a6ff;
+  opacity: 0;
+}
+
+.drivedesk-sidebar .sidebar-inner > li > .sidenav-item-link i {
+  display: inline-grid;
+  float: none;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  margin: 0 12px 0 0;
+  color: #98a7ba;
+  font-size: 20px;
+  line-height: 1;
+  place-items: center;
+  transition: color .16s ease;
+}
+
+.drivedesk-sidebar .sidenav-item-link .nav-text {
+  max-width: 165px;
+  margin-right: auto;
+  overflow: hidden;
+  color: inherit;
+  font-size: 13px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-dark .drivedesk-sidebar .sidebar .sidebar-inner > li > .sidenav-item-link:hover,
+.sidebar-dark .drivedesk-sidebar .sidebar .sidebar-inner > li > .sidenav-item-link:focus-visible {
+  background: rgba(255, 255, 255, .07);
+  color: #fff;
+  outline: none;
+  transform: translateX(1px);
+}
+
+.sidebar-dark .drivedesk-sidebar .sidebar .sidebar-inner > li > .sidenav-item-link:hover i,
+.sidebar-dark .drivedesk-sidebar .sidebar .sidebar-inner > li > .sidenav-item-link:focus-visible i {
+  color: #c6d7ff;
+}
+
+.sidebar-dark .drivedesk-sidebar .sidebar .sidebar-inner > li.active > .sidenav-item-link {
+  background: rgba(76, 132, 255, .18);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(120, 166, 255, .12);
+}
+
+.sidebar-dark .drivedesk-sidebar .sidebar .sidebar-inner > li.active > .sidenav-item-link::before {
+  opacity: 1;
+}
+
+.sidebar-dark .drivedesk-sidebar .sidebar .sidebar-inner > li.active > .sidenav-item-link i {
+  color: #78a6ff;
+}
+
+.drivedesk-sidebar .renewals-subnav {
+  display: none;
+  margin: 5px 3px 7px 22px;
+  padding: 4px 0 4px 12px;
+  border-left: 1px solid rgba(120, 166, 255, .22);
+  list-style: none;
+}
+
+.drivedesk-sidebar .renewals-nav.expand .renewals-subnav { display: block; }
+.drivedesk-sidebar .renewals-nav { position: relative; }
+.drivedesk-sidebar .renewals-nav > .sidenav-item-link { padding-right: 42px !important; }
+.drivedesk-sidebar .renewals-nav-toggle {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  z-index: 2;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8294aa;
+  cursor: pointer;
+  place-items: center;
+  transition: background-color .16s ease, color .16s ease;
+}
+.drivedesk-sidebar .renewals-nav-toggle:hover,
+.drivedesk-sidebar .renewals-nav-toggle:focus-visible {
+  background: rgba(255, 255, 255, .09);
+  color: #fff;
+  outline: none;
+}
+.drivedesk-sidebar .renewals-nav-toggle i { font-size: 17px; transition: transform .18s ease; }
+.drivedesk-sidebar .renewals-nav.expand .renewals-nav-toggle {
+  color: #78a6ff;
+}
+.drivedesk-sidebar .renewals-nav.expand .renewals-nav-toggle i {
+  transform: rotate(180deg);
+}
+.drivedesk-sidebar .renewals-subnav a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 7px 9px;
+  border-radius: 6px;
+  color: #98a7ba;
+  font-size: 11px;
+  text-decoration: none;
+  transition: background-color .15s ease, color .15s ease, transform .15s ease;
+}
+.drivedesk-sidebar .renewals-subnav a i {
+  flex: 0 0 16px;
+  width: 16px;
+  color: #8294aa;
+  font-size: 15px;
+  text-align: center;
+}
+.drivedesk-sidebar .renewals-subnav li.active a i,
+.drivedesk-sidebar .renewals-subnav a:hover i { color: #78a6ff; }
+.drivedesk-sidebar .renewals-subnav a:hover,
+.drivedesk-sidebar .renewals-subnav li.active a { background: rgba(76,132,255,.14); color: #fff; }
+.drivedesk-sidebar .renewals-subnav a:hover { transform: translateX(1px); }
+.drivedesk-sidebar .renewals-subnav li.active a::before {
+  position: absolute;
+  top: 50%;
+  left: -15px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #78a6ff;
+  box-shadow: 0 0 0 3px rgba(120, 166, 255, .14);
+  content: "";
+  transform: translateY(-50%);
+}
+
+@media (min-width: 768px) {
+  .sidebar-minified .drivedesk-sidebar .renewals-nav-toggle,
+  .sidebar-minified .drivedesk-sidebar .renewals-subnav {
+    display: none;
+  }
+
+  .sidebar-minified .drivedesk-sidebar:hover .renewals-nav.expand .renewals-subnav {
+    display: block;
+  }
+
+  .sidebar-minified .drivedesk-sidebar:hover .renewals-nav-toggle {
+    display: grid;
+  }
+
+  .sidebar-minified .drivedesk-sidebar .sidebar-inner {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .sidebar-minified .drivedesk-sidebar .sidebar-inner > li > .sidenav-item-link {
+    width: 55px;
+    justify-content: center;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .sidebar-minified .drivedesk-sidebar .sidebar-inner > li > .sidenav-item-link i {
+    margin-right: 0;
+  }
+
+  .sidebar-minified .drivedesk-sidebar .sidebar-inner > li > .sidenav-item-link .nav-text {
+    position: absolute;
+    width: 0;
+    max-width: 0;
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .sidebar-minified .drivedesk-sidebar:hover .sidebar-inner > li > .sidenav-item-link {
+    width: 100%;
+    justify-content: flex-start;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .sidebar-minified .drivedesk-sidebar:hover .sidebar-inner > li > .sidenav-item-link i {
+    margin-right: 12px;
+  }
+
+  .sidebar-minified .drivedesk-sidebar:hover .sidebar-inner > li > .sidenav-item-link .nav-text {
+    position: static;
+    width: auto;
+    max-width: 165px;
+    margin-right: auto;
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@media (max-width: 767.98px) {
+  /* The React backdrop replaces the old jQuery overlay from sleek.js. */
+  .mobile-sticky-body-overlay {
+    display: none !important;
+  }
+
+  .sidebar-mobile-in .drivedesk-sidebar {
+    z-index: 1060 !important;
+    pointer-events: auto;
+  }
+
+  .drivedesk-sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 250px;
+    z-index: 1055;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: rgba(15, 23, 42, .24);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .2s ease, visibility .2s ease;
+  }
+
+  .sidebar-mobile-in .drivedesk-sidebar-backdrop {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .drivedesk-sidebar {
+    border-right: 0;
+    box-shadow: none !important;
+  }
+
+  .drivedesk-sidebar .sidebar-inner {
+    gap: 4px;
+    padding-top: 12px;
+  }
+
+  .drivedesk-sidebar .sidebar-inner > li > .sidenav-item-link {
+    min-height: 46px;
+    font-size: 13px;
+  }
+
+  .drivedesk-sidebar .sidebar-scroll-area {
+    height: calc(100dvh - 75px);
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drivedesk-sidebar .sidebar-inner > li > .sidenav-item-link,
+  .drivedesk-sidebar .sidebar-inner > li > .sidenav-item-link i {
+    transition: none;
+  }
+}

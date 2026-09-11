@@ -7,25 +7,28 @@ import "../../assets/plugins/nprogress/nprogress.css";
 import "../../assets/plugins/jvectormap/jquery-jvectormap-2.0.3.css";
 
 import "../Students/Students.css";
+import "./Instructors.css";
 
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LoadingState from "../../components/LoadingState";
+import EmptyState from "../../components/EmptyState";
 import DeleteConfirmation from "../../components/deleteConfirmation/deleteConfirmation";
 import { getInstructorsListInformation } from "../../store/instructors/actions";
 
 import { deleteInstructor } from "../../store/instructors/actions";
 
-import avatar from "../../assets/img/avatar.png";
 import AddInstructors from "./addInstructors";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ProfileModal from "../../components/ProfileModal";
 import { useAuth } from "../../hooks/useAuth";
+import { useSubscription } from "../../hooks/useSubscription";
 
 const Instructors = () => {
    const navigate = useNavigate();
   const { role } = useAuth();
+  const { isLimited } = useSubscription();
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -35,8 +38,6 @@ const Instructors = () => {
   const [selectedInstructorAppId, setSelectedInstructorAppId] = useState(null);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
-  const [showProfileModal, setShowProfileModal] = useState(false);
-const [profileData, setProfileData] = useState([]);
 const instructorList = useSelector((state) => state.instructorInfo.instructorsList);
 
   // OPEN Instructor Availability Dashboard
@@ -47,24 +48,6 @@ const instructorList = useSelector((state) => state.instructorInfo.instructorsLi
       state: { instructor },
     });
   };
-
-
-const openInstructorProfile = (data) => {
-  const fields = [
-    { label: "Name", value: data.name },
-    { label: "Email", value: data.email },
-    { label: "Password", value: data.password },
-    { label: "Mobile Number", value: data.mobile_number },
-    { label: "Available From", value: data.available_from },
-    { label: "Available To", value: data.available_to },
-    { label: "Status ", value: data.status },
-    { label: "Role ", value: data.role },
-    // add more if needed
-  ];
-  setProfileData(fields);
-  setShowProfileModal(true);
-};
-
 
   const getInstructorsList = () => {
     const data = {};
@@ -110,10 +93,6 @@ const formatTo12Hour = (timeStr) => {
 
   const handleDeleteCloseModel = () => {
     setShowDeleteModal(false);
-  };
-
-  const deleteDataConfirmation = () => {
-    setShowDeleteModal(true);
   };
 
   const deleteData = (appId) => {
@@ -173,7 +152,7 @@ const formatTo12Hour = (timeStr) => {
   return (
     <>
       <div
-        className="header-fixed sidebar-fixed sidebar-dark header-light"
+        className="header-fixed sidebar-fixed sidebar-dark header-light instructors-page"
         id="body"
       >
         <div className="wrapper">
@@ -184,26 +163,28 @@ const formatTo12Hour = (timeStr) => {
             <div className="content-wrapper">
               <div className="content">
                 {/* Breadcrumb */}
-                <div className="row">
+                <div className="row instructors-page-heading">
                   <div className="breadcrumb-wrapper col-xl-6">
                     <h1>Instructors</h1>
                     <nav aria-label="breadcrumb">
                       <ol className="breadcrumb p-0">
                         <li className="breadcrumb-item">
-                          <a href="#">
-                            <span className="mdi mdi-home"></span>
+                          <a href="#" className="instructors-breadcrumb-home" aria-label="Instructors home">
+                            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                              <path d="M8 1.25 1.5 6.7v8.05h4.2V9.9h4.6v4.85h4.2V6.7L8 1.25Z" />
+                            </svg>
                           </a>
                         </li>
                         <li className="breadcrumb-item">Instructors</li>
                         <li className="breadcrumb-item" aria-current="page">
-                          InstructorsList
+                          Instructor List
                         </li>
                       </ol>
                     </nav>
                   </div>
 
-                  <div className="col-xl-6 text-right">
-                    {role === "admin" ? (
+                  <div className="col-xl-6 text-right instructors-page-actions">
+                    {role === "admin" && !isLimited ? (
          <button
                       type="button"
                       className="mb-1 btn btn-primary"
@@ -221,13 +202,17 @@ const formatTo12Hour = (timeStr) => {
                 {/* Instructors List */}
                 <div>
                   {loading ? (
-                    <p className="text-center my-5">Loading instructors...</p>
+                    <LoadingState label="Loading instructors" />
                   ) : error ? (
-                    <p className="text-center text-danger my-5">{error}</p>
+                    <EmptyState
+                      icon="bi bi-person-badge"
+                      title="No instructors found"
+                      description="Instructors will appear here after they are added."
+                    />
                   ) : (
                     <>
-                    <div className="table-responsive">
-                      <table className="table custom-table text-center align-middle">
+                    <div className="table-responsive instructors-table-wrap">
+                      <table className="table custom-table text-center align-middle instructors-table">
                         <thead className="table-light">
                           <tr>
                             <th>S.NO</th>
@@ -240,38 +225,49 @@ const formatTo12Hour = (timeStr) => {
                         <tbody>
                           {instructorsData.map((ins, index) => (
                             <tr key={index}>
-                              <td>{index+1}</td>
-                              <td>{ins.name || "Instructor Name"}</td>
-                              <td>{ins.mobile_number || "N/A"}</td>
-                              <td className="status"><i className="bi bi-check-circle"></i>{" "} {formatTo12Hour(ins.available_from)} to {formatTo12Hour(ins.available_to)}</td>
-                              <td>
+                              <td data-label="S.No">{index+1}</td>
+                              <td data-label="Instructor Name">{ins.name || "Instructor Name"}</td>
+                              <td data-label="Mobile Number">{ins.mobile_number || "N/A"}</td>
+                              <td data-label="Availability" className="status">
+                                <span className="instructor-availability-value">
+                                  <i className="bi bi-check-circle" aria-hidden="true"></i>
+                                  <span>{formatTo12Hour(ins.available_from)} to {formatTo12Hour(ins.available_to)}</span>
+                                </span>
+                              </td>
+                              <td data-label="Actions" className="instructors-row-actions">
                                {role === "admin" ? (
         <>
          <button
-                                className="btn btn-sm btn-warning"
+                                className="btn btn-sm btn-warning instructor-action-icon"
                                 title="Edit Instructor"
+                                data-tooltip="Edit Instructor"
+                                aria-label="Edit Instructor"
                                 onClick={() => handleEditInstructor(ins)}
                               >
-                                {/* <i className="bi bi-pencil"></i> */}
-                                Edit
+                                <i className="bi bi-pencil-square" aria-hidden="true"></i>
+                                <span className="instructor-action-label">Edit</span>
                               </button>
                               {" "}
                               <button
-                                className="btn btn-sm btn-danger"
-                                title="Delete Isntructor"
+                                className="btn btn-sm btn-danger instructor-action-icon"
+                                title="Delete Instructor"
+                                data-tooltip="Delete Instructor"
+                                aria-label="Delete Instructor"
                                 onClick={() => deleteUser(ins.mobile_number)}
                               >
-                                {/* <i className="bi bi-trash"></i> */}
-                                Delete
+                                <i className="bi bi-trash" aria-hidden="true"></i>
+                                <span className="instructor-action-label">Delete</span>
                               </button>
                               {" "}
                               <button
-                                className="btn btn-sm btn-warning"
+                                className="btn btn-sm btn-primary instructor-action-icon"
                                 title="Instructor Schedule"
+                                data-tooltip="Instructor Schedule"
+                                aria-label="Instructor Schedule"
                                 onClick={() => handleInstructor(ins)}
                               >
-                                {/* <i className="bi bi-person-check"></i> */}
-                                Schedule
+                                <i className="bi bi-calendar-check" aria-hidden="true"></i>
+                                <span className="instructor-action-label">Schedule</span>
                               </button>
         </>
       ) : (
@@ -283,70 +279,6 @@ const formatTo12Hour = (timeStr) => {
                         </tbody>
                       </table>
                     </div>
-                    {/* <div className="row g-4">
-                      {instructorsData.map((ins, index) => (
-                        <div
-                          className="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-3"
-                          key={index}
-                        >
-                          <div className="student-card position-relative">
-                            
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: "5px",
-                                right: "5px",
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "5px",
-                              }}
-                            >
-                              {role === "admin" ? (
-        <>
-         <button
-                                className="btn btn-sm btn-warning"
-                                title="Edit Instructor"
-                                onClick={() => handleEditInstructor(ins)}
-                              >
-                                <i className="bi bi-pencil"></i>
-                              </button>
-                              <button
-                                className="btn btn-sm btn-danger"
-                                title="Delete INstructor"
-                                onClick={() => deleteUser(ins.mobile_number)}
-                              >
-                                <i className="bi bi-trash"></i>
-                              </button>
-        </>
-      ) : (
-        <span></span>
-      )}
-                             
-                            </div>
-
-                            <div>
-                              <img src={avatar} alt="Avatar" />
-                              <h5>{ins.name || "Instructor Name"}</h5>
-                              
-                              <p>{ins.mobile_number || "N/A"}</p>
-                            </div>
-
-                            <div>
-                              <div className="card-buttons">
-                                <Link to="#" onClick={() => openInstructorProfile(ins)} className="btn btn-primary btn-sm">
-                                  View
-                                </Link>
-                                
-                              </div>
-                              <div className="completed-classes">
-                                <i className="bi bi-check-circle"></i>{" "}
-                                {ins.available_from} to {ins.available_to}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div> */}
                     </>
                   )}
                 </div>
@@ -370,14 +302,6 @@ const formatTo12Hour = (timeStr) => {
               id={selectedInstructorAppId}
               message={"Are you sure want to delete this instructor?"}
             />
-            <ProfileModal
-  show={showProfileModal}
-  onClose={() => setShowProfileModal(false)}
-  title="Instructor Profile"
-  avatar={avatar}
-  data={profileData}
-/>
-
             <Footer />
           </div>
         </div>

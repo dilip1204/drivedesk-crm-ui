@@ -1,0 +1,69 @@
+.external-renewal-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.external-renewal-field {
+  min-width: 0;
+}
+
+.external-renewal-field label {
+  display: block;
+  margin-bottom: 5px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.external-renewal-input {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid #d5dce5;
+  border-radius: 6px;
+  background: #fff;
+  color: #172033;
+  font-size: 13px;
+}
+
+textarea.external-renewal-input {
+  resize: vertical;
+}
+
+.external-renewal-input:focus {
+  border-color: #6f9df1;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(53, 111, 232, 0.11);
+}
+
+.external-renewal-input.is-invalid {
+  border-color: #dc3545;
+}
+
+.external-renewal-field small {
+  display: block;
+  margin-top: 4px;
+  color: #667085;
+  font-size: 10px;
+}
+
+.external-renewal-error {
+  margin-top: 3px;
+  color: #dc3545;
+  font-size: 11px;
+}
+
+.external-renewal-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 767.98px) {
+  .external-renewal-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .external-renewal-wide {
+    grid-column: auto;
+  }
+}

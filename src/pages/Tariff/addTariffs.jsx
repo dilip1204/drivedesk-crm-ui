@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import { addTariff, updateTariff } from "../../store/tariff/actions"; // <-- Use correct actions
 import { IoClose } from "react-icons/io5"; // You can use other icons too
+import "./addTariffs.css";
 
 export default function AddTariffs({
   showModal,
@@ -111,8 +112,9 @@ export default function AddTariffs({
       keyboard={false}
       size="lg"
       centered
+      dialogClassName="tariff-form-dialog"
     >
-      <Modal.Header>
+      <Modal.Header className="tariff-form-header">
         <Modal.Title>{isEdit ? "Update Tariff" : "Add Tariff"}</Modal.Title>
         <IoClose
           onClick={() => {
@@ -128,13 +130,13 @@ export default function AddTariffs({
           title="Close"
         />
       </Modal.Header>
-      <Modal.Body>
-        <form onSubmit={formik.handleSubmit}>
+      <Modal.Body className="tariff-form-body">
+        <form onSubmit={formik.handleSubmit} className="tariff-form">
           {fieldPairs.map((pair, rowIndex) => (
-            <div className="row" key={rowIndex}>
+            <div className="row tariff-form-row" key={rowIndex}>
               {pair.map((field) => (
                 <div className="col-md-6" key={field}>
-                  <div className="form-group">
+                  <div className="form-group tariff-form-group">
                     <label>
                       {field
                         .replace(/_/g, " ")
@@ -177,7 +179,7 @@ export default function AddTariffs({
               ))}
             </div>
           ))}
-          <Modal.Footer>
+          <Modal.Footer className="tariff-form-footer">
             <Button
               variant="secondary"
               onClick={() => {

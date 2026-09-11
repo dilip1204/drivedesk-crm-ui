@@ -668,6 +668,93 @@
   .public-comparison-row span { align-items: flex-start; font-size: 9px; }
 }
 
+/* About page only */
+.public-testimonials { border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+.public-testimonials.is-compact { border-top: 1px solid #e2e8f0; }
+.public-testimonial-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
+.public-testimonial-grid > article { display: flex; min-height: 230px; flex-direction: column; padding: 23px; border: 1px solid #d9e0e8; border-radius: 13px; background: #fff; box-shadow: 0 10px 28px rgba(16, 24, 40, .06); }
+.public-testimonial-grid > article > i { color: #8ba9e8; font-size: 25px; line-height: 1; }
+.public-testimonial-grid blockquote { flex: 1 1 auto; margin: 14px 0 22px; color: #475467; font-size: 11px; line-height: 1.7; }
+.public-testimonial-grid article > div { display: flex; align-items: center; gap: 11px; padding-top: 16px; border-top: 1px solid #edf0f4; }
+.public-testimonial-logo { display: grid; flex: 0 0 47px; width: 47px; height: 47px; overflow: hidden; border: 1px solid #e4e9f0; border-radius: 10px; background: #fff; place-items: center; }
+.public-testimonial-logo img { display: block; width: 39px; height: 39px; object-fit: contain; }
+.public-testimonial-grid p, .public-testimonial-grid strong, .public-testimonial-grid small { display: block; margin: 0; }
+.public-testimonial-grid strong { color: #172033; font-size: 10px; line-height: 1.4; }
+.public-testimonial-grid small { margin-top: 4px; color: #98a2b3; font-size: 9px; }
+
+.public-customer-story { display: grid; grid-template-columns: minmax(480px, 1.1fr) minmax(320px, .9fr); align-items: center; gap: 58px; }
+.public-customer-story-visual { overflow: hidden; border: 1px solid #d5deea; border-radius: 15px; background: #fff; box-shadow: 0 20px 48px rgba(16, 24, 40, .12); }
+.public-customer-story-visual > img { display: block; width: 100%; height: auto; }
+.public-customer-story-visual > div { display: flex; align-items: center; gap: 11px; padding: 15px 18px; border-top: 1px solid #e7ebf0; }
+.public-customer-story-visual > div > img { width: 44px; height: 44px; object-fit: contain; }
+.public-customer-story-visual span, .public-customer-story-visual strong, .public-customer-story-visual small { display: block; }
+.public-customer-story-visual strong { color: #172033; font-size: 10px; }
+.public-customer-story-visual small { margin-top: 3px; color: #98a2b3; font-size: 9px; }
+.public-customer-story-copy > span { color: #356fe8; font-size: 9px; font-weight: 750; letter-spacing: .6px; text-transform: uppercase; }
+.public-customer-story-copy > h2 { margin: 10px 0 13px; color: #101828; font-size: clamp(24px, 3vw, 34px); font-weight: 710; letter-spacing: -.9px; line-height: 1.15; }
+.public-customer-story-copy > p { margin: 0; color: #667085; font-size: 11px; line-height: 1.7; }
+.public-customer-story-copy > div { display: grid; gap: 9px; margin-top: 20px; }
+.public-customer-story-copy article { display: flex; align-items: flex-start; gap: 11px; padding: 12px; border: 1px solid #e1e7ef; border-radius: 9px; background: #fff; }
+.public-customer-story-copy article > i { display: grid; flex: 0 0 31px; width: 31px; height: 31px; border-radius: 8px; background: #edf3ff; color: #356fe8; place-items: center; }
+.public-customer-story-copy article span, .public-customer-story-copy article strong, .public-customer-story-copy article small { display: block; }
+.public-customer-story-copy article strong { color: #172033; font-size: 10px; }
+.public-customer-story-copy article small { margin-top: 3px; color: #667085; font-size: 9px; line-height: 1.55; }
+.public-customer-story-copy > a { display: inline-flex; align-items: center; gap: 7px; margin-top: 20px; color: #285fcf; font-size: 10px; font-weight: 700; text-decoration: none; }
+
+.public-about-hero .public-container { max-width: 850px; }
+.public-about-facts { border-bottom: 1px solid #dfe6ef; background: #fff; }
+.public-about-facts .public-container { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.public-about-facts .public-container > div { padding: 27px 30px; border-right: 1px solid #e7ebf0; text-align: center; }
+.public-about-facts .public-container > div:last-child { border-right: 0; }
+.public-about-facts strong, .public-about-facts span { display: block; }
+.public-about-facts strong { color: #175cd3; font-size: 21px; font-weight: 720; letter-spacing: -.4px; }
+.public-about-facts span { margin-top: 5px; color: #667085; font-size: 10px; }
+
+.public-about-story { display: grid; grid-template-columns: minmax(300px, .82fr) minmax(500px, 1.18fr); align-items: center; gap: 62px; }
+.public-about-story-copy .public-section-heading { margin-bottom: 17px; }
+.public-about-story-copy > p { margin: 0 0 13px; color: #667085; font-size: 11px; line-height: 1.72; }
+.public-about-product-window { overflow: hidden; border: 1px solid #d5deea; border-radius: 15px; background: #fff; box-shadow: 0 22px 52px rgba(16, 24, 40, .14); }
+.public-about-product-window > div { display: flex; min-height: 40px; align-items: center; justify-content: space-between; padding: 0 13px; border-bottom: 1px solid #e4e9f0; color: #667085; }
+.public-about-product-window > div > span { width: 8px; height: 8px; border-radius: 50%; background: #f04438; box-shadow: 14px 0 #f79009, 28px 0 #12b76a; }
+.public-about-product-window small { font-size: 8px; font-weight: 650; }
+.public-about-product-window i { color: #12b76a; }
+.public-about-product-window img { display: block; width: 100%; height: auto; }
+
+.public-about-principles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; }
+.public-about-principles article { padding: 22px 19px; border: 1px solid #d9e0e8; border-radius: 12px; background: #fff; }
+.public-about-principles article > i { display: grid; width: 38px; height: 38px; margin-bottom: 17px; border-radius: 9px; background: #edf3ff; color: #356fe8; font-size: 17px; place-items: center; }
+.public-about-principles h3 { margin: 0 0 7px; color: #172033; font-size: 12px; }
+.public-about-principles p { margin: 0; color: #667085; font-size: 10px; line-height: 1.6; }
+
+.public-about-audience > div:last-child { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+.public-about-audience > div:last-child span { display: inline-flex; align-items: center; gap: 8px; padding: 11px 14px; border: 1px solid #d9e0e8; border-radius: 999px; background: #fff; color: #344054; font-size: 10px; font-weight: 650; }
+.public-about-audience > div:last-child i { color: #356fe8; }
+
+.public-about-company { display: flex; align-items: center; justify-content: space-between; gap: 35px; margin-top: 0; margin-bottom: 72px; padding: 27px 30px; border: 1px solid #cfe0f7; border-radius: 14px; background: #edf4ff; }
+.public-about-company > div > span { color: #356fe8; font-size: 9px; font-weight: 750; letter-spacing: .5px; text-transform: uppercase; }
+.public-about-company h2 { margin: 5px 0 7px; color: #172033; font-size: 20px; }
+.public-about-company p { max-width: 680px; margin: 0; color: #667085; font-size: 10px; line-height: 1.65; }
+.public-about-company > a { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 7px; color: #285fcf; font-size: 10px; font-weight: 700; text-decoration: none; }
+
+@media (max-width: 991.98px) {
+  .public-testimonial-grid { grid-template-columns: 1fr; max-width: 720px; margin: 0 auto; }
+  .public-testimonial-grid > article { min-height: 0; }
+  .public-customer-story { grid-template-columns: 1fr; gap: 32px; }
+  .public-customer-story-visual { max-width: 720px; }
+  .public-about-story { grid-template-columns: 1fr; gap: 34px; }
+  .public-about-story-copy { max-width: 700px; }
+  .public-about-principles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767.98px) {
+  .public-customer-story { grid-template-columns: minmax(0, 1fr); }
+  .public-about-facts .public-container { grid-template-columns: 1fr; }
+  .public-about-facts .public-container > div { padding: 20px; border-right: 0; border-bottom: 1px solid #e7ebf0; }
+  .public-about-facts .public-container > div:last-child { border-bottom: 0; }
+  .public-about-principles { grid-template-columns: 1fr; }
+  .public-about-company { align-items: flex-start; flex-direction: column; margin-bottom: 54px; padding: 23px; }
+}
+
 /* Legal pages only */
 .public-legal-hero {
   padding-top: 58px;

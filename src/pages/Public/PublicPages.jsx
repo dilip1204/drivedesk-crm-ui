@@ -38,6 +38,12 @@ const clients = [
   { name: "Surrya Driving Schools", mark: "surrya", logo: surryaLogo },
 ];
 
+const testimonials = [
+  { school: "Sri Ragavendra Heavy Driving School", logo: sriRagavendraLogo, mark: "ragavendra", quote: "DriveDesk gives us a clearer way to manage student information, training activity, and payments from one place. It has made the team’s daily administration easier to follow." },
+  { school: "Rainbow Driving School", logo: rainbowLogo, mark: "rainbow", quote: "Having enquiries, student records, schedules, and fee details together helps us stay organised and respond to day-to-day work with more clarity." },
+  { school: "Surrya Driving Schools", logo: surryaLogo, mark: "surrya", quote: "DriveDesk provides a practical view of our operations. The team can find the records they need and keep important training and payment follow-ups visible." },
+];
+
 const businessBenefits = [
   { icon: "bi-clock-history", title: "Spend less time on admin", text: "Keep student records, schedules, payments and documents together instead of updating separate registers." },
   { icon: "bi-wallet2", title: "Follow every pending fee", text: "See balances clearly, record collections and produce professional receipts for students." },
@@ -106,7 +112,7 @@ function SectionHeading({ eyebrow, title, text, align = "center" }) {
   );
 }
 
-function PublicCta({ title = "Ready to simplify your driving school?", text = "See how DriveDesk brings your daily operations into one clear workspace." }) {
+function PublicCta({ title = "Ready to simplify your driving school?", text = "See how DriveDesk brings your daily operations into one clear workspace.", primaryLabel = "View demo", primaryTo = "/demo", secondaryLabel = "Contact us", secondaryTo = "/contact" }) {
   return (
     <section className="public-container public-cta">
       <div>
@@ -115,8 +121,8 @@ function PublicCta({ title = "Ready to simplify your driving school?", text = "S
         <p>{text}</p>
       </div>
       <div className="public-cta-actions">
-        <Link className="public-button is-light" to="/demo">View demo</Link>
-        <Link className="public-button is-outline-light" to="/contact">Contact us</Link>
+        <Link className="public-button is-light" to={primaryTo}>{primaryLabel}</Link>
+        <Link className="public-button is-outline-light" to={secondaryTo}>{secondaryLabel}</Link>
       </div>
     </section>
   );
@@ -193,6 +199,26 @@ export function HomePage() {
           <i className="bi bi-globe2" aria-hidden="true" />
           <div><strong>Built for driving schools worldwide</strong><span>Remote demos, guided onboarding, and ongoing support wherever your school operates.</span></div>
           <Link to="/contact" onClick={() => trackLeadEvent("demo_cta_click", { placement: "global_strip" })}>Talk to our team <i className="bi bi-arrow-right" /></Link>
+        </div>
+      </section>
+
+      <CustomerTestimonials />
+
+      <section className="public-section public-container public-customer-story">
+        <div className="public-customer-story-visual">
+          <img src={trainingSessionsPreview} alt="DriveDesk training workflow with customer information masked" loading="lazy" />
+          <div><img src={sriRagavendraLogo} alt="Sri Ragavendra Heavy Driving School" /><span><strong>Sri Ragavendra Heavy Driving School</strong><small>Customer workflow story</small></span></div>
+        </div>
+        <div className="public-customer-story-copy">
+          <span>Customer success story</span>
+          <h2>Keeping a busy training operation clear and connected</h2>
+          <p>Heavy-vehicle training involves many moving parts: student records, instructors, schedules, payments, and progress updates all need consistent attention.</p>
+          <div>
+            <article><i className="bi bi-exclamation-circle" /><span><strong>The challenge</strong><small>Important operational information can become difficult to follow when records and daily updates are kept in separate places.</small></span></article>
+            <article><i className="bi bi-grid-1x2" /><span><strong>With DriveDesk</strong><small>The team can manage core student, training, and payment workflows from one organised system.</small></span></article>
+            <article><i className="bi bi-check-circle" /><span><strong>The improvement</strong><small>Daily administration is clearer, records are easier to find, and important follow-ups remain visible to the team.</small></span></article>
+          </div>
+          <Link to="/demo" onClick={() => trackLeadEvent("customer_story_cta_click", { customer: "Sri Ragavendra Heavy Driving School" })}>See the DriveDesk workflow <i className="bi bi-arrow-right" /></Link>
         </div>
       </section>
 
@@ -321,42 +347,90 @@ export function HomePage() {
 export function AboutPage() {
   return (
     <>
-      <section className="public-page-hero">
+      <section className="public-page-hero public-about-hero">
         <div className="public-container">
           <span>About DriveDesk</span>
-          <h1>Built around the way driving schools actually work.</h1>
-          <p>DriveDesk replaces disconnected registers and repetitive administration with one organised, practical workspace.</p>
+          <h1>Built from years of software experience and real driving-school workflows.</h1>
+          <p>DriveDesk brings enquiries, students, instructors, training, payments, renewals, and reports into one practical workspace.</p>
           <p className="public-ownership-statement">
             DriveDesk is a driving school management and CRM software product developed and operated by Asteriq Systech.
           </p>
         </div>
       </section>
 
-      <section className="public-section public-container public-story-grid">
-        <div>
-          <SectionHeading eyebrow="Our purpose" title="Give every school a clearer day" text="Driving schools coordinate people, vehicles, schedules, fees, tests, and reports every day. DriveDesk keeps those moving parts visible and manageable." align="left" />
-          <p className="public-story-copy">The product is designed to reduce repeated data entry, make follow-ups easier, and help owners understand what needs attention. It stays focused on useful workflows rather than unnecessary complexity.</p>
+      <section className="public-about-facts" aria-label="DriveDesk facts">
+        <div className="public-container">
+          <div><strong>3 years</strong><span>Building and improving DriveDesk</span></div>
+          <div><strong>16+ years</strong><span>Software development experience</span></div>
+          <div><strong>India to worldwide</strong><span>Serving India today, available globally</span></div>
         </div>
-        <div className="public-principles-card">
-          <div><i className="bi bi-eye" /><span><strong>Clarity first</strong><small>Important information should be easy to find and understand.</small></span></div>
-          <div><i className="bi bi-shield-check" /><span><strong>Dependable records</strong><small>Payments, sessions, and reports should remain consistent.</small></span></div>
-          <div><i className="bi bi-phone" /><span><strong>Practical access</strong><small>The experience should work from the office or on the move.</small></span></div>
+      </section>
+
+      <section className="public-section public-container public-about-story">
+        <div className="public-about-story-copy">
+          <SectionHeading eyebrow="Why we built it" title="A clearer way to run a driving school" text="Driving schools manage people, vehicles, schedules, fees, tests, and documents every day. When that information sits in different registers and spreadsheets, simple work becomes difficult to follow." align="left" />
+          <p>DriveDesk began three years ago with a focused purpose: bring those daily responsibilities into one organised system. The product helps teams follow enquiries, coordinate training, keep payment records visible, and understand what needs attention.</p>
+          <p>We continue to shape DriveDesk around useful workflows instead of unnecessary complexity, backed by more than 16 years of software development experience.</p>
+        </div>
+        <div className="public-about-product-window">
+          <div><span /><small>DriveDesk dashboard</small><i className="bi bi-shield-check" /></div>
+          <img src={dashboardPreview} alt="DriveDesk driving school dashboard with customer details masked" />
         </div>
       </section>
 
       <section className="public-section public-section-muted">
         <div className="public-container">
-          <SectionHeading eyebrow="Designed for the whole team" title="One system, different responsibilities" />
-          <div className="public-role-grid">
-            <article><i className="bi bi-building" /><h3>School owners</h3><p>See registrations, collections, expenses, outstanding balances, and operational health.</p></article>
-            <article><i className="bi bi-person-badge" /><h3>Administrators</h3><p>Manage enquiries, student records, payments, schedules, and printed documents.</p></article>
-            <article><i className="bi bi-speedometer2" /><h3>Instructors</h3><p>Review assigned students, availability, daily sessions, and training completion.</p></article>
+          <SectionHeading eyebrow="How we build" title="Practical principles behind DriveDesk" text="Every product decision should make the school’s daily work clearer, safer, or easier to complete." />
+          <div className="public-about-principles">
+            <article><i className="bi bi-lightbulb" /><h3>Simple for daily use</h3><p>Important actions and information should be easy for the team to understand.</p></article>
+            <article><i className="bi bi-journal-check" /><h3>Dependable records</h3><p>Student, training, payment, and operational records should remain organised.</p></article>
+            <article><i className="bi bi-phone" /><h3>Accessible anywhere</h3><p>Teams should be able to work from supported mobile and desktop browsers.</p></article>
+            <article><i className="bi bi-headset" /><h3>Support that helps</h3><p>Guided onboarding and ongoing assistance help schools adopt the product confidently.</p></article>
           </div>
         </div>
       </section>
 
-      <PublicCta title="A calmer way to manage daily operations" />
+      <section className="public-section public-container public-about-audience">
+        <SectionHeading eyebrow="Who DriveDesk serves" title="Made for different kinds of driving schools" text="Start with the workflows your school needs today and discuss the right setup as your operation grows." />
+        <div>
+          <span><i className="bi bi-person" /> Independent instructors</span>
+          <span><i className="bi bi-building" /> Small and growing schools</span>
+          <span><i className="bi bi-truck" /> Heavy-vehicle training schools</span>
+          <span><i className="bi bi-diagram-3" /> Multi-branch operations</span>
+        </div>
+      </section>
+
+      <CustomerTestimonials compact />
+
+      <section className="public-container public-about-company">
+        <div><span>Developed by</span><h2>Asteriq Systech</h2><p>DriveDesk is a product of Asteriq Systech, combining long-term software experience with a focused understanding of driving-school operations.</p></div>
+        <a href="https://asteriqsystech.com/" target="_blank" rel="noopener noreferrer">Visit Asteriq Systech <i className="bi bi-box-arrow-up-right" /></a>
+      </section>
+
+      <PublicCta title="See whether DriveDesk fits your school" text="Start with a 60-day free trial or explore the product with a guided demo." primaryLabel="Start free trial" primaryTo="/contact?plan=starter" secondaryLabel="View product demo" secondaryTo="/demo" />
     </>
+  );
+}
+
+function CustomerTestimonials({ compact = false }) {
+  return (
+    <section className={`public-section public-testimonials${compact ? " is-compact" : ""}`}>
+      <div className="public-container">
+        <SectionHeading eyebrow="Customer feedback" title="Trusted in everyday driving-school operations" text="Feedback from schools using DriveDesk to keep their teams and records organised." />
+        <div className="public-testimonial-grid">
+          {testimonials.map((testimonial) => (
+            <article key={testimonial.school}>
+              <i className="bi bi-quote" aria-hidden="true" />
+              <blockquote>{testimonial.quote}</blockquote>
+              <div>
+                <span className={`public-testimonial-logo is-${testimonial.mark}`}><img src={testimonial.logo} alt="" /></span>
+                <p><strong>{testimonial.school}</strong><small>DriveDesk customer</small></p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 

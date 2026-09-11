@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login/Login";
 import PublicLayout from "./components/PublicLayout";
 import { HomePage, AboutPage, DemoPage, ContactPage } from "./pages/Public/PublicPages";
+import { PrivacyPolicyPage, TermsPage, CancellationRefundPolicyPage } from "./pages/Public/LegalPages";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Instructors from "./pages/Instructors/Instructors";
 import Students from "./pages/Students/Students";
@@ -37,6 +38,9 @@ export default function AppRoutes() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/demo" element={<DemoPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/cancellation-refund-policy" element={<CancellationRefundPolicyPage />} />
       </Route>
       <Route path="/login" element={<Login />} />
 

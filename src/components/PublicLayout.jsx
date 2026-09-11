@@ -88,6 +88,12 @@ export function PublicFooter() {
           <Link to="/about">About Us</Link>
           <Link to="/contact">Contact Us</Link>
         </div>
+        <div className="public-footer-links">
+          <strong>Legal</strong>
+          <Link to="/privacy-policy">Privacy Policy</Link>
+          <Link to="/terms">Terms &amp; Conditions</Link>
+          <Link to="/cancellation-refund-policy">Cancellation &amp; Refund</Link>
+        </div>
       </div>
       <div className="public-container public-footer-bottom">
         <span>© {new Date().getFullYear()} DriveDesk. All rights reserved.</span>

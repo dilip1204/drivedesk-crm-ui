@@ -12,6 +12,7 @@ import { ensureTenantLogo } from "../../hooks/useTenantLogo";
 import LoadingState from "../../components/LoadingState";
 import EmptyState from "../../components/EmptyState";
 import { useAuth } from "../../hooks/useAuth";
+import StudentCameraCapture from "./StudentCameraCapture";
 import "./addStudents.css";
 
 const VEHICLE_CLASS_OPTIONS = [
@@ -53,6 +54,8 @@ export default function AddStudents({
   const [profilePicture, setProfilePicture] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState("");
   const [profilePictureError, setProfilePictureError] = useState("");
+  const [showCamera, setShowCamera] = useState(false);
+  const [removeProfilePicture, setRemoveProfilePicture] = useState(false);
   const [licenceForm, setLicenceForm] = useState({
     test_status: "NOT_ATTEMPTED",
     license_number: "",
@@ -88,6 +91,8 @@ export default function AddStudents({
     if (showModal) {
       setProfilePicture(null);
       setProfilePictureError("");
+      setShowCamera(false);
+      setRemoveProfilePicture(false);
     }
   }, [id, showModal]);
 
@@ -107,6 +112,7 @@ export default function AddStudents({
     }
 
     setProfilePicture(file);
+    setRemoveProfilePicture(false);
     setProfilePictureError("");
   };
 
@@ -470,6 +476,10 @@ export default function AddStudents({
             updatedValues[key] = normalizedValues[key];
           }
         });
+
+        if (removeProfilePicture && !profilePicture) {
+          updatedValues.profile_picture = null;
+        }
 
         const payload = {
           application_number: id?.application_number,
@@ -848,7 +858,7 @@ export default function AddStudents({
         <form onSubmit={formik.handleSubmit} className="student-form">
           <div className="student-profile-picture-field">
             <div className="student-profile-picture-preview" aria-hidden="true">
-              {profilePicturePreview || getStudentProfilePicture(id) ? (
+              {profilePicturePreview || (!removeProfilePicture && getStudentProfilePicture(id)) ? (
                 <img src={profilePicturePreview || getStudentProfilePicture(id)} alt="Student profile preview" />
               ) : (
                 <i className="bi bi-person" />
@@ -867,8 +877,37 @@ export default function AddStudents({
               />
               <small>PNG or JPEG. Selecting a new image replaces the current profile picture.</small>
               {profilePictureError && <div className="text-danger">{profilePictureError}</div>}
+              <div className="student-profile-picture-actions">
+                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => setShowCamera(true)}>
+                  <i className="bi bi-camera" aria-hidden="true" /> Capture Photo
+                </button>
+                {isEdit && (profilePicture || (!removeProfilePicture && getStudentProfilePicture(id))) && (
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={() => {
+                      setProfilePicture(null);
+                      setRemoveProfilePicture(true);
+                      setProfilePictureError("");
+                    }}
+                  >
+                    Delete Photo
+                  </button>
+                )}
+              </div>
             </div>
           </div>
+          {showCamera && (
+            <StudentCameraCapture
+              onClose={() => setShowCamera(false)}
+              onUsePhoto={(file) => {
+                setProfilePicture(file);
+                setRemoveProfilePicture(false);
+                setProfilePictureError("");
+                setShowCamera(false);
+              }}
+            />
+          )}
           {showBalanceWarning && (
             <Alert variant="warning">
               Warning: Balance is negative. Please verify paid and total amounts.

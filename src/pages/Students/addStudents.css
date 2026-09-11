@@ -102,6 +102,111 @@
   font-size: 10px;
 }
 
+.student-profile-picture-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.student-camera {
+  position: fixed;
+  z-index: 1080;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, .78);
+}
+
+.student-camera-card {
+  width: min(100%, 440px);
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
+}
+
+.student-camera-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  border-bottom: 1px solid #d9e0e8;
+}
+
+.student-camera-header h5 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.student-camera-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #111827;
+}
+
+.student-camera-stage video,
+.student-camera-stage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.student-camera-stage video {
+  transform: scaleX(-1);
+}
+
+.student-camera-guide {
+  position: absolute;
+  top: 10%;
+  right: 18%;
+  bottom: 10%;
+  left: 18%;
+  border: 3px solid rgba(255, 255, 255, .88);
+  border-radius: 48% 48% 44% 44%;
+  box-shadow: 0 0 0 999px rgba(15, 23, 42, .18);
+  pointer-events: none;
+}
+
+.student-camera-message {
+  min-height: 43px;
+  padding: 12px 16px 6px;
+  color: #1f4e78;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.student-camera-message.is-error {
+  color: #b42318;
+}
+
+.student-camera-actions {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 16px 16px;
+}
+
+@media (max-width: 575.98px) {
+  .student-profile-picture-field {
+    align-items: flex-start;
+  }
+
+  .student-camera {
+    padding: 0;
+  }
+
+  .student-camera-card {
+    width: 100%;
+    border-radius: 0;
+  }
+}
+
 .student-form-row {
   margin-right: -6px;
   margin-left: -6px;

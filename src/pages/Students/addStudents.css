@@ -165,119 +165,6 @@
   font-size: 10px;
 }
 
-.student-camera {
-  position: fixed;
-  z-index: 1080;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-  background: rgba(15, 23, 42, .78);
-}
-
-.student-camera-card {
-  width: min(100%, 440px);
-  overflow: hidden;
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
-}
-
-.student-camera-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 16px;
-  border-bottom: 1px solid #d9e0e8;
-}
-
-.student-camera-header h5 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.student-camera-stage {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  background: #111827;
-}
-
-.student-camera-stage video,
-.student-camera-stage img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.student-camera-stage video {
-  transform: scaleX(-1);
-}
-
-.student-camera-guide {
-  position: absolute;
-  top: 10%;
-  right: 18%;
-  bottom: 10%;
-  left: 18%;
-  border: 3px solid rgba(255, 255, 255, .88);
-  border-radius: 48% 48% 44% 44%;
-  box-shadow: 0 0 0 999px rgba(15, 23, 42, .18);
-  pointer-events: none;
-}
-
-.student-camera-message {
-  min-height: 43px;
-  padding: 12px 16px 6px;
-  color: #1f4e78;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.student-camera-message.is-error {
-  color: #b42318;
-}
-
-.student-camera-actions {
-  display: flex;
-  justify-content: center;
-  gap: 9px;
-  padding: 10px 16px 16px;
-}
-
-@media (max-width: 575.98px) {
-  .student-photo-card {
-    padding: 12px;
-  }
-
-  .student-photo-content {
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .student-profile-picture-preview {
-    flex-basis: 72px;
-    width: 72px;
-    height: 72px;
-  }
-
-  .student-profile-picture-actions {
-    gap: 6px;
-  }
-
-  .student-camera {
-    padding: 0;
-  }
-
-  .student-camera-card {
-    width: 100%;
-    border-radius: 0;
-  }
-}
-
 .student-form-row {
   margin-right: -6px;
   margin-left: -6px;
@@ -855,18 +742,19 @@
   right: 20%;
   bottom: 13%;
   left: 20%;
-  border: 2px solid rgba(255, 255, 255, .72);
-  border-radius: 46% 46% 44% 44%;
-  box-shadow: 0 0 0 999px rgba(15, 23, 42, .12);
   pointer-events: none;
 }
 
 .student-camera-face-frame .corner {
   position: absolute;
-  width: 28px;
-  height: 28px;
-  border-color: #fff;
+  width: 30px;
+  height: 30px;
+  border-color: rgba(255, 255, 255, .96);
   border-style: solid;
+  transition:
+    border-color 180ms ease,
+    filter 180ms ease,
+    transform 180ms ease;
 }
 
 .student-camera-face-frame .corner-tl {
@@ -1078,14 +966,29 @@
   }
 
   .student-camera-card--modern {
+    display: flex;
     width: 100%;
-    max-height: 96dvh;
+    height: 100dvh;
+    max-height: 100dvh;
+    flex-direction: column;
     border: 0;
-    border-radius: 20px 20px 0 0;
+    border-radius: 0;
+  }
+
+  .student-camera-header--modern {
+    flex: 0 0 auto;
+    min-height: 60px;
+    padding: 10px 12px;
   }
 
   .student-camera-stage--modern {
-    aspect-ratio: 4 / 4.25;
+    flex: 1 1 auto;
+    min-height: 300px;
+    aspect-ratio: auto;
+  }
+
+  .student-camera-content {
+    flex: 0 0 auto;
   }
 
   .student-camera-heading p {
@@ -1397,48 +1300,10 @@
 
 }
 
-@media (max-width: 575.98px) {
-  .student-camera {
-    padding: 0;
-    align-items: stretch;
-  }
-
-  .student-camera-card {
-    width: 100%;
-    min-height: 100dvh;
-    border-radius: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .student-camera-stage {
-    flex: 1;
-    min-height: 0;
-    aspect-ratio: auto;
-  }
-
-  .student-camera-actions {
-    display: grid;
-    grid-template-columns: 1fr 1.4fr;
-    gap: 10px;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-  }
-
-  .student-camera-actions .btn {
-    min-height: 48px;
-    font-size: 14px;
-    font-weight: 600;
-  }
-}
-
-/* Add these rules after your existing student camera styles. */
-.student-camera-face-frame {
-  transition: border-color 160ms ease, box-shadow 160ms ease;
-}
-
-.student-camera-face-frame.is-ready {
-  border-color: #198754;
-  box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.18);
+/* Camera readiness and quality states */
+.student-camera-face-frame.is-ready .corner {
+  border-color: #38d996;
+  filter: drop-shadow(0 0 5px rgba(56, 217, 150, .55));
 }
 
 .student-camera-auto-badge {
@@ -1460,13 +1325,32 @@
 }
 
 @media (max-width: 575.98px) {
-  .student-camera-stage--modern {
-    height: min(52dvh, 430px);
-    min-height: 300px;
-    aspect-ratio: auto;
-  }
-
   .student-camera-content {
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+}
+
+
+.student-camera-face-frame:not(.is-ready) .corner {
+  opacity: .92;
+}
+
+@media (max-width: 575.98px) {
+  .student-camera-auto-badge,
+  .student-camera-switch-fab {
+    top: 10px;
+  }
+
+  .student-camera-auto-badge {
+    left: 10px;
+  }
+
+  .student-camera-switch-fab {
+    right: 10px;
+  }
+
+  .student-camera-actions--modern .btn {
+    min-height: 48px;
+    font-size: 13px;
   }
 }

@@ -4,19 +4,20 @@ import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 const CLOSED_THRESHOLD = 0.35;
 const OPEN_THRESHOLD = 0.2;
 
-const MIN_FACE_WIDTH = 0.2;
-const MAX_FACE_WIDTH = 0.62;
-const MIN_FACE_CENTER_X = 0.3;
-const MAX_FACE_CENTER_X = 0.7;
-const MIN_FACE_CENTER_Y = 0.25;
-const MAX_FACE_CENTER_Y = 0.72;
+const MIN_FACE_WIDTH = 0.16;
+const MAX_FACE_WIDTH = 0.7;
+const MIN_FACE_CENTER_X = 0.22;
+const MAX_FACE_CENTER_X = 0.78;
+const MIN_FACE_CENTER_Y = 0.18;
+const MAX_FACE_CENTER_Y = 0.82;
 
 const MIN_BRIGHTNESS = 55;
 const MAX_BRIGHTNESS = 225;
-const MIN_BLUR_SCORE = 55;
+const MIN_BLUR_SCORE = 35;
 
 const OUTPUT_WIDTH = 600;
 const OUTPUT_HEIGHT = 750;
+const REQUIRED_STABLE_FRAMES = 8;
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -223,6 +224,8 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
   const frameCountRef = useRef(0);
   const latestBrightnessRef = useRef(null);
   const captureTimerRef = useRef(null);
+  const isCapturingRef = useRef(false);
+  const stableFramesRef = useRef(0);
 
   const [cameraFacing, setCameraFacing] = useState("user");
   const [message, setMessage] = useState("Starting front camera…");
@@ -255,17 +258,22 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
     }
   }, []);
 
-  const capturePhoto = useCallback(() => {
+  const capturePhoto = useCallback((faceBoxOverride = null) => {
+    if (isCapturingRef.current) return;
+    isCapturingRef.current = true;
+
     const video = videoRef.current;
 
     if (!video?.videoWidth || !video?.videoHeight) {
       setError("Camera is not ready. Please try again.");
+      isCapturingRef.current = false;
       return;
     }
 
-    const canvas = drawProfileCrop(video, latestFaceBoxRef.current);
+    const canvas = drawProfileCrop(video, faceBoxOverride || latestFaceBoxRef.current);
     if (!canvas) {
       setError("Photo capture is not supported by this browser.");
+      isCapturingRef.current = false;
       return;
     }
 
@@ -287,6 +295,7 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
       (blob) => {
         if (!blob) {
           setError("Photo capture failed. Please try again.");
+          isCapturingRef.current = false;
           return;
         }
 
@@ -297,6 +306,7 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
             ? `${issues.join(". ")}. You can retake for better quality.`
             : "Photo quality looks good. Preview it before using."
         );
+        isCapturingRef.current = false;
         stopCamera();
       },
       "image/jpeg",
@@ -348,19 +358,38 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
           faceBox.centerY > MAX_FACE_CENTER_Y
         ) {
           positioningMessage = "Center your face inside the frame.";
-        } else if (brightness !== null && brightness < MIN_BRIGHTNESS) {
-          positioningMessage = "Lighting is too dark. Move to a brighter area.";
-        } else if (brightness !== null && brightness > MAX_BRIGHTNESS) {
-          positioningMessage = "Lighting is too bright. Reduce direct light.";
         }
 
-        const ready = !positioningMessage;
-        setFaceReady(ready);
+        const positionReady = !positioningMessage;
 
-        if (!ready) {
+        if (!positionReady) {
+          stableFramesRef.current = 0;
+          setFaceReady(false);
+          isCapturingRef.current = false;
           blinkPhaseRef.current = "waiting-open";
           setMessage(positioningMessage);
         } else {
+          stableFramesRef.current = Math.min(
+            stableFramesRef.current + 1,
+            REQUIRED_STABLE_FRAMES
+          );
+
+          const stableReady =
+            stableFramesRef.current >= REQUIRED_STABLE_FRAMES;
+
+          setFaceReady(stableReady);
+
+          if (!stableReady) {
+            blinkPhaseRef.current = "waiting-open";
+            setMessage("Great position — hold still for a moment.");
+          } else {
+          const lightingWarning =
+            brightness !== null && brightness < MIN_BRIGHTNESS
+              ? " Lighting is a little dark."
+              : brightness !== null && brightness > MAX_BRIGHTNESS
+              ? " Lighting is very bright."
+              : "";
+
           const left = scores.eyeBlinkLeft;
           const right = scores.eyeBlinkRight;
 
@@ -374,7 +403,7 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
 
             if (blinkPhaseRef.current === "waiting-open" && eyesOpen) {
               blinkPhaseRef.current = "waiting-closed";
-              setMessage("Perfect — blink once to take the photo.");
+              setMessage(`Perfect — blink once to take the photo.${lightingWarning}`);
             } else if (
               blinkPhaseRef.current === "waiting-closed" &&
               eyesClosed
@@ -389,12 +418,14 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
               setMessage("Great! Hold still…");
               animationRef.current = null;
 
+              const faceBoxAtBlink = faceBox;
               captureTimerRef.current = window.setTimeout(() => {
                 captureTimerRef.current = null;
-                capturePhoto();
-              }, 300);
+                capturePhoto(faceBoxAtBlink);
+              }, 350);
               return;
             }
+          }
           }
         }
       } catch (detectionError) {
@@ -444,6 +475,7 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
       latestFaceBoxRef.current = null;
       latestBrightnessRef.current = null;
       frameCountRef.current = 0;
+      stableFramesRef.current = 0;
       blinkPhaseRef.current = "waiting-open";
       lastVideoTimeRef.current = -1;
       setIsStarting(true);
@@ -541,17 +573,40 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
     setCapturedBlob(null);
     setError("");
     setQualityIssues([]);
+    stableFramesRef.current = 0;
+    isCapturingRef.current = false;
     startCamera(cameraFacing);
+  };
+
+
+  const handleManualCapture = () => {
+    if (isStarting || capturedBlob) return;
+
+    if (!latestFaceBoxRef.current) {
+      setMessage("Position your face inside the frame before capturing.");
+      return;
+    }
+
+    if (!faceReady) {
+      const shouldContinue = window.confirm(
+        "Your face is not fully centered or stable yet. Capture anyway?"
+      );
+      if (!shouldContinue) return;
+    }
+
+    capturePhoto(latestFaceBoxRef.current);
   };
 
   const usePhoto = () => {
     if (!capturedBlob) return;
 
-    onUsePhoto(
-      new File([capturedBlob], `student-profile-${Date.now()}.jpg`, {
-        type: "image/jpeg",
-      })
+    const file = new File(
+      [capturedBlob],
+      `student-profile-${Date.now()}.jpg`,
+      { type: "image/jpeg" }
     );
+
+    onUsePhoto(file);
   };
 
   return (
@@ -697,7 +752,7 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
             </div>
           </div>
 
-          {!capturedBlob && !error && (
+          {!capturedBlob && !error && !faceReady && (
             <div className="student-camera-tip">
               <i className="bi bi-lightbulb" aria-hidden="true" />
               <span>
@@ -760,11 +815,11 @@ export default function StudentCameraCapture({ onUsePhoto, onClose }) {
                 <button
                   type="button"
                   className="btn btn-primary student-camera-primary-btn"
-                  onClick={capturePhoto}
+                  onClick={handleManualCapture}
                   disabled={isStarting}
                 >
                   <i className="bi bi-camera" aria-hidden="true" />
-                  Capture Now
+                  Capture Manually
                 </button>
               </>
             )}

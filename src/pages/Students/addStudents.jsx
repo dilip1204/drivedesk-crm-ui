@@ -181,7 +181,7 @@ export default function AddStudents({
     instructor_mobile: id?.instructor_mobile || "",
     test_date: normalizeDateForInput(id?.test_date),
     discount: id?.discount || 0,
-    training_days: id?.training_days || "",
+    training_days: Number(id?.training_days || 0),
     training_start_date: normalizeDateForInput(id?.training_start_date),
     // normalize incoming training_time to "HH:MM" so the time input shows it
     training_time: to24h(id?.training_time) || "",
@@ -193,10 +193,12 @@ export default function AddStudents({
   const validationSchema = Yup.object({
     name: Yup.string().required("Name is required"),
     dob: Yup.date()
-      .required("Date of birth is required")
+      .nullable()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .when([], { is: () => !isEdit, then: (schema) => schema.required("Date of birth is required"), otherwise: (schema) => schema.notRequired() })
       .max(new Date(), "DOB cannot be in future")
       .test("age", "Student must be at least 18 years old", function (value) {
-        if (!value) return false;
+        if (!value) return isEdit;
         const today = new Date();
         const birthDate = new Date(value);
         let age = today.getFullYear() - birthDate.getFullYear();
@@ -222,24 +224,26 @@ export default function AddStudents({
     test_application_number: Yup.string().nullable(),
     application_number: Yup.string().required("Application Number is required"),
     email: "", // optional
-    aadhar_number: Yup.string().required("Aadhar number is required"),
-    plan: Yup.string().required("Plan is required"),
-    payment_method: Yup.string().required("Payment method is required"),
+    aadhar_number: isEdit ? Yup.string().nullable().notRequired() : Yup.string().required("Aadhar number is required"),
+    plan: isEdit ? Yup.string().nullable().notRequired() : Yup.string().required("Plan is required"),
+    payment_method: isEdit ? Yup.string().nullable().notRequired() : Yup.string().required("Payment method is required"),
     paid_amount: Yup.number()
-      .required("Paid amount is required")
-      .typeError("Must be a number"),
+      .typeError("Must be a number")
+      .when([], { is: () => !isEdit, then: (schema) => schema.required("Paid amount is required"), otherwise: (schema) => schema.notRequired() }),
     total_amount: Yup.number()
-      .required("Total amount is required")
-      .typeError("Must be a number"),
-    balance: Yup.number().required("Balance is required").typeError("Must be a number"),
-    full_payment_status: Yup.string().required("Full payment status is required"),
-    instructor_name: Yup.string().required("Instructor name is required"),
-    instructor_mobile: Yup.string().required("Instructor mobile is required"),
+      .typeError("Must be a number")
+      .when([], { is: () => !isEdit, then: (schema) => schema.required("Total amount is required"), otherwise: (schema) => schema.notRequired() }),
+    balance: Yup.number().typeError("Must be a number").when([], { is: () => !isEdit, then: (schema) => schema.required("Balance is required"), otherwise: (schema) => schema.notRequired() }),
+    full_payment_status: isEdit ? Yup.string().nullable().notRequired() : Yup.string().required("Full payment status is required"),
+    instructor_name: isEdit ? Yup.string().nullable().notRequired() : Yup.string().required("Instructor name is required"),
+    instructor_mobile: isEdit ? Yup.string().nullable().notRequired() : Yup.string().required("Instructor mobile is required"),
     training_start_date: Yup.date()
-      .required("Training Start Date is required")
+      .nullable()
+      .transform((value, originalValue) => originalValue === "" ? null : value)
+      .when([], { is: () => !isEdit, then: (schema) => schema.required("Training Start Date is required"), otherwise: (schema) => schema.notRequired() })
       .typeError("Invalid date format")
       .test("training-start-date-min", "Training Start Date cannot be in the past", function (value) {
-        if (!value) return false;
+        if (!value) return isEdit;
         if (isEdit) return true;
 
         const selected = normalizeDateForInput(value);
@@ -247,14 +251,17 @@ export default function AddStudents({
         return selected >= todayISO;
       }),
     training_days: Yup.number()
-      .nullable()
+      .transform((value, originalValue) =>
+        originalValue === "" || originalValue === null ? 0 : value
+      )
       .typeError("Training days must be a number")
-      .min(0, "Cannot be negative"),
+      .min(0, "Cannot be negative")
+      .notRequired(),
     // keep 24h HH:MM format for storage
     training_time: Yup.string()
       .nullable()
-      .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)")
-      .required("Training time is required"),
+      .matches(/^$|^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:MM)")
+      .when([], { is: () => !isEdit, then: (schema) => schema.required("Training time is required"), otherwise: (schema) => schema.notRequired() }),
     test_date: Yup.date()
       .nullable()
       .transform((value, originalValue) => (originalValue === "" ? null : value))
@@ -314,6 +321,7 @@ export default function AddStudents({
 
       const normalizedValues = {
         ...values,
+        training_days: Number(values.training_days || 0),
         alternate_number: values.alternate_number
           ? Number(values.alternate_number)
           : null,
@@ -362,13 +370,53 @@ export default function AddStudents({
       let updatedValues = {};
 
       if (isEdit) {
+        const normalizedInitialValues = {
+          ...initialValues,
+          training_days: Number(initialValues.training_days || 0),
+          alternate_number: initialValues.alternate_number
+            ? Number(initialValues.alternate_number)
+            : null,
+          test_date: initialValues.test_date || null,
+          llr_from_date: initialValues.llr_from_date || null,
+          llr_to_date: initialValues.llr_to_date || null,
+          vehicle_classes: normalizeVehicleClasses(initialValues.vehicle_classes),
+          test_status: id?.test_status || "NOT_ATTEMPTED",
+        };
+
+        if (normalizedInitialValues.test_status === "PASSED") {
+          const initialLicenseDetails = id?.license_details || {};
+          normalizedInitialValues.license_details = {
+            license_number: (initialLicenseDetails.license_number || "").trim(),
+            license_classes: normalizeVehicleClasses(initialLicenseDetails.license_classes),
+            issue_date: normalizeDateForInput(initialLicenseDetails.issue_date) || null,
+            expiry_date: normalizeDateForInput(initialLicenseDetails.expiry_date) || null,
+            rto: (initialLicenseDetails.rto || "").trim(),
+            enrollment_number: (initialLicenseDetails.enrollment_number || "").trim(),
+          };
+        }
+
+        const valuesAreEqual = (currentValue, initialValue) => {
+          if (Array.isArray(currentValue) || Array.isArray(initialValue)) {
+            return JSON.stringify(currentValue || []) === JSON.stringify(initialValue || []);
+          }
+
+          if (
+            currentValue &&
+            initialValue &&
+            typeof currentValue === "object" &&
+            typeof initialValue === "object"
+          ) {
+            return JSON.stringify(currentValue) === JSON.stringify(initialValue);
+          }
+
+          return currentValue === initialValue;
+        };
+
         Object.keys(normalizedValues).forEach((key) => {
-          if (normalizedValues[key] !== id[key]) {
+          if (!valuesAreEqual(normalizedValues[key], normalizedInitialValues[key])) {
             updatedValues[key] = normalizedValues[key];
           }
         });
-
-        updatedValues.status = "Process Started";
 
         const payload = {
           application_number: id?.application_number,
@@ -503,7 +551,6 @@ export default function AddStudents({
     const selectedPlan = plans.find((p) => p.plan_name === formik.values.plan);
     if (selectedPlan) {
       formik.setFieldValue("total_amount", selectedPlan.amount || 0);
-      formik.setFieldValue("training_days", selectedPlan.training_days || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values.plan, plans]);
@@ -761,22 +808,24 @@ export default function AddStudents({
                       {field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       {[
                         "name",
-                        "dob",
                         "mobile_number",
                         "application_number",
-                        "aadhar_number",
-                        "plan",
-                        "payment_method",
-                        "paid_amount",
-                        "total_amount",
-                        "balance",
-                        "full_payment_status",
-                        "instructor_name",
-                        "instructor_mobile",
-                        "training_days",
-                        "training_start_date",
-                        "training_time",
+                        ...(!isEdit ? [
+                          "dob",
+                          "aadhar_number",
+                          "plan",
+                          "payment_method",
+                          "paid_amount",
+                          "total_amount",
+                          "balance",
+                          "full_payment_status",
+                          "instructor_name",
+                          "instructor_mobile",
+                          "training_start_date",
+                          "training_time",
+                        ] : []),
                       ].includes(field) && <span style={{ color: "red" }}>*</span>}
+                      {field === "training_days" && <span className="optional-mark"> Optional</span>}
                     </label>
 
                     {["full_payment_status", "payment_method", "plan", "instructor_name"].includes(
@@ -842,6 +891,8 @@ export default function AddStudents({
                         type={
                           field === "dob" || field.includes("date")
                             ? "date"
+                            : field === "training_days"
+                            ? "number"
                             : field === "email"
                             ? "email"
                             : "text"
@@ -858,8 +909,8 @@ export default function AddStudents({
                             : formik.handleChange
                         }
                         onBlur={formik.handleBlur}
-                        value={formik.values?.[field] || ""}
-                        min={field === "training_start_date" ? trainingStartMinDate : undefined}
+                        value={field === "training_days" ? (formik.values?.[field] ?? 0) : (formik.values?.[field] || "")}
+                        min={field === "training_start_date" ? trainingStartMinDate : field === "training_days" ? 0 : undefined}
                         readOnly={["balance", "total_amount", "instructor_mobile"].includes(field)}
                         maxLength={
                           field === "mobile_number"

@@ -22,6 +22,17 @@ export default function StudentTrainingSessionModal({ show, onClose, session }) 
         <div className="row">
           <div className="col-md-6">
             <ProfileItem label="Name" value={session?.student_name || "Student Name"} />
+            <ProfileItem
+              label="Contact Number"
+              value={
+                session?.mobile_number ||
+                session?.student_mobile_number ||
+                session?.student_mobile ||
+                session?.contact_number ||
+                session?.phone_number ||
+                "N/A"
+              }
+            />
             <ProfileItem label="Date" value={session?.date || "N/A"} />
             <ProfileItem label="Status" value={session?.status || "N/A"} />
           </div>
